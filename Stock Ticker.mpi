@@ -81,7 +81,7 @@ InstallPassword
 {}
 
 InstallVersion
-{1.9.0.0}
+{2.0.0.0}
 
 Language,ca
 {Yes}
@@ -195,7 +195,7 @@ UpgradeApplicationID
 {}
 
 Version
-{1.9.0}
+{2.0.0}
 
 ViewReadme
 {Yes}
@@ -236,8 +236,8 @@ test
 {Testing Switch Yes No {} {run uninstaller without uninstalling any files}}
 
 }
-FileGroup ::FEF6B9C8-8B6E-4C21-987A-39365F276979 -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 MacOS-X Solaris-sparc Windows TarArchive ZipArchive FreeBSD-5-x86 FreeBSD-6-x86 FreeBSD-7-x86 Linux-x86_64 Solaris-x86 Linux-armv7l} -name {Program Files} -parent FileGroups
-File ::9C90D8D8-DCE2-46C6-910B-A0070CF5039F -type dir -name {D:/Stock Ticker/User Guide} -parent FEF6B9C8-8B6E-4C21-987A-39365F276979
+FileGroup ::FEF6B9C8-8B6E-4C21-987A-39365F276979 -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 MacOS-X Solaris-sparc Windows TarArchive ZipArchive FreeBSD-5-x86 FreeBSD-6-x86 FreeBSD-7-x86 Linux-x86_64 Solaris-x86 Linux-armv7l Linux-armv7l_64} -name {Program Files} -parent FileGroups
+File ::9C90D8D8-DCE2-46C6-910B-A0070CF5039F -type dir -name {D:/stockticker/User Guide} -parent FEF6B9C8-8B6E-4C21-987A-39365F276979
 File ::CDE43FC2-F5C8-40CF-84EE-F5FE0EAF2ECC -name index.htm -parent 9C90D8D8-DCE2-46C6-910B-A0070CF5039F
 File ::AADB3634-0908-46B5-BB9E-CE20D9FA927F -type dir -name images -parent 9C90D8D8-DCE2-46C6-910B-A0070CF5039F
 File ::5857CF89-8765-4C02-BEE5-456DC7565686 -name main.jpg -parent AADB3634-0908-46B5-BB9E-CE20D9FA927F
@@ -251,14 +251,12 @@ File ::79322DB6-DCA0-49F0-8034-4D6ABA473C52 -name screenshot.jpg -parent AADB363
 File ::448FA96F-4F90-4BD1-8FD3-3497ACCBA27E -name screenshot_small.jpg -parent AADB3634-0908-46B5-BB9E-CE20D9FA927F
 File ::B936E161-A4D2-450F-BDBE-53C1361EB337 -type dir -name styles -parent 9C90D8D8-DCE2-46C6-910B-A0070CF5039F
 File ::0B35D5DE-F833-4D9C-9116-8DE37CAFF5D1 -name main.css -parent B936E161-A4D2-450F-BDBE-53C1361EB337
-File ::8A158976-0E8D-4DA6-8F8A-F70D15950D2B -name paypal.asp -parent 9C90D8D8-DCE2-46C6-910B-A0070CF5039F
 File ::52AE5FD1-273C-49E3-B86C-37CFD642C0A7 -name PAD.xml -parent 9C90D8D8-DCE2-46C6-910B-A0070CF5039F
-File ::44BF7278-87CC-4374-8D8F-FF969DBA180E -name google385ed203fc8a6902.html -parent 9C90D8D8-DCE2-46C6-910B-A0070CF5039F
-File ::DAD8A8D4-31F5-48A8-AFD6-68181140EBAC -name {D:/Stock Ticker/pivotalstockticker.exe} -parent FEF6B9C8-8B6E-4C21-987A-39365F276979
-FileGroup ::0A80A143-8CDB-48D7-B886-3493A8514289 -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 MacOS-X Solaris-sparc Windows TarArchive ZipArchive FreeBSD-5-x86 FreeBSD-6-x86 FreeBSD-7-x86 Linux-x86_64 Solaris-x86 Linux-armv7l} -name System32 -parent FileGroups
+File ::DAD8A8D4-31F5-48A8-AFD6-68181140EBAC -name D:/stockticker/pivotalstockticker.exe -parent FEF6B9C8-8B6E-4C21-987A-39365F276979
+FileGroup ::0A80A143-8CDB-48D7-B886-3493A8514289 -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 MacOS-X Solaris-sparc Windows TarArchive ZipArchive FreeBSD-5-x86 FreeBSD-6-x86 FreeBSD-7-x86 Linux-x86_64 Solaris-x86 Linux-armv7l Linux-armv7l_64} -name System32 -parent FileGroups
 File ::71F6A058-3A02-44BC-8EEE-F371F6663244 -filemethod {Never overwrite files} -name C:/WINDOWS/system32/msvbvm60.dll -parent 0A80A143-8CDB-48D7-B886-3493A8514289
-Component ::1302D129-2ACC-4205-8939-6C60533F7B96 -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 MacOS-X Solaris-sparc Windows FreeBSD-5-x86 FreeBSD-6-x86 FreeBSD-7-x86 Linux-x86_64 Solaris-x86 Linux-armv7l} -name {Default Component} -parent Components
-SetupType ::FCD39153-0EFD-42F2-99BB-633248E06636 -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 MacOS-X Solaris-sparc Windows FreeBSD-5-x86 FreeBSD-6-x86 FreeBSD-7-x86 Linux-x86_64 Solaris-x86 Linux-armv7l} -name Typical -parent SetupTypes
+Component ::1302D129-2ACC-4205-8939-6C60533F7B96 -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 MacOS-X Solaris-sparc Windows FreeBSD-5-x86 FreeBSD-6-x86 FreeBSD-7-x86 Linux-x86_64 Solaris-x86 Linux-armv7l Linux-armv7l_64} -name {Default Component} -parent Components
+SetupType ::FCD39153-0EFD-42F2-99BB-633248E06636 -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 MacOS-X Solaris-sparc Windows FreeBSD-5-x86 FreeBSD-6-x86 FreeBSD-7-x86 Linux-x86_64 Solaris-x86 Linux-armv7l Linux-armv7l_64} -name Typical -parent SetupTypes
 
 InstallComponent 26E78427-7FC7-4375-9D8B-4F2FC73355CC -setup Install -type pane -title {Welcome Screen} -component Welcome -active Yes -parent StandardInstall
 InstallComponent 89789C07-D3A9-4626-B5FE-ED885CB74B3B -setup Install -type pane -conditions {98379122-4D5E-4BCC-BF47-2C1FEA4A3FA2 2E71B40E-CF33-4623-AC52-4E38CCDBA707} -title {Select Destination} -component SelectDestination -active Yes -parent StandardInstall
@@ -1484,7 +1482,7 @@ FEF6B9C8-8B6E-4C21-987A-39365F276979,Destination
 {<%InstallDir%>}
 
 FEF6B9C8-8B6E-4C21-987A-39365F276979,FileSize
-{1296820}
+{1324978}
 
 FEF6B9C8-8B6E-4C21-987A-39365F276979,Name
 {Program Files}
@@ -1649,6 +1647,60 @@ Linux-armv7l,RequireRoot
 {No}
 
 Linux-armv7l,RootInstallDir
+{/usr/local/<%ShortAppName%>}
+
+Linux-armv7l_64,Active
+{No}
+
+Linux-armv7l_64,BuildSeparateArchives
+{No}
+
+Linux-armv7l_64,DefaultDirectoryPermission
+{0755}
+
+Linux-armv7l_64,DefaultFilePermission
+{0755}
+
+Linux-armv7l_64,Executable
+{<%AppName%>-<%Version%>-<%Platform%>-Install<%Ext%>}
+
+Linux-armv7l_64,FallBackToConsole
+{Yes}
+
+Linux-armv7l_64,InstallDir
+{<%Home%>/<%ShortAppName%>}
+
+Linux-armv7l_64,InstallMode
+{Standard}
+
+Linux-armv7l_64,InstallType
+{Typical}
+
+Linux-armv7l_64,ProgramExecutable
+{}
+
+Linux-armv7l_64,ProgramFolderAllUsers
+{No}
+
+Linux-armv7l_64,ProgramFolderName
+{<%AppName%>}
+
+Linux-armv7l_64,ProgramLicense
+{<%InstallDir%>/LICENSE.txt}
+
+Linux-armv7l_64,ProgramName
+{}
+
+Linux-armv7l_64,ProgramReadme
+{<%InstallDir%>/README.txt}
+
+Linux-armv7l_64,PromptForRoot
+{Yes}
+
+Linux-armv7l_64,RequireRoot
+{No}
+
+Linux-armv7l_64,RootInstallDir
 {/usr/local/<%ShortAppName%>}
 
 Linux-x86,Active
