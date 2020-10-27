@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XML_DIZ_INFO>
+	<MASTER_PAD_VERSION_INFO>
+		<MASTER_PAD_VERSION>2.01</MASTER_PAD_VERSION>
+	</MASTER_PAD_VERSION_INFO>
+	<Program_Info>
+		<Program_Name>Pivotal Stock Ticker</Program_Name>
+		<Program_Version>1.7.0</Program_Version>
+		<Program_Release_Month></Program_Release_Month>
+		<Program_Release_Day></Program_Release_Day>
+		<Program_Release_Year></Program_Release_Year>
+		<Program_Cost_Dollars>0.00</Program_Cost_Dollars>
+		<Program_Type>Freeware</Program_Type>
+		<Program_OS_Support>Windows 98, Windows NT, Windows 2k, Windows Me, Windows XP, Windows 2003 Server, Windows Vista, Windows 7/8/10</Program_OS_Support>
+		<Program_System_Requirements></Program_System_Requirements>
+		<Expire_Info>
+			<Has_Expire_Info></Has_Expire_Info>
+			<Expire_Count></Expire_Count>
+			<Expire_Based_On></Expire_Based_On>
+		</Expire_Info>
+	</Program_Info>
+	<Program_Descriptions>
+		<English>
+			<Char_Desc_450><![CDATA[A free, minimalist stock ticker that allows you to monitor stocks from different Stock Exchanges in different countries as well as providing you with an overall picture of your portfolio.
+Incorparates currency conversion, day changes and popup charts of your stocks day performance.  Supports proxy server configuration and high/low alarms.
+]]></Char_Desc_450>
+		</English>
+	</Program_Descriptions>
+	<Web_Info>
+		<Application_URLs>
+			<Application_Info_URL>http://stockticker.pivotal-solutions.co.uk</Application_Info_URL>
+			<Application_Screenshot_URL>http://stockticker.pivotal-solutions.co.uk/images/screenshot.jpg</Application_Screenshot_URL>
+			<Application_Icon_URL></Application_Icon_URL>
+		</Application_URLs>
+		<Download_URLs>
+			<Primary_Download_URL>http://stockticker.pivotal-solutions.co.uk/Pivotal%20Stock%20Ticker-1.7.0-Setup.exe</Primary_Download_URL>
+		</Download_URLs>
+	</Web_Info>
+</XML_DIZ_INFO>
