@@ -105,6 +105,8 @@ Option Explicit
     Public Const REG_ALWAYS_ON_TOP = "AlwaysOnTop"
     Public Const REG_IEX_KEY = "IEX key"
     Public Const REG_ALPHA_VANTAGE_KEY = "AlphaVantage key"
+    Public Const REG_MARKET_STACK_KEY = "MarketStack key"
+    Public Const REG_TWELVE_DATA_KEY = "TwelveData key"
     Public Const REG_ITALIC = "Italic"
 
     Public Const REG_HIGH_ALARM_WAVE = "High Alarm Wave File"

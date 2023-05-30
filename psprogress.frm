@@ -1,10 +1,9 @@
 VERSION 5.00
-Object = "{86CF1D34-0C5F-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCT2.OCX"
 Begin VB.Form frmProgress 
    BorderStyle     =   4  'Fixed ToolWindow
    ClientHeight    =   1545
-   ClientLeft      =   10500
-   ClientTop       =   2790
+   ClientLeft      =   16065
+   ClientTop       =   5805
    ClientWidth     =   4815
    HasDC           =   0   'False
    Icon            =   "psprogress.frx":0000
@@ -15,18 +14,14 @@ Begin VB.Form frmProgress
    ScaleHeight     =   1545
    ScaleWidth      =   4815
    ShowInTaskbar   =   0   'False
-   Begin MSComCtl2.Animation aniProgress 
+   Begin VB.PictureBox aniProgress 
       Height          =   885
       Left            =   360
+      ScaleHeight     =   825
+      ScaleWidth      =   4035
       TabIndex        =   1
       Top             =   60
       Width           =   4095
-      _ExtentX        =   7223
-      _ExtentY        =   1561
-      _Version        =   393216
-      AutoPlay        =   -1  'True
-      FullWidth       =   273
-      FullHeight      =   59
    End
    Begin VB.Label lblCaption 
       BackStyle       =   0  'Transparent
@@ -190,31 +185,31 @@ Dim iFile%
     ' Initialise error vector and load the required resource
     '
     On Error Resume Next
-    aniProgress.Close
-    If PSGEN_FileExists(msFilename) Then Kill msFilename
-    msFilename = PSGEN_GetTempPathFilename("avi")
+'    aniProgress.Close
+'    If PSGEN_FileExists(msFilename) Then Kill msFilename
+'    msFilename = PSGEN_GetTempPathFilename("avi")
     
     '
     ' Get the resource from the file
     '
-    sID = PSVBUTLS_GetItem(iValue, ",", ANIMATION_IDS)
-    If sID <> "" Then
-        abData = LoadResData(sID, "AVI")
-        If Err = 0 Then
-            If UBound(abData) > 0 Then
+'    sID = PSVBUTLS_GetItem(iValue, ",", ANIMATION_IDS)
+'    If sID <> "" Then
+'        abData = LoadResData(sID, "AVI")
+'        If Err = 0 Then
+'            If UBound(abData) > 0 Then
         
                 '
                 ' Copy the data to the file and use to drive the animation
                 '
-                iFile = FreeFile
-                Open msFilename For Binary Access Write As #iFile
-                Put #iFile, , abData
-                Close #iFile
-                Call aniProgress.Open(msFilename)
-            End If
-        End If
-    End If
-    DoEvents
+'                iFile = FreeFile
+'                Open msFilename For Binary Access Write As #iFile
+'                Put #iFile, , abData
+'                Close #iFile
+'                Call aniProgress.Open(msFilename)
+'            End If
+'        End If
+'    End If
+'    DoEvents
     
 End Property
 
@@ -259,7 +254,7 @@ Private Sub Form_Unload(Cancel As Integer)
     ' Remove the temporary avi file
     '
     On Error Resume Next
-    aniProgress.Close
+'    aniProgress.Close
     If PSGEN_FileExists(msFilename) Then Kill msFilename
 
 End Sub

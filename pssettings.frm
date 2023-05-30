@@ -2,7 +2,7 @@ VERSION 5.00
 Begin VB.Form frmSettings 
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Settings"
-   ClientHeight    =   9210
+   ClientHeight    =   9945
    ClientLeft      =   10335
    ClientTop       =   2130
    ClientWidth     =   6585
@@ -10,8 +10,24 @@ Begin VB.Form frmSettings
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   9210
+   ScaleHeight     =   9945
    ScaleWidth      =   6585
+   Begin VB.TextBox txtTwelveDataKey 
+      Height          =   285
+      Left            =   1770
+      TabIndex        =   55
+      ToolTipText     =   "The token to enable the use of the Alpha Vantage cloud API"
+      Top             =   8835
+      Width           =   4635
+   End
+   Begin VB.TextBox txtMarketStackKey 
+      Height          =   285
+      Left            =   1770
+      TabIndex        =   53
+      ToolTipText     =   "The token to enable the use of the Alpha Vantage cloud API"
+      Top             =   8490
+      Width           =   4635
+   End
    Begin VB.TextBox txtAlphaVantageKey 
       Height          =   285
       Left            =   1770
@@ -141,22 +157,22 @@ Begin VB.Form frmSettings
    End
    Begin VB.CommandButton cmdMain 
       Caption         =   "Restore"
-      Height          =   375
+      Height          =   390
       Index           =   3
       Left            =   1350
       TabIndex        =   28
       ToolTipText     =   "Restore your settings and symbols from a backup file"
-      Top             =   8625
+      Top             =   9330
       Width           =   1050
    End
    Begin VB.CommandButton cmdMain 
       Caption         =   "Backup"
-      Height          =   375
+      Height          =   390
       Index           =   2
       Left            =   180
       TabIndex        =   27
       ToolTipText     =   "Backup your settings and symbols to a file"
-      Top             =   8625
+      Top             =   9330
       Width           =   1050
    End
    Begin VB.CheckBox chkShowTotalValue 
@@ -291,21 +307,21 @@ Begin VB.Form frmSettings
       Caption         =   "OK"
       Default         =   -1  'True
       Enabled         =   0   'False
-      Height          =   375
+      Height          =   390
       Index           =   1
       Left            =   4020
       TabIndex        =   29
-      Top             =   8670
+      Top             =   9375
       Width           =   1125
    End
    Begin VB.CommandButton cmdMain 
       Cancel          =   -1  'True
       Caption         =   "Cancel"
-      Height          =   375
+      Height          =   390
       Index           =   0
       Left            =   5280
       TabIndex        =   30
-      Top             =   8655
+      Top             =   9360
       Width           =   1125
    End
    Begin VB.CheckBox chkShowTotal 
@@ -316,6 +332,28 @@ Begin VB.Form frmSettings
       ToolTipText     =   "Set this if you would like an overall position to be displayed"
       Top             =   3405
       Width           =   5910
+   End
+   Begin VB.Label lblLabel 
+      Alignment       =   1  'Right Justify
+      BackStyle       =   0  'Transparent
+      Caption         =   "TwelveData Token"
+      Height          =   225
+      Index           =   22
+      Left            =   -60
+      TabIndex        =   56
+      Top             =   8865
+      Width           =   1755
+   End
+   Begin VB.Label lblLabel 
+      Alignment       =   1  'Right Justify
+      BackStyle       =   0  'Transparent
+      Caption         =   "MarketStack Token"
+      Height          =   225
+      Index           =   21
+      Left            =   -60
+      TabIndex        =   54
+      Top             =   8520
+      Width           =   1755
    End
    Begin VB.Label lblLabel 
       Alignment       =   1  'Right Justify
@@ -822,6 +860,8 @@ Dim lTmp&
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_ALWAYS_ON_TOP, chkAlwaysOnTop.Value = vbChecked
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_IEX_KEY, txtIexKey.Text
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_ALPHA_VANTAGE_KEY, txtAlphaVantageKey.Text
+        mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_MARKET_STACK_KEY, txtMarketStackKey.Text
+        mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_TWELVE_DATA_KEY, txtTwelveDataKey.Text
         mbDirty = False
         Unload Me
     
@@ -912,6 +952,8 @@ Dim iCnt%
     chkItalic.Value = IIf(CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_ITALIC, "0")), vbChecked, vbUnchecked)
     txtIexKey.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_IEX_KEY)
     txtAlphaVantageKey.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_ALPHA_VANTAGE_KEY)
+    txtMarketStackKey.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_MARKET_STACK_KEY)
+    txtTwelveDataKey.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TWELVE_DATA_KEY)
     
     sFont = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FONT, frmMain.Font.Name)
     For iCnt = 0 To Screen.FontCount - 1
@@ -978,6 +1020,12 @@ Private Sub txtMargin_Change()
 
 End Sub
 
+Private Sub txtMarketStackKey_Change()
+
+    Z_SetDirty True
+
+End Sub
+
 Private Sub txtProxy_Change()
 
     Z_SetDirty True
@@ -1005,3 +1053,8 @@ Dim iCnt%
 
 End Sub
 
+Private Sub txtTwelveDataKey_Change()
+
+    Z_SetDirty True
+
+End Sub

@@ -5,8 +5,8 @@ Begin VB.Form frmMain
    BackColor       =   &H00404040&
    BorderStyle     =   0  'None
    ClientHeight    =   2130
-   ClientLeft      =   10305
-   ClientTop       =   7350
+   ClientLeft      =   7230
+   ClientTop       =   4020
    ClientWidth     =   5880
    ControlBox      =   0   'False
    BeginProperty Font 
@@ -1226,7 +1226,7 @@ Dim objSymsToLookup As New Collection
 Dim objExchangeLookup As New Collection
 Dim sUniqueSymbols$, sSummaryCurrencySymbol$, sSummaryCurrencyName$, sUniqueIndexes$
 Dim objSummaryStocks As New Collection
-Dim sProxy$, sReturnedSymbolName$, sTmp$, sIexKey$, sAlphaVantageKey$
+Dim sProxy$, sReturnedSymbolName$, sTmp$, sIexKey$, sAlphaVantageKey$, sMarketStackKey$, sTwelveDataKey$
 Dim sSymbolName As Variant
 Dim asSymRows$(), asSymVals$()
 Dim sLine As Variant
@@ -1235,7 +1235,7 @@ Dim objAlarm As frmAlarm
 Dim rCurrentPrice#, rStartPrice#
 Static objOldValues As New Collection
 Dim bFound As Boolean
-Dim rDayLow#, rDayHigh#, rDayOpen#, rDayClose#
+Dim rDayLow#, rDayHigh#, rDayOpen#
 Dim iCols As Integer
 Dim sName$
 
@@ -1247,6 +1247,8 @@ Dim sName$
     sProxy = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_PROXY)
     sIexKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_IEX_KEY)
     sAlphaVantageKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_ALPHA_VANTAGE_KEY)
+    sMarketStackKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_MARKET_STACK_KEY)
+    sTwelveDataKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TWELVE_DATA_KEY)
     sSummaryCurrencyName = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY)
     sSummaryCurrencySymbol = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY_SYMBOL)
     If mobjCurrentSymbols.Count = 0 Then
@@ -1274,27 +1276,34 @@ Dim sName$
             End If
         Next
         If sSummaryCurrencyName <> "" And objExchangeLookup.Count > 0 Then
-            For Each sSymbol In objExchangeLookup
-                DoEvents
-                If mbCapturing Then Exit Function
-                If PSGEN_IsSameText(sSymbol, sSummaryCurrencyName) Then
-                    mobjExchangeRates.Add 1#, sSymbol
-                Else
-                    Call PSINET_GetHTTPFile("https://api.exchangeratesapi.io/latest?symbols=GBP&base=" + UCase(sSymbol), sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
-                    If Trim(sCSV) <> "" Then
-                        rRate = Val(Trim(Split(Split(sCSV, "GBP"":")(1), "}")(0)))
-                        If rRate > 0 Then
-                            mobjExchangeRates.Remove sSymbol
-                            mobjExchangeRates.Add rRate, sSymbol
-                            Call mobjReg.SaveSetting(App.Title, REG_LAST_GOOD_RATES, sSymbol, rRate)
-                        End If
+            If Val(timData.Tag) = 600 Or timData.Tag = "" Then
+                timData.Tag = ""
+                sCSV = ""
+                Call PSINET_GetHTTPFile("https://open.er-api.com/v6/latest/GBP", sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
+                For Each sSymbol In objExchangeLookup
+                    DoEvents
+                    If PSGEN_IsSameText(sSymbol, sSummaryCurrencyName) Then
+                        mobjExchangeRates.Add 1#, sSymbol
                     Else
-                        rRate = mobjReg.GetSetting(App.Title, REG_LAST_GOOD_RATES, sSymbol, 1#)
-                        If rRate = 0 Then rRate = 1
-                        Debug.Print "Nothing returned for exchange " + sSymbol + " to " + sSummaryCurrencyName + " using rate:" + rRate
+                        If Trim(sCSV) <> "" Then
+                            rRate = Val(Trim(Split(Split(sCSV, """" + sSymbol + """:")(1), ",")(0)))
+                            If rRate > 0 Then
+                                rRate = 1 / rRate
+                                Call mobjReg.SaveSetting(App.Title, REG_LAST_GOOD_RATES, sSymbol, rRate)
+                            Else
+                                rRate = 1
+                            End If
+                        Else
+                            rRate = mobjReg.GetSetting(App.Title, REG_LAST_GOOD_RATES, sSymbol, 1#)
+                            If rRate = 0 Then rRate = 1
+                            Debug.Print "Nothing returned for exchange " + sSymbol + " to " + sSummaryCurrencyName + " using rate:" + Format(rRate)
+                        End If
+                        mobjExchangeRates.Remove sSymbol
+                        mobjExchangeRates.Add rRate, sSymbol
                     End If
-                End If
-            Next
+                Next
+            End If
+            timData.Tag = IIf(timData.Tag = "", 1, Format(Val(timData.Tag) + 1))
         End If
         
         '
@@ -1302,7 +1311,6 @@ Dim sName$
         '
         For Each sSymbol In objSymsToLookup
             rDayOpen = 0
-            rDayClose = 0
             rDayHigh = 0
             rDayLow = 0
             rCurrentPrice = 0
@@ -1319,14 +1327,7 @@ Dim sName$
             ' Put the stock values into the lookup
             '
             If Trim(sCSV) <> "" Then
-                rDayOpen = CDbl(getJsonValue(sCSV, "open"))
-                rDayClose = CDbl(getJsonValue(sCSV, "close"))
-                If rDayClose = 0 Or getJsonValue(sCSV, "close") = "" Then
-                    rDayClose = CDbl(getJsonValue(sCSV, "previousClose"))
-                    If rDayOpen = 0 Then
-                       rDayOpen = rDayClose
-                    End If
-                End If
+                rDayOpen = CDbl(getJsonValue(sCSV, "previousClose"))
                 rDayHigh = CDbl(getJsonValue(sCSV, "high"))
                 rDayLow = CDbl(getJsonValue(sCSV, "low"))
                 rCurrentPrice = CDbl(getJsonValue(sCSV, "iexRealtimePrice"))
@@ -1354,7 +1355,6 @@ Dim sName$
         '
         For Each sSymbol In objSymsToLookup
             rDayOpen = 0
-            rDayClose = 0
             rDayHigh = 0
             rDayLow = 0
             rCurrentPrice = 0
@@ -1367,8 +1367,7 @@ Dim sName$
             ' Put the stock values into the lookup
             '
             If InStr(sCSV, "<span>Open</span>") > 0 And Trim(sCSV) <> "" Then
-                rDayOpen = CDbl(Split(Split(Split(sCSV, "<span>Open</span>")(1), "<span>")(1), "<")(0))
-                rDayClose = CDbl(Split(Split(Split(sCSV, "<span>Prev Close</span>")(1), "<span>")(1), "<")(0))
+                rDayOpen = CDbl(Split(Split(Split(sCSV, "<span>Prev Close</span>")(1), "<span>")(1), "<")(0))
                 rDayHigh = CDbl(Split(Split(Split(Split(sCSV, "Today's High", 2)(1), "QuoteRibbon-digits-", 2)(1), ">", 2)(1), "<", 2)(0))
                 rDayLow = CDbl(Split(Split(sCSV, "sectionQuoteDetailLow"">")(1), "<")(0))
                 
@@ -1387,31 +1386,116 @@ Dim sName$
         Next
         
         '
-        ' Now get a list of all the symbols that we cant get from elsewhere
+        ' Now get a list of all the symbols that we cant get from Alpha Vantage
         '
-        For Each sSymbol In objSymsToLookup
-            rDayOpen = 0
-            rDayClose = 0
-            rDayHigh = 0
-            rDayLow = 0
-            rCurrentPrice = 0
+        If sAlphaVantageKey <> "" Then
+            For Each sSymbol In objSymsToLookup
+                rDayOpen = 0
+                rDayHigh = 0
+                rDayLow = 0
+                rCurrentPrice = 0
+                
+                DoEvents
+                If mbCapturing Then Exit Function
+                Call PSINET_GetHTTPFile("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval=1min&apikey=" + sAlphaVantageKey + "&datatype=csv&symbol=" + Replace(sSymbol, "^", "."), sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
+    
+                '
+                ' Put the stock values into the lookup
+                '
+                If Trim(sCSV) <> "" Then
+                    sCSV = Split(sCSV, vbLf)(1)
+                    Call ParseCSV(sCSV, asSymVals)
+                    If UBound(asSymVals) = 5 Then
+                        rDayOpen = CDbl(asSymVals(4))
+                        rDayHigh = CDbl(asSymVals(2))
+                        rDayLow = CDbl(asSymVals(3))
+                        rCurrentPrice = CDbl(asSymVals(2))
+        
+                        sTmp = """" + sSymbol + """"
+                        sTmp = sTmp + "," + Format(rCurrentPrice)
+                        sTmp = sTmp + "," + Format(rDayLow)
+                        sTmp = sTmp + "," + Format(rDayHigh)
+                        sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                        objSymLookup.Add sTmp, sSymbol
+                        objSymsToLookup.Remove sSymbol
+                    Else
+                        Debug.Print "Alpha Vantage " + sSymbol + " " + sCSV
+                    End If
+                Else
+                    Debug.Print "Nothing returned from Alpha Vantage for " + sSymbol
+                End If
+            Next
+        End If
             
-            DoEvents
-            If mbCapturing Then Exit Function
-            Call PSINET_GetHTTPFile("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval=1min&apikey=" + sAlphaVantageKey + "&datatype=csv&symbol=" + Replace(sSymbol, "^", "."), sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
-
-            '
-            ' Put the stock values into the lookup
-            '
-            If Trim(sCSV) <> "" Then
-                sCSV = Split(sCSV, vbLf)(1)
-                Call ParseCSV(sCSV, asSymVals)
-                If UBound(asSymVals) = 5 Then
-                    rDayOpen = CDbl(asSymVals(1))
-                    rDayClose = CDbl(asSymVals(4))
-                    rDayHigh = CDbl(asSymVals(2))
-                    rDayLow = CDbl(asSymVals(3))
-                    rCurrentPrice = CDbl(asSymVals(2))
+        '
+        ' Now get a list of all the symbols that we cant get from Twelve Data
+        '
+        If sTwelveDataKey <> "" Then
+            For Each sSymbol In objSymsToLookup
+                rDayOpen = 0
+                rDayHigh = 0
+                rDayLow = 0
+                rCurrentPrice = 0
+                
+                DoEvents
+                If mbCapturing Then Exit Function
+                Call PSINET_GetHTTPFile("https://api.twelvedata.com/quote?format=csv&apikey=" + sTwelveDataKey + "&symbol=" + Replace(sSymbol, "^", "."), sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
+    
+                '
+                ' Put the stock values into the lookup
+                '
+                If Trim(sCSV) <> "" Then
+                    sCSV = Replace(Split(sCSV, vbLf)(1), ";", ",")
+                    Call ParseCSV(sCSV, asSymVals)
+                    If UBound(asSymVals) > 8 Then
+                        rDayOpen = CDbl(asSymVals(9))
+                        rDayHigh = CDbl(asSymVals(7))
+                        rDayLow = CDbl(asSymVals(8))
+                        
+                        Call PSINET_GetHTTPFile("https://api.twelvedata.com/price?format=csv&apikey=" + sTwelveDataKey + "&symbol=" + Replace(sSymbol, "^", "."), sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
+                        If Trim(sCSV) <> "" Then
+                            sCSV = Split(sCSV, vbLf)(1)
+                            rCurrentPrice = CDbl(sCSV)
+            
+                            sTmp = """" + sSymbol + """"
+                            sTmp = sTmp + "," + Format(rCurrentPrice)
+                            sTmp = sTmp + "," + Format(rDayLow)
+                            sTmp = sTmp + "," + Format(rDayHigh)
+                            sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                            objSymLookup.Add sTmp, sSymbol
+                            objSymsToLookup.Remove sSymbol
+                        End If
+                    Else
+                        Debug.Print "Twelve Data " + sSymbol + " " + sCSV
+                    End If
+                Else
+                    Debug.Print "Nothing returned from Twelve Data for " + sSymbol
+                End If
+            Next
+        End If
+        
+        '
+        ' Now get a list of all the symbols that we cant get from Market Stack
+        '
+        If sMarketStackKey <> "" Then
+            For Each sSymbol In objSymsToLookup
+                rDayOpen = 0
+                rDayHigh = 0
+                rDayLow = 0
+                rCurrentPrice = 0
+                
+                DoEvents
+                If mbCapturing Then Exit Function
+                Call PSINET_GetHTTPFile("http://api.marketstack.com/v1/intraday/latest?access_key=" + sMarketStackKey + "&symbols=" + Replace(sSymbol, "^", "."), sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
+    
+                '
+                ' Put the stock values into the lookup
+                '
+                If Trim(sCSV) <> "" Then
+                    rDayOpen = CDbl(Split(Split(sCSV, """close"":", 2)(1), ",", 2)(0))
+                    rDayHigh = CDbl(Split(Split(sCSV, """high"":", 2)(1), ",", 2)(0))
+                    rDayLow = CDbl(Split(Split(sCSV, """low"":", 2)(1), ",", 2)(0))
+                    rCurrentPrice = CDbl(Split(Split(sCSV, """last"":", 2)(1), ",", 2)(0))
     
                     sTmp = """" + sSymbol + """"
                     sTmp = sTmp + "," + Format(rCurrentPrice)
@@ -1421,12 +1505,10 @@ Dim sName$
                     objSymLookup.Add sTmp, sSymbol
                     objSymsToLookup.Remove sSymbol
                 Else
-                    Debug.Print "Alpha Vantage " + sSymbol + " " + sCSV
+                    Debug.Print "Nothing returned from Market Stack for " + sSymbol
                 End If
-            Else
-                Debug.Print "Nothing returned from Alpha Vantage for " + sSymbol
-            End If
-        Next
+            Next
+        End If
         
         '
         ' Get the values from each CSV line
