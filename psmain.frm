@@ -1666,7 +1666,14 @@ Dim objBaseSymbol As cSymbol
                     '
                     objBaseSymbol.Price = ((objBaseSymbol.Price * objBaseSymbol.Shares) + (objSymbol.Price * objSymbol.Shares)) / (objBaseSymbol.Shares + objSymbol.Shares)
                     objBaseSymbol.Shares = objBaseSymbol.Shares + objSymbol.Shares
-                    
+                    objBaseSymbol.ShowPrice = IIf(objSymbol.ShowPrice, True, objBaseSymbol.ShowPrice)
+                    objBaseSymbol.ShowChange = IIf(objSymbol.ShowChange, True, objBaseSymbol.ShowChange)
+                    objBaseSymbol.ShowChangePercent = IIf(objSymbol.ShowChangePercent, True, objBaseSymbol.ShowChangePercent)
+                    objBaseSymbol.ShowChangeUpDown = IIf(objSymbol.ShowChangeUpDown, True, objBaseSymbol.ShowChangeUpDown)
+                    objBaseSymbol.ShowProfitLoss = IIf(objSymbol.ShowProfitLoss, True, objBaseSymbol.ShowProfitLoss)
+                    objBaseSymbol.ShowDayChange = IIf(objSymbol.ShowDayChange, True, objBaseSymbol.ShowDayChange)
+                    objBaseSymbol.ShowDayChangePercent = IIf(objSymbol.ShowDayChangePercent, True, objBaseSymbol.ShowDayChangePercent)
+                    objBaseSymbol.ShowDayChangeUpDown = IIf(objSymbol.ShowDayChangeUpDown, True, objBaseSymbol.ShowDayChangeUpDown)
                 End If
             End If
         Next objSymbol
@@ -1686,7 +1693,7 @@ Dim lBackColor&, lTextColor&, lUpColor&, lDownColor&, lTmp&
 Dim bNotFirst As Boolean
 Dim objSymbol As cSymbol
 Dim bShownOtherData As Boolean
-Dim bShownDayData As Boolean
+Dim bShownBraces As Boolean
 Dim objSymbols As Collection
 
     '
@@ -1716,7 +1723,6 @@ Dim objSymbols As Collection
 
             If Not objSymbol.Disabled Then
                 bShownOtherData = False
-                bShownDayData = False
                 
                 '
                 ' Display all the bits starting with the correct colour
@@ -1734,27 +1740,6 @@ Dim objSymbols As Collection
                     If objSymbol.ShowPrice Then
                         picData.CurrentX = picData.CurrentX + 4
                         picData.Print objSymbol.FormattedValue;
-                    End If
-                    
-                    '
-                    ' Show the up/down arrows
-                    '
-                    If objSymbol.ShowChangeUpDown Then
-                        bShownOtherData = True
-                        iLeft = picData.CurrentX + 4
-                        iTop = picData.CurrentY
-                        If objSymbol.CurrentPrice < objSymbol.Price Then
-                            For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3), lDownColor
-                            Next i
-                            picData.CurrentY = iTop
-                        
-                        ElseIf objSymbol.CurrentPrice > objSymbol.Price Then
-                            For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3), lUpColor
-                            Next i
-                            picData.CurrentY = iTop
-                        End If
                     End If
                     
                     '
@@ -1786,6 +1771,40 @@ Dim objSymbols As Collection
                         picData.CurrentX = picData.CurrentX + 4
                         picData.Print FormatCurrencyValueWithSymbol(objSymbol.CurrencySymbol, objSymbol.CurrencyName, (objSymbol.CurrentPrice * objSymbol.Shares) - (objSymbol.Price * objSymbol.Shares));
                     End If
+                
+                    '
+                    ' Show the up/down arrows
+                    '
+                    If objSymbol.ShowChangeUpDown Then
+                        iLeft = picData.CurrentX + 4
+                        iTop = picData.CurrentY
+                        If objSymbol.CurrentPrice < objSymbol.Price Then
+                            For i = 0 To ScaleHeight \ 4
+                               picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3), lDownColor
+                            Next i
+                            picData.DrawWidth = 2
+                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + 3)-(iLeft + (ScaleHeight \ 4), 3 * ScaleHeight \ 4), lDownColor
+                        
+                        ElseIf objSymbol.CurrentPrice > objSymbol.Price Then
+                            For i = 0 To ScaleHeight \ 4
+                               picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3), lUpColor
+                            Next i
+                            picData.DrawWidth = 2
+                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + ScaleHeight \ 4)-(iLeft + (ScaleHeight \ 4), ScaleHeight - 4), lUpColor
+                        Else
+                            For i = 0 To ScaleHeight \ 4
+                               picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3)
+                            Next i
+                            For i = 0 To ScaleHeight \ 4
+                               picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3)
+                            Next i
+                            picData.DrawWidth = 2
+                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + ScaleHeight \ 4)-(iLeft + (ScaleHeight \ 4), 3 * ScaleHeight \ 4)
+                        End If
+                        picData.DrawWidth = 1
+                        picData.CurrentY = iTop
+                        picData.CurrentX = picData.CurrentX + 4
+                    End If
                 Else
                     picData.ForeColor = IIf(objSymbol.CurrentPrice > objSymbol.DayStart, lUpColor, IIf(objSymbol.CurrentPrice < objSymbol.Price, lDownColor, lTextColor))
                     picData.Print objSymbol.DisplayName;
@@ -1801,61 +1820,79 @@ Dim objSymbols As Collection
                 End If
                 
                 '
-                ' Show the Day up/down arrows
+                ' Show day changes
                 '
-                picData.ForeColor = IIf(objSymbol.CurrentPrice > objSymbol.DayStart, lUpColor, IIf(objSymbol.CurrentPrice < objSymbol.Price, lDownColor, lTextColor))
-                If objSymbol.ShowDayChangeUpDown Then
+                If objSymbol.ShowDayChange Or objSymbol.ShowDayChangePercent Or objSymbol.ShowDayChangeUpDown Then
+                    bShownBraces = (bShownOtherData And (objSymbol.ShowDayChange Or objSymbol.ShowDayChangePercent)) Or (objSymbol.ShowChangeUpDown And objSymbol.ShowDayChangeUpDown)
+                    picData.ForeColor = IIf(objSymbol.CurrentPrice > objSymbol.DayStart, lUpColor, IIf(objSymbol.CurrentPrice < objSymbol.DayStart, lDownColor, lTextColor))
                     picData.CurrentX = picData.CurrentX + 4
-                    If bShownOtherData And Not bShownDayData Then picData.Print "(";
-                    iLeft = picData.CurrentX
-                    iTop = picData.CurrentY
-                    If objSymbol.CurrentPrice < objSymbol.DayStart Then
-                        For i = 0 To ScaleHeight \ 4
-                           picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3), lDownColor
-                        Next i
-                        picData.CurrentY = iTop
+                    If bShownBraces Then picData.Print "(";
+                
+                    '
+                    ' Show the Day price difference
+                    '
+                    If objSymbol.ShowDayChange Then
+                        picData.CurrentX = picData.CurrentX + 4
+                        picData.Print FormatCurrencyValue(objSymbol.CurrencySymbol, objSymbol.CurrentPrice - objSymbol.DayStart);
+                    End If
                     
-                    ElseIf objSymbol.CurrentPrice > objSymbol.DayStart Then
-                        For i = 0 To ScaleHeight \ 4
-                           picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3), lUpColor
-                        Next i
+                    '
+                    ' Show the Day change in percent
+                    '
+                    If objSymbol.ShowDayChangePercent Then
+                        picData.CurrentX = picData.CurrentX + 4
+                        If objSymbol.DayStart <> 0 Then
+                            picData.Print Format(objSymbol.DayChange / objSymbol.DayStart, "0.00%");
+                        Else
+                            picData.Print "0.00%";
+                        End If
+                    End If
+                    
+                    '
+                    ' Show the day profit/loss
+                    '
+                    If objSymbol.ShowProfitLoss And objSymbol.ShowDayChange Then
+                        picData.CurrentX = picData.CurrentX + 4
+                        picData.Print FormatCurrencyValueWithSymbol(objSymbol.CurrencySymbol, objSymbol.CurrencyName, (objSymbol.CurrentPrice * objSymbol.Shares) - (objSymbol.DayStart * objSymbol.Shares));
+                    End If
+                    
+                    '
+                    ' Show the Day up/down arrows
+                    '
+                    If objSymbol.ShowDayChangeUpDown Then
+                        iLeft = picData.CurrentX + 1
+                        iTop = picData.CurrentY
+                        
+                        If objSymbol.CurrentPrice < objSymbol.DayStart Then
+                            For i = 0 To ScaleHeight \ 4
+                               picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3), lDownColor
+                            Next i
+                            picData.DrawWidth = 2
+                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + 3)-(iLeft + (ScaleHeight \ 4), 3 * ScaleHeight \ 4), lDownColor
+                        
+                        ElseIf objSymbol.CurrentPrice > objSymbol.DayStart Then
+                            For i = 0 To ScaleHeight \ 4
+                               picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3), lUpColor
+                            Next i
+                            picData.DrawWidth = 2
+                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + ScaleHeight \ 4)-(iLeft + (ScaleHeight \ 4), ScaleHeight - 4), lUpColor
+                        Else
+                            For i = 0 To ScaleHeight \ 4
+                               picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3)
+                            Next i
+                            For i = 0 To ScaleHeight \ 4
+                               picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3)
+                            Next i
+                            picData.DrawWidth = 2
+                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + ScaleHeight \ 4)-(iLeft + (ScaleHeight \ 4), 3 * ScaleHeight \ 4)
+                        End If
+                        picData.DrawWidth = 1
                         picData.CurrentY = iTop
+                        picData.CurrentX = picData.CurrentX + 4
                     End If
-                    bShownDayData = True
-                End If
                 
-                '
-                ' Show the Day price difference
-                '
-                If objSymbol.ShowDayChange Then
-                    picData.CurrentX = picData.CurrentX + 4
-                    If bShownOtherData And Not bShownDayData Then picData.Print "(";
-                    picData.Print FormatCurrencyValue(objSymbol.CurrencySymbol, objSymbol.CurrentPrice - objSymbol.DayStart);
-                    bShownDayData = True
+                    If bShownBraces Then picData.Print ")";
                 End If
-                
-                '
-                ' Show the Day change in percent
-                '
-                If objSymbol.ShowDayChangePercent Then
-                    picData.CurrentX = picData.CurrentX + 4
-                    If bShownOtherData And Not bShownDayData Then picData.Print "(";
-                    If objSymbol.DayStart <> 0 Then
-                        picData.Print Format(objSymbol.DayChange / objSymbol.DayStart, "0.00%");
-                    Else
-                        picData.Print "0.00%";
-                    End If
-                    bShownDayData = True
-                End If
-                
-                '
-                ' Show the day profit/loss
-                '
-                If objSymbol.ShowProfitLoss And objSymbol.ShowDayChange Then
-                    picData.CurrentX = picData.CurrentX + 4
-                    picData.Print FormatCurrencyValueWithSymbol(objSymbol.CurrencySymbol, objSymbol.CurrencyName, (objSymbol.CurrentPrice * objSymbol.Shares) - (objSymbol.DayStart * objSymbol.Shares));
-                End If
-                If bShownOtherData And bShownDayData Then picData.Print ")";
                 
                 objSymbol.Position.Right = CurrentX + picData.CurrentX
                 bNotFirst = True
