@@ -820,8 +820,9 @@ Private Sub mnuEditSymbols_Click()
 
     frmSymbols.Show vbModal, Me
     DoEvents
-    Set mobjCurrentSymbols = New Collection
-    mnuRefresh_Click
+    If mobjCurrentSymbols.Count = 0 Then
+        mnuRefresh_Click
+    End If
 
 End Sub
 
@@ -961,8 +962,9 @@ Private Sub mnuSettings_Click()
         Call SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, Flags)
     End If
     
-    Set mobjCurrentSymbols = New Collection
-    mnuRefresh_Click
+    timData.Enabled = False
+    Z_DisplayData
+    timData.Enabled = True
 
 End Sub
 
@@ -1689,7 +1691,7 @@ Private Sub Z_DrawSymbolText()
 
 Dim asSymbols$()
 Dim i%, iLeft%, iTop%
-Dim lBackColor&, lTextColor&, lUpColor&, lDownColor&, lTmp&
+Dim lBackColor&, lTextColor&, lUpColor&, lDownColor&, lUpArrowColor&, lDownArrowColor&, lTmp&
 Dim bNotFirst As Boolean
 Dim objSymbol As cSymbol
 Dim bShownOtherData As Boolean
@@ -1703,6 +1705,8 @@ Dim objSymbols As Collection
     lTextColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TEXT_COLOUR, Format(vbWhite)))
     lUpColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_COLOUR, Format(vbGreen)))
     lDownColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_COLOUR, Format(vbRed)))
+    lUpArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_ARROW_COLOUR, Format(vbGreen)))
+    lDownArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_ARROW_COLOUR, Format(vbRed)))
     
     '
     ' Loop through all the symbols getting a sorted list
@@ -1780,17 +1784,17 @@ Dim objSymbols As Collection
                         iTop = picData.CurrentY
                         If objSymbol.CurrentPrice < objSymbol.Price Then
                             For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3), lDownColor
+                               picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3), lDownArrowColor
                             Next i
                             picData.DrawWidth = 2
-                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + 3)-(iLeft + (ScaleHeight \ 4), 3 * ScaleHeight \ 4), lDownColor
+                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + 3)-(iLeft + (ScaleHeight \ 4), 3 * ScaleHeight \ 4), lDownArrowColor
                         
                         ElseIf objSymbol.CurrentPrice > objSymbol.Price Then
                             For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3), lUpColor
+                               picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3), lUpArrowColor
                             Next i
                             picData.DrawWidth = 2
-                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + ScaleHeight \ 4)-(iLeft + (ScaleHeight \ 4), ScaleHeight - 4), lUpColor
+                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + ScaleHeight \ 4)-(iLeft + (ScaleHeight \ 4), ScaleHeight - 4), lUpArrowColor
                         Else
                             For i = 0 To ScaleHeight \ 4
                                picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3)
@@ -1865,17 +1869,17 @@ Dim objSymbols As Collection
                         
                         If objSymbol.CurrentPrice < objSymbol.DayStart Then
                             For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3), lDownColor
+                               picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3), lDownArrowColor
                             Next i
                             picData.DrawWidth = 2
-                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + 3)-(iLeft + (ScaleHeight \ 4), 3 * ScaleHeight \ 4), lDownColor
+                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + 3)-(iLeft + (ScaleHeight \ 4), 3 * ScaleHeight \ 4), lDownArrowColor
                         
                         ElseIf objSymbol.CurrentPrice > objSymbol.DayStart Then
                             For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3), lUpColor
+                               picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3), lUpArrowColor
                             Next i
                             picData.DrawWidth = 2
-                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + ScaleHeight \ 4)-(iLeft + (ScaleHeight \ 4), ScaleHeight - 4), lUpColor
+                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + ScaleHeight \ 4)-(iLeft + (ScaleHeight \ 4), ScaleHeight - 4), lUpArrowColor
                         Else
                             For i = 0 To ScaleHeight \ 4
                                picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3)

@@ -3,8 +3,8 @@ Begin VB.Form frmSettings
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Settings"
    ClientHeight    =   9945
-   ClientLeft      =   10335
-   ClientTop       =   2130
+   ClientLeft      =   30795
+   ClientTop       =   2730
    ClientWidth     =   6585
    KeyPreview      =   -1  'True
    LinkTopic       =   "Form1"
@@ -12,6 +12,28 @@ Begin VB.Form frmSettings
    MinButton       =   0   'False
    ScaleHeight     =   9945
    ScaleWidth      =   6585
+   Begin VB.CommandButton cmdColours 
+      Appearance      =   0  'Flat
+      BackColor       =   &H000000FF&
+      Height          =   240
+      Index           =   4
+      Left            =   5640
+      Style           =   1  'Graphical
+      TabIndex        =   58
+      Top             =   1260
+      Width           =   345
+   End
+   Begin VB.CommandButton cmdColours 
+      Appearance      =   0  'Flat
+      BackColor       =   &H000000FF&
+      Height          =   240
+      Index           =   5
+      Left            =   5640
+      Style           =   1  'Graphical
+      TabIndex        =   57
+      Top             =   1560
+      Width           =   345
+   End
    Begin VB.TextBox txtTwelveDataKey 
       Height          =   285
       Left            =   1770
@@ -238,7 +260,7 @@ Begin VB.Form frmSettings
       BackColor       =   &H000000FF&
       Height          =   240
       Index           =   3
-      Left            =   3525
+      Left            =   3495
       Style           =   1  'Graphical
       TabIndex        =   6
       Top             =   1575
@@ -249,21 +271,21 @@ Begin VB.Form frmSettings
       BackColor       =   &H000000FF&
       Height          =   240
       Index           =   2
-      Left            =   1845
+      Left            =   3495
       Style           =   1  'Graphical
       TabIndex        =   5
-      Top             =   1575
+      Top             =   1275
       Width           =   345
    End
    Begin VB.CommandButton cmdColours 
       Appearance      =   0  'Flat
       BackColor       =   &H000000FF&
-      Height          =   240
+      Height          =   210
       Index           =   1
-      Left            =   3525
+      Left            =   1845
       Style           =   1  'Graphical
       TabIndex        =   4
-      Top             =   1275
+      Top             =   1605
       Width           =   345
    End
    Begin VB.CommandButton cmdColours 
@@ -332,6 +354,28 @@ Begin VB.Form frmSettings
       ToolTipText     =   "Set this if you would like an overall position to be displayed"
       Top             =   3405
       Width           =   5910
+   End
+   Begin VB.Label lblLabel 
+      Alignment       =   1  'Right Justify
+      BackStyle       =   0  'Transparent
+      Caption         =   "Up Arrow Colour"
+      Height          =   225
+      Index           =   24
+      Left            =   3750
+      TabIndex        =   60
+      Top             =   1290
+      Width           =   1755
+   End
+   Begin VB.Label lblLabel 
+      Alignment       =   1  'Right Justify
+      BackStyle       =   0  'Transparent
+      Caption         =   "Down Arrow Colour"
+      Height          =   225
+      Index           =   23
+      Left            =   3945
+      TabIndex        =   59
+      Top             =   1590
+      Width           =   1560
    End
    Begin VB.Label lblLabel 
       Alignment       =   1  'Right Justify
@@ -592,7 +636,7 @@ Begin VB.Form frmSettings
       Caption         =   "Down Colour"
       Height          =   225
       Index           =   6
-      Left            =   2235
+      Left            =   2205
       TabIndex        =   36
       Top             =   1605
       Width           =   1155
@@ -603,20 +647,20 @@ Begin VB.Form frmSettings
       Caption         =   "Up Colour"
       Height          =   225
       Index           =   5
-      Left            =   -45
+      Left            =   1605
       TabIndex        =   35
-      Top             =   1605
+      Top             =   1305
       Width           =   1755
    End
    Begin VB.Label lblLabel 
       Alignment       =   1  'Right Justify
       BackStyle       =   0  'Transparent
       Caption         =   "Normal Text"
-      Height          =   225
+      Height          =   195
       Index           =   4
-      Left            =   2235
+      Left            =   555
       TabIndex        =   34
-      Top             =   1305
+      Top             =   1635
       Width           =   1155
    End
    Begin VB.Label lblLabel 
@@ -853,6 +897,8 @@ Dim lTmp&
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_TEXT_COLOUR, cmdColours(1).BackColor
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_UP_COLOUR, cmdColours(2).BackColor
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_DOWN_COLOUR, cmdColours(3).BackColor
+        mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_UP_ARROW_COLOUR, cmdColours(4).BackColor
+        mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_DOWN_ARROW_COLOUR, cmdColours(5).BackColor
         
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_BOLD, chkBold.Value = vbChecked
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_ITALIC, chkItalic.Value = vbChecked
@@ -947,6 +993,8 @@ Dim iCnt%
     cmdColours(1).BackColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TEXT_COLOUR, Format(vbWhite)))
     cmdColours(2).BackColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_COLOUR, Format(vbGreen)))
     cmdColours(3).BackColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_COLOUR, Format(vbRed)))
+    cmdColours(4).BackColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_ARROW_COLOUR, Format(vbGreen)))
+    cmdColours(5).BackColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_ARROW_COLOUR, Format(vbRed)))
     chkBold.Value = IIf(CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_BOLD, "0")), vbChecked, vbUnchecked)
     chkAlwaysOnTop.Value = IIf(CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_ALWAYS_ON_TOP, "-1")), vbChecked, vbUnchecked)
     chkItalic.Value = IIf(CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_ITALIC, "0")), vbChecked, vbUnchecked)

@@ -496,6 +496,7 @@ Private Sub cmdMain_Click(Index As Integer)
     If Index = 1 Then
         WriteSymbolsToRegistry mobjSymbols
         mbDirty = False
+        Set frmMain.mobjCurrentSymbols = Nothing
         Unload Me
     
     ElseIf Index = 0 Then

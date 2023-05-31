@@ -100,6 +100,8 @@ Option Explicit
     Public Const REG_TEXT_COLOUR = "Text Colour"
     Public Const REG_UP_COLOUR = "Up Colour"
     Public Const REG_DOWN_COLOUR = "Down Colour"
+    Public Const REG_UP_ARROW_COLOUR = "Up Arrow Colour"
+    Public Const REG_DOWN_ARROW_COLOUR = "Down Arrow Colour"
     Public Const REG_FONT = "Font"
     Public Const REG_BOLD = "Bold"
     Public Const REG_ALWAYS_ON_TOP = "AlwaysOnTop"
