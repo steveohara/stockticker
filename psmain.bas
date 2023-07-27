@@ -330,7 +330,7 @@ Dim iCnt%
             ' They will follow this pattern; name_xxxx_yyyy_zzz where xxxx is the major version,
             ' yyyy is the minor and zzzz is the revision
             '
-            asList = Split(sList, "<A HREF=""" + sDir, Compare:=vbTextCompare)
+            asList = Split(sList, "<A HREF=""" + sDir, compare:=vbTextCompare)
             
             '
             ' Now loop through all the possible updates to see if there is one greater than we already are
@@ -733,5 +733,6 @@ Dim tmp$
         End If
     End If
     getJsonValue = tmp
+
 End Function
 
