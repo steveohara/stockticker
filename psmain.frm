@@ -539,10 +539,10 @@ Dim rMargin#
         If bShowTotalPercent Then
             ForeColor = IIf(mobjTotal.TotalValue > mobjTotal.TotalCost, lUpColor, IIf(mobjTotal.TotalValue < mobjTotal.TotalCost, lDownColor, lTextColor))
             Print "  " + mobjTotal.FormattedLossPercent;
-            If rTotalInvestment > 0 Then
-                ForeColor = IIf(mobjTotal.TotalValue > (rTotalInvestment + rMargin), lUpColor, IIf(mobjTotal.TotalValue < (rTotalInvestment + rMargin), lDownColor, lTextColor))
-                Print " (" + mobjTotal.FormattedLossAdjustedPercent(rTotalInvestment + rMargin) + ")";
-            End If
+'            If rTotalInvestment > 0 Then
+'                ForeColor = IIf(mobjTotal.TotalValue > (rTotalInvestment + rMargin), lUpColor, IIf(mobjTotal.TotalValue < (rTotalInvestment + rMargin), lDownColor, lTextColor))
+'                Print " (" + mobjTotal.FormattedLossAdjustedPercent(rTotalInvestment + rMargin) + ")";
+'            End If
         End If
         
         ForeColor = lTextColor
@@ -1309,7 +1309,7 @@ Dim sName$
         End If
         
         '
-        ' Now get a list of all the symbols that we cant get from Google
+        ' Now get a list of all the symbols from IEX
         '
         For Each sSymbol In objSymsToLookup
             rDayOpen = 0
@@ -1320,40 +1320,39 @@ Dim sName$
             DoEvents
             If mbCapturing Then Exit Function
             sName = sSymbol
-            If sSymbol Like "*.L" Then
-                sName = Replace(sName, ".L", "-LN", Compare:=vbTextCompare)
-            End If
-            Call PSINET_GetHTTPFile("https://cloud.iexapis.com/stable/stock/" + Replace(sName, "^", ".") + "/quote?token=" + sIexKey, sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
-            
-            '
-            ' Put the stock values into the lookup
-            '
-            If Trim(sCSV) <> "" Then
-                rDayOpen = CDbl(getJsonValue(sCSV, "previousClose"))
-                rDayHigh = CDbl(getJsonValue(sCSV, "high"))
-                rDayLow = CDbl(getJsonValue(sCSV, "low"))
-                rCurrentPrice = CDbl(getJsonValue(sCSV, "iexRealtimePrice"))
-                If rCurrentPrice = 0 Or getJsonValue(sCSV, "iexRealtimePrice") = "" Then
-                    rCurrentPrice = CDbl(getJsonValue(sCSV, "latestPrice"))
-                End If
-                If rCurrentPrice <> 0 Then
-                    sTmp = """" + sSymbol + """"
-                    sTmp = sTmp + "," + Format(rCurrentPrice)
-                    sTmp = sTmp + "," + Format(rDayLow)
-                    sTmp = sTmp + "," + Format(rDayHigh)
-                    sTmp = sTmp + "," + Format(rCurrentPrice - rDayOpen)
-                    objSymLookup.Add sTmp, sSymbol
-                    objSymsToLookup.Remove sSymbol
+            If Not sSymbol Like "*.L" Then
+                Call PSINET_GetHTTPFile("https://cloud.iexapis.com/stable/stock/" + Replace(sName, "^", ".") + "/quote?token=" + sIexKey, sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
+                
+                '
+                ' Put the stock values into the lookup
+                '
+                If Trim(sCSV) <> "" Then
+                    rDayOpen = CDbl(getJsonValue(sCSV, "previousClose"))
+                    rDayHigh = CDbl(getJsonValue(sCSV, "high"))
+                    rDayLow = CDbl(getJsonValue(sCSV, "low"))
+                    rCurrentPrice = CDbl(getJsonValue(sCSV, "iexRealtimePrice"))
+                    If rCurrentPrice = 0 Or getJsonValue(sCSV, "iexRealtimePrice") = "" Then
+                        rCurrentPrice = CDbl(getJsonValue(sCSV, "latestPrice"))
+                    End If
+                    If rCurrentPrice <> 0 Then
+                        sTmp = """" + sSymbol + """"
+                        sTmp = sTmp + "," + Format(rCurrentPrice)
+                        sTmp = sTmp + "," + Format(rDayLow)
+                        sTmp = sTmp + "," + Format(rDayHigh)
+                        sTmp = sTmp + "," + Format(rCurrentPrice - rDayOpen)
+                        objSymLookup.Add sTmp, sSymbol
+                        objSymsToLookup.Remove sSymbol
+                    Else
+                       Debug.Print "Zero value returned from IEXTrading for " + sSymbol
+                    End If
                 Else
-                   Debug.Print "Zero value returned from IEXTrading for " + sSymbol
+                    Debug.Print "Nothing returned from IEXTrading for " + sSymbol
                 End If
-            Else
-                Debug.Print "Nothing returned from IEXTrading for " + sSymbol
             End If
         Next
         
         '
-        ' Now get a list of all the symbols that we cant get from elsewhere
+        ' Now get a list of all the symbols that we cant get from IEX
         '
         For Each sSymbol In objSymsToLookup
             rDayOpen = 0
@@ -1441,7 +1440,7 @@ Dim sName$
                 
                 DoEvents
                 If mbCapturing Then Exit Function
-                Call PSINET_GetHTTPFile("https://api.twelvedata.com/quote?format=csv&apikey=" + sTwelveDataKey + "&symbol=" + Replace(sSymbol, "^", "."), sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
+                Call PSINET_GetHTTPFile("https://api.twelvedata.com/quote?format=csv&apikey=" + sTwelveDataKey + "&symbol=" + Replace(sSymbol, ".L", ""), sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
     
                 '
                 ' Put the stock values into the lookup
@@ -1454,7 +1453,7 @@ Dim sName$
                         rDayHigh = CDbl(asSymVals(7))
                         rDayLow = CDbl(asSymVals(8))
                         
-                        Call PSINET_GetHTTPFile("https://api.twelvedata.com/price?format=csv&apikey=" + sTwelveDataKey + "&symbol=" + Replace(sSymbol, "^", "."), sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
+                        Call PSINET_GetHTTPFile("https://api.twelvedata.com/price?format=csv&apikey=" + sTwelveDataKey + "&symbol=" + Replace(sSymbol, ".L", ""), sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
                         If Trim(sCSV) <> "" Then
                             sCSV = Split(sCSV, vbLf)(1)
                             rCurrentPrice = CDbl(sCSV)
@@ -1511,6 +1510,50 @@ Dim sName$
                 End If
             Next
         End If
+        
+        '
+        ' Now get a list of all the symbols from IEX, including any LSE data
+        '
+        For Each sSymbol In objSymsToLookup
+            rDayOpen = 0
+            rDayHigh = 0
+            rDayLow = 0
+            rCurrentPrice = 0
+    
+            DoEvents
+            If mbCapturing Then Exit Function
+            sName = sSymbol
+            If sSymbol Like "*.L" Then
+                sName = Replace(sName, ".L", "-LN")
+            End If
+            Call PSINET_GetHTTPFile("https://cloud.iexapis.com/stable/stock/" + Replace(sName, "^", ".") + "/quote?token=" + sIexKey, sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
+                
+            '
+            ' Put the stock values into the lookup
+            '
+            If Trim(sCSV) <> "" Then
+                rDayOpen = CDbl(getJsonValue(sCSV, "previousClose"))
+                rDayHigh = CDbl(getJsonValue(sCSV, "high"))
+                rDayLow = CDbl(getJsonValue(sCSV, "low"))
+                rCurrentPrice = CDbl(getJsonValue(sCSV, "iexRealtimePrice"))
+                If rCurrentPrice = 0 Or getJsonValue(sCSV, "iexRealtimePrice") = "" Then
+                    rCurrentPrice = CDbl(getJsonValue(sCSV, "latestPrice"))
+                End If
+                If rCurrentPrice <> 0 Then
+                    sTmp = """" + sSymbol + """"
+                    sTmp = sTmp + "," + Format(rCurrentPrice)
+                    sTmp = sTmp + "," + Format(rDayLow)
+                    sTmp = sTmp + "," + Format(rDayHigh)
+                    sTmp = sTmp + "," + Format(rCurrentPrice - rDayOpen)
+                    objSymLookup.Add sTmp, sSymbol
+                    objSymsToLookup.Remove sSymbol
+                Else
+                    Debug.Print "Zero value returned from IEXTrading for " + sSymbol
+                End If
+            Else
+                Debug.Print "Nothing returned from IEXTrading for " + sSymbol
+            End If
+        Next
         
         '
         ' Get the values from each CSV line
