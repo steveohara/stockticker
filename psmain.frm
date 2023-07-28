@@ -1374,7 +1374,7 @@ Dim bag As JsonBag
                 Set bag = New JsonBag
                 bag.JSON = sCSV
                 Set bag = bag.Item("quoteSummary").Item("result")(1).Item("price")
-                rDayOpen = CDbl(bag.Item("regularMarketPrice").Item("fmt"))
+                rDayOpen = CDbl(bag.Item("regularMarketPreviousClose").Item("fmt"))
                 rDayHigh = CDbl(bag.Item("regularMarketDayHigh").Item("fmt"))
                 rDayLow = CDbl(bag.Item("regularMarketDayLow").Item("fmt"))
                 rCurrentPrice = CDbl(bag.Item("regularMarketPrice").Item("fmt"))
