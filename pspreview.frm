@@ -376,20 +376,29 @@ Dim bLoaded As Boolean
         CurrentX = LEFT_MARGIN_VALUE
         Print FormatCurrencyValue(objSymbol.CurrencySymbol, objSymbol.DayHigh)
         CurrentX = LEFT_MARGIN
-        ForeColor = IIf(objSymbol.DayChange > 0, lUpColor, IIf(objSymbol.DayChange < 0, lDownColor, ForeColor))
         CurrentY = CurrentY + 1
         
+        ForeColor = vbWhite
         Print "Change: ";
+        ForeColor = IIf(objSymbol.DayChange > 0, lUpColor, IIf(objSymbol.DayChange < 0, lDownColor, ForeColor))
         CurrentX = LEFT_MARGIN_VALUE
         Print FormatCurrencyValue(objSymbol.CurrencySymbol, objSymbol.DayChange) + " " + Format(objSymbol.DayChange / IIf(objSymbol.DayStart = 0, 1, objSymbol.DayStart), "0.00%")
         CurrentX = LEFT_MARGIN
         CurrentY = CurrentY + 1
         
+        ForeColor = vbWhite
         Print "Gain/Loss: ";
+        ForeColor = IIf(objSymbol.DayChange > 0, lUpColor, IIf(objSymbol.DayChange < 0, lDownColor, ForeColor))
         CurrentX = LEFT_MARGIN_VALUE
         Print FormatCurrencyValueWithSymbol(objSymbol.CurrencySymbol, objSymbol.CurrencyName, (objSymbol.CurrentPrice * objSymbol.Shares) - (objSymbol.DayStart * objSymbol.Shares))
-        ForeColor = vbWhite
     
+        If rRate <> 1 And rRate > 0 Then
+            CurrentY = CurrentY + 1
+            CurrentX = LEFT_MARGIN_VALUE
+            Print "(" + FormatCurrencyValueWithSymbol(frmMain.mobjTotal.CurrencySymbol, frmMain.mobjTotal.CurrencyName, objSymbol.Shares * (objSymbol.CurrentPrice - objSymbol.DayStart) * rRate) + ")"
+            CurrentY = CurrentY - 1
+        End If
+        ForeColor = vbWhite
     Else
         sCurrencyName = objStock.CurrencySymbol
         rRate = frmMain.mobjExchangeRates.Item(objStock.CurrencyName)
