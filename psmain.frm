@@ -87,7 +87,7 @@ Begin VB.Form frmMain
    End
    Begin VB.PictureBox picSize 
       Appearance      =   0  'Flat
-      BackColor       =   &H00808080&
+      BackColor       =   &H00000000&
       BorderStyle     =   0  'None
       BeginProperty Font 
          Name            =   "MS Sans Serif"
@@ -2209,14 +2209,14 @@ End Sub
 
 Private Sub timMouse_Timer()
     Dim stPoint As POINTAPI
-    Dim lhWnd&
+    Dim lHwnd&
     Dim iIndex%
     
     If timMouse.Tag <> "" And Not mbCapturing Then
         iIndex = Val(timMouse.Tag)
         Call GetCursorPos(stPoint)
-        lhWnd = WindowFromPoint(stPoint.X, stPoint.Y)
-        If lhWnd <> picSize(iIndex).hWnd Then
+        lHwnd = WindowFromPoint(stPoint.X, stPoint.Y)
+        If lHwnd <> picSize(iIndex).hWnd Then
             picSize(iIndex).BackColor = &H0
             timMouse.Enabled = False
             timMouse.Tag = ""
