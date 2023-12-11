@@ -270,7 +270,7 @@ Dim bLoaded As Boolean
     '
     Cls
     CurrentX = LEFT_MARGIN
-    CurrentY = 8
+    CurrentY = 5
     ForeColor = vbWhite
     lUpColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_COLOUR, Format(vbGreen)))
     lDownColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_COLOUR, Format(vbRed)))
@@ -351,7 +351,7 @@ Dim bLoaded As Boolean
         ' ******************************************
         ' Day Position
         ' ******************************************
-        CurrentY = CurrentY + 8
+        CurrentY = CurrentY + 5
         FontSize = 11
         FontBold = True
         Print "Day Position"
@@ -429,7 +429,7 @@ Dim bLoaded As Boolean
     ' Exchange rates
     ' ******************************************
     CurrentX = LEFT_MARGIN
-    CurrentY = CurrentY + 10
+    CurrentY = CurrentY + 5
     If rRate <> 1 And rRate > 0 Then
         FontBold = True
         FontSize = 11
