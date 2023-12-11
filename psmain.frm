@@ -5,8 +5,8 @@ Begin VB.Form frmMain
    BackColor       =   &H00404040&
    BorderStyle     =   0  'None
    ClientHeight    =   2130
-   ClientLeft      =   7230
-   ClientTop       =   4020
+   ClientLeft      =   8295
+   ClientTop       =   2535
    ClientWidth     =   5880
    ControlBox      =   0   'False
    BeginProperty Font 
@@ -28,6 +28,12 @@ Begin VB.Form frmMain
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   392
    ShowInTaskbar   =   0   'False
+   Begin VB.Timer timMouse 
+      Enabled         =   0   'False
+      Interval        =   100
+      Left            =   3615
+      Top             =   1185
+   End
    Begin VB.PictureBox picData 
       Appearance      =   0  'Flat
       AutoRedraw      =   -1  'True
@@ -55,7 +61,7 @@ Begin VB.Form frmMain
    End
    Begin VB.PictureBox picSize 
       Appearance      =   0  'Flat
-      BackColor       =   &H00808080&
+      BackColor       =   &H00000000&
       BorderStyle     =   0  'None
       BeginProperty Font 
          Name            =   "MS Sans Serif"
@@ -75,6 +81,7 @@ Begin VB.Form frmMain
       ScaleHeight     =   495
       ScaleWidth      =   75
       TabIndex        =   0
+      TabStop         =   0   'False
       Top             =   180
       Width           =   75
    End
@@ -119,12 +126,12 @@ Begin VB.Form frmMain
       EndProperty
       ForeColor       =   &H80000008&
       Height          =   375
-      Left            =   540
+      Left            =   1035
       ScaleHeight     =   25
       ScaleMode       =   3  'Pixel
       ScaleWidth      =   91
       TabIndex        =   2
-      Top             =   270
+      Top             =   240
       Width           =   1365
    End
    Begin VB.Timer timData 
@@ -316,7 +323,7 @@ Option Explicit
     
     Dim mfrmPrevaiew As frmPreview
     Dim mlChartLagger&
-    
+    Dim picSelectedSizer As PictureBox
 
 Private Sub Z_DisplaySymbols()
 Attribute Z_DisplaySymbols.VB_Description = "Displays symbols for the scrolling portion"
@@ -1116,6 +1123,10 @@ Dim iDisplayWidth%
         iDisplayWidth = ScaleWidth - (2 * picSize(0).Width) - 4
         picText.Move picText.Left, 0, iDisplayWidth - picText.Left + 8, ScaleHeight
         mbScrolling = picData.CurrentX > picText.ScaleWidth + 8
+    ElseIf Not timMouse.Enabled Then
+        picSize(Index).BackColor = &H808080
+        timMouse.Tag = CStr(Index)
+        timMouse.Enabled = True
     End If
     frmPreview.HideChart True
     
@@ -2196,3 +2207,20 @@ Private Sub Z_SetTopMost()
 End Sub
 
 
+Private Sub timMouse_Timer()
+    Dim stPoint As POINTAPI
+    Dim lhWnd&
+    Dim iIndex%
+    
+    If timMouse.Tag <> "" And Not mbCapturing Then
+        iIndex = Val(timMouse.Tag)
+        Call GetCursorPos(stPoint)
+        lhWnd = WindowFromPoint(stPoint.X, stPoint.Y)
+        If lhWnd <> picSize(iIndex).hWnd Then
+            picSize(iIndex).BackColor = &H0
+            timMouse.Enabled = False
+            timMouse.Tag = ""
+        End If
+    End If
+    
+End Sub
