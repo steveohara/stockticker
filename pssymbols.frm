@@ -3,8 +3,8 @@ Begin VB.Form frmSymbols
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Symbols"
    ClientHeight    =   7005
-   ClientLeft      =   1185
-   ClientTop       =   2190
+   ClientLeft      =   7935
+   ClientTop       =   5010
    ClientWidth     =   8100
    KeyPreview      =   -1  'True
    LinkTopic       =   "Form1"
@@ -494,6 +494,7 @@ End Sub
 Private Sub cmdMain_Click(Index As Integer)
 
     If Index = 1 Then
+        frmMain.mbForceRefresh = True
         WriteSymbolsToRegistry mobjSymbols
         mbDirty = False
         Set frmMain.mobjCurrentSymbols = Nothing
@@ -528,7 +529,7 @@ End Sub
 Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
 
     If KeyCode = vbKeyF1 Then
-        Call PSGEN_LaunchBrowser("file://" + App.Path + "/user guide/index.htm#Editing_Symbols")
+        Call PSGEN_LaunchBrowser("file://" + App.path + "/user guide/index.htm#Editing_Symbols")
         KeyCode = 0
     End If
     
@@ -652,7 +653,6 @@ End Sub
 
 
 Private Sub Form_Unload(Cancel As Integer)
-
     'Release the SubClassing, Very Important to Prevent Crashing!
     Call SetWindowLong(hWnd, GWL_WNDPROC, glPrevWndProc)
 

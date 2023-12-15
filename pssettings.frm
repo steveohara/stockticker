@@ -2,16 +2,25 @@ VERSION 5.00
 Begin VB.Form frmSettings 
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Settings"
-   ClientHeight    =   9945
-   ClientLeft      =   30795
-   ClientTop       =   2730
+   ClientHeight    =   10230
+   ClientLeft      =   6165
+   ClientTop       =   3150
    ClientWidth     =   6585
    KeyPreview      =   -1  'True
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   9945
+   ScaleHeight     =   10230
    ScaleWidth      =   6585
+   Begin VB.CheckBox chkShowDailyChange 
+      Caption         =   "Show Daily Change"
+      Height          =   195
+      Left            =   690
+      TabIndex        =   20
+      ToolTipText     =   "Will show an aggregated summary of the day change"
+      Top             =   4500
+      Width           =   5910
+   End
    Begin VB.CommandButton cmdColours 
       Appearance      =   0  'Flat
       BackColor       =   &H000000FF&
@@ -19,7 +28,7 @@ Begin VB.Form frmSettings
       Index           =   4
       Left            =   5640
       Style           =   1  'Graphical
-      TabIndex        =   58
+      TabIndex        =   7
       Top             =   1260
       Width           =   345
    End
@@ -30,49 +39,49 @@ Begin VB.Form frmSettings
       Index           =   5
       Left            =   5640
       Style           =   1  'Graphical
-      TabIndex        =   57
+      TabIndex        =   8
       Top             =   1560
       Width           =   345
    End
    Begin VB.TextBox txtTwelveDataKey 
       Height          =   285
-      Left            =   1770
-      TabIndex        =   55
+      Left            =   1740
+      TabIndex        =   32
       ToolTipText     =   "The token to enable the use of the Alpha Vantage cloud API"
-      Top             =   8835
+      Top             =   9090
       Width           =   4635
    End
    Begin VB.TextBox txtMarketStackKey 
       Height          =   285
-      Left            =   1770
-      TabIndex        =   53
+      Left            =   1740
+      TabIndex        =   31
       ToolTipText     =   "The token to enable the use of the Alpha Vantage cloud API"
-      Top             =   8490
+      Top             =   8745
       Width           =   4635
    End
    Begin VB.TextBox txtAlphaVantageKey 
       Height          =   285
-      Left            =   1770
-      TabIndex        =   26
+      Left            =   1740
+      TabIndex        =   30
       ToolTipText     =   "The token to enable the use of the Alpha Vantage cloud API"
-      Top             =   8130
+      Top             =   8385
       Width           =   4635
    End
    Begin VB.TextBox txtIexKey 
       Height          =   285
-      Left            =   1770
-      TabIndex        =   25
+      Left            =   1740
+      TabIndex        =   29
       ToolTipText     =   "The token to enable the use of the IEX cloud API"
-      Top             =   7770
+      Top             =   8025
       Width           =   4635
    End
    Begin VB.CheckBox chkSummarise 
       Caption         =   "Show average for stocks with multiple buys"
       Height          =   195
       Left            =   690
-      TabIndex        =   49
+      TabIndex        =   24
       ToolTipText     =   "Will show a single summary for stocks of the same name and average their cost"
-      Top             =   5460
+      Top             =   5760
       Width           =   5910
    End
    Begin VB.CommandButton cmdLowAlarm 
@@ -88,7 +97,7 @@ Begin VB.Form frmSettings
       EndProperty
       Height          =   285
       Left            =   6030
-      TabIndex        =   13
+      TabIndex        =   15
       ToolTipText     =   "Select a wave file"
       Top             =   2670
       Width           =   315
@@ -106,7 +115,7 @@ Begin VB.Form frmSettings
       EndProperty
       Height          =   285
       Left            =   6030
-      TabIndex        =   11
+      TabIndex        =   13
       ToolTipText     =   "Select a wave file"
       Top             =   2340
       Width           =   315
@@ -114,7 +123,7 @@ Begin VB.Form frmSettings
    Begin VB.TextBox txtLowalarm 
       Height          =   285
       Left            =   1770
-      TabIndex        =   12
+      TabIndex        =   14
       ToolTipText     =   "An alternative wave file to use when a low alarm is triggered"
       Top             =   2670
       Width           =   4155
@@ -122,7 +131,7 @@ Begin VB.Form frmSettings
    Begin VB.TextBox txtHighAlarm 
       Height          =   285
       Left            =   1770
-      TabIndex        =   10
+      TabIndex        =   12
       ToolTipText     =   "An alternative wave file to use when a high alarm is triggered"
       Top             =   2340
       Width           =   4155
@@ -131,7 +140,7 @@ Begin VB.Form frmSettings
       Caption         =   "Show Total Profit && Loss as a Percentage"
       Height          =   195
       Left            =   690
-      TabIndex        =   15
+      TabIndex        =   17
       ToolTipText     =   "Set this if you would like an overall position to be displayed as a percentage of profit/loss over totla cost"
       Top             =   3660
       Width           =   5910
@@ -163,18 +172,18 @@ Begin VB.Form frmSettings
    End
    Begin VB.TextBox txtMargin 
       Height          =   285
-      Left            =   4185
-      TabIndex        =   24
+      Left            =   4125
+      TabIndex        =   28
       ToolTipText     =   "Amount of money you have in your debit (margin) account"
-      Top             =   6975
+      Top             =   7170
       Width           =   1080
    End
    Begin VB.TextBox txtTotal 
       Height          =   285
-      Left            =   1800
-      TabIndex        =   23
+      Left            =   1740
+      TabIndex        =   27
       ToolTipText     =   "Total amount you have invested in stocks in your local currency"
-      Top             =   6975
+      Top             =   7170
       Width           =   1080
    End
    Begin VB.CommandButton cmdMain 
@@ -182,9 +191,9 @@ Begin VB.Form frmSettings
       Height          =   390
       Index           =   3
       Left            =   1350
-      TabIndex        =   28
+      TabIndex        =   34
       ToolTipText     =   "Restore your settings and symbols from a backup file"
-      Top             =   9330
+      Top             =   9645
       Width           =   1050
    End
    Begin VB.CommandButton cmdMain 
@@ -192,16 +201,16 @@ Begin VB.Form frmSettings
       Height          =   390
       Index           =   2
       Left            =   180
-      TabIndex        =   27
+      TabIndex        =   33
       ToolTipText     =   "Backup your settings and symbols to a file"
-      Top             =   9330
+      Top             =   9645
       Width           =   1050
    End
    Begin VB.CheckBox chkShowTotalValue 
       Caption         =   "Show Total Current Value of Investments"
       Height          =   195
       Left            =   690
-      TabIndex        =   17
+      TabIndex        =   19
       ToolTipText     =   "Set this if you want to see the total current value of all stocks"
       Top             =   4215
       Width           =   5910
@@ -210,31 +219,31 @@ Begin VB.Form frmSettings
       Caption         =   "Show Total Cost of Investments"
       Height          =   195
       Left            =   690
-      TabIndex        =   16
+      TabIndex        =   18
       ToolTipText     =   "Set this if you want to see the total amount invested in all stocks"
       Top             =   3930
       Width           =   5910
    End
    Begin VB.TextBox txtCurrencySymbol 
       Height          =   285
-      Left            =   4200
-      TabIndex        =   22
-      Top             =   6180
+      Left            =   4155
+      TabIndex        =   26
+      Top             =   6435
       Width           =   435
    End
    Begin VB.TextBox txtCurrency 
       Height          =   285
-      Left            =   1800
-      TabIndex        =   21
+      Left            =   1755
+      TabIndex        =   25
       ToolTipText     =   "Currency to convert summary values into e.g. GBP, USD etc"
-      Top             =   6180
+      Top             =   6435
       Width           =   645
    End
    Begin VB.CheckBox chkItalic 
       Caption         =   "Italic"
       Height          =   195
       Left            =   4980
-      TabIndex        =   9
+      TabIndex        =   11
       Top             =   2010
       Width           =   960
    End
@@ -242,7 +251,7 @@ Begin VB.Form frmSettings
       Caption         =   "Bold"
       Height          =   195
       Left            =   4140
-      TabIndex        =   8
+      TabIndex        =   10
       Top             =   2010
       Width           =   960
    End
@@ -251,7 +260,7 @@ Begin VB.Form frmSettings
       Left            =   1785
       Sorted          =   -1  'True
       Style           =   2  'Dropdown List
-      TabIndex        =   7
+      TabIndex        =   9
       Top             =   1950
       Width           =   2070
    End
@@ -303,26 +312,26 @@ Begin VB.Form frmSettings
       Caption         =   "Show the Difference of Base Cost Against Current Price as Percentage"
       Height          =   195
       Left            =   690
-      TabIndex        =   20
-      Top             =   5175
+      TabIndex        =   23
+      Top             =   5475
       Width           =   5910
    End
    Begin VB.CheckBox chkShowPrice 
       Caption         =   "Show the Current Price of each Stock"
       Height          =   195
       Left            =   690
-      TabIndex        =   18
+      TabIndex        =   21
       ToolTipText     =   "Set this if you would like an overall position to be displayed"
-      Top             =   4590
+      Top             =   4890
       Width           =   5910
    End
    Begin VB.CheckBox chkShowCostBase 
       Caption         =   "Show the Average Cost of each Stock (Cost Base)"
       Height          =   195
       Left            =   690
-      TabIndex        =   19
+      TabIndex        =   22
       ToolTipText     =   "Set this if you would like an overall position to be displayed"
-      Top             =   4875
+      Top             =   5175
       Width           =   5910
    End
    Begin VB.CommandButton cmdMain 
@@ -332,8 +341,8 @@ Begin VB.Form frmSettings
       Height          =   390
       Index           =   1
       Left            =   4020
-      TabIndex        =   29
-      Top             =   9375
+      TabIndex        =   35
+      Top             =   9690
       Width           =   1125
    End
    Begin VB.CommandButton cmdMain 
@@ -342,18 +351,46 @@ Begin VB.Form frmSettings
       Height          =   390
       Index           =   0
       Left            =   5280
-      TabIndex        =   30
-      Top             =   9360
+      TabIndex        =   36
+      Top             =   9675
       Width           =   1125
    End
    Begin VB.CheckBox chkShowTotal 
       Caption         =   "Show Total Profit && Loss"
       Height          =   195
       Left            =   690
-      TabIndex        =   14
+      TabIndex        =   16
       ToolTipText     =   "Set this if you would like an overall position to be displayed"
       Top             =   3405
       Width           =   5910
+   End
+   Begin VB.Label lblLabel 
+      Alignment       =   2  'Center
+      Caption         =   "Investment"
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   8.25
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H00808080&
+      Height          =   225
+      Index           =   13
+      Left            =   330
+      TabIndex        =   49
+      Top             =   6900
+      Width           =   1095
+   End
+   Begin VB.Line ctlLine 
+      BorderColor     =   &H00808080&
+      Index           =   6
+      X1              =   105
+      X2              =   6340
+      Y1              =   6975
+      Y2              =   6975
    End
    Begin VB.Label lblLabel 
       Alignment       =   1  'Right Justify
@@ -362,7 +399,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   24
       Left            =   3750
-      TabIndex        =   60
+      TabIndex        =   61
       Top             =   1290
       Width           =   1755
    End
@@ -373,7 +410,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   23
       Left            =   3945
-      TabIndex        =   59
+      TabIndex        =   60
       Top             =   1590
       Width           =   1560
    End
@@ -383,9 +420,9 @@ Begin VB.Form frmSettings
       Caption         =   "TwelveData Token"
       Height          =   225
       Index           =   22
-      Left            =   -60
-      TabIndex        =   56
-      Top             =   8865
+      Left            =   -90
+      TabIndex        =   59
+      Top             =   9120
       Width           =   1755
    End
    Begin VB.Label lblLabel 
@@ -394,9 +431,9 @@ Begin VB.Form frmSettings
       Caption         =   "MarketStack Token"
       Height          =   225
       Index           =   21
-      Left            =   -60
-      TabIndex        =   54
-      Top             =   8520
+      Left            =   -90
+      TabIndex        =   58
+      Top             =   8775
       Width           =   1755
    End
    Begin VB.Label lblLabel 
@@ -405,9 +442,9 @@ Begin VB.Form frmSettings
       Caption         =   "AlphaVantage Token"
       Height          =   225
       Index           =   20
-      Left            =   -60
-      TabIndex        =   52
-      Top             =   8160
+      Left            =   -90
+      TabIndex        =   57
+      Top             =   8415
       Width           =   1755
    End
    Begin VB.Label lblLabel 
@@ -416,9 +453,9 @@ Begin VB.Form frmSettings
       Caption         =   "IEX Token"
       Height          =   225
       Index           =   19
-      Left            =   -60
-      TabIndex        =   51
-      Top             =   7800
+      Left            =   -90
+      TabIndex        =   56
+      Top             =   8055
       Width           =   1755
    End
    Begin VB.Label lblLabel 
@@ -436,18 +473,18 @@ Begin VB.Form frmSettings
       ForeColor       =   &H00808080&
       Height          =   225
       Index           =   0
-      Left            =   390
-      TabIndex        =   50
-      Top             =   7470
+      Left            =   360
+      TabIndex        =   55
+      Top             =   7725
       Width           =   1095
    End
    Begin VB.Line ctlLine 
       BorderColor     =   &H00808080&
       Index           =   8
-      X1              =   150
-      X2              =   6385
-      Y1              =   7575
-      Y2              =   7575
+      X1              =   120
+      X2              =   6355
+      Y1              =   7830
+      Y2              =   7830
    End
    Begin VB.Label lblLabel 
       Alignment       =   1  'Right Justify
@@ -456,7 +493,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   18
       Left            =   -60
-      TabIndex        =   48
+      TabIndex        =   54
       Top             =   2730
       Width           =   1755
    End
@@ -467,7 +504,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   17
       Left            =   -60
-      TabIndex        =   47
+      TabIndex        =   53
       Top             =   2370
       Width           =   1755
    End
@@ -477,7 +514,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   16
       Left            =   2520
-      TabIndex        =   46
+      TabIndex        =   52
       Top             =   540
       Width           =   825
    End
@@ -488,7 +525,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   15
       Left            =   -60
-      TabIndex        =   45
+      TabIndex        =   51
       Top             =   540
       Width           =   1755
    End
@@ -499,45 +536,17 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   14
       Left            =   -60
-      TabIndex        =   44
+      TabIndex        =   50
       Top             =   180
       Width           =   1755
-   End
-   Begin VB.Label lblLabel 
-      Alignment       =   2  'Center
-      Caption         =   "Investment"
-      BeginProperty Font 
-         Name            =   "MS Sans Serif"
-         Size            =   8.25
-         Charset         =   0
-         Weight          =   700
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      ForeColor       =   &H00808080&
-      Height          =   225
-      Index           =   13
-      Left            =   390
-      TabIndex        =   43
-      Top             =   6690
-      Width           =   1095
    End
    Begin VB.Line ctlLine 
       BorderColor     =   &H00FFFFFF&
       Index           =   7
-      X1              =   150
-      X2              =   6385
-      Y1              =   6795
-      Y2              =   6795
-   End
-   Begin VB.Line ctlLine 
-      BorderColor     =   &H00808080&
-      Index           =   6
-      X1              =   150
-      X2              =   6385
-      Y1              =   6765
-      Y2              =   6765
+      X1              =   90
+      X2              =   6325
+      Y1              =   7005
+      Y2              =   7005
    End
    Begin VB.Label lblLabel 
       Alignment       =   1  'Right Justify
@@ -545,9 +554,9 @@ Begin VB.Form frmSettings
       Caption         =   "Margin"
       Height          =   225
       Index           =   12
-      Left            =   2355
-      TabIndex        =   42
-      Top             =   7035
+      Left            =   2295
+      TabIndex        =   48
+      Top             =   7230
       Width           =   1755
    End
    Begin VB.Label lblLabel 
@@ -556,9 +565,9 @@ Begin VB.Form frmSettings
       Caption         =   "Total Investment"
       Height          =   225
       Index           =   11
-      Left            =   -30
-      TabIndex        =   41
-      Top             =   7035
+      Left            =   -90
+      TabIndex        =   47
+      Top             =   7230
       Width           =   1755
    End
    Begin VB.Label lblLabel 
@@ -567,9 +576,9 @@ Begin VB.Form frmSettings
       Caption         =   "Currency Symbol"
       Height          =   225
       Index           =   10
-      Left            =   2370
-      TabIndex        =   40
-      Top             =   6240
+      Left            =   2325
+      TabIndex        =   46
+      Top             =   6495
       Width           =   1755
    End
    Begin VB.Label lblLabel 
@@ -588,8 +597,8 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   9
       Left            =   405
-      TabIndex        =   39
-      Top             =   5865
+      TabIndex        =   45
+      Top             =   6120
       Width           =   1935
    End
    Begin VB.Line ctlLine 
@@ -597,16 +606,16 @@ Begin VB.Form frmSettings
       Index           =   5
       X1              =   165
       X2              =   6400
-      Y1              =   5940
-      Y2              =   5940
+      Y1              =   6225
+      Y2              =   6225
    End
    Begin VB.Line ctlLine 
       BorderColor     =   &H00FFFFFF&
       Index           =   4
       X1              =   165
       X2              =   6400
-      Y1              =   5970
-      Y2              =   5970
+      Y1              =   6255
+      Y2              =   6255
    End
    Begin VB.Label lblLabel 
       Alignment       =   1  'Right Justify
@@ -614,9 +623,9 @@ Begin VB.Form frmSettings
       Caption         =   "Currency Code"
       Height          =   225
       Index           =   8
-      Left            =   -30
-      TabIndex        =   38
-      Top             =   6240
+      Left            =   -75
+      TabIndex        =   44
+      Top             =   6495
       Width           =   1755
    End
    Begin VB.Label lblLabel 
@@ -626,7 +635,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   7
       Left            =   540
-      TabIndex        =   37
+      TabIndex        =   43
       Top             =   1995
       Width           =   1155
    End
@@ -637,7 +646,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   6
       Left            =   2205
-      TabIndex        =   36
+      TabIndex        =   42
       Top             =   1605
       Width           =   1155
    End
@@ -648,7 +657,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   5
       Left            =   1605
-      TabIndex        =   35
+      TabIndex        =   41
       Top             =   1305
       Width           =   1755
    End
@@ -659,7 +668,7 @@ Begin VB.Form frmSettings
       Height          =   195
       Index           =   4
       Left            =   555
-      TabIndex        =   34
+      TabIndex        =   40
       Top             =   1635
       Width           =   1155
    End
@@ -679,7 +688,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   3
       Left            =   495
-      TabIndex        =   33
+      TabIndex        =   39
       Top             =   960
       Width           =   2190
    End
@@ -706,7 +715,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   2
       Left            =   -45
-      TabIndex        =   32
+      TabIndex        =   38
       Top             =   1305
       Width           =   1755
    End
@@ -726,7 +735,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   1
       Left            =   450
-      TabIndex        =   31
+      TabIndex        =   37
       Top             =   3075
       Width           =   870
    End
@@ -755,10 +764,6 @@ Attribute VB_Exposed = False
     Dim mobjReg As New cRegistry
     Dim mbDirty As Boolean
     
-Private Sub Check1_Click()
-
-End Sub
-
 Private Sub chkAlwaysOnTop_Click()
     
     Z_SetDirty True
@@ -782,6 +787,13 @@ Private Sub chkShowCostBase_Click()
 
     Z_SetDirty True
     
+End Sub
+
+
+Private Sub chkShowDailyChange_Click()
+
+    Z_SetDirty True
+
 End Sub
 
 Private Sub chkShowPercent_Click()
@@ -867,6 +879,7 @@ Dim lTmp&
 
     On Error Resume Next
     If Index = 1 Then
+        frmMain.mbForceRefresh = True
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_PROXY, txtProxy.Text
         lTmp = REG_FREQUENCY_DEF
         If IsNumeric(txtFrequency.Text) Then
@@ -887,6 +900,7 @@ Dim lTmp&
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_PROFIT_LOSS_PERCENT, chkShowTotalPercent.Value = vbChecked
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_TOTAL_COST, chkShowTotalCost.Value = vbChecked
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_TOTAL_VALUE, chkShowTotalValue.Value = vbChecked
+        mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_DAILY_CHANGE, chkShowDailyChange.Value = vbChecked
         
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_COST_BASE, chkShowCostBase.Value = vbChecked
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_PRICE, chkShowCostBase.Value = vbChecked
@@ -931,7 +945,7 @@ Dim lTmp&
                 '
                 ' Backup the original
                 '
-                Call Shell("regedit /E """ + App.Path + "\backup_" + Format(Now, "ddmmyy_hhNNss") + ".bck"" ""HKEY_LOCAL_MACHINE\SOFTWARE\Pivotal\" + App.Title + """", vbHide)
+                Call Shell("regedit /E """ + App.path + "\backup_" + Format(Now, "ddmmyy_hhNNss") + ".bck"" ""HKEY_LOCAL_MACHINE\SOFTWARE\Pivotal\" + App.Title + """", vbHide)
                 
                 '
                 ' Now delete the original and load the new values
@@ -950,7 +964,7 @@ End Sub
 Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
 
     If KeyCode = vbKeyF1 Then
-        Call PSGEN_LaunchBrowser("file://" + App.Path + "/user guide/index.htm#Editing_Settings")
+        Call PSGEN_LaunchBrowser("file://" + App.path + "/user guide/index.htm#Editing_Settings")
         KeyCode = 0
     End If
     
@@ -983,6 +997,7 @@ Dim iCnt%
     chkShowTotalPercent.Value = IIf(CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_PROFIT_LOSS_PERCENT, "0")), vbChecked, vbUnchecked)
     chkShowTotalCost.Value = IIf(CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_TOTAL_COST, "0")), vbChecked, vbUnchecked)
     chkShowTotalValue.Value = IIf(CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_TOTAL_VALUE, "0")), vbChecked, vbUnchecked)
+    chkShowDailyChange.Value = IIf(CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_DAILY_CHANGE, "0")), vbChecked, vbUnchecked)
     
     chkShowCostBase.Value = IIf(CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_COST_BASE, "0")), vbChecked, vbUnchecked)
     chkShowPrice.Value = IIf(CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_PRICE, "0")), vbChecked, vbUnchecked)

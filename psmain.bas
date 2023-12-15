@@ -86,6 +86,7 @@ Option Explicit
     Public Const REG_SHOW_SUMMARY_PROFIT_LOSS_PERCENT = "Show Total Profit and Loss as Percent"
     Public Const REG_SHOW_SUMMARY_TOTAL_COST = "Show Total Cost"
     Public Const REG_SHOW_SUMMARY_TOTAL_VALUE = "Show Total Value"
+    Public Const REG_SHOW_SUMMARY_DAILY_CHANGE = "Show Daily Change"
     
     Public Const REG_SHOW_SUMMARY_COST_BASE = "Show Cost Base"
     Public Const REG_SHOW_SUMMARY_PRICE = "Show Price"
@@ -382,7 +383,7 @@ Dim iCnt%
                         ' Download the file
                         '
                         sDownload = "http://" + sServer + sDir + "/" + Split(Split(sDownload, "<")(0), ">")(1)
-                        sFilename = App.Path + "\" + App.EXEName + "_download.exe"
+                        sFilename = App.path + "\" + App.EXEName + "_download.exe"
                         If Not Z_GetHTTPFileToFile(sDownload, sFilename) Then
                             MsgBox "Problem downloading the upgrade - " + Err.Description, vbCritical + vbOKOnly
                         Else

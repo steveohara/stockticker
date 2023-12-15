@@ -315,6 +315,7 @@ Option Explicit
     Public mobjSummaryStocks As New Collection
     Public mobjCurrentSymbols As New Collection
     Public mobjExchangeRates As New Collection
+    Public mbForceRefresh As Boolean
     
     Private mlTimer&
     Public miScrollPosition%
@@ -324,7 +325,7 @@ Option Explicit
     Dim mfrmPrevaiew As frmPreview
     Dim mlChartLagger&
     Dim picSelectedSizer As PictureBox
-
+    
 Private Sub Z_DisplaySymbols()
 Attribute Z_DisplaySymbols.VB_Description = "Displays symbols for the scrolling portion"
 '****************************************************************************
@@ -471,14 +472,15 @@ Dim bShowPercent As Boolean
 Dim bShowSummary As Boolean
 Dim bShowTotalCost As Boolean
 Dim bShowTotalValue As Boolean
+Dim bShowDailyChange As Boolean
 Dim bBold As Boolean
 Dim bItalic As Boolean
 Dim bAlwaysOnTop As Boolean
 Dim bShown As Boolean
 Dim sLeader$, sFont$, sCurrencyName$, sCurrencySymbol$
-Dim lBackColor&, lTextColor&, lUpColor&, lDownColor&
-Dim rTotalInvestment#
-Dim rMargin#
+Dim lBackColor&, lTextColor&, lUpColor&, lDownColor&, lUpArrowColor&, lDownArrowColor&
+Dim rTotalInvestment#, rMargin#, rRate#, rTotalChange#
+Dim objSymbol As cSymbol
 
     '
     ' Draw the text on the display
@@ -489,6 +491,7 @@ Dim rMargin#
     bShowTotal = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_PROFIT_LOSS, "0"))
     bShowTotalPercent = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_PROFIT_LOSS_PERCENT, "0"))
     bShowTotalValue = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_TOTAL_VALUE, "0"))
+    bShowDailyChange = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_DAILY_CHANGE, "0"))
     bShowTotalCost = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_TOTAL_COST, "0"))
     bShowCostBase = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_COST_BASE, "0"))
     bShowPrice = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_PRICE, "0"))
@@ -499,6 +502,8 @@ Dim rMargin#
     lTextColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TEXT_COLOUR, Format(vbWhite)))
     lUpColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_COLOUR, Format(vbGreen)))
     lDownColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_COLOUR, Format(vbRed)))
+    lUpArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_ARROW_COLOUR, Format(vbGreen)))
+    lDownArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_ARROW_COLOUR, Format(vbRed)))
     
     If PSGEN_IsCommaLocale Then
         rTotalInvestment = CDbl("0" + Replace(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_TOTAL, "0"), ".", ","))
@@ -533,6 +538,7 @@ Dim rMargin#
     ' Draw the summary (non-scrolling)
     '
     If bShowSummary Then
+        ForeColor = &HC0C0&
         Print "Summary:";
         If bShowTotal Then
             ForeColor = IIf(mobjTotal.TotalValue > mobjTotal.TotalCost, lUpColor, IIf(mobjTotal.TotalValue < mobjTotal.TotalCost, lDownColor, lTextColor))
@@ -546,10 +552,6 @@ Dim rMargin#
         If bShowTotalPercent Then
             ForeColor = IIf(mobjTotal.TotalValue > mobjTotal.TotalCost, lUpColor, IIf(mobjTotal.TotalValue < mobjTotal.TotalCost, lDownColor, lTextColor))
             Print "  " + mobjTotal.FormattedLossPercent;
-'            If rTotalInvestment > 0 Then
-'                ForeColor = IIf(mobjTotal.TotalValue > (rTotalInvestment + rMargin), lUpColor, IIf(mobjTotal.TotalValue < (rTotalInvestment + rMargin), lDownColor, lTextColor))
-'                Print " (" + mobjTotal.FormattedLossAdjustedPercent(rTotalInvestment + rMargin) + ")";
-'            End If
         End If
         
         ForeColor = lTextColor
@@ -562,8 +564,9 @@ Dim rMargin#
             CurrentY = 1
         End If
         
-        If bShowPrice Or bShowCostBase Or bShowPercent Then
+        If bShowPrice Or bShowCostBase Or bShowPercent Or bShowDailyChange Then
             bShown = False
+            rTotalChange = 0
             For Each objStock In mobjSummaryStocks
                 If bShowPrice Or bShowPercent Then
                     objStock.Position.Left = CurrentX
@@ -576,8 +579,28 @@ Dim rMargin#
                     bShown = True
                 End If
                 ForeColor = lTextColor
-                If bShowCostBase Then Print " " + IIf(bShowPrice Or bShowPercent, "", "   " + objStock.Code + " ") + objStock.FormattedAverageCost;
+                If bShowCostBase Then
+                    Print " " + IIf(bShowPrice Or bShowPercent, "", "   " + objStock.Code + " ") + objStock.FormattedAverageCost;
+                End If
+                
+                '
+                ' Get the total daily change
+                '
+                Set objSymbol = mobjCurrentSymbols.Item(objStock.Code)
+                rTotalChange = rTotalChange + (Z_ConvertCurrency(objSymbol, objSymbol.DayChange) * objStock.NumberOfShares)
             Next
+            If bShowDailyChange Then
+                CurrentX = CurrentX + IIf(bShown, 10, 6)
+                ForeColor = &HC0C0&
+                Print "Today:";
+                ForeColor = IIf(rTotalChange > 0, lUpColor, IIf(rTotalChange < 0, lDownColor, lTextColor))
+                CurrentX = CurrentX + 6
+                Print FormatCurrencyValue("£", rTotalChange);
+                CurrentX = CurrentX + 6
+                Print "(" + Format(rTotalChange / (mobjTotal.TotalValue - rTotalChange), "0.00%") + ")";
+                bShown = True
+            End If
+            
             If bShown Then
                 CurrentX = CurrentX + 4
                 Line (CurrentX, 0)-(CurrentX, ScaleHeight), &H808080
@@ -825,9 +848,10 @@ End Sub
 
 Private Sub mnuEditSymbols_Click()
 
+    mbForceRefresh = False
     frmSymbols.Show vbModal, Me
     DoEvents
-    If mobjCurrentSymbols.Count = 0 Then
+    If mobjCurrentSymbols.Count = 0 Or mbForceRefresh Then
         mnuRefresh_Click
     End If
 
@@ -957,21 +981,25 @@ End Sub
 
 Private Sub mnuSettings_Click()
 
+    mbForceRefresh = False
     frmSettings.Show vbModal, Me
     DoEvents
 
-    '
-    ' Set top most if required
-    '
-    If CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_ALWAYS_ON_TOP, "-1")) Then
-        Call SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, Flags)
-    Else
-        Call SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, Flags)
-    End If
+    If mbForceRefresh Then
+        '
+        ' Set top most if required
+        '
+        If CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_ALWAYS_ON_TOP, "-1")) Then
+            Call SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, Flags)
+        Else
+            Call SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, Flags)
+        End If
     
-    timData.Enabled = False
-    Z_DisplayData
-    timData.Enabled = True
+        '
+        ' Refresh the display
+        '
+        mnuRefresh_Click
+    End If
 
 End Sub
 
