@@ -1,9 +1,9 @@
-![image](./images/https://github.com/steveohara/stockticker/wiki/images/tickerbar.png)
-
 # StockTicker 
 `Version: 3.0.0 [18-Dec-2023 18:32]`
 
-Yet another free stock ticker!
+![image](https://github.com/steveohara/stockticker/wiki/images/overall.png)
+
+**Yet another free stock ticker!**
 
 If like me, you have a meagre amount of money "invested" in stocks and 
 shares, then you're probably interested in how they're doing - 
