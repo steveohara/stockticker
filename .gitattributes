@@ -1,1 +1,9 @@
-* -text
+*.txt		text eol=crlf
+*.frm       text eol=crlf
+*.cls       text eol=crlf
+*.bas       text eol=crlf
+*.vb*       text eol=crlf
+*.rc        text eol=crlf
+*.frx       -text
+*.RES       -text
+

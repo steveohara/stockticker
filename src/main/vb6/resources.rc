@@ -1,2 +1,2 @@
-lowalarm VIDEO.SOUND alert.wav
-highalarm VIDEO.SOUND woohoo.wav
+lowalarm VIDEO.SOUND ..\resources\alert.wav
+highalarm VIDEO.SOUND ..\resources\woohoo.wav
