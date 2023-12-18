@@ -3731,7 +3731,6 @@ Dim lActWidth&, lActHeight&
 
 End Function
 
-
 Public Function PSGEN_InDevelopment(Optional bSetMode As Boolean = False) As Boolean
 '****************************************************************************
 '
@@ -6378,42 +6377,39 @@ Dim iStart%, iFound%, iCnt%
     ' Loop until we have got to the end of the string or the item number
     '
     On Error Resume Next
-    sOutput = PSGEN_GetItem(iItem, sSep, sSource)
-    If Err <> 0 Then
-        sOutput = ""
-        iStart = 1
-        iCnt = 0
-        Do
-            iFound = InStr(iStart, sSource, sSep)
-            If iFound <> 0 Then
-                
-                '
-                ' Have we found the item number we're interested in
-                '
-                iCnt = iCnt + 1
-                If iCnt = iItem Then
-                    sOutput = Mid$(sSource, iStart, iFound - iStart)
-                    iFound = 0
-                Else
-                    iStart = iFound + Len(sSep)
-                End If
+    sOutput = ""
+    iStart = 1
+    iCnt = 0
+    Do
+        iFound = InStr(iStart, sSource, sSep)
+        If iFound <> 0 Then
+            
+            '
+            ' Have we found the item number we're interested in
+            '
+            iCnt = iCnt + 1
+            If iCnt = iItem Then
+                sOutput = Mid$(sSource, iStart, iFound - iStart)
+                iFound = 0
             Else
-    
-                '
-                ' Nothing found so either return nothing or the whole thing
-                ' if this is the first item we're looking for
-                '
-                If (iCnt = 0) And (iItem = 1) Then
-                    sOutput = sSource
-                ElseIf iCnt = iItem - 1 Then
-                    sOutput = Mid$(sSource, iStart, Len(sSource) - iStart + 1)
-                Else
-                    sOutput = ""
-                End If
+                iStart = iFound + Len(sSep)
             End If
-    
-        Loop Until iFound = 0
-    End If
+        Else
+
+            '
+            ' Nothing found so either return nothing or the whole thing
+            ' if this is the first item we're looking for
+            '
+            If (iCnt = 0) And (iItem = 1) Then
+                sOutput = sSource
+            ElseIf iCnt = iItem - 1 Then
+                sOutput = Mid$(sSource, iStart, Len(sSource) - iStart + 1)
+            Else
+                sOutput = ""
+            End If
+        End If
+
+    Loop Until iFound = 0
 
     '
     ' Return the modified value
