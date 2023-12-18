@@ -815,7 +815,7 @@ End Sub
 
 Private Sub mnuAbout_Click()
 
-    Call PSGEN_LaunchBrowser("https://github.com/steveohara/stockticker")
+    MsgBox VERSION_NAME + vbCrLf + vbCrLf + "Version:" + VERSION_NUMBER + " Built:" + VERSION_TIMESTAMP
     
 End Sub
 

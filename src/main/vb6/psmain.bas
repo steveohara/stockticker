@@ -1,4 +1,4 @@
-Attribute VB_Name = "Main"
+Attribute VB_Name = "Support"
 '****************************************************************************
 '
 '   Pivotal Solutions Ltd © 2004
@@ -25,6 +25,13 @@ Attribute VB_Name = "Main"
 '****************************************************
 '
 Option Explicit
+
+    '
+    ' Version number form the build system
+    '
+    Public Const VERSION_NAME = "Pivotal Stock Ticker (pivotalstockticker.exe)"
+    Public Const VERSION_NUMBER = "3.0.0"
+    Public Const VERSION_TIMESTAMP = "18-Dec-2023 18:32"
 
     '
     ' Registry entries
@@ -725,4 +732,30 @@ Dim tmp$
     getJsonValue = tmp
 
 End Function
+
+Private Sub Main()
+
+Dim asArgs$()
+Dim bHandled As Boolean
+    
+    '
+    ' Need to check if w are being run with a command
+    '
+    asArgs = Split(Command$, " ")
+    bHandled = False
+    If UBound(asArgs) > -1 Then
+        If asArgs(0) = "-version" Or asArgs(0) = "-v" Then
+            MsgBox VERSION_NAME + vbCrLf + "Version:" + VERSION_NUMBER + " Built:" + VERSION_TIMESTAMP
+            bHandled = True
+        End If
+    End If
+    
+    '
+    ' Show the main dialog if we are not just running a comman line
+    '
+    If Not bHandled Then
+        frmMain.Show
+    End If
+
+End Sub
 

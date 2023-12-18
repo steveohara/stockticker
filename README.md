@@ -1,4 +1,6 @@
-# StockTicker
+# StockTicker 
+`Version: 3.0.0 [18-Dec-2023 18:32]`
+
 Yet another free stock ticker!
 
 If like me, you have a meagre amount of money "invested" in stocks and 

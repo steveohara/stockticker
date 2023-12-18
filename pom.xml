@@ -9,6 +9,7 @@
         <project.minor.version>0</project.minor.version>
         <project.revision.version>0</project.revision.version>
         <project.vb6.executable>C:\Program Files (x86)\Microsoft Visual Studio\VB98\vb6.exe</project.vb6.executable>
+        <maven.build.timestamp.format>dd-MMM-yyyy HH:mm</maven.build.timestamp.format>
     </properties>
 
     <groupId>com.pivotal-solutions</groupId>
@@ -190,6 +191,65 @@
                             <recursive>false</recursive>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>version10</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>find-and-replace</goal>
+                        </goals>
+                        <configuration>
+                            <replacementType>file-contents</replacementType>
+                            <baseDir>src\main\vb6</baseDir>
+                            <fileMask>psmain.bas</fileMask>
+                            <findRegex>Public Const VERSION_NUMBER.+</findRegex>
+                            <replaceValue>Public Const VERSION_NUMBER = "${project.version}"</replaceValue>
+                            <recursive>false</recursive>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>version11</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>find-and-replace</goal>
+                        </goals>
+                        <configuration>
+                            <replacementType>file-contents</replacementType>
+                            <baseDir>src\main\vb6</baseDir>
+                            <fileMask>psmain.bas</fileMask>
+                            <findRegex>Public Const VERSION_NAME.+</findRegex>
+                            <replaceValue>Public Const VERSION_NAME = "${project.name} (${project.artifactId}.exe)"</replaceValue>
+                            <recursive>false</recursive>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>version12</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>find-and-replace</goal>
+                        </goals>
+                        <configuration>
+                            <replacementType>file-contents</replacementType>
+                            <baseDir>src\main\vb6</baseDir>
+                            <fileMask>psmain.bas</fileMask>
+                            <findRegex>Public Const VERSION_TIMESTAMP.+</findRegex>
+                            <replaceValue>Public Const VERSION_TIMESTAMP = "${maven.build.timestamp}"</replaceValue>
+                            <recursive>false</recursive>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>version13</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>find-and-replace</goal>
+                        </goals>
+                        <configuration>
+                            <replacementType>file-contents</replacementType>
+                            <fileMask>README.md</fileMask>
+                            <findRegex>(?i)version:[^`]+</findRegex>
+                            <replaceValue>Version: ${project.version} [${maven.build.timestamp}]</replaceValue>
+                            <recursive>false</recursive>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 
@@ -209,6 +269,20 @@
                             <executable>"${project.basedir}\installer\unix2dos.exe"</executable>
                             <arguments>
                                 <argument>"${project.basedir}\src\main\vb6\psticker.vbp"</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tidy2</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <executable>"${project.basedir}\installer\unix2dos.exe"</executable>
+                            <arguments>
+                                <argument>"${project.basedir}\src\main\vb6\psmain.bas"</argument>
                             </arguments>
                         </configuration>
                     </execution>
