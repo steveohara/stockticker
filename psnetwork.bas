@@ -1295,7 +1295,7 @@ Dim sError$
     If Not IsMissing(vCookies) Then
         For iCnt = 0 To UBound(vCookies)
             If Err <> 0 Then Exit For
-            Call InternetSetCookie(sURL, PSVBUTLS_GetItem(1, "=", vCookies(iCnt)), PSVBUTLS_GetItem(2, "=", vCookies(iCnt)))
+            Call InternetSetCookie(sURL, PSGEN_GetItem(1, "=", vCookies(iCnt)), PSGEN_GetItem(2, "=", vCookies(iCnt)))
         Next iCnt
     End If
 

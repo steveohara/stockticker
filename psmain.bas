@@ -370,16 +370,6 @@ Dim iCnt%
                     If MsgBox("A later version of the application is available for download (v" + Format(lLatestMajor) + "." + Format(lLatestMinor) + "." + Format(lRev) + ")" + vbCrLf + vbCrLf + "Download and install it ?", vbQuestion + vbYesNo + vbDefaultButton1) = vbYes Then
                     
                         '
-                        ' Show the download progress
-                        '
-                        Load frmProgress
-                        frmProgress.Caption = "Upgrading"
-                        frmProgress.AnimationType = AnimateFileMove
-                        frmProgress.ProgressText = "Downloading upgrade from server ..."
-                        frmProgress.Show
-                        DoEvents
-                        
-                        '
                         ' Download the file
                         '
                         sDownload = "http://" + sServer + sDir + "/" + Split(Split(sDownload, "<")(0), ">")(1)
@@ -391,7 +381,6 @@ Dim iCnt%
                             '
                             ' Now swap the executable
                             '
-                            Unload frmProgress
                             MsgBox App.Title + " now needs to restart to use the new version", vbInformation + vbOKOnly
                             Shell sFilename + " " + Command, vbHide
                             End
@@ -457,7 +446,7 @@ Dim iCnt%, iFile%
     If Not IsMissing(vCookies) Then
         For iCnt = 0 To UBound(vCookies)
             If Err <> 0 Then Exit For
-            Call InternetSetCookie(sURL, PSVBUTLS_GetItem(1, "=", vCookies(iCnt)), PSVBUTLS_GetItem(2, "=", vCookies(iCnt)))
+            Call InternetSetCookie(sURL, PSGEN_GetItem(1, "=", vCookies(iCnt)), PSGEN_GetItem(2, "=", vCookies(iCnt)))
         Next iCnt
     End If
     

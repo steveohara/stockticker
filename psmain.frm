@@ -517,6 +517,7 @@ Dim objSymbol As cSymbol
     bItalic = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_ITALIC, "0"))
     sFont = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FONT, Font.Name)
     bAlwaysOnTop = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_ALWAYS_ON_TOP, "-1"))
+    sCurrencySymbol = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY_SYMBOL, "£")
     
     '
     ' Position the display elements
@@ -595,7 +596,7 @@ Dim objSymbol As cSymbol
                 Print "Today:";
                 ForeColor = IIf(rTotalChange > 0, lUpColor, IIf(rTotalChange < 0, lDownColor, lTextColor))
                 CurrentX = CurrentX + 6
-                Print FormatCurrencyValue("£", rTotalChange);
+                Print FormatCurrencyValue(sCurrencySymbol, rTotalChange);
                 CurrentX = CurrentX + 6
                 Print "(" + Format(rTotalChange / (mobjTotal.TotalValue - rTotalChange), "0.00%") + ")";
                 bShown = True
@@ -814,7 +815,7 @@ End Sub
 
 Private Sub mnuAbout_Click()
 
-    frmAbout.Show vbModal
+    Call PSGEN_LaunchBrowser("https://github.com/steveohara/stockticker")
     
 End Sub
 
@@ -975,7 +976,7 @@ End Sub
 
 Private Sub mnuHelp_Click()
 
-    Call PSGEN_LaunchBrowser("""file:///" + Replace(App.path, "\", "/") + "/user guide/index.htm""")
+    Call PSGEN_LaunchBrowser("https://github.com/steveohara/stockticker/wiki")
 
 End Sub
 

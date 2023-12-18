@@ -3365,7 +3365,7 @@ Dim iCnt%
         For iCnt = 1 To 255
             sTmp = Hex(iCnt)
             If Len(sTmp) = 1 Then sTmp = "0" + sTmp
-            sReturn = Replace(sReturn, "%" + sTmp, Chr(iCnt), Compare:=vbTextCompare)
+            sReturn = Replace(sReturn, "%" + sTmp, Chr(iCnt), compare:=vbTextCompare)
         Next iCnt
     End If
     
@@ -3571,7 +3571,7 @@ Dim asTmp$()
     '
     iReturn = 0
     On Error Resume Next
-    asTmp = Split(sList, sSep, Compare:=vbTextCompare)
+    asTmp = Split(sList, sSep, compare:=vbTextCompare)
     For iCnt = 0 To UBound(asTmp)
         If StrComp(asTmp(iCnt), sItemValue, vbTextCompare) = 0 Then
             iReturn = iCnt + 1
@@ -3731,52 +3731,6 @@ Dim lActWidth&, lActHeight&
 
 End Function
 
-Public Function PSGEN_GetShortPathName$(ByVal sPath$)
-Attribute PSGEN_GetShortPathName.VB_Description = "Returns the shorthand version of the path"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetShortPathName
-'
-'                     sPath$             - Path to shorten
-'
-'                          ) As String
-'
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    17 May 2000   First created for ConScriptConsole
-'
-'                  PURPOSE: Returns the shorthand version of the path
-'
-'****************************************************************************
-'
-'
-Dim sReturn$, sRealPath$, sFilename$
-Dim lTmp&
-
-    '
-    ' Initialise error vector
-    '
-    On Error Resume Next
-    sRealPath = PSVBUTLS_GetDirPart(sPath)
-    sFilename = PSVBUTLS_GetFilePart(sPath)
-    sReturn = String(Len(sRealPath) + 1, vbNullChar)
-    Call GetShortPathName(ByVal sRealPath, sReturn, Len(sRealPath))
-    If Left$(sReturn, 1) = vbNullChar Then sReturn = sRealPath
-    sReturn = PSGEN_GetItem(1, vbNullChar, sReturn) + IIf(sFilename = "", "", "\" + sFilename)
-
-    '
-    ' Return value to caller
-    '
-    PSGEN_GetShortPathName = sReturn
-
-End Function
-
-
-    
 
 Public Function PSGEN_InDevelopment(Optional bSetMode As Boolean = False) As Boolean
 '****************************************************************************
@@ -5815,7 +5769,7 @@ Dim iTmp%
         '
         ' Now try the application directory
         '
-        If Right$(App.Path, 1) = "\" Then sFilename = App.Path + sFileToFind Else sFilename = App.Path + "\" + sFileToFind
+        If Right$(App.path, 1) = "\" Then sFilename = App.path + sFileToFind Else sFilename = App.path + "\" + sFileToFind
         sTmp = Dir$(sFilename)
         If (sTmp <> "") And (Err = 0) Then
             PSGEN_FindFile = sFilename
@@ -6424,7 +6378,7 @@ Dim iStart%, iFound%, iCnt%
     ' Loop until we have got to the end of the string or the item number
     '
     On Error Resume Next
-    sOutput = PSVBUTLS_GetItem(iItem, sSep, sSource)
+    sOutput = PSGEN_GetItem(iItem, sSep, sSource)
     If Err <> 0 Then
         sOutput = ""
         iStart = 1
@@ -7067,71 +7021,6 @@ Dim sKey$, sKeys$
     PSGEN_GetKeysPressed = sKeys
 
 End Function
-
-Public Function PSGEN_WaitForShell&(ByVal sTask$, Optional vTimeout As Variant)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Function PSGEN_WaitForTask
-'
-'                     sTask$             - Task to run
-'                     vTimeout as variant- Optional timeout
-'
-'                     ) as long          - Wait failure code
-'
-'             DEPENDENCIES:   NONE
-'
-'     MODIFICATION HISTORY:   Steve O'Hara    04 November 1997   First created for DocBlazer
-'
-'                  PURPOSE:   Runs the shell task and waits for it to complete.
-'                             If specified will wait vTimeout seconds otherwise
-'                             the wait is infinite.
-'
-'****************************************************************************
-'
-'
-Dim lRet&, lTimeout&, hProcess&
-Dim iStatus%
-Dim alWin&()
-
-
-    '
-    ' Initialise error vector
-    '
-    On Error Resume Next
-    If IsMissing(vTimeout) Then
-        lTimeout = INFINITE
-    Else
-        If vTimeout <= 0 Then
-            lTimeout = INFINITE
-        Else
-            lTimeout = vTimeout
-        End If
-    End If
-    
-    '
-    ' Start the shelled application:
-    '
-    hProcess = ShellExecute(0&, "open", sTask, 0&, "", SW_SHOW)
-    DoEvents
-    Call Sleep(5000)
-      
-    '
-    ' Wait for the shelled application to finish
-    '
-    If hProcess > 0 Then
-        Do While PSGEN_FindWindowLike(alWin, 0&, "*" + PSVBUTLS_GetFilePart(sTask) + "*", "", 0&) > 0
-            DoEvents
-            Call Sleep(500)
-        Loop
-    End If
-    PSGEN_WaitForShell = lRet
-    
-End Function
-
 
 Public Sub PSGEN_DrawRoundedShadow(ByVal frmWork As Form)
 '****************************************************************************
