@@ -226,8 +226,7 @@ Dim lKeyLength&, sRegistryKeyName$, ftFileTime As FILETIME
         '
         lNextKey = 0
         lKeyLength = 4000: sRegistryKeyName = String$(lKeyLength, vbNullChar)
-        lReturnValue = RegEnumKeyEx(lRegistryKey, lNextKey, sRegistryKeyName, lKeyLength, _
-            0&, 0&, 0&, ftFileTime)
+        lReturnValue = RegEnumKeyEx(lRegistryKey, lNextKey, sRegistryKeyName, lKeyLength, 0&, 0&, 0&, ftFileTime)
             
         Do While lReturnValue = ERROR_SUCCESS
             sRegistryKeyName = Left$(sRegistryKeyName, lKeyLength)
@@ -244,11 +243,11 @@ Dim lKeyLength&, sRegistryKeyName$, ftFileTime As FILETIME
             If bReturn Then
                 lNextKey = lNextKey + 1
                 lKeyLength = 4000: sRegistryKeyName = String$(lKeyLength, vbNullChar)
-                lReturnValue = RegEnumKeyEx(lRegistryKey, lNextKey, sRegistryKeyName, lKeyLength, _
-                    0&, 0&, 0&, ftFileTime)
+                lReturnValue = RegEnumKeyEx(lRegistryKey, lNextKey, sRegistryKeyName, lKeyLength, 0&, 0&, 0&, ftFileTime)
             Else
                 Exit Do
             End If
+            DoEvents
         Loop
         
         '
@@ -326,12 +325,10 @@ Dim lRegistryKeyLength&
     '
     ' Does the registry key have to be opened in the first place?
     '
-    lReturnCode = RegOpenKeyEx(HKEY_LOCAL_MACHINE, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection, _
-        0&, KEY_ALL_ACCESS, lRegistryKey)
-        
+    lReturnCode = RegOpenKeyEx(HKEY_LOCAL_MACHINE, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection, 0&, KEY_ALL_ACCESS, lRegistryKey)
     If lReturnCode = ERROR_SUCCESS Then
         '
-        ' If a key is specified, then attempt delete it. Otherwise,
+        ' If a key is specified, then attempt delete to it. Otherwise,
         ' attempt to delete any subkeys beneath this one, then
         ' delete the key.
         '
@@ -340,8 +337,7 @@ Dim lRegistryKeyLength&
         Else
             lNextSubKey = 0&: lRegistryKeyLength = 4000
             sSubKeyName = String$(lRegistryKeyLength, vbNullChar)
-            lSubKeyReturnCode = RegEnumKeyEx(lRegistryKey, lNextSubKey, sSubKeyName, lRegistryKeyLength, _
-                0&, 0&, 0&, ftFileTime)
+            lSubKeyReturnCode = RegEnumKeyEx(lRegistryKey, lNextSubKey, sSubKeyName, lRegistryKeyLength, 0&, 0&, 0&, ftFileTime)
                 
             Do While lSubKeyReturnCode = ERROR_SUCCESS Or lSubKeyReturnCode = 234
                 sSubKeyName = Left$(sSubKeyName, lRegistryKeyLength)
@@ -360,8 +356,8 @@ Dim lRegistryKeyLength&
                 '
                 lRegistryKeyLength = 4000
                 sSubKeyName = String$(lRegistryKeyLength, vbNullChar)
-                lSubKeyReturnCode = RegEnumKeyEx(lRegistryKey, lNextSubKey, sSubKeyName, lRegistryKeyLength, _
-                    0&, 0&, 0&, ftFileTime)
+                lSubKeyReturnCode = RegEnumKeyEx(lRegistryKey, lNextSubKey, sSubKeyName, lRegistryKeyLength, 0&, 0&, 0&, ftFileTime)
+                DoEvents
             Loop
             
             '
@@ -424,8 +420,7 @@ Dim lRegistryKeyLength&
         Else
             lNextSubKey = 0&: lRegistryKeyLength = 4000
             sSubKeyName = String$(lRegistryKeyLength, vbNullChar)
-            lSubKeyReturnCode = RegEnumKeyEx(lRegistryKey, lNextSubKey, sSubKeyName, lRegistryKeyLength, _
-                0&, 0&, 0&, ftFileTime)
+            lSubKeyReturnCode = RegEnumKeyEx(lRegistryKey, lNextSubKey, sSubKeyName, lRegistryKeyLength, 0&, 0&, 0&, ftFileTime)
                 
             Do While lSubKeyReturnCode = ERROR_SUCCESS Or lSubKeyReturnCode = 234
                 sSubKeyName = Left$(sSubKeyName, lRegistryKeyLength)
@@ -444,8 +439,8 @@ Dim lRegistryKeyLength&
                 '
                 lRegistryKeyLength = 4000
                 sSubKeyName = String$(lRegistryKeyLength, vbNullChar)
-                lSubKeyReturnCode = RegEnumKeyEx(lRegistryKey, lNextSubKey, sSubKeyName, lRegistryKeyLength, _
-                    0&, 0&, 0&, ftFileTime)
+                lSubKeyReturnCode = RegEnumKeyEx(lRegistryKey, lNextSubKey, sSubKeyName, lRegistryKeyLength, 0&, 0&, 0&, ftFileTime)
+                DoEvents
             Loop
             
             '
@@ -690,8 +685,7 @@ Dim ftFileTime As FILETIME, abKeyValue() As Byte
             lNextValue = 0&
             lKeyNameSize = 32000: sKeyName = String$(lKeyNameSize + 1, vbNullChar)
             lKeyValueSize = 32000: ReDim abKeyValue(1 To lKeyValueSize + 1)
-            lReturnValue = RegEnumValue(lRegistryKey, lNextValue, sKeyName, lKeyNameSize, 0&, REG_SZ, _
-                abKeyValue(1), lKeyValueSize)
+            lReturnValue = RegEnumValue(lRegistryKey, lNextValue, sKeyName, lKeyNameSize, 0&, REG_SZ, abKeyValue(1), lKeyValueSize)
             
             Do While lReturnValue = ERROR_SUCCESS
                 sKeyName = Left$(sKeyName, lKeyNameSize)
@@ -708,8 +702,8 @@ Dim ftFileTime As FILETIME, abKeyValue() As Byte
                 lKeyNameSize = 32000: sKeyName = String$(lKeyNameSize + 1, vbNullChar)
                 lKeyValueSize = 32000: ReDim abKeyValue(1 To lKeyValueSize + 1)
                 
-                lReturnValue = RegEnumValue(lRegistryKey, lNextValue, sKeyName, lKeyNameSize, 0&, REG_SZ, _
-                    abKeyValue(1), lKeyValueSize)
+                lReturnValue = RegEnumValue(lRegistryKey, lNextValue, sKeyName, lKeyNameSize, 0&, REG_SZ, abKeyValue(1), lKeyValueSize)
+                DoEvents
             Loop
             
             '
@@ -813,6 +807,7 @@ Dim ftFileTime As FILETIME
                 lNextValue = lNextValue + 1
                 lKeyNameSize = 32000: sKeyName = String$(lKeyNameSize + 1, vbNullChar)
                 lReturnValue = RegEnumKeyEx(lRegistryKey, lNextValue, sKeyName, lKeyNameSize, 0&, vbNullString, 0&, ftFileTime)
+                DoEvents
             Loop
             GetSubkeys = rkKeys
         Else
@@ -883,8 +878,7 @@ Dim ftFileTime As FILETIME, abKeyValue() As Byte
             lKeyNameSize = 32000: sKeyName = String$(lKeyNameSize + 1, vbNullChar)
             lKeyValueSize = 32000: ReDim abKeyValue(1 To lKeyValueSize + 1)
             
-            lReturnValue = RegEnumValue(lRegistryKey, lNextValue, sKeyName, lKeyNameSize, 0&, REG_SZ, _
-                abKeyValue(1), lKeyValueSize)
+            lReturnValue = RegEnumValue(lRegistryKey, lNextValue, sKeyName, lKeyNameSize, 0&, REG_SZ, abKeyValue(1), lKeyValueSize)
             Do While lReturnValue = ERROR_SUCCESS
                 sKeyName = Left$(sKeyName, lKeyNameSize)
                 sKeyValue = StrConv(abKeyValue, vbUnicode)
@@ -900,8 +894,8 @@ Dim ftFileTime As FILETIME, abKeyValue() As Byte
                 lKeyNameSize = 32000: sKeyName = String$(lKeyNameSize + 1, vbNullChar)
                 lKeyValueSize = 32000: ReDim abKeyValue(1 To lKeyValueSize + 1)
                 
-                lReturnValue = RegEnumValue(lRegistryKey, lNextValue, sKeyName, lKeyNameSize, 0&, REG_SZ, _
-                    abKeyValue(1), lKeyValueSize)
+                lReturnValue = RegEnumValue(lRegistryKey, lNextValue, sKeyName, lKeyNameSize, 0&, REG_SZ, abKeyValue(1), lKeyValueSize)
+                DoEvents
             Loop
             
             '

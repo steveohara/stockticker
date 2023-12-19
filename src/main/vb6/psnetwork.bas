@@ -1302,7 +1302,7 @@ Dim sError$
     '
     ' Connect to the session
     '
-    If sTitle = "" Then sTitle = App.Title
+    If sTitle = "" Then sTitle = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     If lUseSession <> 0 Then
         lSession = lUseSession
     Else

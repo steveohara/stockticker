@@ -1,7 +1,7 @@
 ![image](./images/https://github.com/steveohara/stockticker/wiki/images/tickerbar.png)
 
 # StockTicker 
-`Version: 3.0.0 [18-Dec-2023 18:32]`
+`Version: 3.1.0 [19-Dec-2023 17:54]`
 
 Yet another free stock ticker!
 

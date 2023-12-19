@@ -1282,6 +1282,7 @@ Dim iCols As Integer
 Dim sName$
 Dim data As Object
 Dim bag As JsonBag
+Dim sCurrencies$
 
     '
     ' Get the useful stuff
@@ -1313,35 +1314,68 @@ Dim bag As JsonBag
         ' Get all the exchange rates for all the symbols that are not
         ' disabled
         '
+        sCurrencies = ""
         For Each objSymbol In mobjCurrentSymbols
             If Not objSymbol.Disabled Then
                 objSymsToLookup.Add objSymbol.Code, objSymbol.Code
-                If objSymbol.CurrencyName <> "" Then objExchangeLookup.Add objSymbol.CurrencyName, objSymbol.CurrencyName
+                If objSymbol.CurrencyName <> "" Then
+                    objExchangeLookup.Add objSymbol.CurrencyName, objSymbol.CurrencyName
+                    sCurrencies = sCurrencies + IIf(sCurrencies = "", "", ",") + objSymbol.CurrencyName
+                End If
             End If
         Next
         If sSummaryCurrencyName <> "" And objExchangeLookup.Count > 0 Then
             If Val(timData.Tag) = 600 Or timData.Tag = "" Then
                 timData.Tag = ""
                 sCSV = ""
-                Call PSINET_GetHTTPFile("https://open.er-api.com/v6/latest/GBP", sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
+                
+                '
+                ' Try using https://app.freecurrencyapi.com
+                '
+                Call PSINET_GetHTTPFile("https://api.freecurrencyapi.com/v1/latest?apikey=fca_live_IdRwCTYgnuLbARofPs6W7zvwosdHmwXdBJlIX6fJ&base_currency=GBP", sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
+                If Trim(sCSV) <> "" Then
+                    Set bag = New JsonBag
+                    bag.JSON = sCSV
+                    For Each sSymbol In objExchangeLookup
+                        If Not PSGEN_IsSameText(sSymbol, sSummaryCurrencyName) Then
+                            rRate = CDbl(bag.Item("data").Item(sSymbol))
+                            If rRate > 0 Then
+                                rRate = 1 / rRate
+                                Call mobjReg.SaveSetting(App.Title, REG_LAST_GOOD_RATES, sSymbol, rRate)
+                            End If
+                        End If
+                    Next
+                Else
+                    '
+                    ' Try using https://open.er-api.com
+                    '
+                    Call PSINET_GetHTTPFile("https://open.er-api.com/v6/latest/GBP", sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
+                    If Trim(sCSV) <> "" Then
+                        For Each sSymbol In objExchangeLookup
+                            DoEvents
+                            If Not PSGEN_IsSameText(sSymbol, sSummaryCurrencyName) Then
+                                rRate = Val(Trim(Split(Split(sCSV, """" + sSymbol + """:")(1), ",")(0)))
+                                If rRate > 0 Then
+                                    rRate = 1 / rRate
+                                    Call mobjReg.SaveSetting(App.Title, REG_LAST_GOOD_RATES, sSymbol, rRate)
+                                End If
+                            End If
+                        Next
+                    Else
+                        Debug.Print "Failed to get exchange rates, reverting to last saved values from registry"
+                    End If
+                End If
+                
+                '
+                ' Get the exchange rate from the registry
+                '
                 For Each sSymbol In objExchangeLookup
                     DoEvents
                     If PSGEN_IsSameText(sSymbol, sSummaryCurrencyName) Then
                         mobjExchangeRates.Add 1#, sSymbol
                     Else
-                        If Trim(sCSV) <> "" Then
-                            rRate = Val(Trim(Split(Split(sCSV, """" + sSymbol + """:")(1), ",")(0)))
-                            If rRate > 0 Then
-                                rRate = 1 / rRate
-                                Call mobjReg.SaveSetting(App.Title, REG_LAST_GOOD_RATES, sSymbol, rRate)
-                            Else
-                                rRate = 1
-                            End If
-                        Else
-                            rRate = mobjReg.GetSetting(App.Title, REG_LAST_GOOD_RATES, sSymbol, 1#)
-                            If rRate = 0 Then rRate = 1
-                            Debug.Print "Nothing returned for exchange " + sSymbol + " to " + sSummaryCurrencyName + " using rate:" + Format(rRate)
-                        End If
+                        rRate = mobjReg.GetSetting(App.Title, REG_LAST_GOOD_RATES, sSymbol, 1#)
+                        If rRate = 0 Then rRate = 1
                         mobjExchangeRates.Remove sSymbol
                         mobjExchangeRates.Add rRate, sSymbol
                     End If
