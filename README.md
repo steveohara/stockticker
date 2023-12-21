@@ -1,5 +1,5 @@
 # StockTicker 
-`Version: 3.2.0 [21-Dec-2023 13:16]`
+`Version: 3.2.1 [21-Dec-2023 14:41]`
 
 ![image](https://github.com/steveohara/stockticker/wiki/images/overall.png)
 

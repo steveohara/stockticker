@@ -1898,6 +1898,7 @@ Public Const SM_CYVIRTUALSCREEN = 79
 Public Const SM_CMONITORS = 80
 Public Const SM_SAMEDISPLAYFORMAT = 81
    
+
 Public Function Z_CabinetCallback(ByVal Context As Long, ByVal Notification As Long, ByRef Param1 As FileInCabinetInfo, ByVal Param2 As Long) As Long
     
 Dim fp As FILEPATHS
@@ -5930,7 +5931,7 @@ Dim lMutex&
         If App.StartMode = vbSModeStandalone Then
             MsgBox "Write to INI file (" + sIniFileName + ") failed", vbOKOnly + vbExclamation
         Else
-            Call PSGEN_WriteToEventLog(LogError, "Write to INI file (" + sIniFileName + ") failed")
+            Call PSGEN_Log("Write to INI file (" + sIniFileName + ") failed", LogError)
         End If
     End If
     
@@ -7935,14 +7936,14 @@ Dim rAdjustedTime As Currency
 
 End Function
 
-Public Function PSGEN_WriteToEventLog(ByVal iLogType As LogEventTypes, ByVal sMessage$, Optional ByVal sSource$) As Boolean
+Public Function PSGEN_Log(ByVal sMessage$, Optional ByVal iLogType As LogEventTypes = LogEventTypes.LogInformation, Optional ByVal sSource$ = "") As Boolean
 '****************************************************************************
 '
 '   Pivotal Solutions Ltd © 2001
 '
 '****************************************************************************
 '
-'                     NAME: Sub PSGEN_WriteToEventLog
+'                     NAME: Sub PSGEN_Log
 '
 '                        iLogType%    - Type of event to register
 '                        sMessage$    - Message to register
@@ -7970,22 +7971,22 @@ Dim hEventLog&
     '
     If sSource = "" Then sSource = App.Title
     hEventLog = RegisterEventSource(vbNullString, sSource)
-'    hEventLog = OpenEventLog(vbNullString, "VBRuntime")
 
     '
     ' ReportEvent returns 0 if failed, any other number indicates success
     '
-    If ReportEvent(hEventLog, iLogType, 0, 1, 0&, 1, 0, vbCrLf + vbCrLf + sMessage, 0) = 0 Then
-'    If ReportEvent(hEventLog, iLogType, 0, 1, 0&, 1, 0, vbCrLf + sSource + vbCrLf + sMessage, 0) = 0 Then
-        PSGEN_WriteToEventLog = False
+    If ReportEvent(hEventLog, iLogType, 0, 0, 0, 1, Len(sMessage), sMessage, 0) = 0 Then
+        PSGEN_Log = False
     Else
-        PSGEN_WriteToEventLog = True
+        PSGEN_Log = True
     End If
 
     '
     ' Free the resources
     '
     Call DeregisterEventSource(hEventLog)
+    
+    Debug.Print Format(Now(), "dd/MM/yy hh:mm:ss") + " " + sMessage
 
 End Function
 
@@ -8895,3 +8896,4 @@ Function PSGEN_GetLocaleValue#(ByVal sValue$)
     PSGEN_GetLocaleValue = CDbl(sValue)
 
 End Function
+

@@ -1338,8 +1338,10 @@ Dim bGotExchangeRates As Boolean
                 ' Try using https://app.freecurrencyapi.com
                 '
                 If sFreeCurrencyKey <> "" Then
+                    PSGEN_Log "Getting exchange rates from https://api.freecurrencyapi.com"
                     Call PSINET_GetHTTPFile("https://api.freecurrencyapi.com/v1/latest?apikey=" + sFreeCurrencyKey + "&base_currency=GBP", sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=3)
                     If Trim(sCSV) <> "" Then
+                        PSGEN_Log "Got exchange rates from https://api.freecurrencyapi.com successfully"
                         Set bag = New JsonBag
                         bag.JSON = sCSV
                         For Each sSymbol In objExchangeLookup
@@ -1352,14 +1354,18 @@ Dim bGotExchangeRates As Boolean
                                 End If
                             End If
                         Next
+                    Else
+                        PSGEN_Log "Failed to get exchange rates from https://api.freecurrencyapi.com - " + Err.Description, LogEventTypes.LogError
                     End If
                 End If
                 If Not bGotExchangeRates Then
                     '
                     ' Try using https://open.er-api.com
                     '
+                    PSGEN_Log "Getting exchange rates from https://open.er-api.com"
                     Call PSINET_GetHTTPFile("https://open.er-api.com/v6/latest/GBP", sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=3)
                     If Trim(sCSV) <> "" Then
+                        PSGEN_Log "Got exchange rates from https://open.er-api.com successfully"
                         For Each sSymbol In objExchangeLookup
                             DoEvents
                             If Not PSGEN_IsSameText(sSymbol, sSummaryCurrencyName) Then
@@ -1372,7 +1378,7 @@ Dim bGotExchangeRates As Boolean
                             End If
                         Next
                     Else
-                        Debug.Print "Failed to get exchange rates, reverting to last saved values from registry"
+                        PSGEN_Log "Failed to get exchange rates from https://open.er-api.com - " + Err.Description, LogEventTypes.LogError
                     End If
                 End If
                 
@@ -1414,12 +1420,14 @@ Dim bGotExchangeRates As Boolean
                 If mbCapturing Then Exit Function
                 sName = sSymbol
                 If Not sSymbol Like "*.L" Then
+                    PSGEN_Log "Getting stock price from IEX for " + sSymbol
                     Call PSINET_GetHTTPFile("https://cloud.iexapis.com/stable/stock/" + Replace(sName, "^", ".") + "/quote?token=" + sIexKey, sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=3)
                     
                     '
                     ' Put the stock values into the lookup
                     '
                     If Trim(sCSV) <> "" Then
+                        PSGEN_Log "Got stock price from IEX successfully for " + sSymbol
                         rDayOpen = CDbl(getJsonValue(sCSV, "previousClose"))
                         rDayHigh = CDbl(getJsonValue(sCSV, "high"))
                         rDayLow = CDbl(getJsonValue(sCSV, "low"))
@@ -1436,10 +1444,10 @@ Dim bGotExchangeRates As Boolean
                             objSymLookup.Add sTmp, sSymbol
                             objSymsToLookup.Remove sSymbol
                         Else
-                           Debug.Print "Zero value returned from IEXTrading for " + sSymbol
+                           PSGEN_Log "Zero value returned from IEX for " + sSymbol, LogEventTypes.LogWarning
                         End If
                     Else
-                        Debug.Print "Nothing returned from IEXTrading for " + sSymbol
+                        PSGEN_Log "Failed to stock price from IEX for " + sSymbol + " - " + Err.Description, LogEventTypes.LogError
                     End If
                 End If
             Next
@@ -1457,12 +1465,14 @@ Dim bGotExchangeRates As Boolean
                 
                 DoEvents
                 If mbCapturing Then Exit Function
+                PSGEN_Log "Getting stock price from Alpha Vantage for " + sSymbol
                 Call PSINET_GetHTTPFile("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval=1min&apikey=" + sAlphaVantageKey + "&datatype=csv&symbol=" + Replace(sSymbol, "^", "."), sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=2)
     
                 '
                 ' Put the stock values into the lookup
                 '
                 If Trim(sCSV) <> "" Then
+                    PSGEN_Log "Got stock price from Alpha Vantage successfully for " + sSymbol
                     sCSV = Split(sCSV, vbLf)(1)
                     Call ParseCSV(sCSV, asSymVals)
                     If UBound(asSymVals) = 5 Then
@@ -1479,10 +1489,10 @@ Dim bGotExchangeRates As Boolean
                         objSymLookup.Add sTmp, sSymbol
                         objSymsToLookup.Remove sSymbol
                     Else
-                        Debug.Print "Alpha Vantage " + sSymbol + " " + sCSV
+                        PSGEN_Log "Cannot parse data from Alpha Vantage for " + sSymbol + " " + sCSV, LogEventTypes.LogWarning
                     End If
                 Else
-                    Debug.Print "Nothing returned from Alpha Vantage for " + sSymbol
+                    PSGEN_Log "Failed to get stock price from Alpha Vantage for " + sSymbol + " - " + Err.Description, LogEventTypes.LogError
                 End If
             Next
         End If
@@ -1499,12 +1509,14 @@ Dim bGotExchangeRates As Boolean
                 
                 DoEvents
                 If mbCapturing Then Exit Function
+                PSGEN_Log "Getting stock price from Twelve Data for " + sSymbol
                 Call PSINET_GetHTTPFile("https://api.twelvedata.com/quote?format=csv&apikey=" + sTwelveDataKey + "&symbol=" + Replace(sSymbol, ".L", ""), sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=2)
     
                 '
                 ' Put the stock values into the lookup
                 '
                 If Trim(sCSV) <> "" Then
+                    PSGEN_Log "Got stock price from Twelve Data successfully for " + sSymbol
                     sCSV = Replace(Split(sCSV, vbLf)(1), ";", ",")
                     Call ParseCSV(sCSV, asSymVals)
                     If UBound(asSymVals) > 8 Then
@@ -1526,10 +1538,10 @@ Dim bGotExchangeRates As Boolean
                             objSymsToLookup.Remove sSymbol
                         End If
                     Else
-                        Debug.Print "Twelve Data " + sSymbol + " " + sCSV
+                        PSGEN_Log "Cannot parse data from Twelve Data for " + sSymbol + " " + sCSV, LogEventTypes.LogWarning
                     End If
                 Else
-                    Debug.Print "Nothing returned from Twelve Data for " + sSymbol
+                    PSGEN_Log "Failed to get stock prices from Twelve Data for " + sSymbol + " - " + Err.Description, LogEventTypes.LogError
                 End If
             Next
         End If
@@ -1546,12 +1558,14 @@ Dim bGotExchangeRates As Boolean
                 
                 DoEvents
                 If mbCapturing Then Exit Function
+                PSGEN_Log "Getting stock price from Market Stack for " + sSymbol
                 Call PSINET_GetHTTPFile("http://api.marketstack.com/v1/intraday/latest?access_key=" + sMarketStackKey + "&symbols=" + Replace(sSymbol, "^", "."), sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=2)
     
                 '
                 ' Put the stock values into the lookup
                 '
                 If Trim(sCSV) <> "" Then
+                    PSGEN_Log "Got stock price from Market Stack successfully for " + sSymbol
                     rDayOpen = CDbl(Split(Split(sCSV, """close"":", 2)(1), ",", 2)(0))
                     rDayHigh = CDbl(Split(Split(sCSV, """high"":", 2)(1), ",", 2)(0))
                     rDayLow = CDbl(Split(Split(sCSV, """low"":", 2)(1), ",", 2)(0))
@@ -1565,7 +1579,7 @@ Dim bGotExchangeRates As Boolean
                     objSymLookup.Add sTmp, sSymbol
                     objSymsToLookup.Remove sSymbol
                 Else
-                    Debug.Print "Nothing returned from Market Stack for " + sSymbol
+                    PSGEN_Log "Failed to get stock price from Market Stack for " + sSymbol + " - " + Err.Description, LogEventTypes.LogError
                 End If
             Next
         End If
@@ -1580,6 +1594,7 @@ Dim bGotExchangeRates As Boolean
     
             DoEvents
             If mbCapturing Then Exit Function
+            PSGEN_Log "Getting stock price from Yahoo for " + sSymbol
             sName = sSymbol
             Call PSINET_GetHTTPFile("https://query2.finance.yahoo.com/ws/fundamentals-timeseries/v6/finance/quoteSummary/" + Replace(sName, "^", ".") + "?modules=price", sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
                 
@@ -1587,6 +1602,7 @@ Dim bGotExchangeRates As Boolean
             ' Put the stock values into the lookup
             '
             If Trim(sCSV) <> "" Then
+                PSGEN_Log "Got stock price from Yahoo successfully for " + sSymbol
                 Set bag = New JsonBag
                 bag.JSON = sCSV
                 Set bag = bag.Item("quoteSummary").Item("result")(1).Item("price")
@@ -1603,10 +1619,10 @@ Dim bGotExchangeRates As Boolean
                     objSymLookup.Add sTmp, sSymbol
                     objSymsToLookup.Remove sSymbol
                 Else
-                    Debug.Print "Zero value returned from Yahoo for " + sSymbol
+                    PSGEN_Log "Zero value returned from Yahoo for " + sSymbol, LogEventTypes.LogWarning
                 End If
             Else
-                Debug.Print "Nothing returned from Yahoo for " + sSymbol
+                PSGEN_Log "Failed to get stock prices from Yahoo for " + sSymbol + " - " + Err.Description, LogEventTypes.LogError
             End If
         Next
         
@@ -1621,12 +1637,14 @@ Dim bGotExchangeRates As Boolean
             
             DoEvents
             If mbCapturing Then Exit Function
+            PSGEN_Log "Getting stock price from Reuters for " + sSymbol
             Call PSINET_GetHTTPFile("https://in.reuters.com/companies/" + Replace(sSymbol, "^", "."), sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
 
             '
             ' Put the stock values into the lookup
             '
             If InStr(sCSV, "<span>Open</span>") > 0 And Trim(sCSV) <> "" Then
+                PSGEN_Log "Got stock price from Reurters successfully for " + sSymbol
                 rDayOpen = CDbl(Split(Split(Split(sCSV, "<span>Prev Close</span>")(1), "<span>")(1), "<")(0))
                 rDayHigh = CDbl(Split(Split(Split(Split(sCSV, "Today's High", 2)(1), "QuoteRibbon-digits-", 2)(1), ">", 2)(1), "<", 2)(0))
                 rDayLow = CDbl(Split(Split(sCSV, "sectionQuoteDetailLow"">")(1), "<")(0))
@@ -1641,7 +1659,7 @@ Dim bGotExchangeRates As Boolean
                 objSymLookup.Add sTmp, sSymbol
                 objSymsToLookup.Remove sSymbol
             Else
-                Debug.Print "Nothing returned from Reuters for " + sSymbol
+                PSGEN_Log "Failed to get stock price from Reuters for " + sSymbol + " - " + Err.Description, LogEventTypes.LogError
             End If
         Next
         
@@ -1655,7 +1673,7 @@ Dim bGotExchangeRates As Boolean
                 sSymbol = objSymsToLookup.Item(objSymbol.Code)
                 If Err = 0 Then
                     SymbolInfo = mobjReg.GetSetting(App.Title, REG_LAST_GOOD_VALUES, objSymbol.Code, "")
-                    Debug.Print "Couldn't get data for " + sSymbol + " - using historic value"
+                    PSGEN_Log "Couldn't get data for " + sSymbol + " - using historic value", LogEventTypes.LogWarning
                     objSymbol.ErrorDescription = "Couldn't refresh value"
                 Else
                     SymbolInfo = objSymLookup.Item(objSymbol.Code)
