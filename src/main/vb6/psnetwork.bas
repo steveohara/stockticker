@@ -1237,11 +1237,7 @@ Dim lErrInfo&
 
 End Function
 
-
-
-
-
-Public Function PSINET_GetHTTPFile(ByVal sURL$, sValue$, Optional ByVal sTitle$, Optional ByVal lFlags& = (INTERNET_FLAG_RELOAD + INTERNET_FLAG_PRAGMA_NOCACHE), Optional vCookies, Optional vHeaders, Optional ByVal lUseSession&, Optional sProxyName$ = "", Optional sProxyByPass$ = "", Optional lConnectionTimeout& = 30000, Optional lReadTimeout& = 30000) As Boolean
+Public Function PSINET_GetHTTPFile(ByVal sURL$, sValue$, Optional ByVal sTitle$, Optional ByVal lFlags& = (INTERNET_FLAG_RELOAD + INTERNET_FLAG_PRAGMA_NOCACHE), Optional vCookies, Optional vHeaders, Optional ByVal lUseSession&, Optional sProxyName$ = "", Optional sProxyByPass$ = "", Optional lConnectionTimeout& = 30000, Optional lReadTimeout& = 30000, Optional iRetries = 0) As Boolean
 '****************************************************************************
 '
 '   Pivotal Solutions Ltd © 2002
@@ -1249,6 +1245,57 @@ Public Function PSINET_GetHTTPFile(ByVal sURL$, sValue$, Optional ByVal sTitle$,
 '****************************************************************************
 '
 '                     NAME: Function PSINET_GetHTTPFile
+'
+'                     sURL$              - The URL of the file to get
+'                     sValue$            - Contents of the file
+'                     sTitle$            - Optional title
+'                     vHeaders$          - Additional headers (array)
+'                     lUseSession$       - Existing connection handle
+'                     sProxyName         - Name of proxy server to use
+'                     sProxyByPass       - List of addresses for the proxy to bypass
+'                     iRetries           - Number of retries if the content is empty
+'
+'                          ) As Boolean
+'
+'             DEPENDENCIES: NONE
+'
+'     MODIFICATION HISTORY: Steve O'Hara    25 April 2002   First created for WebSneak
+'
+'                  PURPOSE: Returns the contents of a remote HTTP file in
+'                           sValue
+'                           If successful, then returns true
+'                           The sURL should be expressed as a full spec HTTP
+'                           URL
+'
+'****************************************************************************
+'
+'
+Dim bReturn As Boolean
+Dim iRetry%
+
+    On Error Resume Next
+    While iRetry <= iRetries And Not bReturn
+        Err.Clear
+        bReturn = Z_GetHTTPFile(sURL, sValue, sTitle, lFlags, vCookies, vHeaders, lUseSession, sProxyName, sProxyByPass, lConnectionTimeout, lReadTimeout)
+        iRetry = iRetry + 1
+    Wend
+
+    If Err.Description <> "" Then
+        On Error GoTo 0
+        Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, Err.Description
+    End If
+    PSINET_GetHTTPFile = bReturn
+    
+End Function
+
+Private Function Z_GetHTTPFile(ByVal sURL$, sValue$, Optional ByVal sTitle$, Optional ByVal lFlags& = (INTERNET_FLAG_RELOAD + INTERNET_FLAG_PRAGMA_NOCACHE), Optional vCookies, Optional vHeaders, Optional ByVal lUseSession&, Optional sProxyName$ = "", Optional sProxyByPass$ = "", Optional lConnectionTimeout& = 30000, Optional lReadTimeout& = 30000) As Boolean
+'****************************************************************************
+'
+'   Pivotal Solutions Ltd © 2002
+'
+'****************************************************************************
+'
+'                     NAME: Function Z_GetHTTPFile
 '
 '                     sURL$              - The URL of the file to get
 '                     sValue$            - Contents of the file
@@ -1373,7 +1420,7 @@ Dim sError$
         On Error GoTo 0
         Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, sError
     End If
-    PSINET_GetHTTPFile = bReturn
+    Z_GetHTTPFile = bReturn
 
 End Function
 

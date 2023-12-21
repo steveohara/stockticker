@@ -1,5 +1,5 @@
 # StockTicker 
-`Version: 3.1.0 [19-Dec-2023 17:54]`
+`Version: 3.2.0 [21-Dec-2023 13:16]`
 
 ![image](https://github.com/steveohara/stockticker/wiki/images/overall.png)
 
@@ -20,7 +20,7 @@ So, back in 2000, I wrote my own.
 
 Feel free to criticise or make suggestions 
 for enhancements etc.  I do development on this to keep me from going insane 
-in my normal development job so I'm always looking for some sort of distraction....  
+in my normal development job, so I'm always looking for some sort of distraction....  
 My goal is to keep it simple and lightweight.
 
 To see how it works, how to configure it etc. see the [WIKI](https://github.com/steveohara/stockticker/wiki)

@@ -2,7 +2,7 @@ VERSION 5.00
 Begin VB.Form frmSettings 
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Settings"
-   ClientHeight    =   10230
+   ClientHeight    =   10500
    ClientLeft      =   6165
    ClientTop       =   3150
    ClientWidth     =   6585
@@ -10,8 +10,16 @@ Begin VB.Form frmSettings
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   10230
+   ScaleHeight     =   10500
    ScaleWidth      =   6585
+   Begin VB.TextBox txtFreeCurrencyKey 
+      Height          =   285
+      Left            =   1740
+      TabIndex        =   62
+      ToolTipText     =   "The token to enable the use of the Free Currency exchage rate cloud API"
+      Top             =   9435
+      Width           =   4635
+   End
    Begin VB.CheckBox chkShowDailyChange 
       Caption         =   "Show Daily Change"
       Height          =   195
@@ -193,7 +201,7 @@ Begin VB.Form frmSettings
       Left            =   1350
       TabIndex        =   34
       ToolTipText     =   "Restore your settings and symbols from a backup file"
-      Top             =   9645
+      Top             =   9945
       Width           =   1050
    End
    Begin VB.CommandButton cmdMain 
@@ -203,7 +211,7 @@ Begin VB.Form frmSettings
       Left            =   180
       TabIndex        =   33
       ToolTipText     =   "Backup your settings and symbols to a file"
-      Top             =   9645
+      Top             =   9945
       Width           =   1050
    End
    Begin VB.CheckBox chkShowTotalValue 
@@ -342,7 +350,7 @@ Begin VB.Form frmSettings
       Index           =   1
       Left            =   4020
       TabIndex        =   35
-      Top             =   9690
+      Top             =   9990
       Width           =   1125
    End
    Begin VB.CommandButton cmdMain 
@@ -352,7 +360,7 @@ Begin VB.Form frmSettings
       Index           =   0
       Left            =   5280
       TabIndex        =   36
-      Top             =   9675
+      Top             =   9975
       Width           =   1125
    End
    Begin VB.CheckBox chkShowTotal 
@@ -363,6 +371,17 @@ Begin VB.Form frmSettings
       ToolTipText     =   "Set this if you would like an overall position to be displayed"
       Top             =   3405
       Width           =   5910
+   End
+   Begin VB.Label lblLabel 
+      Alignment       =   1  'Right Justify
+      BackStyle       =   0  'Transparent
+      Caption         =   "FreeCurrency Token"
+      Height          =   225
+      Index           =   25
+      Left            =   -90
+      TabIndex        =   63
+      Top             =   9465
+      Width           =   1755
    End
    Begin VB.Label lblLabel 
       Alignment       =   2  'Center
@@ -922,6 +941,7 @@ Dim lTmp&
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_ALPHA_VANTAGE_KEY, txtAlphaVantageKey.Text
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_MARKET_STACK_KEY, txtMarketStackKey.Text
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_TWELVE_DATA_KEY, txtTwelveDataKey.Text
+        mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_FREE_CURRENCY_KEY, txtFreeCurrencyKey.Text
         mbDirty = False
         Unload Me
     
@@ -1017,6 +1037,7 @@ Dim iCnt%
     txtAlphaVantageKey.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_ALPHA_VANTAGE_KEY)
     txtMarketStackKey.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_MARKET_STACK_KEY)
     txtTwelveDataKey.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TWELVE_DATA_KEY)
+    txtFreeCurrencyKey.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FREE_CURRENCY_KEY)
     
     sFont = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FONT, frmMain.Font.Name)
     For iCnt = 0 To Screen.FontCount - 1
@@ -1054,6 +1075,12 @@ Private Sub txtCurrency_Change()
 End Sub
 
 Private Sub txtCurrencySymbol_Change()
+
+    Z_SetDirty True
+
+End Sub
+
+Private Sub txtFreeCurrencyKey_Change()
 
     Z_SetDirty True
 

@@ -30,8 +30,8 @@ Option Explicit
     ' Version number form the build system
     '
     Public Const VERSION_NAME = "Pivotal Stock Ticker (pivotalstockticker.exe)"
-    Public Const VERSION_NUMBER = "3.1.0"
-    Public Const VERSION_TIMESTAMP = "19-Dec-2023 17:54"
+    Public Const VERSION_NUMBER = "3.2.0"
+    Public Const VERSION_TIMESTAMP = "21-Dec-2023 13:16"
 
     '
     ' Registry entries
@@ -117,6 +117,7 @@ Option Explicit
     Public Const REG_ALPHA_VANTAGE_KEY = "AlphaVantage key"
     Public Const REG_MARKET_STACK_KEY = "MarketStack key"
     Public Const REG_TWELVE_DATA_KEY = "TwelveData key"
+    Public Const REG_FREE_CURRENCY_KEY = "FreeCurrency key"
     Public Const REG_ITALIC = "Italic"
 
     Public Const REG_HIGH_ALARM_WAVE = "High Alarm Wave File"
