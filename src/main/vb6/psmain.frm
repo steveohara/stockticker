@@ -1297,6 +1297,7 @@ Dim bGotExchangeRates As Boolean
     sTwelveDataKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TWELVE_DATA_KEY)
     sFreeCurrencyKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FREE_CURRENCY_KEY)
     sSummaryCurrencyName = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY)
+    sSummaryCurrencySymbol = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY_SYMBOL)
     If mobjCurrentSymbols.Count = 0 Then
         Set mobjCurrentSymbols = ReadSymbolsFromRegistry
     End If
@@ -1779,9 +1780,17 @@ Dim bGotExchangeRates As Boolean
     mobjTotal.TotalCost = rTotalInvested
     mobjTotal.TotalValue = rTotalValue
     mobjTotal.CurrencySymbol = ""
+    
+    '
+    ' Set the currency synmbol for conversion if specified by the user
+    '
     If sSummaryCurrencySymbol <> "" Then
         mobjTotal.CurrencySymbol = sSummaryCurrencySymbol
         mobjTotal.CurrencyName = sSummaryCurrencyName
+        
+    '
+    ' Use the first symbol in the list
+    '
     ElseIf sCurrencySymbol <> "" Then
         If sCurrencySymbol = String(Len(sCurrencySymbol), Left(sCurrencySymbol, 1)) Then mobjTotal.CurrencySymbol = Left(sCurrencySymbol, 1)
     End If
