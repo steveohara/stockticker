@@ -29,7 +29,7 @@ Attribute VB_Exposed = False
 '
 '                 PURPOSE : This class modules provides services that allow applications
 '                           manipulate the Windows registry (note: All registry keys are
-'                           derived from HKEY_LOCAL_MACHINE\SOFTWARE\Pivotal).
+'                           derived from REGISTRY_ROOT\SOFTWARE\Pivotal).
 '
 '****************************************************************************
 '
@@ -65,19 +65,15 @@ End Type
 '**********
 ' Windows API Constants
 '**********
-Private Const HKEY_CLASSES_ROOT = &H80000000        ' Base registry key constants.
-Private Const HKEY_CURRENT_USER = &H80000001
-Private Const HKEY_LOCAL_MACHINE = &H80000002
-Private Const HKEY_PERFORMANCE_DATA = &H80000004
-Private Const HKEY_USERS = &H80000003
-
 Public Enum RegistryClasses
-    RegClassesRoot = &H80000000
+    RegRoot = &H80000000
     RegCurrentUser = &H80000001
     RegLocalMachine = &H80000002
     RegPerformanceData = &H80000004
     RegUsers = &H80000003
 End Enum
+    
+Private REGISTRY_ROOT As RegistryClasses
     
 Private Const ERROR_SUCCESS = 0&                    ' Appropriate error codes.
 Private Const ERROR_INSUFFICIENT_BUFFER = 122
@@ -87,10 +83,11 @@ Private Const ERROR_MORE_DATA = 234
 Private Const REG_CREATED_NEW_KEY = &H1             ' Values "returned" by the
 Private Const REG_OPENED_EXISTING_KEY = &H2         ' RegCreateKeyEx API functions.
 
-Private Const REG_BINARY = 3                        ' Data types of the information retrieved
-Private Const REG_DWORD = 4                         ' from the registry.
-Private Const REG_SZ = 1
-Private Const REG_NONE = 0
+Const REG_BINARY = 3                        ' Data types of the information retrieved
+Const REG_DWORD = 4                         ' from the registry.
+Const REG_SZ = 1
+Const REG_NONE = 0
+Const REG_MULTI_SZ = 7
 
 Private Const REG_OPTION_BACKUP_RESTORE = 4
 Private Const REG_OPTION_CREATE_LINK = 2
@@ -325,7 +322,7 @@ Dim lRegistryKeyLength&
     '
     ' Does the registry key have to be opened in the first place?
     '
-    lReturnCode = RegOpenKeyEx(HKEY_LOCAL_MACHINE, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection, 0&, KEY_ALL_ACCESS, lRegistryKey)
+    lReturnCode = RegOpenKeyEx(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection, 0&, KEY_ALL_ACCESS, lRegistryKey)
     If lReturnCode = ERROR_SUCCESS Then
         '
         ' If a key is specified, then attempt delete to it. Otherwise,
@@ -364,7 +361,7 @@ Dim lRegistryKeyLength&
             ' No more subkeys
             '
             If lSubKeyReturnCode = ERROR_NO_MORE_ITEMS Then
-                lReturnCode = RegDeleteKey(HKEY_LOCAL_MACHINE, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection)
+                lReturnCode = RegDeleteKey(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection)
             End If
         End If
     End If
@@ -515,7 +512,7 @@ Dim saAttr As SECURITY_ATTRIBUTES
     saAttr.lpSecurityDescriptor = 0     ' from the Visual Basic Screensaver project. The MSDN help can
     saAttr.bInheritHandle = True        ' probably give you advice on what these values can (or should) be.
     
-    lReturnCode = RegCreateKeyEx(HKEY_LOCAL_MACHINE, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & IIf(sAppName = "", "", "\") & sSection, _
+    lReturnCode = RegCreateKeyEx(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & IIf(sAppName = "", "", "\") & sSection, _
         0&, vbNullString, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, saAttr, lRegistryKey, lHowKeyCreated)
 
     '
@@ -667,7 +664,7 @@ Dim ftFileTime As FILETIME, abKeyValue() As Byte
     '
     ' Find the registry key
     '
-    lReturnValue = RegOpenKeyEx(HKEY_LOCAL_MACHINE, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection, _
+    lReturnValue = RegOpenKeyEx(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection, _
         0, KEY_READ, lRegistryKey)
         
     '
@@ -780,7 +777,7 @@ Dim ftFileTime As FILETIME
     '
     ' Find the registry key
     '
-    lReturnValue = RegOpenKeyEx(HKEY_LOCAL_MACHINE, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection, _
+    lReturnValue = RegOpenKeyEx(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection, _
         0, KEY_READ, lRegistryKey)
         
     '
@@ -1144,7 +1141,7 @@ Dim lReturnValue&, lRegistryKey&, lStringLength&, sKeyValue$
     '
     ' Attempt to open the specific registry key.
     '
-    lReturnValue = RegOpenKeyEx(HKEY_LOCAL_MACHINE, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & IIf(sAppName = "", "", "\") & sSection, _
+    lReturnValue = RegOpenKeyEx(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & IIf(sAppName = "", "", "\") & sSection, _
         ByVal 0&, KEY_READ, lRegistryKey)
     
     '
@@ -1196,6 +1193,7 @@ Private Sub Class_Initialize()
     ' Set the default name
     '
     CompanyName = DEF_COMPANY_NAME
+    REGISTRY_ROOT = RegistryClasses.RegLocalMachine
 
 End Sub
 Public Function GetMimeType$(ByVal sType$)
@@ -1243,7 +1241,7 @@ Dim lReturnValue&, lRegistryKey&, lStringLength&
     '
     ' Attempt to open the specific registry key.
     '
-    lReturnValue = RegOpenKeyEx(HKEY_CLASSES_ROOT, sType, ByVal 0&, KEY_READ, lRegistryKey)
+    lReturnValue = RegOpenKeyEx(RegistryClasses.RegRoot, sType, ByVal 0&, KEY_READ, lRegistryKey)
     
     '
     ' If the registry key exists, then attempt to retrieve the content type
@@ -1318,7 +1316,7 @@ Dim lReturnValue&, lRegistryKey&, lStringLength&
     '
     ' Attempt to open the specific registry key.
     '
-    lReturnValue = RegOpenKeyEx(HKEY_CLASSES_ROOT, sType, ByVal 0&, KEY_READ, lRegistryKey)
+    lReturnValue = RegOpenKeyEx(RegistryClasses.RegRoot, sType, ByVal 0&, KEY_READ, lRegistryKey)
     
     '
     ' If the registry key exists, then attempt to retrieve the content type
@@ -1613,6 +1611,31 @@ Dim bReturn As Boolean: bReturn = False
         bReturn = True
     
     Z_GetWindowsVersionInformation = bReturn
+
+End Function
+
+
+
+Public Function GetRegistryRoot&()
+    GetRegistryRoot = REGISTRY_ROOT
+End Function
+
+
+Public Function GetRegistryKeyName$()
+
+    If REGISTRY_ROOT = RegRoot Then
+        GetRegistryKeyName = "HKEY_CLASSES_ROOT"
+    ElseIf REGISTRY_ROOT = RegCurrentUser Then
+        GetRegistryKeyName = "HKEY_CURRENT_USER"
+    ElseIf REGISTRY_ROOT = RegLocalMachine Then
+        GetRegistryKeyName = "HKEY_LOCAL_MACHINE"
+    ElseIf REGISTRY_ROOT = RegPerformanceData Then
+        GetRegistryKeyName = "HKEY_PERFORMANCE_DATA"
+    ElseIf REGISTRY_ROOT = RegUsers Then
+        GetRegistryKeyName = "HKEY_USERS"
+    Else
+        GetRegistryKeyName = ""
+    End If
 
 End Function
 

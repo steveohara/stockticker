@@ -584,41 +584,15 @@ Option Explicit
     Public Const PROCESS_ALL_ACCESS = &H1F0FFF
     Public Const PROCESS_TERMINATE = &H1&
     
-    Public Const REG_BINARY = 3                        ' Data types of the information retrieved
-    Public Const REG_DWORD = 4                         ' from the registry.
-    Public Const REG_SZ = 1
-    Public Const REG_NONE = 0
-    Public Const REG_MULTI_SZ = 7
-
     Public Const ERROR_SUCCESS = 0&                ' Indicates that everything's okay
     Public Const ERROR_MORE_DATA = 234&            ' Indicates that there is more data to
                                                     ' retrieve from the registry
     Public Const ERROR_FILE_NOT_FOUND = 2&         ' Indicates that a license key (or license key value
                                                     ' does not exist)
-    Public Const HKEY_CLASSES_ROOT = &H80000000
-    Public Const HKEY_CURRENT_CONFIG = &H80000005
-    Public Const HKEY_CURRENT_USER = &H80000001
-    Public Const HKEY_DYN_DATA = &H80000006
-    Public Const HKEY_LOCAL_MACHINE = &H80000002
-    Public Const HKEY_PERFORMANCE_DATA = &H80000004
-    Public Const HKEY_USERS = &H80000003
     
     Public Const GWL_WNDPROC = -4
     Public Const GWL_USERDATA = -21
     Public Const GWL_STYLE = -16
-
-    Public Const KEY_QUERY_VALUE = &H1             ' Registry key characteristics
-    Public Const KEY_SET_VALUE = &H2
-    Public Const KEY_CREATE_SUB_KEY = &H4
-    Public Const KEY_ENUMERATE_SUB_KEYS = &H8
-    Public Const KEY_NOTIFY = &H10
-    Public Const KEY_CREATE_LINK = &H20
-    Public Const STANDARD_RIGHTS_ALL = &H1F0000
-    Public Const SYNCHRONIZE = &H100000
-    
-    Public Const KEY_ALL_ACCESS = ((STANDARD_RIGHTS_ALL Or KEY_QUERY_VALUE Or KEY_SET_VALUE Or KEY_CREATE_SUB_KEY Or KEY_ENUMERATE_SUB_KEYS Or KEY_NOTIFY Or KEY_CREATE_LINK) And (Not SYNCHRONIZE))
-    
-    Public Const REG_OPTION_NON_VOLATILE = 0       ' How the registry value will be saved
     
     '
     ' Edge function values

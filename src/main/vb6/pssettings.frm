@@ -954,7 +954,7 @@ Dim lTmp&
     ElseIf Index = 2 Then
         sFilename = PSGEN_SelectSaveFile(cmdMain(Index).hWnd, "Backup Files" + vbNullChar + "*.bck", OFN_EXPLORER + OFN_OVERWRITEPROMPT + OFN_PATHMUSTEXIST + OFN_SHAREAWARE, "Save to File")
         If sFilename <> "" Then
-            Call Shell("regedit /E """ + sFilename + """ ""HKEY_LOCAL_MACHINE\SOFTWARE\Pivotal\" + App.Title + """", vbHide)
+            Call Shell("regedit /E """ + sFilename + """ """ + mobjReg.GetRegistryKeyName() + "\SOFTWARE\Pivotal\" + App.Title + """", vbHide)
         End If
     
     ElseIf Index = 3 Then
@@ -965,14 +965,15 @@ Dim lTmp&
                 '
                 ' Backup the original
                 '
-                Call Shell("regedit /E """ + App.path + "\backup_" + Format(Now, "ddmmyy_hhNNss") + ".bck"" ""HKEY_LOCAL_MACHINE\SOFTWARE\Pivotal\" + App.Title + """", vbHide)
+                Err.Clear
+                Call Shell("regedit /E """ + App.path + "\backup_" + Format(Now, "ddmmyy_hhNNss") + ".bck"" """ + mobjReg.GetRegistryKeyName() + "\SOFTWARE\Pivotal\" + App.Title + """", vbHide)
                 
                 '
                 ' Now delete the original and load the new values
                 '
                 mobjReg.DeleteSetting App.Title, REG_SETTINGS
                 mobjReg.DeleteSetting App.Title, REG_SYMBOLS
-                mobjReg.DeleteSettingEx RegLocalMachine, "SOFTWARE\Pivotal\" + App.Title
+                mobjReg.DeleteSettingEx mobjReg.GetRegistryRoot(), "SOFTWARE\Pivotal\" + App.Title
                 Call Shell("regedit /s """ + sFilename + """", vbHide)
             End If
         End If
