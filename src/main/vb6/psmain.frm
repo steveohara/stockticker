@@ -1301,6 +1301,9 @@ Dim bGotExchangeRates As Boolean
     If mobjCurrentSymbols.Count = 0 Then
         Set mobjCurrentSymbols = ReadSymbolsFromRegistry
     End If
+    If sSummaryCurrencyName = "" Then
+        sSummaryCurrencyName = "GBP"
+    End If
     
     '
     ' Decide if we need to adjust the symbols
@@ -1336,11 +1339,42 @@ Dim bGotExchangeRates As Boolean
                 sCSV = ""
                 
                 '
+                ' Try using https://api.iex.cloud
+                '
+                If sIexKey <> "" Then
+                    sCurrencies = ""
+                    For Each sSymbol In objExchangeLookup
+                        DoEvents
+                        If Not PSGEN_IsSameText(sSymbol, sSummaryCurrencyName) Then
+                            sCurrencies = sCurrencies + IIf(sCurrencies = "", "", ",") + sSummaryCurrencyName + sSymbol
+                        End If
+                    Next
+                    PSGEN_Log "Getting exchange rates from https://api.iex.cloud"
+                    Call PSINET_GetHTTPFile("https://api.iex.cloud/v1/fx/convert?symbols=" + sCurrencies + "&token=" + sIexKey, sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=3)
+                    If Trim(sCSV) <> "" Then
+                        PSGEN_Log "Got exchange rates from https://api.iex.cloud successfully"
+                        Set bag = New JsonBag
+                        bag.JSON = sCSV
+                        For Each bag In bag
+                            rRate = CDbl(bag.Item("rate"))
+                            If rRate > 0 Then
+                                rRate = 1 / rRate
+                                sSymbol = Replace(bag.Item("symbol"), sSummaryCurrencyName, "")
+                                Call mobjReg.SaveSetting(App.Title, REG_LAST_GOOD_RATES, sSymbol, rRate)
+                                bGotExchangeRates = True
+                            End If
+                        Next
+                    Else
+                        PSGEN_Log "Failed to get exchange rates from https://api.iex.cloud - " + Err.Description, LogEventTypes.LogError
+                    End If
+                End If
+                
+                '
                 ' Try using https://app.freecurrencyapi.com
                 '
-                If sFreeCurrencyKey <> "" Then
+                If Not bGotExchangeRates And sFreeCurrencyKey <> "" Then
                     PSGEN_Log "Getting exchange rates from https://api.freecurrencyapi.com"
-                    Call PSINET_GetHTTPFile("https://api.freecurrencyapi.com/v1/latest?apikey=" + sFreeCurrencyKey + "&base_currency=GBP", sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=3)
+                    Call PSINET_GetHTTPFile("https://api.freecurrencyapi.com/v1/latest?apikey=" + sFreeCurrencyKey + "&base_currency=" + sSummaryCurrencyName, sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=3)
                     If Trim(sCSV) <> "" Then
                         PSGEN_Log "Got exchange rates from https://api.freecurrencyapi.com successfully"
                         Set bag = New JsonBag
@@ -1364,7 +1398,7 @@ Dim bGotExchangeRates As Boolean
                     ' Try using https://open.er-api.com
                     '
                     PSGEN_Log "Getting exchange rates from https://open.er-api.com"
-                    Call PSINET_GetHTTPFile("https://open.er-api.com/v6/latest/GBP", sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=3)
+                    Call PSINET_GetHTTPFile("https://open.er-api.com/v6/latest/" + sSummaryCurrencyName, sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=3)
                     If Trim(sCSV) <> "" Then
                         PSGEN_Log "Got exchange rates from https://open.er-api.com successfully"
                         For Each sSymbol In objExchangeLookup
