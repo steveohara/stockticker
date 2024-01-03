@@ -875,11 +875,12 @@ Dim objStock As cStock
         
         Open sFilename For Output As #1
         
-        Print #1, "Date," + Format(Now, "dd-MMM-yyyy hh:nn:ss")
-        Print #1, "Code,Display Name,Disabled,Currency Name,Currency Symbol,Shares,Cost,Current Price"
+        Print #1, "Date," + Format(Now, "yyyy-mm-dd hh:nn:ss")
+        Print #1, "Code,Display Name,Trade Date,Disabled,Currency Name,Currency Symbol,Shares,Cost,Current Price"
         For Each objSymbol In objSymbols
             Print #1, objSymbol.Code + ",";
             Print #1, objSymbol.DisplayName + ",";
+            Print #1, Format(DateAdd("s", CDbl(objSymbol.RegKey), DateSerial(2008, 1, 1)), "yyyy-mm-dd hh:nn:ss") + ",";
             Print #1, IIf(objSymbol.Disabled, "true", "false") + ",";
             Print #1, objSymbol.CurrencyName + ",";
             Print #1, objSymbol.CurrencySymbol + ",";
@@ -913,7 +914,7 @@ Dim objStock As cStock
         
         Open sFilename For Output As #1
         
-        Print #1, "Date," + Format(Now, "dd-MMM-yyyy hh:nn:ss")
+        Print #1, "Date," + Format(Now, "yyyy-mm-dd hh:nn:ss")
         Print #1, "Code,Display Name,Currency Name,Currency Symbol,Shares,Cost,Current Price"
         For Each objSymbol In objSymbols
             If Not objSymbol.Disabled Then
@@ -952,7 +953,7 @@ Dim objStock As cStock
         
         Open sFilename For Output As #1
         
-        Print #1, "Date," + Format(Now, "dd-MMM-yyyy hh:nn:ss")
+        Print #1, "Date," + Format(Now, "yyyy-mm-dd hh:nn:ss")
         Print #1, "Code,Display Name,Currency Name,Currency Symbol,Shares,Cost,Current Price"
         For Each objSymbol In objSymbols
             If Not objSymbol.Disabled Then
