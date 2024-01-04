@@ -120,6 +120,8 @@ Private Declare Function RegQueryValueEx Lib "advapi32.dll" Alias "RegQueryValue
 Private Declare Function RegSetValueEx Lib "advapi32.dll" Alias "RegSetValueExA" (ByVal hKey As Long, ByVal lpValueName As String, ByVal Reserved As Long, ByVal dwType As Long, lpData As Any, ByVal cbData As Long) As Long
 Private Declare Function RegDeleteValue Lib "advapi32.dll" Alias "RegDeleteValueA" (ByVal hKey As Long, ByVal lpValueName As String) As Long
 Private Declare Function RegDeleteKey Lib "advapi32.dll" Alias "RegDeleteKeyA" (ByVal hKey As Long, ByVal lpSubKey As String) As Long
+Private Declare Function RegDeleteTree Lib "advapi32.dll" Alias "RegDeleteTreeA" (ByVal hKey As Long, ByVal lpSubKey As String) As Long
+Private Declare Function RegDisableReflectionKey Lib "advapi32.dll" (ByVal hKey As Long) As Long
 
 Private Declare Function GetVersionEx Lib "kernel32" Alias "GetVersionExA" (lpVersionInformation As OSVERSIONINFO) As Long
 
@@ -171,114 +173,7 @@ End Type
 Private mbRetrievedVersion As Boolean
 Private mstVersionInformation As OSVERSIONINFO
 
-Private Function Z_RemoveSubKeys(ByVal lBaseRegistryKey&, ByVal sKeyName$) As Boolean
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function Z_RemoveSubKeys
-'
-'                     lBaseRegistryKey&  - A variable that represents an open registry key
-'                     sKeyName$          - The name of the registry key to remove.
-'
-'                          ) As Boolean
-'
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Darren Adams    25 August 1999   First created for Pivotal Object Library
-'
-'                  PURPOSE: Removes a registry key, and any others underneath
-'                           it
-'
-'****************************************************************************
-'
-'
-Dim bReturn As Boolean: bReturn = True
-
-'
-' The usual registry manipulation variables
-'
-Dim lReturnValue&, lRegistryKey&, lNextKey&
-Dim lKeyLength&, sRegistryKeyName$, ftFileTime As FILETIME
-
-    '
-    ' Initialise error vector
-    '
-    On Error Resume Next
-    
-    '
-    ' Open the base registry key, find out whether this registry key contains
-    ' subkeys, delete those, then delete the base registry key
-    '
-    lReturnValue = RegOpenKeyEx(lBaseRegistryKey, sKeyName, 0&, KEY_ALL_ACCESS, lRegistryKey)
-    
-    '
-    ' This registry key should be found, but let's make sure anyway
-    '
-    If lReturnValue = ERROR_SUCCESS Then
-        '
-        ' Now look for any sub keys that this application may have
-        '
-        lNextKey = 0
-        lKeyLength = 4000: sRegistryKeyName = String$(lKeyLength, vbNullChar)
-        lReturnValue = RegEnumKeyEx(lRegistryKey, lNextKey, sRegistryKeyName, lKeyLength, 0&, 0&, 0&, ftFileTime)
-            
-        Do While lReturnValue = ERROR_SUCCESS
-            sRegistryKeyName = Left$(sRegistryKeyName, lKeyLength)
-            
-            '
-            ' Delete this sub key (and any others underneath it)
-            '
-            bReturn = Z_RemoveSubKeys(lRegistryKey, sRegistryKeyName)
-            
-            '
-            ' If subkeys could be removed, then try to find the next one, otherwise
-            ' exit this function
-            '
-            If bReturn Then
-                lNextKey = lNextKey + 1
-                lKeyLength = 4000: sRegistryKeyName = String$(lKeyLength, vbNullChar)
-                lReturnValue = RegEnumKeyEx(lRegistryKey, lNextKey, sRegistryKeyName, lKeyLength, 0&, 0&, 0&, ftFileTime)
-            Else
-                Exit Do
-            End If
-            DoEvents
-        Loop
-        
-        '
-        ' The only 'good' reason for leaving the above loop is if there are
-        ' no more sub keys (as indicated by the error constant below). If
-        ' any other errors codes have been returned, then something has
-        ' gone wrong, therefore this function fails.
-        '
-        If lReturnValue <> ERROR_NO_MORE_ITEMS Or bReturn = False Then
-            bReturn = False
-        Else
-            '
-            ' Delete the registry key then finish up
-            '
-            lReturnValue = RegDeleteKey(lRegistryKey, sRegistryKeyName)
-            If lReturnValue = ERROR_SUCCESS Then bReturn = True
-        End If
-    Else
-        bReturn = False
-    End If
-    
-    '
-    ' Close the registry key anyway
-    '
-    Call RegCloseKey(lRegistryKey)
-    
-    '
-    ' Return value to caller
-    '
-    Z_RemoveSubKeys = bReturn
-
-End Function
-
-Public Sub DeleteSetting(ByVal sAppName$, ByVal sSection$, Optional ByVal sKey$ = "")
+Public Sub DeleteSetting(ByVal sAppName$, Optional ByVal sSection$ = "", Optional ByVal sKey$ = "")
 Attribute DeleteSetting.VB_Description = "Deletes a section or key setting from an application's entry in the Windows registry"
 '****************************************************************************
 '
@@ -306,70 +201,21 @@ Attribute DeleteSetting.VB_Description = "Deletes a section or key setting from 
 '
 ' The required registry variables
 '
-Dim lRegistryKey&, lReturnCode&, ftFileTime As FILETIME
-
-'
-' Variables to manipulate any sub keys
-'
-Dim lSubRegistryKey&, lNextSubKey&, sSubKeyName$, lSubKeyReturnCode&
-Dim lRegistryKeyLength&
+Dim lRegistryKey&, lReturnCode&
 
     '
-    ' Initialise error vector
+    ' If we have a key and section, then dlete the key value
     '
     On Error Resume Next
-
-    '
-    ' Does the registry key have to be opened in the first place?
-    '
-    lReturnCode = RegOpenKeyEx(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection, 0&, KEY_ALL_ACCESS, lRegistryKey)
-    If lReturnCode = ERROR_SUCCESS Then
-        '
-        ' If a key is specified, then attempt delete to it. Otherwise,
-        ' attempt to delete any subkeys beneath this one, then
-        ' delete the key.
-        '
-        If sKey <> vbNullString Then
+    If sKey <> "" Then
+        lReturnCode = RegOpenKeyEx(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & IIf(sSection <> "", "\" & sSection, ""), 0&, KEY_ALL_ACCESS, lRegistryKey)
+        If lReturnCode = ERROR_SUCCESS Then
             lReturnCode = RegDeleteValue(lRegistryKey, sKey)
-        Else
-            lNextSubKey = 0&: lRegistryKeyLength = 4000
-            sSubKeyName = String$(lRegistryKeyLength, vbNullChar)
-            lSubKeyReturnCode = RegEnumKeyEx(lRegistryKey, lNextSubKey, sSubKeyName, lRegistryKeyLength, 0&, 0&, 0&, ftFileTime)
-                
-            Do While lSubKeyReturnCode = ERROR_SUCCESS Or lSubKeyReturnCode = 234
-                sSubKeyName = Left$(sSubKeyName, lRegistryKeyLength)
-                
-                '
-                ' Delete this subkey (and any others underneath it). If this
-                ' could not be done, then leave the loop (and possibly raise
-                ' an error?)
-                '
-                If Not Z_RemoveSubKeys(lRegistryKey, sSubKeyName) Then
-                    Exit Do
-                End If
-            
-                '
-                ' Try to find the next registry key.
-                '
-                lRegistryKeyLength = 4000
-                sSubKeyName = String$(lRegistryKeyLength, vbNullChar)
-                lSubKeyReturnCode = RegEnumKeyEx(lRegistryKey, lNextSubKey, sSubKeyName, lRegistryKeyLength, 0&, 0&, 0&, ftFileTime)
-                DoEvents
-            Loop
-            
-            '
-            ' No more subkeys
-            '
-            If lSubKeyReturnCode = ERROR_NO_MORE_ITEMS Then
-                lReturnCode = RegDeleteKey(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection)
-            End If
+            Call RegCloseKey(lRegistryKey)
         End If
+    Else
+        lReturnCode = RegDeleteTree(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & IIf(sSection <> "", "\" & sSection, ""))
     End If
-    
-    '
-    ' Close the registry key anyway
-    '
-    Call RegCloseKey(lRegistryKey)
 
 End Sub
 
@@ -396,63 +242,24 @@ Public Sub DeleteSettingEx(ByVal lKeyBase As RegistryClasses, ByVal sSection$, O
 '****************************************************************************
 '
 '
-Dim lRegistryKey&, lReturnCode&, ftFileTime As FILETIME
-Dim lSubRegistryKey&, lNextSubKey&, sSubKeyName$, lSubKeyReturnCode&
-Dim lRegistryKeyLength&
-
+'
+' The required registry variables
+'
+Dim lRegistryKey&, lReturnCode&
 
     '
-    ' Does the registry key have to be opened in the first place?
+    ' If we have a key and section, then dlete the key value
     '
     On Error Resume Next
-    lReturnCode = RegOpenKeyEx(lKeyBase, sSection, 0&, KEY_ALL_ACCESS, lRegistryKey)
-    If lReturnCode = ERROR_SUCCESS Then
-        '
-        ' If a key is specified, then attempt delete it. Otherwise,
-        ' attempt to delete any subkeys beneath this one, then
-        ' delete the key.
-        '
-        If sKey <> vbNullString Then
+    If sKey <> "" Then
+        lReturnCode = RegOpenKeyEx(lKeyBase, sSection, 0&, KEY_ALL_ACCESS, lRegistryKey)
+        If lReturnCode = ERROR_SUCCESS Then
             lReturnCode = RegDeleteValue(lRegistryKey, sKey)
-        Else
-            lNextSubKey = 0&: lRegistryKeyLength = 4000
-            sSubKeyName = String$(lRegistryKeyLength, vbNullChar)
-            lSubKeyReturnCode = RegEnumKeyEx(lRegistryKey, lNextSubKey, sSubKeyName, lRegistryKeyLength, 0&, 0&, 0&, ftFileTime)
-                
-            Do While lSubKeyReturnCode = ERROR_SUCCESS Or lSubKeyReturnCode = 234
-                sSubKeyName = Left$(sSubKeyName, lRegistryKeyLength)
-                
-                '
-                ' Delete this subkey (and any others underneath it). If this
-                ' could not be done, then leave the loop (and possibly raise
-                ' an error?)
-                '
-                If Not Z_RemoveSubKeys(lRegistryKey, sSubKeyName) Then
-                    Exit Do
-                End If
-            
-                '
-                ' Try to find the next registry key.
-                '
-                lRegistryKeyLength = 4000
-                sSubKeyName = String$(lRegistryKeyLength, vbNullChar)
-                lSubKeyReturnCode = RegEnumKeyEx(lRegistryKey, lNextSubKey, sSubKeyName, lRegistryKeyLength, 0&, 0&, 0&, ftFileTime)
-                DoEvents
-            Loop
-            
-            '
-            ' No more subkeys
-            '
-            If lSubKeyReturnCode = ERROR_NO_MORE_ITEMS Then
-                lReturnCode = RegDeleteKey(lKeyBase, sSection)
-            End If
+            Call RegCloseKey(lRegistryKey)
         End If
+    Else
+        lReturnCode = RegDeleteTree(lKeyBase, sSection)
     End If
-    
-    '
-    ' Close the registry key anyway
-    '
-    Call RegCloseKey(lRegistryKey)
 
 End Sub
 
@@ -664,8 +471,7 @@ Dim ftFileTime As FILETIME, abKeyValue() As Byte
     '
     ' Find the registry key
     '
-    lReturnValue = RegOpenKeyEx(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection, _
-        0, KEY_READ, lRegistryKey)
+    lReturnValue = RegOpenKeyEx(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection, 0, KEY_READ, lRegistryKey)
         
     '
     ' Found the registry key? Then get the values, otherwise, return
@@ -777,8 +583,7 @@ Dim ftFileTime As FILETIME
     '
     ' Find the registry key
     '
-    lReturnValue = RegOpenKeyEx(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection, _
-        0, KEY_READ, lRegistryKey)
+    lReturnValue = RegOpenKeyEx(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & "\" & sSection, 0, KEY_READ, lRegistryKey)
         
     '
     ' Found the registry key? Then get the values, otherwise, return
@@ -1141,14 +946,14 @@ Dim lReturnValue&, lRegistryKey&, lStringLength&, sKeyValue$
     '
     ' Attempt to open the specific registry key.
     '
-    lReturnValue = RegOpenKeyEx(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & IIf(sAppName = "", "", "\") & sSection, _
-        ByVal 0&, KEY_READ, lRegistryKey)
+    lReturnValue = RegOpenKeyEx(REGISTRY_ROOT, REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & IIf(sAppName = "", "", "\") & sSection, ByVal 0&, KEY_READ, lRegistryKey)
     
     '
     ' If the registry key exists, then attempt to retrieve the value, otherwise
     ' return the argument specified by the optional sDefault argument.
     '
     If lReturnValue = ERROR_SUCCESS Then
+        
         '
         ' Set an initial length of the string variable that will be
         ' used to store the retrieved registry value
@@ -1388,6 +1193,7 @@ Dim lReturnValue&, lRegistryKey&, lStringLength&, sKeyValue$
     ' return the argument specified by the optional sDefault argument.
     '
     If lReturnValue = ERROR_SUCCESS Then
+        
         '
         ' Set an initial length of the string variable that will be
         ' used to store the retrieved registry value
@@ -1615,13 +1421,36 @@ Dim bReturn As Boolean: bReturn = False
 End Function
 
 
-
 Public Function GetRegistryRoot&()
+'********************************************************************************
+'
+'               Function :  GetRegistryRoot
+'                           (
+'                           )   -   Long :   Key ID of the registry root
+'
+'   Modification History :  Steve O'Hara     4 December, 2023        Created
+'
+'            Description :  This function returns the ID of the root key
+'
+'********************************************************************************
+'
     GetRegistryRoot = REGISTRY_ROOT
 End Function
 
 
 Public Function GetRegistryKeyName$()
+'********************************************************************************
+'
+'               Function :  GetRegistryKeyName
+'                           (
+'                           )   -   String :   Key name of the registry root
+'
+'   Modification History :  Steve O'Hara     4 December, 2023        Created
+'
+'            Description :  This function returns the name of the root key
+'
+'********************************************************************************
+'
 
     If REGISTRY_ROOT = RegRoot Then
         GetRegistryKeyName = "HKEY_CLASSES_ROOT"
@@ -1638,4 +1467,181 @@ Public Function GetRegistryKeyName$()
     End If
 
 End Function
+
+Public Function SaveToFile(ByVal sFilename$, ByVal sAppName$)
+'********************************************************************************
+'
+'               Function :  SaveToFile
+'                           (
+'                               sFilename$  - File to save the settings to
+'                               sAppName$   - Name of the application
+'                           )   -   String :   Any errors from the save process
+'
+'   Modification History :  Steve O'Hara     4 December, 2023        Created
+'
+'            Description :  This function saves all the settings to the specified
+'                           file and will return any errors
+'
+'********************************************************************************
+'
+Dim iFile%, iCnt%
+Dim asSymbols As Variant
+
+    '
+    ' Attempt to ope the file for output
+    '
+    SaveToFile = ""
+    On Error Resume Next
+    iFile = FreeFile
+    Open sFilename For Output As iFile
+    If Err = 0 Then
+    
+        '
+        ' Start with the easy stuff
+        '
+        Print #iFile, "Windows Registry Editor Version 5.00" & vbCrLf
+        Z_WriteSectionToFile iFile, sAppName
+        
+        '
+        ' Now the Last Good Rates
+        '
+        Z_WriteSectionToFile iFile, sAppName, REG_LAST_GOOD_RATES
+        
+        '
+        ' Now the Last Good Values
+        '
+        Z_WriteSectionToFile iFile, sAppName, REG_LAST_GOOD_VALUES
+    
+        '
+        ' Now the Settings
+        '
+        Z_WriteSectionToFile iFile, sAppName, REG_SETTINGS
+    
+        '
+        ' Loop round all the symbols
+        '
+        asSymbols = GetSubkeys(App.Title, REG_SYMBOLS)
+        If Not IsEmpty(asSymbols) Then
+            asSymbols = PSGEN_SortArraySimple(asSymbols)
+            For iCnt = 0 To UBound(asSymbols)
+                Z_WriteSectionToFile iFile, sAppName, REG_SYMBOLS & "\" & asSymbols(iCnt)
+            Next
+        End If
+    
+        '
+        ' Close the file
+        '
+        Close iFile
+    Else
+        SaveToFile = "Error trying to open file [" & sFilename & "] for output" & vbCrLf & Err.Description
+        PSGEN_Log SaveToFile, LogError
+    End If
+
+End Function
+
+
+Public Function LoadFromFile(ByVal sFilename$, ByVal sAppName$)
+'********************************************************************************
+'
+'               Function :  LoadFromFile
+'                           (
+'                               sFilename$  - File to save the settings to
+'                               sAppName$   - Name of the application
+'                           )   -   String :   Any errors from the save process
+'
+'   Modification History :  Steve O'Hara     4 December, 2023        Created
+'
+'            Description :  This function loads all the settings from the specified
+'                           file and will return any errors
+'
+'********************************************************************************
+'
+Dim iFile%
+Dim sLine$, sSection$, sKey$, sValue$
+Dim bGotFirstSection As Boolean
+
+    '
+    ' Delete the app settings first
+    '
+    LoadFromFile = ""
+    On Error Resume Next
+    DeleteSetting sAppName
+
+    '
+    ' Attempt to open the file for output
+    '
+    iFile = FreeFile
+    Open sFilename For Input As iFile
+    If Err = 0 Then
+    
+        Do While Not EOF(iFile)
+            Line Input #iFile, sLine
+            
+            '
+            ' Check for a section definition
+            '
+            If sLine Like "[[]*]" Then
+                sSection = Split(Mid(sLine, 2, Len(sLine) - 2), sAppName + "\", 2)(1)
+                
+            '
+            ' If not empty and we have a section, then must be a value
+            '
+            ElseIf sSection <> "" And sLine <> "" Then
+                sKey = Replace(Split(sLine, "=", 2)(0), """", "")
+                sValue = Replace(Replace(Replace(Split(sLine, "=", 2)(1), "\""", "~#~"), """", ""), "~#~", """")
+                If sKey <> "" Then
+                    SaveSetting sAppName, sSection, sKey, sValue
+                End If
+            End If
+        Loop
+        
+        '
+        ' Close the file
+        '
+        Close iFile
+    Else
+        LoadFromFile = "Error trying to open file [" & sFilename & "] for output" & vbCrLf & Err.Description
+        PSGEN_Log LoadFromFile, LogError
+    End If
+
+End Function
+
+
+Private Sub Z_WriteSectionToFile(ByVal iFile%, ByVal sAppName$, Optional ByVal sSection$ = "")
+'********************************************************************************
+'
+'               Function :  Z_WriteSectionToFile
+'                           (
+'                               iFile%      - File to write to
+'                               sAppName$   - Name of the application
+'                               sSection$   - Name of th section to wite with all of its values
+'                           )
+'
+'   Modification History :  Steve O'Hara     4 December, 2023        Created
+'
+'            Description :  This subroutine writes the section to the output
+'                           file along with the registry values for it. It throws
+'                           an error if something fails
+'
+'********************************************************************************
+'
+
+Dim asValues As Variant
+Dim iCnt%
+
+    Print #iFile, "[" & GetRegistryKeyName() & "\" & REGISTRY_KEY_BASE & CompanyName & "\" & sAppName & IIf(sSection = "", "", "\" & sSection) & "]"
+    If sSection <> "" Then
+        asValues = GetAllSettings(sAppName, sSection)
+        If Not IsEmpty(asValues) Then
+            For iCnt = 0 To UBound(asValues)
+                If asValues(iCnt, 1) <> "" Then
+                    Print #iFile, """" & asValues(iCnt, 0) & """=""" & Replace(asValues(iCnt, 1), """", "\""") & """"
+                End If
+            Next
+        End If
+    End If
+    Print #iFile, ""
+
+End Sub
+
 

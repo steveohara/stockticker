@@ -30,8 +30,8 @@ Option Explicit
     ' Version number form the build system
     '
     Public Const VERSION_NAME = "Pivotal Stock Ticker (pivotalstockticker.exe)"
-    Public Const VERSION_NUMBER = "3.2.6"
-    Public Const VERSION_TIMESTAMP = "03-Jan-2024 10:17"
+    Public Const VERSION_NUMBER = "3.3.0"
+    Public Const VERSION_TIMESTAMP = "04-Jan-2024 14:12"
 
     '
     ' Registry entries
@@ -738,9 +738,10 @@ Private Sub Main()
 
 Dim asArgs$()
 Dim bHandled As Boolean
+Dim sExeFile$
     
     '
-    ' Need to check if w are being run with a command
+    ' Need to check if we are being run with a command
     '
     asArgs = Split(Command$, " ")
     bHandled = False
@@ -752,10 +753,34 @@ Dim bHandled As Boolean
     End If
     
     '
-    ' Show the main dialog if we are not just running a comman line
+    ' Show the main dialog if we are not just running a command line
     '
     If Not bHandled Then
-        frmMain.Show
+    
+        '
+        ' Check to see if this is the upgrade
+        '
+        If App.EXEName Like "*_download" Then
+            sExeFile = Split(App.EXEName, "_download")(0) + ".exe"
+            If PSGEN_ProcessExists(sExeFile) > 0 Then
+                Call PSGEN_KillExe(sExeFile)
+                Call Sleep(500)
+            End If
+            FileCopy App.path + "\" + App.EXEName + ".exe", App.path + "\" + sExeFile
+            Shell App.path + "\" + sExeFile + Command, vbHide
+            Call Sleep(500)
+            End
+        Else
+            
+            '
+            ' Check to see if the app is already running
+            '
+            If PSGEN_ProcessExists(App.EXEName + ".exe") > 1 Then
+                End
+            Else
+                frmMain.Show
+            End If
+        End If
     End If
 
 End Sub

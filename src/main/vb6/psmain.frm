@@ -489,7 +489,6 @@ Dim objSymbol As cSymbol
     ' Draw the text on the display
     '
     On Error Resume Next
-'    Debug.Print Format(Now, "hh:nn:ss") + " Displaying data"
     Set picData.Font = Font
     bShowTotal = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_PROFIT_LOSS, "0"))
     bShowTotalPercent = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_PROFIT_LOSS_PERCENT, "0"))
@@ -677,44 +676,26 @@ End Sub
 
 Private Sub Form_Load()
 
-Dim sExeFile$
-
     '
     ' Remove the border
     '
     SetWindowLong Me.hWnd, GWL_STYLE, 100663296
+    Set mobjCurrentSymbols = Nothing
+    Set mobjExchangeRates = Nothing
+    Set mobjSummaryStocks = Nothing
     
     '
-    ' Check to see if this is the upgrade
+    ' Position the display based upon the docking
     '
-    If App.EXEName Like "*_download" Then
-        sExeFile = Split(App.EXEName, "_download")(0) + ".exe"
-        If PSGEN_ProcessExists(sExeFile) > 0 Then
-            Call PSGEN_KillExe(sExeFile)
-            Call Sleep(500)
-        End If
-        FileCopy App.path + "\" + App.EXEName + ".exe", App.path + "\" + sExeFile
-        Shell App.path + "\" + sExeFile + Command, vbHide
-        Call Sleep(500)
-        End
-    Else
-        
-        '
-        ' Check to see if the app is already running
-        '
-        If PSGEN_ProcessExists(App.EXEName + ".exe") > 1 Then End
-        
-        '
-        ' Position the display based upon the docking
-        '
-        Z_SetupDisplay
-        
-        '
-        ' Display the data
-        '
-        Call Z_DisplayData("Loading....")
-        Z_GetSymbolData
-    End If
+    Z_SetupDisplay
+    
+    '
+    ' Display the data
+    '
+    Call Z_DisplayData("Loading....")
+    Z_GetSymbolData
+    Z_DisplayData
+    timData.Enabled = True
     
 End Sub
 
@@ -812,6 +793,17 @@ End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
 
+    '
+    ' Initialise before unloading
+    '
+    timData.Enabled = False
+    Set mobjCurrentSymbols = Nothing
+    Set mobjExchangeRates = Nothing
+    Set mobjSummaryStocks = Nothing
+    
+    '
+    ' Undock ourselves
+    '
     Z_UnloadDock
 
 End Sub

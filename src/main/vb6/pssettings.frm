@@ -893,7 +893,7 @@ End Sub
 
 Private Sub cmdMain_Click(Index As Integer)
 
-Dim sFilename$
+Dim sFilename$, sError$, sBackup$
 Dim lTmp&
 
     On Error Resume Next
@@ -954,9 +954,18 @@ Dim lTmp&
     ElseIf Index = 2 Then
         sFilename = PSGEN_SelectSaveFile(cmdMain(Index).hWnd, "Backup Files" + vbNullChar + "*.bck", OFN_EXPLORER + OFN_OVERWRITEPROMPT + OFN_PATHMUSTEXIST + OFN_SHAREAWARE, "Save to File")
         If sFilename <> "" Then
-            Call Shell("regedit /E """ + sFilename + """ """ + mobjReg.GetRegistryKeyName() + "\SOFTWARE\Pivotal\" + App.Title + """", vbHide)
+            sError = mobjReg.SaveToFile(sFilename, App.Title)
+            If sError = "" Then
+                MsgBox "Settings saved successfully to" + vbCrLf + vbCrLf + sFilename, vbInformation
+                PSGEN_Log "Saved settings to " + sBackup
+            Else
+                MsgBox "Error whilst saving settings to" + vbCrLf + vbCrLf + sFilename + vbCrLf + vbCrLf + sError, vbCritical
+            End If
         End If
     
+    '
+    ' Reload the registry from a file
+    '
     ElseIf Index = 3 Then
         sFilename = PSGEN_SelectOpenFile(cmdMain(Index).hWnd, "Backup Files" + vbNullChar + "*.bck", OFN_EXPLORER + OFN_OVERWRITEPROMPT + OFN_PATHMUSTEXIST + OFN_SHAREAWARE, "Save to File")
         If sFilename <> "" Then
@@ -966,15 +975,25 @@ Dim lTmp&
                 ' Backup the original
                 '
                 Err.Clear
-                Call Shell("regedit /E """ + App.path + "\backup_" + Format(Now, "ddmmyy_hhNNss") + ".bck"" """ + mobjReg.GetRegistryKeyName() + "\SOFTWARE\Pivotal\" + App.Title + """", vbHide)
+                sBackup = App.path + "\backup_" + Format(Now, "ddmmyy_hhNNss") + ".bck"
+                sError = mobjReg.SaveToFile(sBackup, App.Title)
+                If sError <> "" Then
+                    MsgBox "Error whilst backing up settings to" + vbCrLf + vbCrLf + sBackup + vbCrLf + vbCrLf + sError, vbCritical
+                Else
                 
-                '
-                ' Now delete the original and load the new values
-                '
-                mobjReg.DeleteSetting App.Title, REG_SETTINGS
-                mobjReg.DeleteSetting App.Title, REG_SYMBOLS
-                mobjReg.DeleteSettingEx mobjReg.GetRegistryRoot(), "SOFTWARE\Pivotal\" + App.Title
-                Call Shell("regedit /s """ + sFilename + """", vbHide)
+                    '
+                    ' Now delete the original and load the new values
+                    '
+                    PSGEN_Log "Backup settings to " + sBackup
+                    sError = mobjReg.LoadFromFile(sFilename, App.Title)
+                    If sError = "" Then
+                        MsgBox "Settings loaded successfully from" + vbCrLf + vbCrLf + sFilename, vbInformation
+                        Unload frmMain
+                        frmMain.Show
+                    Else
+                        MsgBox "Error whilst loading settings from" + vbCrLf + vbCrLf + sFilename + vbCrLf + vbCrLf + sError, vbCritical
+                    End If
+                End If
             End If
         End If
     
