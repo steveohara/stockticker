@@ -1457,12 +1457,14 @@ Dim bGotExchangeRates As Boolean
                     '
                     If Trim(sCSV) <> "" Then
                         PSGEN_Log "Got stock price from IEX successfully for " + sSymbol
-                        rDayOpen = CDbl(getJsonValue(sCSV, "previousClose"))
-                        rDayHigh = CDbl(getJsonValue(sCSV, "high"))
-                        rDayLow = CDbl(getJsonValue(sCSV, "low"))
-                        rCurrentPrice = CDbl(getJsonValue(sCSV, "iexRealtimePrice"))
-                        If rCurrentPrice = 0 Or getJsonValue(sCSV, "iexRealtimePrice") = "" Then
-                            rCurrentPrice = CDbl(getJsonValue(sCSV, "latestPrice"))
+                        Set bag = New JsonBag
+                        bag.JSON = sCSV
+                        rDayOpen = CDbl(bag.Item("previousClose"))
+                        rDayHigh = CDbl(bag.Item("high"))
+                        rDayLow = CDbl(bag.Item("low"))
+                        rCurrentPrice = CDbl(bag.Item("iexRealtimePrice"))
+                        If rCurrentPrice = 0 Or bag.Item("iexRealtimePrice") = "" Then
+                            rCurrentPrice = CDbl(bag.Item("latestPrice"))
                         End If
                         If rCurrentPrice <> 0 Then
                             sTmp = """" + sSymbol + """"
