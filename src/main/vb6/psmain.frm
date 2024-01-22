@@ -322,6 +322,9 @@ Option Explicit
     Private miScrollInterval%
     Private miScrollMovement%
     
+    Public mrDaySummaryRegionStartX As Single
+    Public mrDaySummaryRegionEndX As Single
+    
     Dim mfrmPrevaiew As frmPreview
     Dim mlChartLagger&
     Dim picSelectedSizer As PictureBox
@@ -479,7 +482,7 @@ Dim bItalic As Boolean
 Dim bAlwaysOnTop As Boolean
 Dim bShown As Boolean
 Dim sLeader$, sFont$, sCurrencyName$, sCurrencySymbol$
-Dim lBackColor&, lTextColor&, lUpColor&, lDownColor&, lUpArrowColor&, lDownArrowColor&
+Dim lBackColor&, lTextColor&, lUpColor&, lDownColor&
 Dim rTotalInvestment#, rMargin#, rRate#, rTotalChange#
 Dim objSymbol As cSymbol
 
@@ -502,8 +505,6 @@ Dim objSymbol As cSymbol
     lTextColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TEXT_COLOUR, Format(vbWhite)))
     lUpColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_COLOUR, Format(vbGreen)))
     lDownColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_COLOUR, Format(vbRed)))
-    lUpArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_ARROW_COLOUR, Format(vbGreen)))
-    lDownArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_ARROW_COLOUR, Format(vbRed)))
     
     If PSGEN_IsCommaLocale Then
         rTotalInvestment = CDbl("0" + Replace(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_TOTAL, "0"), ".", ","))
@@ -588,9 +589,10 @@ Dim objSymbol As cSymbol
                 ' Get the total daily change
                 '
                 Set objSymbol = mobjCurrentSymbols.Item(objStock.Code)
-                rTotalChange = rTotalChange + (Z_ConvertCurrency(objSymbol, objSymbol.DayChange) * objStock.NumberOfShares)
+                rTotalChange = rTotalChange + (ConvertCurrency(objSymbol, objSymbol.DayChange) * objStock.NumberOfShares)
             Next
             If bShowDailyChange Then
+                mrDaySummaryRegionStartX = CurrentX
                 CurrentX = CurrentX + IIf(bShown, 10, 6)
                 ForeColor = &HC0C0&
                 Print "Today:";
@@ -599,6 +601,7 @@ Dim objSymbol As cSymbol
                 Print FormatCurrencyValue(sCurrencySymbol, rTotalChange);
                 CurrentX = CurrentX + 6
                 Print "(" + Format(rTotalChange / (mobjTotal.TotalValue - rTotalChange), "0.00%") + ")";
+                mrDaySummaryRegionEndX = CurrentX
                 bShown = True
             End If
             
@@ -731,6 +734,7 @@ End Sub
 Private Sub Form_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
 
 Dim stPoint As POINTAPI
+Dim bShowDailyChange As Boolean
 
     '
     ' If we are capturing then move the display
@@ -740,11 +744,19 @@ Dim stPoint As POINTAPI
         Call GetCursorPos(stPoint)
         Call SetWindowPos(hWnd, 0, stPoint.X - mstPoint.X, stPoint.Y - mstPoint.Y, 0, 0, SWP_NOSIZE)
     Else
-    
-        '
-        ' Show the browser window for this application
-        '
-        frmPreview.ShowChart Z_GetSymbolUnderMouse
+        bShowDailyChange = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_DAILY_CHANGE, "0"))
+        If bShowDailyChange And X >= mrDaySummaryRegionStartX And X <= mrDaySummaryRegionEndX Then
+            '
+            ' Show the preview window for the daily sumary
+            '
+            frmPreview.ShowDaySummary
+        
+        Else
+            '
+            ' Show the preview window for this application
+            '
+            frmPreview.ShowChart Z_GetSymbolUnderMouse
+        End If
     End If
     
 End Sub
@@ -1729,8 +1741,8 @@ Dim bGotExchangeRates As Boolean
                 End If
                     
                 If Not objSymbol.ExcludeFromSummary Then
-                    rTotalInvested = rTotalInvested + Z_ConvertCurrency(objSymbol, objSymbol.Price * objSymbol.Shares)
-                    rTotalValue = rTotalValue + Z_ConvertCurrency(objSymbol, objSymbol.CurrentPrice * objSymbol.Shares)
+                    rTotalInvested = rTotalInvested + ConvertCurrency(objSymbol, objSymbol.Price * objSymbol.Shares)
+                    rTotalValue = rTotalValue + ConvertCurrency(objSymbol, objSymbol.CurrentPrice * objSymbol.Shares)
                 End If
                 
                 '
@@ -1882,7 +1894,7 @@ Private Sub Z_DrawSymbolText()
 
 Dim asSymbols$()
 Dim i%, iLeft%, iTop%
-Dim lBackColor&, lTextColor&, lUpColor&, lDownColor&, lUpArrowColor&, lDownArrowColor&, lTmp&
+Dim lBackColor&, lTextColor&, lUpColor&, lDownColor&, lTmp&
 Dim bNotFirst As Boolean
 Dim objSymbol As cSymbol
 Dim bShownOtherData As Boolean
@@ -1896,8 +1908,6 @@ Dim objSymbols As Collection
     lTextColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TEXT_COLOUR, Format(vbWhite)))
     lUpColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_COLOUR, Format(vbGreen)))
     lDownColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_COLOUR, Format(vbRed)))
-    lUpArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_ARROW_COLOUR, Format(vbGreen)))
-    lDownArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_ARROW_COLOUR, Format(vbRed)))
     
     '
     ' Loop through all the symbols getting a sorted list
@@ -1971,34 +1981,7 @@ Dim objSymbols As Collection
                     ' Show the up/down arrows
                     '
                     If objSymbol.ShowChangeUpDown Then
-                        iLeft = picData.CurrentX + 4
-                        iTop = picData.CurrentY
-                        If objSymbol.CurrentPrice < objSymbol.Price Then
-                            For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3), lDownArrowColor
-                            Next i
-                            picData.DrawWidth = 2
-                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + 3)-(iLeft + (ScaleHeight \ 4), 3 * ScaleHeight \ 4), lDownArrowColor
-                        
-                        ElseIf objSymbol.CurrentPrice > objSymbol.Price Then
-                            For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3), lUpArrowColor
-                            Next i
-                            picData.DrawWidth = 2
-                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + ScaleHeight \ 4)-(iLeft + (ScaleHeight \ 4), ScaleHeight - 4), lUpArrowColor
-                        Else
-                            For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3)
-                            Next i
-                            For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3)
-                            Next i
-                            picData.DrawWidth = 2
-                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + ScaleHeight \ 4)-(iLeft + (ScaleHeight \ 4), 3 * ScaleHeight \ 4)
-                        End If
-                        picData.DrawWidth = 1
-                        picData.CurrentY = iTop
-                        picData.CurrentX = picData.CurrentX + 4
+                        DrawUpDownArrow objSymbol, picData, ScaleHeight, picData.CurrentX + 4, picData.CurrentY
                     End If
                 Else
                     picData.ForeColor = IIf(objSymbol.CurrentPrice > objSymbol.DayStart, lUpColor, IIf(objSymbol.CurrentPrice < objSymbol.Price, lDownColor, lTextColor))
@@ -2055,35 +2038,7 @@ Dim objSymbols As Collection
                     ' Show the Day up/down arrows
                     '
                     If objSymbol.ShowDayChangeUpDown Then
-                        iLeft = picData.CurrentX + 1
-                        iTop = picData.CurrentY
-                        
-                        If objSymbol.CurrentPrice < objSymbol.DayStart Then
-                            For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3), lDownArrowColor
-                            Next i
-                            picData.DrawWidth = 2
-                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + 3)-(iLeft + (ScaleHeight \ 4), 3 * ScaleHeight \ 4), lDownArrowColor
-                        
-                        ElseIf objSymbol.CurrentPrice > objSymbol.DayStart Then
-                            For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3), lUpArrowColor
-                            Next i
-                            picData.DrawWidth = 2
-                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + ScaleHeight \ 4)-(iLeft + (ScaleHeight \ 4), ScaleHeight - 4), lUpArrowColor
-                        Else
-                            For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, ScaleHeight - i - 3)-(iLeft + (ScaleHeight \ 4) + i, ScaleHeight - i - 3)
-                            Next i
-                            For i = 0 To ScaleHeight \ 4
-                               picData.Line (iLeft + (ScaleHeight \ 4) - i, i + 3)-(iLeft + (ScaleHeight \ 4) + i, i + 3)
-                            Next i
-                            picData.DrawWidth = 2
-                            picData.Line (iLeft + (ScaleHeight \ 4), iTop + ScaleHeight \ 4)-(iLeft + (ScaleHeight \ 4), 3 * ScaleHeight \ 4)
-                        End If
-                        picData.DrawWidth = 1
-                        picData.CurrentY = iTop
-                        picData.CurrentX = picData.CurrentX + 4
+                        DrawUpDownArrow objSymbol, picData, ScaleHeight, picData.CurrentX + 1, picData.CurrentY
                     End If
                 
                     If bShownBraces Then picData.Print ")";
@@ -2114,21 +2069,6 @@ Dim lTmp&
         picData.ForeColor = lTmp
         picData.FontSize = i
         picData.CurrentY = picData.CurrentY - 2
-    End If
-
-End Function
-
-Function Z_ConvertCurrency#(ByVal objSymbol As cSymbol, ByVal rValue#)
-
-Dim sCurrencyDest$, sCSV$, sURL$
-Dim rRate#
-
-    On Error Resume Next
-    Z_ConvertCurrency = rValue
-    rRate = mobjExchangeRates.Item(objSymbol.CurrencyName)
-    If rRate > 0 Then
-        Z_ConvertCurrency = rValue * rRate
-        If InStr(1, "abcdefghijklmnopqrstuvwxyz", objSymbol.CurrencySymbol, vbTextCompare) > 0 Then Z_ConvertCurrency = Z_ConvertCurrency / 100
     End If
 
 End Function

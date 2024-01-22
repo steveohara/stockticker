@@ -104,6 +104,7 @@ Option Explicit
     Private mobjStockSymbol As Object
     Private mlLeftPos&
     Private mbOneDay As Boolean
+    Private mbDaySummary As Boolean
     Private mobjChartCache As Collection
 
 
@@ -121,8 +122,10 @@ End Sub
 
 Private Sub picGraph_DblClick()
 
-    mbOneDay = Not mbOneDay
-    Z_ShowChart mobjStockSymbol
+    If Not mbDaySummary Then
+        mbOneDay = Not mbOneDay
+        Z_ShowChart mobjStockSymbol
+    End If
 
 End Sub
 
@@ -156,7 +159,11 @@ End Sub
 Private Sub timOpen_Timer()
 
     timOpen.Enabled = False
-    Z_ShowChart mobjStockSymbol
+    If mbDaySummary Then
+        Z_ShowDaySummary
+    Else
+        Z_ShowChart mobjStockSymbol
+    End If
 
 End Sub
 
@@ -178,6 +185,7 @@ Public Sub ShowChart(objStockSymbol As Object)
 Dim stRect As RECT
 Dim stPoint As POINTAPI
 
+    mbDaySummary = False
     If objStockSymbol Is Nothing Then
         HideChart True
         
@@ -194,6 +202,22 @@ Dim stPoint As POINTAPI
     End If
 
 End Sub
+
+Public Sub ShowDaySummary()
+
+Dim stRect As RECT
+
+    mbDaySummary = True
+    If Not timClose.Enabled Then
+        GetWindowRect frmMain.hWnd, stRect
+        timOpen.Enabled = False
+        mlLeftPos = stRect.Left + frmMain.mrDaySummaryRegionStartX
+        timOpen.Enabled = True
+        timClose.Enabled = True
+    End If
+
+End Sub
+
 
 
 Private Sub Z_ShowChart(objStockSymbol As Object)
@@ -246,6 +270,7 @@ Dim bLoaded As Boolean
     '
     ' Load and position the display
     '
+    picGraph.Visible = True
     lLeft = mlLeftPos
     lTop = (frmMain.Top + frmMain.Height) / Screen.TwipsPerPixelY
     lWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN)
@@ -497,4 +522,118 @@ Dim bLoaded As Boolean
     timClose.Enabled = True
 
 End Sub
+
+Private Sub Z_ShowDaySummary()
+'****************************************************************************
+'
+'   Pivotal Solutions Ltd © 2008
+'
+'****************************************************************************
+'
+'                     NAME: Sub Z_ShowChart
+'
+'                     sSymbol$           - Symbol to show chart for
+'
+'             DEPENDENCIES: NONE
+'
+'     MODIFICATION HISTORY: Steve O'Hara    28 August 2008   First created for StockTicker
+'
+'                  PURPOSE: Shows a chart window
+'
+'****************************************************************************
+'
+'
+Dim lWidth&, lLeft&, lTop&, lHeight&, lWidest&, lTableTop&
+Dim lTextColor&, lUpColor&, lDownColor&, lUpArrowColor&, lDownArrowColor&
+Dim objStock As cStock
+Dim objSymbol As cSymbol
+Dim rRate#, rTotalChange#
+Dim sCurrencyName$, sCurrencySymbol$
+
+    '
+    ' Determine the type of symbol
+    '
+    On Error Resume Next
+    timClose.Enabled = False
+    picGraph.Visible = False
+        
+    '
+    ' Draw the useful text
+    '
+    Cls
+    CurrentY = 8
+    ForeColor = vbWhite
+    FontSize = 11
+    lTextColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TEXT_COLOUR, Format(vbWhite)))
+    lUpColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_COLOUR, Format(vbGreen)))
+    lDownColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_COLOUR, Format(vbRed)))
+    lUpArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_ARROW_COLOUR, Format(vbGreen)))
+    lDownArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_ARROW_COLOUR, Format(vbRed)))
+    sCurrencySymbol = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY_SYMBOL, "£")
+    
+    CurrentX = 10
+    ForeColor = lTextColor
+    FontBold = True
+    Print "Day Summary"
+    FontBold = False
+    CurrentY = CurrentY + 10
+    lTableTop = CurrentY - 5
+    
+    '
+    ' Each stock sumarised for the day
+    '
+    rTotalChange = 0
+    For Each objStock In frmMain.mobjSummaryStocks
+        ForeColor = lTextColor
+        CurrentX = 10
+        Set objSymbol = frmMain.mobjCurrentSymbols.Item(objStock.Code)
+        Print objStock.DisplayName;
+        CurrentX = 60
+        
+        ForeColor = IIf(objStock.CurrentPrice > objSymbol.DayStart, lUpColor, IIf(objStock.CurrentPrice < objSymbol.DayStart, lDownColor, lTextColor))
+        Print " " & objStock.FormattedPrice;
+        CurrentX = 135
+        Print FormatCurrencyValue(objStock.CurrencySymbol, objSymbol.DayChange);
+        CurrentX = 180
+        Print Format(objSymbol.DayChange / objSymbol.DayStart, "(0.00%)");
+        
+        rTotalChange = rTotalChange + (ConvertCurrency(objSymbol, objSymbol.DayChange) * objStock.NumberOfShares)
+        lWidest = IIf(CurrentX > lWidest, CurrentX, lWidest)
+        Print ""
+    Next
+    lWidest = lWidest + 5
+    
+    '
+    ' Add a line under the title
+    '
+    ForeColor = lTextColor
+    lTop = CurrentY
+    Line (10, lTableTop)-(lWidest, lTableTop)
+    CurrentY = lTop
+    
+    '
+    ' Add the total value
+    '
+    FontBold = True
+    CurrentY = CurrentY + 5
+    Line (10, CurrentY)-(lWidest, CurrentY)
+    CurrentY = CurrentY + 5
+    CurrentX = 10
+    FontBold = True
+    Print "Total: ";
+    ForeColor = IIf(rTotalChange > 0, lUpColor, IIf(rTotalChange < 0, lDownColor, lTextColor))
+    Print FormatCurrencyValue(sCurrencySymbol, rTotalChange) & " (" + Format(rTotalChange / (frmMain.mobjTotal.TotalValue - rTotalChange), "0.00%") + ")"
+    
+    '
+    ' Resize the window to match the content
+    '
+    lLeft = mlLeftPos
+    lTop = frmMain.Top + frmMain.Height
+    Move lLeft * Screen.TwipsPerPixelX, lTop, (lWidest + 10) * Screen.TwipsPerPixelX, (CurrentY + 10) * Screen.TwipsPerPixelY
+    
+    Show
+    timClose.Enabled = True
+
+End Sub
+
 

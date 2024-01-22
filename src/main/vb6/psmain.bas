@@ -30,8 +30,8 @@ Option Explicit
     ' Version number form the build system
     '
     Public Const VERSION_NAME = "Pivotal Stock Ticker (pivotalstockticker.exe)"
-    Public Const VERSION_NUMBER = "3.3.2"
-    Public Const VERSION_TIMESTAMP = "12-Jan-2024 16:25"
+    Public Const VERSION_NUMBER = "3.4.0"
+    Public Const VERSION_TIMESTAMP = "22-Jan-2024 16:00"
 
     '
     ' Registry entries
@@ -784,4 +784,59 @@ Dim sExeFile$
     End If
 
 End Sub
+
+Sub DrawUpDownArrow(ByVal objSymbol As cSymbol, objSurface As Object, ByVal iScaleHeight%, ByVal iLeft%, ByVal iTop%)
+
+Dim lTextColor&, lUpArrowColor&, lDownArrowColor&
+Dim i%
+
+    lTextColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TEXT_COLOUR, Format(vbWhite)))
+    lUpArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_ARROW_COLOUR, Format(vbGreen)))
+    lDownArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_ARROW_COLOUR, Format(vbRed)))
+    
+    If objSymbol.CurrentPrice < objSymbol.DayStart Then
+        For i = 0 To iScaleHeight \ 4
+           objSurface.Line (iLeft + (iScaleHeight \ 4) - i, iScaleHeight - i - 3)-(iLeft + (iScaleHeight \ 4) + i, iScaleHeight - i - 3), lDownArrowColor
+        Next i
+        objSurface.DrawWidth = 2
+        objSurface.Line (iLeft + (iScaleHeight \ 4), iTop + 3)-(iLeft + (iScaleHeight \ 4), 3 * iScaleHeight \ 4), lDownArrowColor
+    
+    ElseIf objSymbol.CurrentPrice > objSymbol.DayStart Then
+        For i = 0 To iScaleHeight \ 4
+           objSurface.Line (iLeft + (iScaleHeight \ 4) - i, i + 3)-(iLeft + (iScaleHeight \ 4) + i, i + 3), lUpArrowColor
+        Next i
+        objSurface.DrawWidth = 2
+        objSurface.Line (iLeft + (iScaleHeight \ 4), iTop + iScaleHeight \ 4)-(iLeft + (iScaleHeight \ 4), iScaleHeight - 4), lUpArrowColor
+    Else
+        For i = 0 To iScaleHeight \ 4
+           objSurface.Line (iLeft + (iScaleHeight \ 4) - i, iScaleHeight - i - 3)-(iLeft + (iScaleHeight \ 4) + i, iScaleHeight - i - 3)
+        Next i
+        For i = 0 To iScaleHeight \ 4
+           objSurface.Line (iLeft + (iScaleHeight \ 4) - i, i + 3)-(iLeft + (iScaleHeight \ 4) + i, i + 3), lTextColor
+        Next i
+        objSurface.DrawWidth = 2
+        objSurface.Line (iLeft + (iScaleHeight \ 4), iTop + iScaleHeight \ 4)-(iLeft + (iScaleHeight \ 4), 3 * iScaleHeight \ 4), lTextColor
+    End If
+
+    objSurface.DrawWidth = 1
+    objSurface.CurrentY = iTop
+    objSurface.CurrentX = objSurface.CurrentX + 4
+
+End Sub
+
+Function ConvertCurrency#(ByVal objSymbol As cSymbol, ByVal rValue#)
+
+Dim sCurrencyDest$, sCSV$, sURL$
+Dim rRate#
+
+    On Error Resume Next
+    ConvertCurrency = rValue
+    rRate = frmMain.mobjExchangeRates.Item(objSymbol.CurrencyName)
+    If rRate > 0 Then
+        ConvertCurrency = rValue * rRate
+        If InStr(1, "abcdefghijklmnopqrstuvwxyz", objSymbol.CurrencySymbol, vbTextCompare) > 0 Then ConvertCurrency = ConvertCurrency / 100
+    End If
+
+End Function
+
 
