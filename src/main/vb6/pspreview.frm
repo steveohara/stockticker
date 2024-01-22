@@ -547,7 +547,7 @@ Dim lWidth&, lLeft&, lTop&, lHeight&, lWidest&, lTableTop&
 Dim lTextColor&, lUpColor&, lDownColor&, lUpArrowColor&, lDownArrowColor&
 Dim objStock As cStock
 Dim objSymbol As cSymbol
-Dim rRate#, rTotalChange#
+Dim rRate#, rTotalChange#, rChangeValue#
 Dim sCurrencyName$, sCurrencySymbol$
 
     '
@@ -574,10 +574,15 @@ Dim sCurrencyName$, sCurrencySymbol$
     CurrentX = 10
     ForeColor = lTextColor
     FontBold = True
-    Print "Day Summary"
+    Print "Stock";
+    CurrentX = 60
+    Print "Price";
+    CurrentX = 135
+    Print "Change"
     FontBold = False
     CurrentY = CurrentY + 10
     lTableTop = CurrentY - 5
+    CurrentX = 10
     
     '
     ' Each stock sumarised for the day
@@ -593,11 +598,15 @@ Dim sCurrencyName$, sCurrencySymbol$
         ForeColor = IIf(objStock.CurrentPrice > objSymbol.DayStart, lUpColor, IIf(objStock.CurrentPrice < objSymbol.DayStart, lDownColor, lTextColor))
         Print " " & objStock.FormattedPrice;
         CurrentX = 135
-        Print FormatCurrencyValue(objStock.CurrencySymbol, objSymbol.DayChange);
-        CurrentX = 180
-        Print Format(objSymbol.DayChange / objSymbol.DayStart, "(0.00%)");
+        rChangeValue = ConvertCurrency(objSymbol, objSymbol.DayChange) * objStock.NumberOfShares
+        Print FormatCurrencyValue(sCurrencySymbol, rChangeValue);
+        CurrentX = 205
+        Print "(" & FormatCurrencyValue(objStock.CurrencySymbol, objSymbol.DayChange);
+        CurrentX = 255
+        Print Format(objSymbol.DayChange / objSymbol.DayStart, "0.00%)");
         
-        rTotalChange = rTotalChange + (ConvertCurrency(objSymbol, objSymbol.DayChange) * objStock.NumberOfShares)
+        
+        rTotalChange = rTotalChange + rChangeValue
         lWidest = IIf(CurrentX > lWidest, CurrentX, lWidest)
         Print ""
     Next
