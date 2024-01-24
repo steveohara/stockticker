@@ -5,8 +5,8 @@ Begin VB.Form frmMain
    BackColor       =   &H00404040&
    BorderStyle     =   0  'None
    ClientHeight    =   2130
-   ClientLeft      =   8295
-   ClientTop       =   2535
+   ClientLeft      =   8850
+   ClientTop       =   6540
    ClientWidth     =   5880
    ControlBox      =   0   'False
    BeginProperty Font 
@@ -56,6 +56,7 @@ Begin VB.Form frmMain
       ScaleMode       =   3  'Pixel
       ScaleWidth      =   129
       TabIndex        =   3
+      TabStop         =   0   'False
       Top             =   1380
       Width           =   1935
    End
@@ -107,6 +108,7 @@ Begin VB.Form frmMain
       ScaleHeight     =   495
       ScaleWidth      =   75
       TabIndex        =   1
+      TabStop         =   0   'False
       Top             =   240
       Width           =   75
    End
@@ -131,6 +133,7 @@ Begin VB.Form frmMain
       ScaleMode       =   3  'Pixel
       ScaleWidth      =   91
       TabIndex        =   2
+      TabStop         =   0   'False
       Top             =   240
       Width           =   1365
    End
@@ -1761,6 +1764,8 @@ Dim bGotExchangeRates As Boolean
                     objStock.Code = objSymbol.Code
                     objStock.CurrentPrice = objSymbol.CurrentPrice
                     objStock.CurrencyName = objSymbol.CurrencyName
+                    objStock.DayStart = objSymbol.DayStart
+                    objStock.DayChange = objSymbol.DayChange
                     objStock.AddStock objSymbol.Shares, objSymbol.Price
                     objSummaryStocks.Add objStock, objStock.DisplayName
                     If objStock.CurrencySymbol = "" And objSymbol.CurrencySymbol <> "" Then objStock.CurrencySymbol = objSymbol.CurrencySymbol

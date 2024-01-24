@@ -4,8 +4,8 @@ Begin VB.Form frmPreview
    BackColor       =   &H00000000&
    BorderStyle     =   1  'Fixed Single
    ClientHeight    =   5115
-   ClientLeft      =   7830
-   ClientTop       =   4245
+   ClientLeft      =   7935
+   ClientTop       =   2400
    ClientWidth     =   9780
    ControlBox      =   0   'False
    BeginProperty Font 
@@ -27,6 +27,19 @@ Begin VB.Form frmPreview
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   652
    ShowInTaskbar   =   0   'False
+   Begin VB.PictureBox picSort 
+      AutoRedraw      =   -1  'True
+      BorderStyle     =   0  'None
+      Height          =   375
+      Left            =   4440
+      ScaleHeight     =   25
+      ScaleMode       =   3  'Pixel
+      ScaleWidth      =   33
+      TabIndex        =   5
+      TabStop         =   0   'False
+      Top             =   2280
+      Width           =   495
+   End
    Begin VB.PictureBox picGraph 
       AutoRedraw      =   -1  'True
       BackColor       =   &H00FFFFFF&
@@ -61,6 +74,86 @@ Begin VB.Form frmPreview
       Interval        =   500
       Left            =   645
       Top             =   660
+   End
+   Begin VB.Label lblHeader 
+      Caption         =   "Change"
+      BeginProperty Font 
+         Name            =   "Calibri"
+         Size            =   8.25
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   255
+      Index           =   3
+      Left            =   2520
+      MousePointer    =   7  'Size N S
+      TabIndex        =   4
+      ToolTipText     =   "Sort by change (percent)"
+      Top             =   3000
+      Width           =   1095
+   End
+   Begin VB.Label lblHeader 
+      Caption         =   "Value"
+      BeginProperty Font 
+         Name            =   "Calibri"
+         Size            =   8.25
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   255
+      Index           =   2
+      Left            =   2520
+      MousePointer    =   7  'Size N S
+      TabIndex        =   3
+      ToolTipText     =   "Sort by change (value)"
+      Top             =   2520
+      Width           =   1095
+   End
+   Begin VB.Label lblHeader 
+      Caption         =   "Price"
+      BeginProperty Font 
+         Name            =   "Calibri"
+         Size            =   8.25
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   255
+      Index           =   1
+      Left            =   2520
+      MousePointer    =   7  'Size N S
+      TabIndex        =   2
+      ToolTipText     =   "Sort by current price"
+      Top             =   2160
+      Width           =   1095
+   End
+   Begin VB.Label lblHeader 
+      Caption         =   "Stock"
+      BeginProperty Font 
+         Name            =   "Calibri"
+         Size            =   8.25
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   255
+      Index           =   0
+      Left            =   2520
+      MousePointer    =   7  'Size N S
+      TabIndex        =   1
+      ToolTipText     =   "Sort by symbol"
+      Top             =   1800
+      Width           =   1095
    End
 End
 Attribute VB_Name = "frmPreview"
@@ -118,6 +211,27 @@ Private Sub Form_DblClick()
 
     picGraph_DblClick
     
+End Sub
+
+Private Sub Label1_Click()
+
+End Sub
+
+Private Sub lblHeader_Click(Index As Integer)
+
+Dim sSortOrder$
+Dim iSortColumn%
+
+    sSortOrder = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DAY_SUMMARY_SORT_ORDER, "asc")
+    iSortColumn = CInt(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DAY_SUMMARY_SORT_COLUMN, "0"))
+    If Index = iSortColumn Then
+        Call mobjReg.SaveSetting(App.Title, REG_SETTINGS, REG_DAY_SUMMARY_SORT_ORDER, IIf(sSortOrder = "asc", "desc", "asc"))
+    Else
+        Call mobjReg.SaveSetting(App.Title, REG_SETTINGS, REG_DAY_SUMMARY_SORT_ORDER, "asc")
+        Call mobjReg.SaveSetting(App.Title, REG_SETTINGS, REG_DAY_SUMMARY_SORT_COLUMN, Format(Index))
+    End If
+    Z_ShowDaySummary
+
 End Sub
 
 Private Sub picGraph_DblClick()
@@ -270,6 +384,11 @@ Dim bLoaded As Boolean
     '
     ' Load and position the display
     '
+    lblHeader(0).Visible = False
+    lblHeader(1).Visible = False
+    lblHeader(2).Visible = False
+    lblHeader(3).Visible = False
+    picSort.Visible = False
     picGraph.Visible = True
     lLeft = mlLeftPos
     lTop = (frmMain.Top + frmMain.Height) / Screen.TwipsPerPixelY
@@ -546,9 +665,9 @@ Private Sub Z_ShowDaySummary()
 Dim lWidth&, lLeft&, lTop&, lHeight&, lWidest&, lTableTop&
 Dim lTextColor&, lUpColor&, lDownColor&, lUpArrowColor&, lDownArrowColor&
 Dim objStock As cStock
-Dim objSymbol As cSymbol
 Dim rRate#, rTotalChange#, rChangeValue#
-Dim sCurrencyName$, sCurrencySymbol$
+Dim sCurrencyName$, sCurrencySymbol$, sSortOrder$
+Dim i%, iSortColumn%
 
     '
     ' Determine the type of symbol
@@ -561,7 +680,6 @@ Dim sCurrencyName$, sCurrencySymbol$
     ' Draw the useful text
     '
     Cls
-    CurrentY = 8
     ForeColor = vbWhite
     FontSize = 11
     lTextColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TEXT_COLOUR, Format(vbWhite)))
@@ -569,42 +687,77 @@ Dim sCurrencyName$, sCurrencySymbol$
     lDownColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_COLOUR, Format(vbRed)))
     lUpArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_ARROW_COLOUR, Format(vbGreen)))
     lDownArrowColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_ARROW_COLOUR, Format(vbRed)))
+    sSortOrder = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DAY_SUMMARY_SORT_ORDER, "asc")
+    iSortColumn = CInt(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DAY_SUMMARY_SORT_COLUMN, "0"))
     sCurrencySymbol = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY_SYMBOL, "£")
+        
+    lblHeader(0).BackColor = BackColor
+    lblHeader(0).ForeColor = lTextColor
+    Set lblHeader(0).Font = Font
+    lblHeader(0).Height = lTextColor
+    lblHeader(0).Move 10, 8, 50, TextHeight("I")
+    lblHeader(0).Visible = True
     
-    CurrentX = 10
-    ForeColor = lTextColor
-    FontBold = True
-    Print "Stock";
-    CurrentX = 60
-    Print "Price";
-    CurrentX = 135
-    Print "Change"
-    FontBold = False
-    CurrentY = CurrentY + 10
-    lTableTop = CurrentY - 5
-    CurrentX = 10
+    lblHeader(1).BackColor = BackColor
+    lblHeader(1).ForeColor = lTextColor
+    Set lblHeader(1).Font = Font
+    lblHeader(1).Move 65, lblHeader(0).Top, lblHeader(0).Width, lblHeader(0).Height
+    lblHeader(1).Visible = True
+    
+    lblHeader(2).BackColor = BackColor
+    lblHeader(2).ForeColor = lTextColor
+    Set lblHeader(2).Font = Font
+    lblHeader(2).Move 140, lblHeader(0).Top, lblHeader(0).Width, lblHeader(0).Height
+    lblHeader(2).Visible = True
+    
+    lblHeader(3).BackColor = BackColor
+    lblHeader(3).ForeColor = lTextColor
+    Set lblHeader(3).Font = Font
+    lblHeader(3).Move 210, lblHeader(0).Top, lblHeader(0).Width, lblHeader(0).Height
+    lblHeader(3).Visible = True
+    lTableTop = lblHeader(0).Top + lblHeader(0).Height + 2
+    
+    picSort.BackColor = BackColor
+    picSort.ForeColor = ForeColor
+    picSort.ZOrder 1000
+    picSort.DrawWidth = 1
+    If sSortOrder = "asc" Then
+        For i = 0 To picSort.ScaleHeight \ 4
+           picSort.Line ((picSort.ScaleHeight \ 4) - i, picSort.ScaleHeight - i - 3)-((picSort.ScaleHeight \ 4) + i, picSort.ScaleHeight - i - 3), lTextColor
+        Next i
+        picSort.DrawWidth = 2
+        picSort.Line ((picSort.ScaleHeight \ 4), 3)-((picSort.ScaleHeight \ 4), 3 * picSort.ScaleHeight \ 4), lTextColor
+    Else
+        For i = 0 To picSort.ScaleHeight \ 4
+           picSort.Line ((picSort.ScaleHeight \ 4) - i, i + 3)-((picSort.ScaleHeight \ 4) + i, i + 3), lTextColor
+        Next i
+        picSort.DrawWidth = 2
+        picSort.Line ((picSort.ScaleHeight \ 4), picSort.ScaleHeight \ 4)-((picSort.ScaleHeight \ 4), picSort.ScaleHeight - 4), lTextColor
+    End If
+    picSort.Move lblHeader(iSortColumn).Left + TextWidth(lblHeader(iSortColumn).Caption) + 4, lblHeader(0).Top, 10, lblHeader(0).Height
+    picSort.Visible = True
     
     '
     ' Each stock sumarised for the day
     '
+    CurrentY = lTableTop + 2
+    CurrentX = 10
     rTotalChange = 0
-    For Each objStock In frmMain.mobjSummaryStocks
+    For Each objStock In SortCollection(frmMain.mobjSummaryStocks, sSortOrder = "asc", iSortColumn)
         ForeColor = lTextColor
         CurrentX = 10
-        Set objSymbol = frmMain.mobjCurrentSymbols.Item(objStock.Code)
         Print objStock.DisplayName;
-        CurrentX = 60
+        CurrentX = 65
         
-        ForeColor = IIf(objStock.CurrentPrice > objSymbol.DayStart, lUpColor, IIf(objStock.CurrentPrice < objSymbol.DayStart, lDownColor, lTextColor))
+        ForeColor = IIf(objStock.CurrentPrice > objStock.DayStart, lUpColor, IIf(objStock.CurrentPrice < objStock.DayStart, lDownColor, lTextColor))
         Print " " & objStock.FormattedPrice;
-        CurrentX = 135
-        rChangeValue = ConvertCurrency(objSymbol, objSymbol.DayChange) * objStock.NumberOfShares
+        CurrentX = 140
+        rChangeValue = ConvertCurrency(objStock, objStock.DayChange) * objStock.NumberOfShares
         Print FormatCurrencyValue(sCurrencySymbol, rChangeValue);
-        CurrentX = 205
-        Print "(" & FormatCurrencyValue(objStock.CurrencySymbol, objSymbol.DayChange);
-        CurrentX = 255
-        Print Format(objSymbol.DayChange / objSymbol.DayStart, "0.00%)");
-        
+        CurrentX = 210
+        Print "(" & FormatCurrencyValue(objStock.CurrencySymbol, objStock.DayChange);
+        CurrentX = 260
+        Print Format(objStock.DayChange / objStock.DayStart, "0.00%)");
         
         rTotalChange = rTotalChange + rChangeValue
         lWidest = IIf(CurrentX > lWidest, CurrentX, lWidest)
@@ -645,4 +798,67 @@ Dim sCurrencyName$, sCurrencySymbol$
 
 End Sub
 
+Function SortCollection(ByVal objStocks As Collection, ByVal bAscending As Boolean, ByVal iColumn%)
+
+    Dim objReturn As Collection
+    Dim i%, j%
+    Dim bFoundSlot As Boolean
+    Dim objSlot As cStock
+    Dim objNew As cStock
+
+    Set objReturn = New Collection
+    For i = 1 To objStocks.Count
+        Set objNew = objStocks.Item(i)
+        If i = 1 Then
+            objReturn.Add objNew
+        
+        ElseIf bAscending Then
+            For j = 1 To objReturn.Count
+                Set objSlot = objReturn(j)
+                If iColumn = 3 Then
+                    bFoundSlot = ConvertCurrency(objNew, objNew.DayChange / objNew.DayStart) < ConvertCurrency(objSlot, objSlot.DayChange / objSlot.DayStart)
+                ElseIf iColumn = 2 Then
+                    bFoundSlot = ConvertCurrency(objNew, objNew.DayChange * objNew.NumberOfShares) < ConvertCurrency(objSlot, objSlot.DayChange * objSlot.NumberOfShares)
+                ElseIf iColumn = 1 Then
+                    bFoundSlot = ConvertCurrency(objNew, objNew.CurrentPrice) < ConvertCurrency(objSlot, objSlot.CurrentPrice)
+                Else
+                    bFoundSlot = StrComp(objNew.DisplayName, objSlot.DisplayName) < 0
+                End If
+                If bFoundSlot Then
+                    Exit For
+                End If
+            Next j
+            If j > objReturn.Count Then
+                objReturn.Add objNew
+            Else
+                objReturn.Add objNew, Before:=j
+            End If
+        
+        Else
+            For j = objReturn.Count To 1 Step -1
+                Set objSlot = objReturn(j)
+                If iColumn = 3 Then
+                    bFoundSlot = ConvertCurrency(objNew, objNew.DayChange / objNew.DayStart) < ConvertCurrency(objSlot, objSlot.DayChange / objSlot.DayStart)
+                ElseIf iColumn = 2 Then
+                    bFoundSlot = ConvertCurrency(objNew, objNew.DayChange * objNew.NumberOfShares) < ConvertCurrency(objSlot, objSlot.DayChange * objSlot.NumberOfShares)
+                ElseIf iColumn = 1 Then
+                    bFoundSlot = ConvertCurrency(objNew, objNew.CurrentPrice) < ConvertCurrency(objSlot, objSlot.CurrentPrice)
+                Else
+                    bFoundSlot = StrComp(objNew.DisplayName, objSlot.DisplayName) < 0
+                End If
+                If bFoundSlot Then
+                    Exit For
+                End If
+            Next j
+            If j < 1 Then
+                objReturn.Add objNew, Before:=1
+            Else
+                objReturn.Add objNew, After:=j
+            End If
+        End If
+        
+    Next i
+
+    Set SortCollection = objReturn
+End Function
 

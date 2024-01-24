@@ -21,6 +21,8 @@ Option Explicit
     Public CurrentPrice#
     Public CurrencySymbol$
     Public CurrencyName$
+    Public DayStart#
+    Public DayChange#
     Public Position As New cRegion
     
     
