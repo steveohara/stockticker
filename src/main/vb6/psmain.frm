@@ -325,6 +325,9 @@ Option Explicit
     Private miScrollInterval%
     Private miScrollMovement%
     
+    Public mrSummaryRegionStartX As Single
+    Public mrSummaryRegionEndX As Single
+    
     Public mrDaySummaryRegionStartX As Single
     Public mrDaySummaryRegionEndX As Single
     
@@ -542,7 +545,10 @@ Dim objSymbol As cSymbol
     '
     ' Draw the summary (non-scrolling)
     '
+    mrSummaryRegionStartX = 0
+    mrSummaryRegionEndX = 0
     If bShowSummary Then
+        mrSummaryRegionStartX = CurrentX
         ForeColor = &HC0C0&
         Print "Summary:";
         If bShowTotal Then
@@ -568,6 +574,7 @@ Dim objSymbol As cSymbol
             Line (CurrentX, 0)-(CurrentX, ScaleHeight), &H808080
             CurrentY = 1
         End If
+        mrSummaryRegionEndX = CurrentX
         
         If bShowPrice Or bShowCostBase Or bShowPercent Or bShowDailyChange Then
             bShown = False
@@ -594,6 +601,8 @@ Dim objSymbol As cSymbol
                 Set objSymbol = mobjCurrentSymbols.Item(objStock.Code)
                 rTotalChange = rTotalChange + (ConvertCurrency(objSymbol, objSymbol.DayChange) * objStock.NumberOfShares)
             Next
+            mrDaySummaryRegionStartX = 0
+            mrDaySummaryRegionEndX = 0
             If bShowDailyChange Then
                 mrDaySummaryRegionStartX = CurrentX
                 CurrentX = CurrentX + IIf(bShown, 10, 6)
@@ -738,6 +747,7 @@ Private Sub Form_MouseMove(Button As Integer, Shift As Integer, X As Single, Y A
 
 Dim stPoint As POINTAPI
 Dim bShowDailyChange As Boolean
+Dim bShowSummary As Boolean
 
     '
     ' If we are capturing then move the display
@@ -747,8 +757,13 @@ Dim bShowDailyChange As Boolean
         Call GetCursorPos(stPoint)
         Call SetWindowPos(hWnd, 0, stPoint.X - mstPoint.X, stPoint.Y - mstPoint.Y, 0, 0, SWP_NOSIZE)
     Else
-        bShowDailyChange = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_DAILY_CHANGE, "0"))
-        If bShowDailyChange And X >= mrDaySummaryRegionStartX And X <= mrDaySummaryRegionEndX Then
+        If X > mrSummaryRegionStartX And X < mrSummaryRegionEndX Then
+            '
+            ' Show the preview window for the sumary
+            '
+            frmPreview.ShowSummary
+        
+        ElseIf X > mrDaySummaryRegionStartX And X < mrDaySummaryRegionEndX Then
             '
             ' Show the preview window for the daily sumary
             '

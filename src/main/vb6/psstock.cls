@@ -30,6 +30,7 @@ Public Sub AddStock(ByVal lNumbeOfShares&, ByVal rPrice#)
     
     NumberOfShares = NumberOfShares + lNumbeOfShares
     TotalCost = TotalCost + (lNumbeOfShares * rPrice)
+    TotalValue = lNumbeOfShares * CurrentPrice
     
 End Sub
 
@@ -69,6 +70,12 @@ Public Function FormattedLossPercent$()
 
 End Function
 
+Public Function LossPercent#()
+
+    If TotalCost > 0 Then LossPercent = (TotalValue - TotalCost) * 100 / TotalCost
+
+End Function
+
 Public Function FormattedLossAdjusted$(ByVal rValue#)
 
     FormattedLossAdjusted = FormatCurrencyValueWithSymbol(CurrencySymbol, CurrencyName, TotalValue - rValue)
@@ -90,6 +97,12 @@ End Function
 Public Function FormattedBasePercent$()
 
     If AverageCost > 0 Then FormattedBasePercent = Format((CurrentPrice - AverageCost) / AverageCost, "0.00%")
+
+End Function
+
+Public Function FormattedTotalValue$()
+
+    FormattedTotalValue = FormatCurrencyValue(CurrencySymbol, ConvertCurrency(Me, CurrentPrice) * NumberOfShares)
 
 End Function
 
