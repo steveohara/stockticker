@@ -7,6 +7,7 @@ Begin VB.Form frmPreview
    ClientLeft      =   6840
    ClientTop       =   3495
    ClientWidth     =   9780
+   ClipControls    =   0   'False
    ControlBox      =   0   'False
    BeginProperty Font 
       Name            =   "Calibri"
@@ -352,10 +353,6 @@ Private Sub Form_DblClick()
 
     picGraph_DblClick
     
-End Sub
-
-Private Sub Label1_Click()
-
 End Sub
 
 Private Sub lblHeader_Click(Index As Integer)
@@ -845,6 +842,8 @@ Dim i%, iSortColumn%
     ' Draw the useful text
     '
     Cls
+    Width = 2000 * Screen.TwipsPerPixelX
+    Height = 2000 * Screen.TwipsPerPixelX
     ForeColor = vbWhite
     FontSize = 11
     lTextColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TEXT_COLOUR, Format(vbWhite)))
@@ -961,6 +960,8 @@ Dim i%, iSortColumn%
     ' Draw the useful text
     '
     Cls
+    Width = 2000 * Screen.TwipsPerPixelX
+    Height = 2000 * Screen.TwipsPerPixelX
     ForeColor = vbWhite
     FontSize = 11
     lTextColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TEXT_COLOUR, Format(vbWhite)))

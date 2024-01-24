@@ -748,6 +748,7 @@ Private Sub Form_MouseMove(Button As Integer, Shift As Integer, X As Single, Y A
 Dim stPoint As POINTAPI
 Dim bShowDailyChange As Boolean
 Dim bShowSummary As Boolean
+Dim objSymbol As Object
 
     '
     ' If we are capturing then move the display
@@ -757,23 +758,25 @@ Dim bShowSummary As Boolean
         Call GetCursorPos(stPoint)
         Call SetWindowPos(hWnd, 0, stPoint.X - mstPoint.X, stPoint.Y - mstPoint.Y, 0, 0, SWP_NOSIZE)
     Else
-        If X > mrSummaryRegionStartX And X < mrSummaryRegionEndX Then
-            '
-            ' Show the preview window for the sumary
-            '
-            frmPreview.ShowSummary
-        
-        ElseIf X > mrDaySummaryRegionStartX And X < mrDaySummaryRegionEndX Then
-            '
-            ' Show the preview window for the daily sumary
-            '
-            frmPreview.ShowDaySummary
-        
+        Set objSymbol = Z_GetSymbolUnderMouse
+        If objSymbol Is Nothing Then
+            If X > mrSummaryRegionStartX And X < mrSummaryRegionEndX Then
+                '
+                ' Show the preview window for the sumary
+                '
+                frmPreview.ShowSummary
+            
+            ElseIf X > mrDaySummaryRegionStartX And X < mrDaySummaryRegionEndX Then
+                '
+                ' Show the preview window for the daily sumary
+                '
+                frmPreview.ShowDaySummary
+            End If
         Else
             '
             ' Show the preview window for this application
             '
-            frmPreview.ShowChart Z_GetSymbolUnderMouse
+            frmPreview.ShowChart objSymbol
         End If
     End If
     
@@ -1127,6 +1130,8 @@ Private Sub mnuUpgrade_Click()
     PSMAIN_CheckForUpgrade
     
 End Sub
+
+
 
 
 
