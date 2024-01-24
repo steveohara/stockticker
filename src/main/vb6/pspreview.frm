@@ -87,6 +87,26 @@ Begin VB.Form frmPreview
          Strikethrough   =   0   'False
       EndProperty
       Height          =   255
+      Index           =   6
+      Left            =   6600
+      MousePointer    =   7  'Size N S
+      TabIndex        =   12
+      ToolTipText     =   "Sort by base average price paid"
+      Top             =   4200
+      Width           =   1095
+   End
+   Begin VB.Label lblSummaryHeader 
+      Caption         =   "Value"
+      BeginProperty Font 
+         Name            =   "Calibri"
+         Size            =   8.25
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   255
       Index           =   5
       Left            =   6720
       MousePointer    =   7  'Size N S
@@ -96,7 +116,7 @@ Begin VB.Form frmPreview
       Width           =   1095
    End
    Begin VB.Label lblSummaryHeader 
-      Caption         =   "Value"
+      Caption         =   "Cost"
       BeginProperty Font 
          Name            =   "Calibri"
          Size            =   8.25
@@ -156,7 +176,7 @@ Begin VB.Form frmPreview
       Width           =   1095
    End
    Begin VB.Label lblSummaryHeader 
-      Caption         =   "Cost"
+      Caption         =   "Paid"
       BeginProperty Font 
          Name            =   "Calibri"
          Size            =   8.25
@@ -171,7 +191,7 @@ Begin VB.Form frmPreview
       Left            =   6720
       MousePointer    =   7  'Size N S
       TabIndex        =   7
-      ToolTipText     =   "Sort by base average cost"
+      ToolTipText     =   "Sort by base average price paid"
       Top             =   2280
       Width           =   1095
    End
@@ -966,6 +986,7 @@ Dim i%, iSortColumn%
     lblSummaryHeader(3).Move 210, lblSummaryHeader(0).Top
     lblSummaryHeader(4).Move 280, lblSummaryHeader(0).Top
     lblSummaryHeader(5).Move 370, lblSummaryHeader(0).Top
+    lblSummaryHeader(6).Move 460, lblSummaryHeader(0).Top
     
     lTableTop = lblSummaryHeader(0).Top + lblSummaryHeader(0).Height + 2
     
@@ -997,9 +1018,13 @@ Dim i%, iSortColumn%
         Print Format(objStock.NumberOfShares, "#,###,##0");
         
         CurrentX = 280
-        Print FormatCurrencyValue(sCurrencySymbol, ConvertCurrency(objStock, objStock.CurrentPrice) * objStock.NumberOfShares);
+        Print FormatCurrencyValue(sCurrencySymbol, ConvertCurrency(objStock, objStock.TotalCost));
         
         CurrentX = 370
+        ForeColor = IIf(objStock.TotalValue > objStock.TotalCost, lUpColor, IIf(objStock.TotalValue < objStock.TotalCost, lDownColor, lTextColor))
+        Print FormatCurrencyValue(sCurrencySymbol, ConvertCurrency(objStock, objStock.TotalValue));
+        
+        CurrentX = 460
         ForeColor = IIf(objStock.CurrentPrice > objStock.AverageCost, lUpColor, IIf(objStock.CurrentPrice < objStock.AverageCost, lDownColor, lTextColor))
         Print objStock.FormattedLossPercent;
         
@@ -1136,10 +1161,12 @@ Private Function Z_SortSummaryCollection(ByVal objStocks As Collection, ByVal bA
         ElseIf bAscending Then
             For j = 1 To objReturn.Count
                 Set objSlot = objReturn(j)
-                If iColumn = 5 Then
+                If iColumn = 6 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.LossPercent) < ConvertCurrency(objSlot, objSlot.LossPercent)
-                ElseIf iColumn = 4 Then
+                ElseIf iColumn = 5 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.TotalValue) < ConvertCurrency(objSlot, objSlot.TotalValue)
+                ElseIf iColumn = 4 Then
+                    bFoundSlot = ConvertCurrency(objNew, objNew.TotalCost) < ConvertCurrency(objSlot, objSlot.TotalCost)
                 ElseIf iColumn = 3 Then
                     bFoundSlot = objNew.NumberOfShares < objSlot.NumberOfShares
                 ElseIf iColumn = 2 Then
@@ -1162,10 +1189,12 @@ Private Function Z_SortSummaryCollection(ByVal objStocks As Collection, ByVal bA
         Else
             For j = objReturn.Count To 1 Step -1
                 Set objSlot = objReturn(j)
-                If iColumn = 5 Then
+                If iColumn = 6 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.LossPercent) < ConvertCurrency(objSlot, objSlot.LossPercent)
-                ElseIf iColumn = 4 Then
+                ElseIf iColumn = 5 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.TotalValue) < ConvertCurrency(objSlot, objSlot.TotalValue)
+                ElseIf iColumn = 4 Then
+                    bFoundSlot = ConvertCurrency(objNew, objNew.TotalCost) < ConvertCurrency(objSlot, objSlot.TotalCost)
                 ElseIf iColumn = 3 Then
                     bFoundSlot = objNew.NumberOfShares < objSlot.NumberOfShares
                 ElseIf iColumn = 2 Then
