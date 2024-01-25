@@ -745,41 +745,8 @@ End Sub
 
 Private Sub Form_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
 
-Dim stPoint As POINTAPI
-Dim bShowDailyChange As Boolean
-Dim bShowSummary As Boolean
-Dim objSymbol As Object
+    Z_MouseMove False
 
-    '
-    ' If we are capturing then move the display
-    '
-    If mbCapturing Then
-        frmPreview.HideChart True
-        Call GetCursorPos(stPoint)
-        Call SetWindowPos(hWnd, 0, stPoint.X - mstPoint.X, stPoint.Y - mstPoint.Y, 0, 0, SWP_NOSIZE)
-    Else
-        Set objSymbol = Z_GetSymbolUnderMouse
-        If objSymbol Is Nothing Then
-            If X > mrSummaryRegionStartX And X < mrSummaryRegionEndX Then
-                '
-                ' Show the preview window for the sumary
-                '
-                frmPreview.ShowSummary
-            
-            ElseIf X > mrDaySummaryRegionStartX And X < mrDaySummaryRegionEndX Then
-                '
-                ' Show the preview window for the daily sumary
-                '
-                frmPreview.ShowDaySummary
-            End If
-        Else
-            '
-            ' Show the preview window for this application
-            '
-            frmPreview.ShowChart objSymbol
-        End If
-    End If
-    
 End Sub
 
 Private Sub Form_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
@@ -1231,7 +1198,7 @@ End Sub
 
 Private Sub picText_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
 
-    Call Form_MouseMove(Button, Shift, X, Y)
+    Z_MouseMove True
 
 End Sub
 
@@ -2327,3 +2294,40 @@ Private Sub timMouse_Timer()
     End If
     
 End Sub
+
+Private Sub Z_MouseMove(ByVal bOverData As Boolean)
+
+Dim stPoint As POINTAPI
+
+    '
+    ' If we are capturing (dragging) then move the display
+    '
+    Call GetCursorPos(stPoint)
+    If mbCapturing Then
+        frmPreview.HideChart True
+        Call SetWindowPos(hWnd, 0, stPoint.X - mstPoint.X, stPoint.Y - mstPoint.Y, 0, 0, SWP_NOSIZE)
+    
+    '
+    ' Show the preview window for this application
+    '
+    ElseIf bOverData Then
+        frmPreview.ShowChart Z_GetSymbolUnderMouse
+    
+    Else
+        Call ScreenToClient(hWnd, stPoint)
+        '
+        ' Show the preview window for the sumary
+        '
+        If stPoint.X > mrSummaryRegionStartX And stPoint.X < mrSummaryRegionEndX Then
+            frmPreview.ShowSummary
+            
+        '
+        ' Show the preview window for the daily sumary
+        '
+        ElseIf stPoint.X > mrDaySummaryRegionStartX And stPoint.X < mrDaySummaryRegionEndX Then
+            frmPreview.ShowDaySummary
+        End If
+    End If
+End Sub
+
+

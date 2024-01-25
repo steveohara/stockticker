@@ -479,9 +479,10 @@ Public Sub ShowDaySummary()
 
 Dim stRect As RECT
 
-    mbSummary = False
-    mbDaySummary = True
-    If Not timClose.Enabled Then
+    If Not timClose.Enabled Or (Visible And Not mbDaySummary) Then
+        Hide
+        mbSummary = False
+        mbDaySummary = True
         GetWindowRect frmMain.hWnd, stRect
         timOpen.Enabled = False
         mlLeftPos = stRect.Left + frmMain.mrDaySummaryRegionStartX
@@ -495,9 +496,10 @@ Public Sub ShowSummary()
 
 Dim stRect As RECT
 
-    mbSummary = True
-    mbDaySummary = False
-    If Not timClose.Enabled Then
+    If Not timClose.Enabled Or (Visible And Not mbSummary) Then
+        Hide
+        mbSummary = True
+        mbDaySummary = False
         GetWindowRect frmMain.hWnd, stRect
         timOpen.Enabled = False
         mlLeftPos = stRect.Left + frmMain.mrSummaryRegionStartX
@@ -920,8 +922,13 @@ Dim i%, iSortColumn%
     ' Resize the window to match the content
     '
     lLeft = mlLeftPos
+    lWidest = lWidest + 10
     lTop = frmMain.Top + frmMain.Height
-    Move lLeft * Screen.TwipsPerPixelX, lTop, (lWidest + 10) * Screen.TwipsPerPixelX, (CurrentY + 10) * Screen.TwipsPerPixelY
+    lWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN)
+    lHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN)
+    If lLeft + lWidest > lWidth Then lLeft = lWidth - lWidest
+    If lTop + CurrentY + 10 > lHeight Then lTop = (frmMain.Top / Screen.TwipsPerPixelY) - (CurrentY + 10)
+    Move lLeft * Screen.TwipsPerPixelX, lTop, lWidest * Screen.TwipsPerPixelX, (CurrentY + 10) * Screen.TwipsPerPixelY
     
     Show
     timClose.Enabled = True
@@ -1073,8 +1080,13 @@ Dim i%, iSortColumn%
     ' Resize the window to match the content
     '
     lLeft = mlLeftPos
+    lWidest = lWidest + 10
     lTop = frmMain.Top + frmMain.Height
-    Move lLeft * Screen.TwipsPerPixelX, lTop, (lWidest + 10) * Screen.TwipsPerPixelX, (CurrentY + 10) * Screen.TwipsPerPixelY
+    lWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN)
+    lHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN)
+    If lLeft + lWidest > lWidth Then lLeft = lWidth - lWidest
+    If lTop + CurrentY + 10 > lHeight Then lTop = (frmMain.Top / Screen.TwipsPerPixelY) - (CurrentY + 10)
+    Move lLeft * Screen.TwipsPerPixelX, lTop, lWidest * Screen.TwipsPerPixelX, (CurrentY + 10) * Screen.TwipsPerPixelY
     
     Show
     timClose.Enabled = True
@@ -1163,7 +1175,7 @@ Private Function Z_SortSummaryCollection(ByVal objStocks As Collection, ByVal bA
             For j = 1 To objReturn.Count
                 Set objSlot = objReturn(j)
                 If iColumn = 6 Then
-                    bFoundSlot = ConvertCurrency(objNew, objNew.LossPercent) < ConvertCurrency(objSlot, objSlot.LossPercent)
+                    bFoundSlot = objNew.LossPercent < objSlot.LossPercent
                 ElseIf iColumn = 5 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.TotalValue) < ConvertCurrency(objSlot, objSlot.TotalValue)
                 ElseIf iColumn = 4 Then
@@ -1191,7 +1203,7 @@ Private Function Z_SortSummaryCollection(ByVal objStocks As Collection, ByVal bA
             For j = objReturn.Count To 1 Step -1
                 Set objSlot = objReturn(j)
                 If iColumn = 6 Then
-                    bFoundSlot = ConvertCurrency(objNew, objNew.LossPercent) < ConvertCurrency(objSlot, objSlot.LossPercent)
+                    bFoundSlot = objNew.LossPercent < objSlot.LossPercent
                 ElseIf iColumn = 5 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.TotalValue) < ConvertCurrency(objSlot, objSlot.TotalValue)
                 ElseIf iColumn = 4 Then
