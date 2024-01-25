@@ -4,8 +4,8 @@ Begin VB.Form frmPreview
    BackColor       =   &H00000000&
    BorderStyle     =   1  'Fixed Single
    ClientHeight    =   5115
-   ClientLeft      =   6840
-   ClientTop       =   3495
+   ClientLeft      =   6195
+   ClientTop       =   2550
    ClientWidth     =   9780
    ClipControls    =   0   'False
    ControlBox      =   0   'False
@@ -88,12 +88,32 @@ Begin VB.Form frmPreview
          Strikethrough   =   0   'False
       EndProperty
       Height          =   255
+      Index           =   7
+      Left            =   6720
+      MousePointer    =   7  'Size N S
+      TabIndex        =   13
+      ToolTipText     =   "Sort by base average price paid"
+      Top             =   3600
+      Width           =   1095
+   End
+   Begin VB.Label lblSummaryHeader 
+      Caption         =   "Percent"
+      BeginProperty Font 
+         Name            =   "Calibri"
+         Size            =   8.25
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   255
       Index           =   6
-      Left            =   6600
+      Left            =   6840
       MousePointer    =   7  'Size N S
       TabIndex        =   12
       ToolTipText     =   "Sort by base average price paid"
-      Top             =   4200
+      Top             =   3120
       Width           =   1095
    End
    Begin VB.Label lblSummaryHeader 
@@ -109,11 +129,11 @@ Begin VB.Form frmPreview
       EndProperty
       Height          =   255
       Index           =   5
-      Left            =   6720
+      Left            =   6960
       MousePointer    =   7  'Size N S
       TabIndex        =   11
       ToolTipText     =   "Sort by gain/loss"
-      Top             =   3840
+      Top             =   2760
       Width           =   1095
    End
    Begin VB.Label lblSummaryHeader 
@@ -129,11 +149,11 @@ Begin VB.Form frmPreview
       EndProperty
       Height          =   255
       Index           =   4
-      Left            =   6840
+      Left            =   7080
       MousePointer    =   7  'Size N S
       TabIndex        =   10
       ToolTipText     =   "Sort by total value"
-      Top             =   3480
+      Top             =   2400
       Width           =   1095
    End
    Begin VB.Label lblSummaryHeader 
@@ -149,11 +169,11 @@ Begin VB.Form frmPreview
       EndProperty
       Height          =   255
       Index           =   3
-      Left            =   6720
+      Left            =   6960
       MousePointer    =   7  'Size N S
       TabIndex        =   9
       ToolTipText     =   "Sort by number of shares"
-      Top             =   3000
+      Top             =   1920
       Width           =   1095
    End
    Begin VB.Label lblSummaryHeader 
@@ -169,11 +189,11 @@ Begin VB.Form frmPreview
       EndProperty
       Height          =   255
       Index           =   2
-      Left            =   6720
+      Left            =   6960
       MousePointer    =   7  'Size N S
       TabIndex        =   8
       ToolTipText     =   "Sort by current price"
-      Top             =   2640
+      Top             =   1560
       Width           =   1095
    End
    Begin VB.Label lblSummaryHeader 
@@ -189,11 +209,11 @@ Begin VB.Form frmPreview
       EndProperty
       Height          =   255
       Index           =   1
-      Left            =   6720
+      Left            =   6960
       MousePointer    =   7  'Size N S
       TabIndex        =   7
       ToolTipText     =   "Sort by base average price paid"
-      Top             =   2280
+      Top             =   1200
       Width           =   1095
    End
    Begin VB.Label lblSummaryHeader 
@@ -209,11 +229,11 @@ Begin VB.Form frmPreview
       EndProperty
       Height          =   255
       Index           =   0
-      Left            =   6840
+      Left            =   7080
       MousePointer    =   7  'Size N S
       TabIndex        =   6
       ToolTipText     =   "Sort by symbol"
-      Top             =   1920
+      Top             =   840
       Width           =   1095
    End
    Begin VB.Label lblHeader 
@@ -480,7 +500,7 @@ Public Sub ShowDaySummary()
 Dim stRect As RECT
 
     If Not timClose.Enabled Or (Visible And Not mbDaySummary) Then
-        Hide
+        HideChart True
         mbSummary = False
         mbDaySummary = True
         GetWindowRect frmMain.hWnd, stRect
@@ -497,7 +517,7 @@ Public Sub ShowSummary()
 Dim stRect As RECT
 
     If Not timClose.Enabled Or (Visible And Not mbSummary) Then
-        Hide
+        HideChart True
         mbSummary = True
         mbDaySummary = False
         GetWindowRect frmMain.hWnd, stRect
@@ -861,7 +881,7 @@ Dim i%, iSortColumn%
     lblHeader(0).Move 10, 8
     lblHeader(1).Move 65, lblHeader(0).Top
     lblHeader(2).Move 140, lblHeader(0).Top
-    lblHeader(3).Move 210, lblHeader(0).Top
+    lblHeader(3).Move 220, lblHeader(0).Top
     lTableTop = lblHeader(0).Top + lblHeader(0).Height + 2
     
     '
@@ -876,20 +896,24 @@ Dim i%, iSortColumn%
     CurrentX = 10
     rTotalChange = 0
     For Each objStock In Z_SortDaySummaryCollection(frmMain.mobjSummaryStocks, sSortOrder = "asc", iSortColumn)
-        ForeColor = lTextColor
-        CurrentX = 10
-        Print objStock.DisplayName;
-        CurrentX = 65
         
+        CurrentX = 10
+        ForeColor = lTextColor
+        Print objStock.DisplayName;
+        
+        CurrentX = 65
         ForeColor = IIf(objStock.CurrentPrice > objStock.DayStart, lUpColor, IIf(objStock.CurrentPrice < objStock.DayStart, lDownColor, lTextColor))
         Print " " & objStock.FormattedPrice;
+        
         CurrentX = 140
         rChangeValue = ConvertCurrency(objStock, objStock.DayChange) * objStock.NumberOfShares
         Print FormatCurrencyValue(sCurrencySymbol, rChangeValue);
-        CurrentX = 210
-        Print "(" & FormatCurrencyValue(objStock.CurrencySymbol, objStock.DayChange);
-        CurrentX = 260
-        Print Format(objStock.DayChange / objStock.DayStart, "0.00%)");
+        
+        CurrentX = 220
+        Print Format(objStock.DayChange / objStock.DayStart, "0.00%");
+        
+        CurrentX = 270
+        Print "(" & FormatCurrencyValue(objStock.CurrencySymbol, objStock.DayChange) & ")";
         
         rTotalChange = rTotalChange + rChangeValue
         lWidest = IIf(CurrentX > lWidest, CurrentX, lWidest)
@@ -995,6 +1019,7 @@ Dim i%, iSortColumn%
     lblSummaryHeader(4).Move 280, lblSummaryHeader(0).Top
     lblSummaryHeader(5).Move 370, lblSummaryHeader(0).Top
     lblSummaryHeader(6).Move 460, lblSummaryHeader(0).Top
+    lblSummaryHeader(7).Move 530, lblSummaryHeader(0).Top
     
     lTableTop = lblSummaryHeader(0).Top + lblSummaryHeader(0).Height + 2
     
@@ -1035,6 +1060,9 @@ Dim i%, iSortColumn%
         CurrentX = 460
         ForeColor = IIf(objStock.CurrentPrice > objStock.AverageCost, lUpColor, IIf(objStock.CurrentPrice < objStock.AverageCost, lDownColor, lTextColor))
         Print objStock.FormattedLossPercent;
+        
+        CurrentX = 530
+        Print FormatCurrencyValue(sCurrencySymbol, ConvertCurrency(objStock, objStock.TotalValue - objStock.TotalCost));
         
         lWidest = IIf(CurrentX > lWidest, CurrentX, lWidest)
         Print ""
@@ -1174,7 +1202,9 @@ Private Function Z_SortSummaryCollection(ByVal objStocks As Collection, ByVal bA
         ElseIf bAscending Then
             For j = 1 To objReturn.Count
                 Set objSlot = objReturn(j)
-                If iColumn = 6 Then
+                If iColumn = 7 Then
+                    bFoundSlot = ConvertCurrency(objNew, objNew.TotalCost - objNew.TotalValue) < ConvertCurrency(objSlot, objSlot.TotalCost - objSlot.TotalValue)
+                ElseIf iColumn = 6 Then
                     bFoundSlot = objNew.LossPercent < objSlot.LossPercent
                 ElseIf iColumn = 5 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.TotalValue) < ConvertCurrency(objSlot, objSlot.TotalValue)
@@ -1202,7 +1232,9 @@ Private Function Z_SortSummaryCollection(ByVal objStocks As Collection, ByVal bA
         Else
             For j = objReturn.Count To 1 Step -1
                 Set objSlot = objReturn(j)
-                If iColumn = 6 Then
+                If iColumn = 7 Then
+                    bFoundSlot = ConvertCurrency(objNew, objNew.TotalCost - objNew.TotalValue) < ConvertCurrency(objSlot, objSlot.TotalCost - objSlot.TotalValue)
+                ElseIf iColumn = 6 Then
                     bFoundSlot = objNew.LossPercent < objSlot.LossPercent
                 ElseIf iColumn = 5 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.TotalValue) < ConvertCurrency(objSlot, objSlot.TotalValue)
@@ -1269,6 +1301,7 @@ Dim lTextColor&
     picSort.BackColor = BackColor
     picSort.ForeColor = ForeColor
     picSort.DrawWidth = 1
+    picSort.Move objLabel.Left + TextWidth(objLabel.Caption) + 4, objLabel.Top, 10, objLabel.Height
     If bAscending Then
         For i = 0 To picSort.ScaleHeight \ 4
            picSort.Line ((picSort.ScaleHeight \ 4) - i, picSort.ScaleHeight - i - 3)-((picSort.ScaleHeight \ 4) + i, picSort.ScaleHeight - i - 3), lTextColor
@@ -1282,8 +1315,21 @@ Dim lTextColor&
         picSort.DrawWidth = 2
         picSort.Line ((picSort.ScaleHeight \ 4), picSort.ScaleHeight \ 4)-((picSort.ScaleHeight \ 4), picSort.ScaleHeight - 4), lTextColor
     End If
-    picSort.Move objLabel.Left + TextWidth(objLabel.Caption) + 4, objLabel.Top, 10, objLabel.Height
     picSort.Visible = True
     picSort.ZOrder 1000
     
+End Sub
+
+Public Sub RefreshDisplay()
+
+    If Visible Then
+        If mbSummary Then
+            Z_ShowSummary
+        ElseIf mbDaySummary Then
+            Z_ShowDaySummary
+        Else
+            Z_ShowChart mobjStockSymbol
+        End If
+    End If
+
 End Sub

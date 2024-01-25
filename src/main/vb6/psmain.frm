@@ -654,6 +654,7 @@ Dim objSymbol As cSymbol
     Else
         Z_DrawSymbolText
         Z_DisplaySymbols
+        frmPreview.RefreshDisplay
     End If
     
 End Sub
