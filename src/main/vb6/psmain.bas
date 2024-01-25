@@ -31,7 +31,7 @@ Option Explicit
     '
     Public Const VERSION_NAME = "Pivotal Stock Ticker (pivotalstockticker.exe)"
     Public Const VERSION_NUMBER = "3.5.2"
-    Public Const VERSION_TIMESTAMP = "24-Jan-2024 18:37"
+    Public Const VERSION_TIMESTAMP = "25-Jan-2024 09:08"
 
     '
     ' Registry entries

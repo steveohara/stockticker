@@ -1099,7 +1099,7 @@ Private Function Z_SortDaySummaryCollection(ByVal objStocks As Collection, ByVal
             For j = 1 To objReturn.Count
                 Set objSlot = objReturn(j)
                 If iColumn = 3 Then
-                    bFoundSlot = ConvertCurrency(objNew, objNew.DayChange / objNew.DayStart) < ConvertCurrency(objSlot, objSlot.DayChange / objSlot.DayStart)
+                    bFoundSlot = (objNew.DayChange / objNew.DayStart) < (objSlot.DayChange / objSlot.DayStart)
                 ElseIf iColumn = 2 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.DayChange * objNew.NumberOfShares) < ConvertCurrency(objSlot, objSlot.DayChange * objSlot.NumberOfShares)
                 ElseIf iColumn = 1 Then
@@ -1121,7 +1121,7 @@ Private Function Z_SortDaySummaryCollection(ByVal objStocks As Collection, ByVal
             For j = objReturn.Count To 1 Step -1
                 Set objSlot = objReturn(j)
                 If iColumn = 3 Then
-                    bFoundSlot = ConvertCurrency(objNew, objNew.DayChange / objNew.DayStart) < ConvertCurrency(objSlot, objSlot.DayChange / objSlot.DayStart)
+                    bFoundSlot = (objNew.DayChange / objNew.DayStart) < (objSlot.DayChange / objSlot.DayStart)
                 ElseIf iColumn = 2 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.DayChange * objNew.NumberOfShares) < ConvertCurrency(objSlot, objSlot.DayChange * objSlot.NumberOfShares)
                 ElseIf iColumn = 1 Then
