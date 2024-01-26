@@ -82,7 +82,8 @@ Dim rTextWidth#, rTextHeight#
         ' Get all the metrics
         '
         Cls
-        Set Font = objFont
+        Font.Charset = objFont.Charset
+        Font.size = Font.size
         Font.Bold = False
         lWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN)
         lHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN)

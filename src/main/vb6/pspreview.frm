@@ -625,9 +625,11 @@ Dim bLoaded As Boolean
     ' ******************************************
     ' Day Position
     ' ******************************************
-    FontSize = 11
+    Font.Charset = frmMain.Font.Charset
+    Font.size = IIf(frmMain.Font.size > 10, 10, frmMain.Font.size)
     FontBold = True
     Print "Overall Position"
+    FontSize = FontSize - 1
     If objSymbol.FromNasdaqRealTime Then
         CurrentX = LEFT_MARGIN
         lTmp = ForeColor
@@ -636,7 +638,6 @@ Dim bLoaded As Boolean
         ForeColor = lTmp
     End If
     CurrentY = CurrentY + 2
-    FontSize = 9
     FontBold = False
     CurrentX = LEFT_MARGIN
     If Not objSymbol Is Nothing Then
@@ -698,11 +699,11 @@ Dim bLoaded As Boolean
         ' ******************************************
         ' Day Position
         ' ******************************************
-        CurrentY = CurrentY + 5
-        FontSize = 11
+        CurrentY = CurrentY + 7
+        FontSize = FontSize + 1
         FontBold = True
         Print "Day Position"
-        FontSize = 9
+        FontSize = FontSize - 1
         CurrentY = CurrentY + 2
         FontBold = False
         CurrentX = LEFT_MARGIN
@@ -778,10 +779,10 @@ Dim bLoaded As Boolean
     CurrentX = LEFT_MARGIN
     CurrentY = CurrentY + 5
     If rRate <> 1 And rRate > 0 Then
+        FontSize = FontSize + 1
         FontBold = True
-        FontSize = 11
         Print "FX Rate"
-        FontSize = 9
+        FontSize = FontSize - 1
         FontBold = False
         CurrentY = CurrentY + 1
         CurrentX = LEFT_MARGIN
@@ -793,7 +794,7 @@ Dim bLoaded As Boolean
     FontBold = False
     CurrentX = LEFT_MARGIN
     CurrentY = 324
-    FontSize = 8
+    FontSize = IIf(FontSize > 9, 9, FontSize)
     ForeColor = vbGrayText
     Print "Updated:" + Format(objSymbol.LastUpdate)
     Line (512, 0)-(687, 339), vbWhite, B
@@ -877,10 +878,12 @@ Dim i%, iSortColumn%
     ' Draw the useful text
     '
     Cls
+    Font.Charset = frmMain.Font.Charset
+    Font.size = frmMain.Font.size
+    FontBold = False
     Width = 2000 * Screen.TwipsPerPixelX
     Height = 2000 * Screen.TwipsPerPixelX
     ForeColor = vbWhite
-    FontSize = 11
     lTextColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TEXT_COLOUR, Format(vbWhite)))
     lUpColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_COLOUR, Format(vbGreen)))
     lDownColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_COLOUR, Format(vbRed)))
@@ -912,7 +915,9 @@ Dim i%, iSortColumn%
         
         CurrentX = 10
         ForeColor = lTextColor
+        FontBold = True
         Print objStock.DisplayName;
+        FontBold = False
         
         CurrentX = 65
         ForeColor = IIf(objStock.CurrentPrice > objStock.DayStart, lUpColor, IIf(objStock.CurrentPrice < objStock.DayStart, lDownColor, lTextColor))
@@ -1004,10 +1009,12 @@ Dim i%, iSortColumn%
     ' Draw the useful text
     '
     Cls
+    Font.Charset = frmMain.Font.Charset
+    Font.size = frmMain.Font.size
+    FontBold = False
     Width = 2000 * Screen.TwipsPerPixelX
     Height = 2000 * Screen.TwipsPerPixelX
     ForeColor = vbWhite
-    FontSize = 11
     lTextColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TEXT_COLOUR, Format(vbWhite)))
     lUpColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_COLOUR, Format(vbGreen)))
     lDownColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_COLOUR, Format(vbRed)))
@@ -1048,8 +1055,10 @@ Dim i%, iSortColumn%
     CurrentX = 10
     For Each objStock In Z_SortSummaryCollection(frmMain.mobjSummaryStocks, sSortOrder = "asc", iSortColumn)
         ForeColor = lTextColor
+        FontBold = True
         CurrentX = 10
         Print objStock.DisplayName;
+        FontBold = False
         
         CurrentX = 70
         ForeColor = lTextColor

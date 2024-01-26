@@ -30,8 +30,8 @@ Option Explicit
     ' Version number form the build system
     '
     Public Const VERSION_NAME = "Pivotal Stock Ticker (pivotalstockticker.exe)"
-    Public Const VERSION_NUMBER = "3.5.5"
-    Public Const VERSION_TIMESTAMP = "26-Jan-2024 13:58"
+    Public Const VERSION_NUMBER = "3.5.6"
+    Public Const VERSION_TIMESTAMP = "26-Jan-2024 19:48"
 
     '
     ' Registry entries
