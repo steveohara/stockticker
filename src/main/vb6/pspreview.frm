@@ -92,7 +92,7 @@ Begin VB.Form frmPreview
       Left            =   6720
       MousePointer    =   7  'Size N S
       TabIndex        =   13
-      ToolTipText     =   "Sort by base average price paid"
+      Tag             =   "Sort by base average price paid"
       Top             =   3600
       Width           =   1095
    End
@@ -112,7 +112,7 @@ Begin VB.Form frmPreview
       Left            =   6840
       MousePointer    =   7  'Size N S
       TabIndex        =   12
-      ToolTipText     =   "Sort by base average price paid"
+      Tag             =   "Sort by base average price paid"
       Top             =   3120
       Width           =   1095
    End
@@ -132,7 +132,7 @@ Begin VB.Form frmPreview
       Left            =   6960
       MousePointer    =   7  'Size N S
       TabIndex        =   11
-      ToolTipText     =   "Sort by gain/loss"
+      Tag             =   "Sort by gain/loss"
       Top             =   2760
       Width           =   1095
    End
@@ -152,7 +152,7 @@ Begin VB.Form frmPreview
       Left            =   7080
       MousePointer    =   7  'Size N S
       TabIndex        =   10
-      ToolTipText     =   "Sort by total value"
+      Tag             =   "Sort by total value"
       Top             =   2400
       Width           =   1095
    End
@@ -172,7 +172,7 @@ Begin VB.Form frmPreview
       Left            =   6960
       MousePointer    =   7  'Size N S
       TabIndex        =   9
-      ToolTipText     =   "Sort by number of shares"
+      Tag             =   "Sort by number of shares"
       Top             =   1920
       Width           =   1095
    End
@@ -192,7 +192,7 @@ Begin VB.Form frmPreview
       Left            =   6960
       MousePointer    =   7  'Size N S
       TabIndex        =   8
-      ToolTipText     =   "Sort by current price"
+      Tag             =   "Sort by current price"
       Top             =   1560
       Width           =   1095
    End
@@ -212,7 +212,7 @@ Begin VB.Form frmPreview
       Left            =   6960
       MousePointer    =   7  'Size N S
       TabIndex        =   7
-      ToolTipText     =   "Sort by base average price paid"
+      Tag             =   "Sort by base average price paid"
       Top             =   1200
       Width           =   1095
    End
@@ -232,7 +232,7 @@ Begin VB.Form frmPreview
       Left            =   7080
       MousePointer    =   7  'Size N S
       TabIndex        =   6
-      ToolTipText     =   "Sort by symbol"
+      Tag             =   "Sort by symbol"
       Top             =   840
       Width           =   1095
    End
@@ -252,7 +252,7 @@ Begin VB.Form frmPreview
       Left            =   2520
       MousePointer    =   7  'Size N S
       TabIndex        =   4
-      ToolTipText     =   "Sort by change (percent)"
+      Tag             =   "Sort by change (percent)"
       Top             =   3000
       Width           =   1095
    End
@@ -272,7 +272,7 @@ Begin VB.Form frmPreview
       Left            =   2520
       MousePointer    =   7  'Size N S
       TabIndex        =   3
-      ToolTipText     =   "Sort by change (value)"
+      Tag             =   "Sort by change (value)"
       Top             =   2520
       Width           =   1095
    End
@@ -292,7 +292,7 @@ Begin VB.Form frmPreview
       Left            =   2520
       MousePointer    =   7  'Size N S
       TabIndex        =   2
-      ToolTipText     =   "Sort by current price"
+      Tag             =   "Sort by current price"
       Top             =   2160
       Width           =   1095
    End
@@ -312,7 +312,7 @@ Begin VB.Form frmPreview
       Left            =   2520
       MousePointer    =   7  'Size N S
       TabIndex        =   1
-      ToolTipText     =   "Sort by symbol"
+      Tag             =   "Sort by symbol"
       Top             =   1800
       Width           =   1095
    End
@@ -392,6 +392,12 @@ Dim iSortColumn%
 
 End Sub
 
+Private Sub lblHeader_MouseMove(Index As Integer, Button As Integer, Shift As Integer, X As Single, Y As Single)
+
+    frmTooltip.ShowToolTip Me.Font, lblHeader(Index).Tag
+    
+End Sub
+
 Private Sub lblSummaryHeader_Click(Index As Integer)
 
 Dim sSortOrder$
@@ -406,6 +412,12 @@ Dim iSortColumn%
         Call mobjReg.SaveSetting(App.Title, REG_SETTINGS, REG_SUMMARY_SORT_COLUMN, Format(Index))
     End If
     Z_ShowSummary
+
+End Sub
+
+Private Sub lblSummaryHeader_MouseMove(Index As Integer, Button As Integer, Shift As Integer, X As Single, Y As Single)
+
+    frmTooltip.ShowToolTip Me.Font, lblSummaryHeader(Index).Tag
 
 End Sub
 
@@ -468,6 +480,7 @@ Public Sub HideChart(Optional ByVal bImmediately As Boolean)
     Else
         timClose.Enabled = True
     End If
+    frmTooltip.HideTooltip
 
 End Sub
 
