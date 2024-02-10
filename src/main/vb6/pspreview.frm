@@ -92,7 +92,7 @@ Begin VB.Form frmPreview
       Left            =   6720
       MousePointer    =   7  'Size N S
       TabIndex        =   13
-      Tag             =   "Sort by base average price paid"
+      Tag             =   "Sort by change (value)"
       Top             =   3600
       Width           =   1095
    End
@@ -112,7 +112,7 @@ Begin VB.Form frmPreview
       Left            =   6840
       MousePointer    =   7  'Size N S
       TabIndex        =   12
-      Tag             =   "Sort by base average price paid"
+      Tag             =   "Sort by change (percent)"
       Top             =   3120
       Width           =   1095
    End
@@ -132,7 +132,7 @@ Begin VB.Form frmPreview
       Left            =   6960
       MousePointer    =   7  'Size N S
       TabIndex        =   11
-      Tag             =   "Sort by gain/loss"
+      Tag             =   "Sort by value"
       Top             =   2760
       Width           =   1095
    End
@@ -152,7 +152,7 @@ Begin VB.Form frmPreview
       Left            =   7080
       MousePointer    =   7  'Size N S
       TabIndex        =   10
-      Tag             =   "Sort by total value"
+      Tag             =   "Sort by total cost"
       Top             =   2400
       Width           =   1095
    End
