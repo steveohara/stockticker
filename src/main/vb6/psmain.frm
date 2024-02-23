@@ -263,36 +263,16 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-'****************************************************************************
 '
-'   Pivotal Solutions Ltd © 2004
+' Copyright (c) 2024, Pivotal Solutions and/or its affiliates. All rights reserved.
+' Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
 '
-'****************************************************************************
-'
-' LANGUAGE:             Microsoft Visual Basic V6.00
-'
-' MODULE NAME:          Pivotal_Main
-'
-' MODULE TYPE:          BASIC Form
-'
-' FILE NAME:            PSMAIN.FRM
-'
-' MODIFICATION HISTORY: Steve O'Hara    30 April 2004   First created for ScaffoldTicker
-'
-' PURPOSE:              Main ticker interface
-'
-'
-'****************************************************************************
-'
-'****************************************************
-' MODULE VARIABLE DECLARATIONS
-'****************************************************
+' This the main ticker 'bar' and contains both the summarisation
+' and scrolling portion of the ticker display
 '
 Option Explicit
 
-    '
     ' Registry entries
-    '
     Const REG_POSITION = "Position"
     Const REG_FONTSIZE = "Font Size"
     Const REG_SCROLLSPEED = "Scroll Speed"
@@ -338,22 +318,8 @@ Option Explicit
     
 Private Sub Z_DisplaySymbols()
 Attribute Z_DisplaySymbols.VB_Description = "Displays symbols for the scrolling portion"
-'****************************************************************************
 '
-'   Pivotal Solutions Ltd © 2008
-'
-'****************************************************************************
-'
-'                     NAME: Sub Z_DisplaySymbols
-'
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    04 September 2008   First created for StockTicker
-'
-'                  PURPOSE: Displays symbols for the scrolling portion
-'
-'****************************************************************************
-'
+' Displays symbols for the scrolling portion
 '
 Dim iCnt%
 Dim lBmp&
@@ -361,9 +327,7 @@ Dim lBufferDC&
 Dim stRect As RECT
 Dim lBrush&
 
-    '
     ' Output the data and scroll if neccersary
-    '
     On Error Resume Next
     'Debug.Print Format(GetTickCount) + " Displaying symbols"
     
@@ -371,22 +335,16 @@ Dim lBrush&
     lBmp = CreateCompatibleBitmap(picText.hDC, 5000, picText.ScaleHeight)
     Call SelectObject(lBufferDC, lBmp)
     
-    '
     ' Copy the data image into the buffer
-    '
     BitBlt lBufferDC, 0, 0, 5000, picText.ScaleHeight, picData.hDC, 0, 0, SRCCOPY
     If mbScrolling Then BitBlt lBufferDC, picData.CurrentX, 0, 5000, picText.ScaleHeight, picData.hDC, 0, 0, SRCCOPY
     
-    '
     ' Copy the buffer to the screen
-    '
     BitBlt picText.hDC, 0, 0, 5000, picText.ScaleHeight, lBufferDC, miScrollPosition, 0, SRCCOPY
     Call DeleteDC(lBufferDC)
     Call DeleteObject(lBmp)
     
-    '
     ' Adjust the scroll position
-    '
     If Not mbScrolling Then
         miScrollPosition = 0
     Else
@@ -399,28 +357,12 @@ End Sub
 
 
 Private Sub Z_ShowYahooChart(ByVal sSymbols)
-'****************************************************************************
 '
-'   Pivotal Solutions Ltd © 2005
-'
-'****************************************************************************
-'
-'                     NAME: Sub Z_ShowYahooChart
-'
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 November 2005   First created for ScaffoldTicker
-'
-'                  PURPOSE: Shows the admin page of choice
-'
-'****************************************************************************
-'
+' Shows the admin page of choice
 '
 Dim sURL$
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     sURL = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_LAUNCH_URL)
     If sURL = "" Then sURL = REG_LAUNCH_URL_DEF
@@ -430,47 +372,19 @@ Dim sURL$
 End Sub
 
 Private Sub Z_ShowNasdaqChart(ByVal sSymbol)
-'****************************************************************************
 '
-'   Pivotal Solutions Ltd © 2005
-'
-'****************************************************************************
-'
-'                     NAME: Sub Z_ShowNasdaqChart
-'
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 November 2005   First created for ScaffoldTicker
-'
-'                  PURPOSE: Shows the admin page of choice
-'
-'****************************************************************************
-'
+' Shows the admin page of choice
 '
     Call PSGEN_LaunchBrowser("http://www.nasdaq.com/symbol/" + sSymbol + "/real-time")
 
 End Sub
 
 Private Sub Z_DisplayData(Optional ByVal sData = "")
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2004
-'
-'****************************************************************************
-'
-'                     NAME: Sub Z_DisplayData
 '
 '                     sData$             - Data to display
 '                     bFlash As Boolean            - Flash the display
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    03 May 2004   First created for MediaWebTicker
-'
-'                  PURPOSE: Displays data on the screen
-'
-'****************************************************************************
-'
+' Displays data on the screen
 '
 Dim objStock As cStock
 Dim iCnt%, iImageWidth%, iDisplayWidth%
@@ -492,9 +406,7 @@ Dim lBackColor&, lTextColor&, lUpColor&, lDownColor&
 Dim rTotalInvestment#, rMargin#, rRate#, rTotalChange#
 Dim objSymbol As cSymbol
 
-    '
     ' Draw the text on the display
-    '
     On Error Resume Next
     Set picData.Font = Font
     bShowTotal = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_PROFIT_LOSS, "0"))
@@ -526,9 +438,7 @@ Dim objSymbol As cSymbol
     bAlwaysOnTop = CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_ALWAYS_ON_TOP, "-1"))
     sCurrencySymbol = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY_SYMBOL, "£")
     
-    '
     ' Position the display elements
-    '
     Cls
     Font.Name = sFont
     Font.Bold = bBold
@@ -542,9 +452,7 @@ Dim objSymbol As cSymbol
     CurrentX = picSize(0).Width + 2 + iImageWidth
     CurrentY = 1
     
-    '
     ' Draw the summary (non-scrolling)
-    '
     mrSummaryRegionStartX = 0
     mrSummaryRegionEndX = 0
     If bShowSummary Then
@@ -595,9 +503,7 @@ Dim objSymbol As cSymbol
                     Print " " + IIf(bShowPrice Or bShowPercent, "", "   " + objStock.Code + " ") + objStock.FormattedAverageCost;
                 End If
                 
-                '
                 ' Get the total daily change
-                '
                 Set objSymbol = mobjCurrentSymbols.Item(objStock.Code)
                 rTotalChange = rTotalChange + (ConvertCurrency(objSymbol, objSymbol.DayChange) * objStock.NumberOfShares)
             Next
@@ -626,9 +532,7 @@ Dim objSymbol As cSymbol
     End If
     picText.Move CurrentX, 0, iDisplayWidth - CurrentX + 8, ScaleHeight
         
-    '
     ' Set the display flashing
-    '
     If sData <> "" Then
         picData.Visible = False
         Visible = True
@@ -648,9 +552,7 @@ Dim objSymbol As cSymbol
         miScrollPosition = 0
         picText.Visible = True
         
-    '
     ' Display the symbols
-    '
     Else
         Z_DrawSymbolText
         Z_DisplaySymbols
@@ -663,9 +565,7 @@ Private Sub Form_DblClick()
 
 Dim objSymbol As Object
 
-    '
     ' Show the browser window for this application
-    '
     Set objSymbol = Z_GetSymbolUnderMouse
     If Not objSymbol Is Nothing Then
         frmPreview.HideChart True
@@ -690,22 +590,16 @@ End Sub
 
 Private Sub Form_Load()
 
-    '
     ' Remove the border
-    '
     SetWindowLong Me.hWnd, GWL_STYLE, 100663296
     Set mobjCurrentSymbols = Nothing
     Set mobjExchangeRates = Nothing
     Set mobjSummaryStocks = Nothing
     
-    '
     ' Position the display based upon the docking
-    '
     Z_SetupDisplay
     
-    '
     ' Display the data
-    '
     Call Z_DisplayData("Loading....")
     Z_GetSymbolData
     Z_DisplayData
@@ -718,16 +612,12 @@ Private Sub Form_MouseDown(Button As Integer, Shift As Integer, X As Single, Y A
 Dim stRect As RECT
 Dim stPoint As POINTAPI
 
-    '
     ' Show the context menu
-    '
     If Button = vbRightButton Then
         frmPreview.HideChart True
         PopupMenu mnuPopup
     
-    '
     ' Set the capture so that we can catch the mouse up
-    '
     ElseIf Not mbCapturing Then
         Call SetCapture(hWnd)
         Call GetCursorPos(stPoint)
@@ -756,9 +646,7 @@ Dim stRect As RECT
 
     If mbCapturing Then
         
-        '
         ' Release the mouse capture and save the current position
-        '
         ReleaseCapture
         Call ClipCursor(ByVal 0&)
         mbCapturing = False
@@ -771,9 +659,7 @@ Dim stRect As RECT
         Call GetWindowRect(hWnd, stRect)
         Call mobjReg.SaveSetting(App.Title, REG_SETTINGS, REG_POSITION, Format(stRect.Left) + "," + Format(stRect.Top) + "," + Format(stRect.Right - stRect.Left))
         
-        '
         ' If we have in some way changed the docking
-        '
         If Not mnuDockNone.Checked Then
             If stRect.Top <> mstDock.rc.Top Then mnuDockNone_Click
         End If
@@ -792,17 +678,13 @@ End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
 
-    '
     ' Initialise before unloading
-    '
     timData.Enabled = False
     Set mobjCurrentSymbols = Nothing
     Set mobjExchangeRates = Nothing
     Set mobjSummaryStocks = Nothing
     
-    '
     ' Undock ourselves
-    '
     Z_UnloadDock
 
 End Sub
@@ -982,18 +864,14 @@ Private Sub mnuSettings_Click()
     DoEvents
 
     If mbForceRefresh Then
-        '
         ' Set top most if required
-        '
         If CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_ALWAYS_ON_TOP, "-1")) Then
             Call SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, Flags)
         Else
             Call SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, Flags)
         End If
     
-        '
         ' Refresh the display
-        '
         mnuRefresh_Click
     End If
 
@@ -1107,9 +985,7 @@ Private Sub picSize_MouseDown(Index As Integer, Button As Integer, Shift As Inte
 
 Dim stRect As RECT
 
-    '
     ' Set the capture so that we can catch the mouse up
-    '
     If Not mbCapturing Then
         Call SetCapture(picSize(Index).hWnd)
         Call GetCursorPos(mstPoint)
@@ -1127,9 +1003,7 @@ Dim stRect As RECT
 Dim stRectGrabs As RECT
 Dim iDisplayWidth%
 
-    '
     ' If we are capturing then move the display
-    '
     On Error Resume Next
     If mbCapturing Then
         Call GetWindowRect(hWnd, stRect)
@@ -1164,9 +1038,7 @@ Dim stRect As RECT
 
     If mbCapturing Then
         
-        '
         ' Release the mouse capture and save the current position
-        '
         ReleaseCapture
         mbCapturing = False
         Call GetWindowRect(hWnd, stRect)
@@ -1212,9 +1084,7 @@ End Sub
 
 Public Sub TimerEvent()
 
-    '
     ' Draw the text on the display if required
-    '
     If Visible Then
         If mDataHasChanged Then
             Z_DisplayData
@@ -1232,24 +1102,10 @@ End Sub
 
 
 Private Function Z_GetSymbolData()
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2004
-'
-'****************************************************************************
-'
-'                     NAME: Function Z_GetSymbolData
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    04 June 2004   First created for MediaWebTicker
-'
-'                  PURPOSE: Returns the user counts display string
-'
-'****************************************************************************
-'
+' Returns the user counts display string
 '
 Dim objSymbol As cSymbol
 Dim objStock As cStock
@@ -1282,9 +1138,7 @@ Dim bag As JsonBag
 Dim sCurrencies$
 Dim bGotExchangeRates As Boolean
 
-    '
     ' Get the useful stuff
-    '
     On Error Resume Next
     sURL = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_URL, REG_URL_DEF)
     sProxy = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_PROXY)
@@ -1302,20 +1156,14 @@ Dim bGotExchangeRates As Boolean
         sSummaryCurrencyName = "GBP"
     End If
     
-    '
     ' Decide if we need to adjust the symbols
-    '
     Set mobjCurrentSymbols = Z_GetDisplaySymbols(CBool(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SHOW_SUMMARY_SUMMARISE, "0")), False)
     
-    '
     ' Loop through all the symbols getting the lists
-    '
     If mobjCurrentSymbols.Count > 0 Then
     
-        '
         ' Get all the exchange rates for all the symbols that are not
         ' disabled
-        '
         sCurrencies = ""
         For Each objSymbol In mobjCurrentSymbols
             If Not objSymbol.Disabled Then
@@ -1328,16 +1176,12 @@ Dim bGotExchangeRates As Boolean
         Next
         If sSummaryCurrencyName <> "" And objExchangeLookup.Count > 0 Then
         
-            '
             ' Ony attempt to get the exchanges rates every 10 minutes after the first successful get
-            '
             If Val(timData.Tag) >= (600 / timData.Interval) Or timData.Tag = "" Then
                 timData.Tag = ""
                 sCSV = ""
                 
-                '
                 ' Try using https://api.iex.cloud
-                '
                 If sIexKey <> "" Then
                     sCurrencies = ""
                     For Each sSymbol In objExchangeLookup
@@ -1366,9 +1210,7 @@ Dim bGotExchangeRates As Boolean
                     End If
                 End If
                 
-                '
                 ' Try using https://app.freecurrencyapi.com
-                '
                 If Not bGotExchangeRates And sFreeCurrencyKey <> "" Then
                     PSGEN_Log "Getting exchange rates from https://api.freecurrencyapi.com"
                     Call PSINET_GetHTTPFile("https://api.freecurrencyapi.com/v1/latest?apikey=" + sFreeCurrencyKey + "&base_currency=" + sSummaryCurrencyName, sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=3)
@@ -1391,9 +1233,7 @@ Dim bGotExchangeRates As Boolean
                     End If
                 End If
                 If Not bGotExchangeRates Then
-                    '
                     ' Try using https://open.er-api.com
-                    '
                     PSGEN_Log "Getting exchange rates from https://open.er-api.com"
                     Call PSINET_GetHTTPFile("https://open.er-api.com/v6/latest/" + sSummaryCurrencyName, sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=3)
                     If Trim(sCSV) <> "" Then
@@ -1414,9 +1254,7 @@ Dim bGotExchangeRates As Boolean
                     End If
                 End If
                 
-                '
                 ' Get the exchange rate from the registry
-                '
                 For Each sSymbol In objExchangeLookup
                     DoEvents
                     If PSGEN_IsSameText(sSymbol, sSummaryCurrencyName) Then
@@ -1430,17 +1268,13 @@ Dim bGotExchangeRates As Boolean
                 Next
             End If
             
-            '
             ' Wait for a while before getting the updated exchange rates again
-            '
             If bGotExchangeRates Then
                 timData.Tag = IIf(timData.Tag = "", 1, Format(Val(timData.Tag) + 1))
             End If
         End If
         
-        '
         ' Now get a list of all the symbols from IEX if we have a key
-        '
         If sIexKey <> "" Then
             For Each sSymbol In objSymsToLookup
                 rDayOpen = 0
@@ -1455,9 +1289,7 @@ Dim bGotExchangeRates As Boolean
                     PSGEN_Log "Getting stock price from IEX for " + sSymbol
                     Call PSINET_GetHTTPFile("https://cloud.iexapis.com/stable/stock/" + Replace(sName, "^", ".") + "/quote?token=" + sIexKey, sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=3)
                     
-                    '
                     ' Put the stock values into the lookup
-                    '
                     If Trim(sCSV) <> "" Then
                         PSGEN_Log "Got stock price from IEX successfully for " + sSymbol
                         Set bag = New JsonBag
@@ -1487,9 +1319,7 @@ Dim bGotExchangeRates As Boolean
             Next
         End If
         
-        '
         ' Now get a list of all the symbols from Alpha Vantage
-        '
         If sAlphaVantageKey <> "" Then
             For Each sSymbol In objSymsToLookup
                 rDayOpen = 0
@@ -1502,9 +1332,7 @@ Dim bGotExchangeRates As Boolean
                 PSGEN_Log "Getting stock price from Alpha Vantage for " + sSymbol
                 Call PSINET_GetHTTPFile("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval=1min&apikey=" + sAlphaVantageKey + "&datatype=csv&symbol=" + Replace(sSymbol, "^", "."), sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=2)
     
-                '
                 ' Put the stock values into the lookup
-                '
                 If Trim(sCSV) <> "" Then
                     PSGEN_Log "Got stock price from Alpha Vantage successfully for " + sSymbol
                     sCSV = Split(sCSV, vbLf)(1)
@@ -1531,9 +1359,7 @@ Dim bGotExchangeRates As Boolean
             Next
         End If
             
-        '
         ' Now get a list of all the symbols from Twelve Data
-        '
         If sTwelveDataKey <> "" Then
             For Each sSymbol In objSymsToLookup
                 rDayOpen = 0
@@ -1546,9 +1372,7 @@ Dim bGotExchangeRates As Boolean
                 PSGEN_Log "Getting stock price from Twelve Data for " + sSymbol
                 Call PSINET_GetHTTPFile("https://api.twelvedata.com/quote?format=csv&apikey=" + sTwelveDataKey + "&symbol=" + Replace(sSymbol, ".L", ""), sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=2)
     
-                '
                 ' Put the stock values into the lookup
-                '
                 If Trim(sCSV) <> "" Then
                     PSGEN_Log "Got stock price from Twelve Data successfully for " + sSymbol
                     sCSV = Replace(Split(sCSV, vbLf)(1), ";", ",")
@@ -1580,9 +1404,7 @@ Dim bGotExchangeRates As Boolean
             Next
         End If
         
-        '
         ' Now get a list of all the symbols from Market Stack
-        '
         If sMarketStackKey <> "" Then
             For Each sSymbol In objSymsToLookup
                 rDayOpen = 0
@@ -1595,9 +1417,7 @@ Dim bGotExchangeRates As Boolean
                 PSGEN_Log "Getting stock price from Market Stack for " + sSymbol
                 Call PSINET_GetHTTPFile("http://api.marketstack.com/v1/intraday/latest?access_key=" + sMarketStackKey + "&symbols=" + Replace(sSymbol, "^", "."), sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=2)
     
-                '
                 ' Put the stock values into the lookup
-                '
                 If Trim(sCSV) <> "" Then
                     PSGEN_Log "Got stock price from Market Stack successfully for " + sSymbol
                     rDayOpen = CDbl(Split(Split(sCSV, """close"":", 2)(1), ",", 2)(0))
@@ -1632,9 +1452,7 @@ Dim bGotExchangeRates As Boolean
             sName = sSymbol
             Call PSINET_GetHTTPFile("https://query2.finance.yahoo.com/ws/fundamentals-timeseries/v6/finance/quoteSummary/" + Replace(sName, "^", ".") + "?modules=price", sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
                 
-            '
             ' Put the stock values into the lookup
-            '
             If Trim(sCSV) <> "" Then
                 PSGEN_Log "Got stock price from Yahoo successfully for " + sSymbol
                 Set bag = New JsonBag
@@ -1660,9 +1478,7 @@ Dim bGotExchangeRates As Boolean
             End If
         Next
         
-        '
         ' Now get a list of all the symbols from Reuters
-        '
         For Each sSymbol In objSymsToLookup
             rDayOpen = 0
             rDayHigh = 0
@@ -1674,9 +1490,7 @@ Dim bGotExchangeRates As Boolean
             PSGEN_Log "Getting stock price from Reuters for " + sSymbol
             Call PSINET_GetHTTPFile("https://in.reuters.com/companies/" + Replace(sSymbol, "^", "."), sCSV, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=2000)
 
-            '
             ' Put the stock values into the lookup
-            '
             If InStr(sCSV, "<span>Open</span>") > 0 And Trim(sCSV) <> "" Then
                 PSGEN_Log "Got stock price from Reurters successfully for " + sSymbol
                 rDayOpen = CDbl(Split(Split(Split(sCSV, "<span>Prev Close</span>")(1), "<span>")(1), "<")(0))
@@ -1698,9 +1512,7 @@ Dim bGotExchangeRates As Boolean
         Next
         
         '
-        '
         ' Get the values from each CSV line
-        '
         For Each objSymbol In mobjCurrentSymbols
             If Not objSymbol.Disabled Then
                 Err.Clear
@@ -1714,9 +1526,7 @@ Dim bGotExchangeRates As Boolean
                 End If
                 
                 If SymbolInfo <> "" Then
-                    '
                     ' Work out the running stuff
-                    '
                     SymbolInfo = objSymLookup.Item(objSymbol.Code)
                     Call mobjReg.SaveSetting(App.Title, REG_LAST_GOOD_VALUES, objSymbol.Code, SymbolInfo)
                     SymbolInfo = Split(SymbolInfo, ",")
@@ -1736,15 +1546,11 @@ Dim bGotExchangeRates As Boolean
                     rTotalValue = rTotalValue + ConvertCurrency(objSymbol, objSymbol.CurrentPrice * objSymbol.Shares)
                 End If
                 
-                '
                 ' Check for any problems
-                '
                 If objSymbol.CurrentPrice = 0 Then objSymbol.ErrorDescription = "Bad Symbol"
                 sCurrencySymbol = sCurrencySymbol + objSymbol.CurrencySymbol
                 
-                '
                 ' Create the summary stock values
-                '
                 If Not objSymbol.ExcludeFromSummary Then
                     Set objStock = New cStock
                     objStock.DisplayName = objSymbol.DisplayName
@@ -1759,17 +1565,13 @@ Dim bGotExchangeRates As Boolean
                     If objStock.CurrencySymbol = "" And objSymbol.CurrencySymbol <> "" Then objStock.CurrencySymbol = objSymbol.CurrencySymbol
                 End If
                 
-                '
                 ' Check for an alarm condition
-                '
                 If objOldValues Is Nothing Then Set objOldValues = New Collection
                 rOldPrice = objOldValues.Item(objSymbol.Code)
                 If Err = 0 Then
                     If objSymbol.LowAlarmEnabled Then
                         
-                        '
                         ' If this is a percentage change then base it on the last recorded value
-                        '
                         If objSymbol.LowAlarmIsPercent Then
                             If objSymbol.CurrentPrice <= ((objSymbol.LowAlarmValue / 100) * rOldPrice) Then
                                 Set objAlarm = New frmAlarm
@@ -1807,25 +1609,19 @@ Dim bGotExchangeRates As Boolean
         Next
     End If
 
-    '
     ' Return value to caller
-    '
     mDataHasChanged = True
     Set mobjSummaryStocks = objSummaryStocks
     mobjTotal.TotalCost = rTotalInvested
     mobjTotal.TotalValue = rTotalValue
     mobjTotal.CurrencySymbol = ""
     
-    '
     ' Set the currency synmbol for conversion if specified by the user
-    '
     If sSummaryCurrencySymbol <> "" Then
         mobjTotal.CurrencySymbol = sSummaryCurrencySymbol
         mobjTotal.CurrencyName = sSummaryCurrencyName
         
-    '
     ' Use the first symbol in the list
-    '
     ElseIf sCurrencySymbol <> "" Then
         If sCurrencySymbol = String(Len(sCurrencySymbol), Left(sCurrencySymbol, 1)) Then mobjTotal.CurrencySymbol = Left(sCurrencySymbol, 1)
     End If
@@ -1849,9 +1645,7 @@ Dim objBaseSymbol As cSymbol
         For Each objSymbol In objSymbolsToUse
             If bGetAll Or Not objSymbol.Disabled Then
             
-                '
                 ' Check if we have this symbol already
-                '
                 Set objBaseSymbol = Nothing
                 Set objBaseSymbol = objSymbols.Item(objSymbol.Code)
                 If objBaseSymbol Is Nothing Then
@@ -1859,9 +1653,7 @@ Dim objBaseSymbol As cSymbol
                     objSymbols.Add objBaseSymbol, objBaseSymbol.Code
                 Else
                     
-                    '
                     ' Update the original with the new values
-                    '
                     objBaseSymbol.Price = ((objBaseSymbol.Price * objBaseSymbol.Shares) + (objSymbol.Price * objSymbol.Shares)) / (objBaseSymbol.Shares + objSymbol.Shares)
                     objBaseSymbol.Shares = objBaseSymbol.Shares + objSymbol.Shares
                     objBaseSymbol.ShowPrice = IIf(objSymbol.ShowPrice, True, objBaseSymbol.ShowPrice)
@@ -1894,17 +1686,13 @@ Dim bShownOtherData As Boolean
 Dim bShownBraces As Boolean
 Dim objSymbols As Collection
 
-    '
     ' Get the colours from the registry
-    '
     'Debug.Print Format(Now, "hh:nn:ss") + " Drawing symbol text"
     lTextColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TEXT_COLOUR, Format(vbWhite)))
     lUpColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_COLOUR, Format(vbGreen)))
     lDownColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_COLOUR, Format(vbRed)))
     
-    '
     ' Loop through all the symbols getting a sorted list
-    '
     picData.ScaleMode = vbPixels
     picData.Width = Int(GetSystemMetrics(SM_CXVIRTUALSCREEN)) * Screen.TwipsPerPixelX
     picData.Cls
@@ -1913,18 +1701,14 @@ Dim objSymbols As Collection
     picData.BackColor = BackColor
     If mobjCurrentSymbols.Count > 0 Then
     
-        '
         ' Split the text into it's constituents
-        '
         On Error Resume Next
         For Each objSymbol In mobjCurrentSymbols
 
             If Not objSymbol.Disabled Then
                 bShownOtherData = False
                 
-                '
                 ' Display all the bits starting with the correct colour
-                '
                 If bNotFirst Then picData.CurrentX = picData.CurrentX + 10
                 objSymbol.Position.Left = CurrentX + picData.CurrentX
                 If objSymbol.ShowChangeUpDown Or objSymbol.ShowChange Or objSymbol.ShowChangePercent Or objSymbol.ShowProfitLoss Then
@@ -1932,26 +1716,20 @@ Dim objSymbols As Collection
                     picData.Print objSymbol.DisplayName;
                     Call Z_ShowNasdaq(objSymbol)
                 
-                    '
                     ' Show the price
-                    '
                     If objSymbol.ShowPrice Then
                         picData.CurrentX = picData.CurrentX + 4
                         picData.Print objSymbol.FormattedValue;
                     End If
                     
-                    '
                     ' Show the price difference
-                    '
                     If objSymbol.ShowChange Then
                         bShownOtherData = True
                         picData.CurrentX = picData.CurrentX + 4
                         picData.Print FormatCurrencyValue(objSymbol.CurrencySymbol, objSymbol.CurrentPrice - objSymbol.Price);
                     End If
                     
-                    '
                     ' Show the change in percent
-                    '
                     If objSymbol.ShowChangePercent Then
                         bShownOtherData = True
                         picData.CurrentX = picData.CurrentX + 4
@@ -1962,17 +1740,13 @@ Dim objSymbols As Collection
                         End If
                     End If
                     
-                    '
                     ' Show the profit/loss
-                    '
                     If objSymbol.ShowProfitLoss Then
                         picData.CurrentX = picData.CurrentX + 4
                         picData.Print FormatCurrencyValueWithSymbol(objSymbol.CurrencySymbol, objSymbol.CurrencyName, (objSymbol.CurrentPrice * objSymbol.Shares) - (objSymbol.Price * objSymbol.Shares));
                     End If
                 
-                    '
                     ' Show the up/down arrows
-                    '
                     If objSymbol.ShowChangeUpDown Then
                         DrawUpDownArrow objSymbol, picData, ScaleHeight, picData.CurrentX + 4, picData.CurrentY
                     End If
@@ -1981,35 +1755,27 @@ Dim objSymbols As Collection
                     picData.Print objSymbol.DisplayName;
                     Call Z_ShowNasdaq(objSymbol)
                     
-                    '
                     ' Show the price
-                    '
                     If objSymbol.ShowPrice Then
                         picData.CurrentX = picData.CurrentX + 4
                         picData.Print objSymbol.FormattedValue;
                     End If
                 End If
                 
-                '
                 ' Show day changes
-                '
                 If objSymbol.ShowDayChange Or objSymbol.ShowDayChangePercent Or objSymbol.ShowDayChangeUpDown Then
                     bShownBraces = (bShownOtherData And (objSymbol.ShowDayChange Or objSymbol.ShowDayChangePercent)) Or (objSymbol.ShowChangeUpDown And objSymbol.ShowDayChangeUpDown)
                     picData.ForeColor = IIf(objSymbol.CurrentPrice > objSymbol.DayStart, lUpColor, IIf(objSymbol.CurrentPrice < objSymbol.DayStart, lDownColor, lTextColor))
                     picData.CurrentX = picData.CurrentX + 4
                     If bShownBraces Then picData.Print "(";
                 
-                    '
                     ' Show the Day price difference
-                    '
                     If objSymbol.ShowDayChange Then
                         picData.CurrentX = picData.CurrentX + 4
                         picData.Print FormatCurrencyValue(objSymbol.CurrencySymbol, objSymbol.CurrentPrice - objSymbol.DayStart);
                     End If
                     
-                    '
                     ' Show the Day change in percent
-                    '
                     If objSymbol.ShowDayChangePercent Then
                         picData.CurrentX = picData.CurrentX + 4
                         If objSymbol.DayStart <> 0 Then
@@ -2019,17 +1785,13 @@ Dim objSymbols As Collection
                         End If
                     End If
                     
-                    '
                     ' Show the day profit/loss
-                    '
                     If objSymbol.ShowProfitLoss And objSymbol.ShowDayChange Then
                         picData.CurrentX = picData.CurrentX + 4
                         picData.Print FormatCurrencyValueWithSymbol(objSymbol.CurrencySymbol, objSymbol.CurrencyName, (objSymbol.CurrentPrice * objSymbol.Shares) - (objSymbol.DayStart * objSymbol.Shares));
                     End If
                     
-                    '
                     ' Show the Day up/down arrows
-                    '
                     If objSymbol.ShowDayChangeUpDown Then
                         DrawUpDownArrow objSymbol, picData, ScaleHeight, picData.CurrentX + 1, picData.CurrentY
                     End If
@@ -2073,9 +1835,7 @@ Dim objSymbol As cSymbol
 Dim objStock As cStock
 Dim objReturn As Object
     
-    '
     ' Find the symbol we're over - check the symbols first
-    '
     Call GetCursorPos(stPoint)
     Call ScreenToClient(hWnd, stPoint)
     If stPoint.Y > 0 And stPoint.Y < ScaleHeight Then
@@ -2087,9 +1847,7 @@ Dim objReturn As Object
             End If
         Next objSymbol
         
-        '
         ' If we haven't found one then now try the summary stocks
-        '
         If objReturn Is Nothing Then
             For Each objStock In mobjSummaryStocks
                 If stPoint.X > objStock.Position.Left And stPoint.X < objStock.Position.Right Then
@@ -2122,25 +1880,19 @@ Dim sPos$, sDocking$, sTmp$
 Dim lScreenWidth&, lScreenHeight&
 Dim stRect As RECT
     
-    '
     ' Set the scroll and data intervals
-    '
     mnuRunAtStartup.Checked = PSGEN_FileExists(PSGEN_GetSpecialFolderLocation(CSIDL_STARTUP) + "\" + App.ProductName + ".lnk")
     Z_SetScrollInterval
     timData.Interval = CInt(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FREQUENCY, Format(REG_FREQUENCY_DEF))) * 1000
     
-    '
     ' Set the docking stuff
-    '
     sPos = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOCK_TYPE)
     mnuDockTop.Checked = PSGEN_IsSameText(sPos, "Top")
     mnuDockBottom.Checked = PSGEN_IsSameText(sPos, "Bottom")
     mnuDockNone.Checked = PSGEN_IsSameText(sPos, "None") Or sPos = ""
     mnuDockAutoHide.Checked = PSGEN_IsSameText(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOCK_AUTOHIDE), "true")
     
-    '
     ' Set the font
-    '
     sPos = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FONTSIZE, "7")
     mnuFontSize7pt.Checked = (sPos = "7")
     mnuFontSize8pt.Checked = (sPos = "8")
@@ -2155,21 +1907,15 @@ Dim stRect As RECT
         Font.Name = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FONT, "Calibri")
     End If
     
-    '
     ' Set the background colours
-    '
     BackColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_BACK_COLOUR, BackColor))
     picText.BackColor = BackColor
     picData.BackColor = BackColor
     
-    '
     ' Get the URL
-    '
     msURL = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_URL, REG_URL_DEF)
     
-    '
     ' Position the display
-    '
     lScreenWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN)
     lScreenHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN)
     sPos = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_POSITION)
@@ -2184,18 +1930,14 @@ Dim stRect As RECT
     End If
     lHeight = TextHeight("|") + 2
     
-    '
     ' Check that the parameters are ok
-    '
     If lWidth > lScreenWidth Then lWidth = lScreenWidth
     If lLeft < 0 Then lLeft = 0
     If lLeft > (lScreenWidth - lWidth) Then lLeft = (lScreenWidth - lWidth)
     If lTop < 0 Then lTop = 0
     If lTop > (lScreenHeight - lHeight) Then lTop = (lScreenHeight - lHeight)
     
-    '
     ' Position the window or dock it
-    '
     Z_UnloadDock
     If mnuDockNone.Checked Then
         Call SetWindowPos(hWnd, 0, lLeft, lTop, lWidth, lHeight, 0)
@@ -2227,9 +1969,7 @@ Dim stRect As RECT
         Loop Until stRect.Top = mstDock.rc.Top
     End If
     
-    '
     ' Set top most if required
-    '
     Z_SetTopMost
     
 End Sub
@@ -2239,15 +1979,11 @@ Private Sub Z_SetScrollInterval()
 Dim sSpeed$
 Dim iInterval%
 
-    '
     ' Get the scroll speed and adjust the timer if required
-    '
     sSpeed = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SCROLLSPEED, REG_SCROLLSPEED_MEDIUM)
     If sSpeed <> REG_SCROLLSPEED_FAST And sSpeed <> REG_SCROLLSPEED_MEDIUM And sSpeed <> REG_SCROLLSPEED_SLOW Then sSpeed = REG_SCROLLSPEED_MEDIUM
     
-    '
     ' If the values are different, then change the timer
-    '
     miScrollMovement = Val(Split(sSpeed, ",")(0))
     iInterval = Val(Split(sSpeed, ",")(1))
     If iInterval <> miScrollInterval Or mlTimer = 0 Then
@@ -2256,9 +1992,7 @@ Dim iInterval%
         mlTimer = SetTimer(hWnd, 0, iInterval, AddressOf TimerProc)
     End If
     
-    '
     ' Indicate to the user which speed is selected
-    '
     mnuScrollFast.Checked = (sSpeed = REG_SCROLLSPEED_FAST)
     mnuScrollMedium.Checked = (sSpeed = REG_SCROLLSPEED_MEDIUM)
     mnuScrollSlow.Checked = (sSpeed = REG_SCROLLSPEED_SLOW)
@@ -2300,31 +2034,23 @@ Private Sub Z_MouseMove(ByVal bOverData As Boolean)
 
 Dim stPoint As POINTAPI
 
-    '
     ' If we are capturing (dragging) then move the display
-    '
     Call GetCursorPos(stPoint)
     If mbCapturing Then
         frmPreview.HideChart True
         Call SetWindowPos(hWnd, 0, stPoint.X - mstPoint.X, stPoint.Y - mstPoint.Y, 0, 0, SWP_NOSIZE)
     
-    '
     ' Show the preview window for this application
-    '
     ElseIf bOverData Then
         frmPreview.ShowChart Z_GetSymbolUnderMouse
     
     Else
         Call ScreenToClient(hWnd, stPoint)
-        '
         ' Show the preview window for the sumary
-        '
         If stPoint.X > mrSummaryRegionStartX And stPoint.X < mrSummaryRegionEndX Then
             frmPreview.ShowSummary
             
-        '
         ' Show the preview window for the daily sumary
-        '
         ElseIf stPoint.X > mrDaySummaryRegionStartX And stPoint.X < mrDaySummaryRegionEndX Then
             frmPreview.ShowDaySummary
         End If

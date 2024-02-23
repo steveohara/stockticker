@@ -1,35 +1,14 @@
 Attribute VB_Name = "Network"
-'****************************************************************************
 '
-'   Pivotal Solutions Ltd © 2003
+' Copyright (c) 2024, Pivotal Solutions and/or its affiliates. All rights reserved.
+' Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
 '
-'****************************************************************************
-'
-' LANGUAGE:             Microsoft Visual Basic V6
-'
-' MODULE NAME:          Pivotal_Network
-'
-' MODULE TYPE:          BASIC Module
-'
-' FILE NAME:            PSNETWORK.BAS
-'
-' MODIFICATION HISTORY: Steve O'Hara    03 January 2003   First created for MediaWeb
-'
-' PURPOSE:              Provides an interface into the WININET DLL
-'
-'
-'****************************************************************************
-'
-'****************************************************
-' MODULE VARIABLE DECLARATIONS
-'****************************************************
+' Provides an interface into the WININET DLL for network calls
 '
 Option Explicit
 
 
-    '
     ' Module error values
-    '
     Public Const ERROR_OFFSET = 10000
     Public Const ERROR_SOURCE = "PSNETWORK"
 
@@ -780,33 +759,17 @@ Private Declare Function IcmpSendEcho Lib "icmp.dll" _
        
        
 Public Function PSINET_GetHttpCodeMessage$(ByVal lCode&)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2005
-'
-'****************************************************************************
-'
-'                     NAME: Function PSINET_GetHttpCodeMessage
 '
 '                     iCode%             - HTTP Code
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    07 October 2005   First created for PivotalStock
-'
-'                  PURPOSE: Returns the message associated with the HTTP
+' Returns the message associated with the HTTP
 '                           request code
-'
-'****************************************************************************
-'
 '
 Dim sReturn$
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     Select Case lCode
         Case HTTP_STATUS_OK
@@ -885,9 +848,7 @@ Dim sReturn$
             sReturn = "Unknown HTTP error code"
     End Select
 
-    '
     ' Return value to caller
-    '
     PSINET_GetHttpCodeMessage = Format(lCode) + " " + sReturn
 
 End Function
@@ -895,35 +856,19 @@ End Function
 
 
 Public Function PSINET_TranslateErrorCode$(ByVal lErrorCode&)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSINET_TranslateErrorCode
 '
 '                     lErrorCode&        - Error code returned from DLL
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    13 May 2002   First created for TeamPlayer
-'
-'                  PURPOSE: Translates the error code into something
+' Translates the error code into something
 '                           meaningful
-'
-'****************************************************************************
-'
 '
 Dim sReturn$
 Dim lError&, lLength&
 Dim sError$
 
-    '
     ' Determine the error text
-    '
     On Error Resume Next
     Select Case lErrorCode
         Case 0
@@ -982,84 +927,48 @@ Dim sError$
         Case Else: sReturn = "Error details not available."
     End Select
 
-    '
     ' Get any extended info
-    '
     lLength = 1000
     sError = String(lLength, vbNullChar)
     Call InternetGetLastResponseInfo(lError, sError, lLength)
     If lLength > 0 Then sReturn = Left(sError, lLength)
 
-    '
     ' Return value to caller
-    '
     PSINET_TranslateErrorCode = sReturn
 
 End Function
 
 Private Function Z_PointerToString$(ByVal lPointer&)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function Z_PointerToString
 '
 '                     lPointer&          - Pointer to a string in memory
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    13 May 2002   First created for TeamPlayer
-'
-'                  PURPOSE: Returns the string pointed to by lPointer
-'
-'****************************************************************************
-'
+' Returns the string pointed to by lPointer
 '
 Dim sReturn$
 
 
-    '
     ' The values returned in the NETRESOURCE structures are pointers to
     ' ANSI strings so they need to be converted to Visual Basic Strings
-    '
     On Error Resume Next
     sReturn = String(255, Chr$(0))
     CopyPointer2String sReturn, lPointer
     sReturn = Left(sReturn, InStr(sReturn, Chr$(0)) - 1)
 
-    '
     ' Return value to caller
-    '
     Z_PointerToString = sReturn
 
 End Function
 
 Public Function PSINET_GetConnectedShares$(Optional ByVal bIncludeDrives As Boolean)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSINET_GetConnectedShares
 '
 '                           bIncludeDrives      - True, include the drive letter in brackets
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    13 May 2002   First created for TeamPlayer
-'
-'                  PURPOSE: Returns a comma separated list of connected share
+' Returns a comma separated list of connected share
 '                           names
-'
-'****************************************************************************
-'
 '
 Dim lEnum&, lBuff&
 Dim stRes As NETRESOURCE_1
@@ -1068,37 +977,27 @@ Dim lPointer&, lResource&, lCnt&
 Dim sReturn$, sTmp$
 
 
-    '
     ' Setup the NETRESOURCE input structure
-    '
     On Error Resume Next
     stRes.dwUsage = RESOURCEUSAGE_CONTAINER
     stRes.lpRemoteName = 0
     lStringBuff = 1000
     lCount = &HFFFFFFFF
 
-    '
     ' Open a Net enumeration operation handle: lEnum
-    '
     lResource = WNetOpenEnum(RESOURCE_CONNECTED, RESOURCETYPE_ANY, 0, stRes, lEnum)
     If lResource = 0 Then
        
-       '
        ' Create a buffer large enough for the results, 1000 bytes should be sufficient
-       '
        lBuff = GlobalAlloc(GPTR, lStringBuff)
        
-       '
        ' Call the enumeration function
-       '
        lResource = WNetEnumResource(lEnum, lCount, lBuff, lStringBuff)
        If lResource = 0 Then
           lPointer = lBuff
           
-          '
           ' WNetEnumResource fills the buffer with an array of NETRESOURCE
           ' structures. Walk through the list and print each local and remote name
-          '
           For lCnt = 1 To lCount
              CopyMemory stRes, ByVal lPointer, LenB(stRes)
              lPointer = lPointer + LenB(stRes)
@@ -1110,16 +1009,12 @@ Dim sReturn$, sTmp$
           Next lCnt
        End If
        
-       '
        ' Free the memory and close the enumeration
-       '
        If lBuff <> 0 Then Call GlobalFree(lBuff)
        Call WNetCloseEnum(lEnum)
     End If
 
-    '
     ' Return value to caller
-    '
     PSINET_GetConnectedShares = sReturn
 
 End Function
@@ -1131,36 +1026,20 @@ End Function
       
       
 Public Function PSINET_CloseNetworkShare(ByVal sShare$, Optional ByVal bReconnect As Boolean) As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Sub PSINET_CloseNetworkShare
 '
 '                     sShare$            - Share to disconnect
 '                     bReconnect         - True, reconnect share after re-boot
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    13 May 2002   First created for TeamPlayer
-'
-'                  PURPOSE: Closes the connection defined by sResourse
+' Closes the connection defined by sResourse
 '                           This can point to the share or the sahre drive
 '                           name
-'
-'****************************************************************************
-'
 '
 Dim bReturn As Boolean
 Dim lErrInfo&
 
 
-    '
     ' You may specify either the lpRemoteName or lpLocalName
     ' "\\ServerName\ShareName" or "Z:"
-    '
     On Error Resume Next
     lErrInfo = WNetCancelConnection2(sShare, IIf(bReconnect, CONNECT_UPDATE_PROFILE, 0), False)
     If lErrInfo = NO_ERROR Then
@@ -1174,13 +1053,6 @@ Dim lErrInfo&
 End Function
 
 Public Function PSINET_OpenNetworkShare(ByVal sServer$, ByVal sUsername$, ByVal sPassword$, ByVal sDrive$, Optional ByVal bPersistent As Boolean) As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSINET_OpenNetworkShare
 '
 '                     sServer$           - Name of the share to connect to
 '                     sUsername$         - Username to use (NULL means use current)
@@ -1190,24 +1062,15 @@ Public Function PSINET_OpenNetworkShare(ByVal sServer$, ByVal sUsername$, ByVal 
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    13 May 2002   First created for TeamPlayer
-'
-'                  PURPOSE: Connects an intranet resource to the local
+' Connects an intranet resource to the local
 '                           connection list
-'
-'****************************************************************************
-'
 '
 Dim bReturn As Boolean
 Dim stNetResource As NETRESOURCE
 Dim lErrInfo&
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     stNetResource.dwScope = RESOURCE_GLOBALNET
     stNetResource.dwType = RESOURCETYPE_DISK
@@ -1217,10 +1080,8 @@ Dim lErrInfo&
     stNetResource.lpLocalName = sDrive
     stNetResource.lpRemoteName = sServer
 
-    '
     ' If the UserName and Password arguments are NULL, the user context
     ' for the process provides the default user name.
-    '
     If sPassword = "" Then sPassword = vbNullString
     If sUsername = "" Then sUsername = vbNullString
     lErrInfo = WNetAddConnection2(stNetResource, sPassword, sUsername, IIf(bPersistent, CONNECT_UPDATE_PROFILE, 0))
@@ -1230,21 +1091,12 @@ Dim lErrInfo&
         Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, PSINET_TranslateErrorCode(Err.LastDllError)
     End If
 
-    '
     ' Return value to caller
-    '
     PSINET_OpenNetworkShare = bReturn
 
 End Function
 
 Public Function PSINET_GetHTTPFile(ByVal sURL$, sValue$, Optional ByVal sTitle$, Optional ByVal lFlags& = (INTERNET_FLAG_RELOAD + INTERNET_FLAG_PRAGMA_NOCACHE), Optional vCookies, Optional vHeaders, Optional ByVal lUseSession&, Optional sProxyName$ = "", Optional sProxyByPass$ = "", Optional lConnectionTimeout& = 30000, Optional lReadTimeout& = 30000, Optional iRetries = 0) As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSINET_GetHTTPFile
 '
 '                     sURL$              - The URL of the file to get
 '                     sValue$            - Contents of the file
@@ -1257,18 +1109,11 @@ Public Function PSINET_GetHTTPFile(ByVal sURL$, sValue$, Optional ByVal sTitle$,
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 April 2002   First created for WebSneak
-'
-'                  PURPOSE: Returns the contents of a remote HTTP file in
+' Returns the contents of a remote HTTP file in
 '                           sValue
 '                           If successful, then returns true
 '                           The sURL should be expressed as a full spec HTTP
 '                           URL
-'
-'****************************************************************************
-'
 '
 Dim bReturn As Boolean
 Dim iRetry%
@@ -1289,13 +1134,6 @@ Dim iRetry%
 End Function
 
 Private Function Z_GetHTTPFile(ByVal sURL$, sValue$, Optional ByVal sTitle$, Optional ByVal lFlags& = (INTERNET_FLAG_RELOAD + INTERNET_FLAG_PRAGMA_NOCACHE), Optional vCookies, Optional vHeaders, Optional ByVal lUseSession&, Optional sProxyName$ = "", Optional sProxyByPass$ = "", Optional lConnectionTimeout& = 30000, Optional lReadTimeout& = 30000) As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function Z_GetHTTPFile
 '
 '                     sURL$              - The URL of the file to get
 '                     sValue$            - Contents of the file
@@ -1307,18 +1145,11 @@ Private Function Z_GetHTTPFile(ByVal sURL$, sValue$, Optional ByVal sTitle$, Opt
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 April 2002   First created for WebSneak
-'
-'                  PURPOSE: Returns the contents of a remote HTTP file in
+' Returns the contents of a remote HTTP file in
 '                           sValue
 '                           If successful, then returns true
 '                           The sURL should be expressed as a full spec HTTP
 '                           URL
-'
-'****************************************************************************
-'
 '
 Const CONNECTION_TIMEOUT = 5000&
 Const RECEIVE_TIMEOUT = 30000&
@@ -1332,9 +1163,7 @@ Dim iCnt%
 Dim dTimeOut As Date
 Dim sError$
 
-    '
     ' Set the cookies
-    '
     On Error Resume Next
     Err.Clear
     sURL = Trim(sURL)
@@ -1346,9 +1175,7 @@ Dim sError$
         Next iCnt
     End If
 
-    '
     ' Connect to the session
-    '
     If sTitle = "" Then sTitle = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     If lUseSession <> 0 Then
         lSession = lUseSession
@@ -1360,21 +1187,15 @@ Dim sError$
         End If
     End If
     
-    '
     ' Set the timeouts
-    '
     Call InternetSetOption(lSession, INTERNET_OPTION_CONNECT_TIMEOUT, lConnectionTimeout, 4)
     Call InternetSetOption(lSession, INTERNET_OPTION_RECEIVE_TIMEOUT, lReadTimeout, 4)
     Call InternetSetOption(lSession, INTERNET_OPTION_SEND_TIMEOUT, SEND_TIMEOUT, 4)
     
-    '
     ' Ignore Certificat errors
-    '
     Call InternetSetOption(lSession, INTERNET_OPTION_SECURITY_FLAGS, SECURITY_FLAG_IGNORE_CERT_CN_INVALID Or SECURITY_FLAG_IGNORE_CERT_DATE_INVALID Or SECURITY_FLAG_IGNORE_UNKNOWN_CA, 4)
     
-    '
     ' Get the file
-    '
     If Not IsMissing(vHeaders) Then
         vHeaders = Join(vHeaders, vbNullChar)
         lFile = InternetOpenUrl(lSession, sURL, vHeaders, Len(vHeaders), lFlags, 0)
@@ -1384,9 +1205,7 @@ Dim sError$
     If lFile = 0 Then
         sError = PSINET_TranslateErrorCode(Err.LastDllError)
     Else
-        '
         ' Check that we got the file we wanted
-        '
         lLength = Len(sBuffer)
         Call HttpQueryInfo(lFile, HTTP_QUERY_STATUS_CODE, ByVal sBuffer, lLength, lTmp)
         If Left(sBuffer, 1) <> "2" Then
@@ -1406,16 +1225,12 @@ Dim sError$
         End If
     End If
         
-    '
     ' Close the handles
-    '
     If lFile <> 0 Then Call InternetCloseHandle(lFile)
     If lUseSession = 0 And lSession <> 0 Then Call InternetCloseHandle(lSession)
     DoEvents
 
-    '
     ' Return value to caller
-    '
     If sError <> "" Then
         On Error GoTo 0
         Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, sError
@@ -1429,13 +1244,6 @@ End Function
 
 
 Public Function PSINET_PostHTTPFile(ByVal sURL$, ByVal sContent$, ByVal sBoundary$, sValue$, Optional ByVal lFlags& = (INTERNET_FLAG_KEEP_CONNECTION + INTERNET_FLAG_RELOAD), Optional sProxyName$ = "", Optional sProxyByPass$ = "") As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSINET_PostHTTPFile
 '
 '                     sURL$              - The URL of the file to get
 '                     sContent$          - Contents of the file to send
@@ -1446,17 +1254,10 @@ Public Function PSINET_PostHTTPFile(ByVal sURL$, ByVal sContent$, ByVal sBoundar
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 April 2002   First created for WebSneak
-'
-'                  PURPOSE: Sends the value as a POST
+' Sends the value as a POST
 '                           If successful, then returns true
 '                           The sURL should be expressed as a full spec HTTP
 '                           URL
-'
-'****************************************************************************
-'
 '
 Dim bReturn As Boolean
 Dim sBuffer As String * 65000
@@ -1465,9 +1266,7 @@ Dim lFile&, lLength&, lSession&, lConnection&, lTmp&
 Dim bFinished As Boolean
 
 
-    '
     ' Connect to the session
-    '
     On Error Resume Next
     Err.Clear
     sValue = ""
@@ -1477,44 +1276,34 @@ Dim bFinished As Boolean
         lSession = InternetOpen(App.Title, INTERNET_OPEN_TYPE_PROXY, sProxyName, sProxyByPass, 0)
     End If
     
-    '
     ' Connect to the server
-    '
     sServer = PSGEN_GetItem(3, "/", sURL)
     lConnection = InternetConnect(lSession, sServer, INTERNET_INVALID_PORT_NUMBER, vbNullString, vbNullString, INTERNET_SERVICE_HTTP, 0, 0)
     If lConnection = 0 Then
         Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, PSINET_TranslateErrorCode(Err.LastDllError)
     Else
     
-        '
         ' Open a connection
-        '
         sService = PSGEN_GetItem(2, sServer, sURL)
         lFile = HttpOpenRequest(lConnection, "POST", sService, vbNullString, vbNullString, 0, lFlags, 0)
     If lFile = 0 Then
         Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, PSINET_TranslateErrorCode(Err.LastDllError)
     Else
         
-            '
             ' Send the data
-            '
             sHeader = "Content-Type: multipart/form-data; boundary=" + sBoundary & vbCrLf
             Call HttpAddRequestHeaders(lFile, sHeader, Len(sHeader), HTTP_ADDREQ_FLAG_REPLACE + HTTP_ADDREQ_FLAG_ADD)
             If HttpSendRequest(lFile, vbNullString, 0, sContent, Len(sContent)) = 0 Then
                 Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, PSINET_TranslateErrorCode(Err.LastDllError)
             Else
             
-                '
                 ' Check that we got a correct header
-                '
                 lLength = Len(sBuffer)
                 Call HttpQueryInfo(lFile, HTTP_QUERY_STATUS_CODE, ByVal sBuffer, lLength, lTmp)
                 If Left(sBuffer, 1) <> "2" Then
                     Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, "STATUS:" + PSINET_GetHttpCodeMessage(Val(Left(sBuffer, lLength)))
                 Else
-                    '
                     ' Read the response
-                    '
         While Not bFinished
             sBuffer = vbNullString
             Call InternetReadFile(lFile, sBuffer, Len(sBuffer), lLength)
@@ -1531,22 +1320,13 @@ Dim bFinished As Boolean
     Call InternetCloseHandle(lSession)
     DoEvents
 
-    '
     ' Return value to caller
-    '
     PSINET_PostHTTPFile = bReturn
 
 End Function
 
 
 Public Function PSINET_PutFtpFile(ByVal sServer$, ByVal sServerUid$, ByVal sServerPwd$, ByVal sSourceFile$, ByVal sDestFolder$, ByVal sDestFile$, ByVal bUseBinary As Boolean, Optional sProxyName$ = "", Optional sProxyByPass$ = "") As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSINET_PutFtpFile
 '
 '                     sServer$           - Host name or IP address
 '                     sServerUid$        - Server username
@@ -1559,21 +1339,12 @@ Public Function PSINET_PutFtpFile(ByVal sServer$, ByVal sServerUid$, ByVal sServ
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 April 2002   First created for WebSneak
-'
-'                  PURPOSE: Sends the file using the FTP service
-'
-'****************************************************************************
-'
+' Sends the file using the FTP service
 '
 Dim bReturn As Boolean
 Dim lSession&, lConnection&
 
-    '
     ' Connect to the session
-    '
     On Error Resume Next
     Err.Clear
     If sProxyName = "" Then
@@ -1582,25 +1353,19 @@ Dim lSession&, lConnection&
         lSession = InternetOpen(App.Title, INTERNET_OPEN_TYPE_PROXY, sProxyName, sProxyByPass, 0)
     End If
     
-    '
     ' Connect to the server
-    '
     lConnection = InternetConnect(lSession, sServer, INTERNET_INVALID_PORT_NUMBER, sServerUid, sServerPwd, INTERNET_SERVICE_FTP, 0, 0)
     If lConnection = 0 Then
         Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, PSINET_TranslateErrorCode(Err.LastDllError)
     Else
     
-        '
         ' Change directory on the server
-        '
         If sDestFolder <> "" Then
             If FtpSetCurrentDirectory(lConnection, sDestFolder) = 0 Then Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, "Cannot change directory to " + sDestFolder + vbCrLf + PSINET_TranslateErrorCode(Err.LastDllError)
         End If
         If Err = 0 Then
         
-            '
             ' Send the file
-            '
             If FtpPutFile(lConnection, sSourceFile, sDestFile, IIf(bUseBinary, INTERNET_FLAG_TRANSFER_BINARY, INTERNET_FLAG_TRANSFER_ASCII), 0) = 0 Then
                 Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, PSINET_TranslateErrorCode(Err.LastDllError)
             Else
@@ -1612,22 +1377,13 @@ Dim lSession&, lConnection&
     Call InternetCloseHandle(lSession)
     DoEvents
 
-    '
     ' Return value to caller
-    '
     PSINET_PutFtpFile = bReturn
 
 End Function
 
 
 Public Function PSINET_Ping(sAddress$, Optional ByVal lTimeout& = PING_TIMEOUT, Optional sRoundTripTime$ = "", Optional sDataSize$ = "", Optional sIPAddress$ = "", Optional bDataMatch As Boolean = False) As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSINET_Ping
 '
 '                           sAddress$        - Host to ping
 '                           lTimeout&        - Timeout for operation (msec)
@@ -1638,16 +1394,9 @@ Public Function PSINET_Ping(sAddress$, Optional ByVal lTimeout& = PING_TIMEOUT, 
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 April 2002   First created for WebSneak
-'
-'                  PURPOSE: Tries to ping the specified host and returns True if OK
+' Tries to ping the specified host and returns True if OK
 '                           Optionally returns time taken for the ping, the data
 '                           exchanged and wether the sent matched the recieved.
-'
-'****************************************************************************
-'
 '
 Dim stECHO As ICMP_ECHO_REPLY
 Dim iPtr%
@@ -1657,41 +1406,29 @@ Dim lAddress&
 Dim abAddr(3) As Byte
 
 
-    '
     ' Assume failure
-    '
     On Error Resume Next
     PSINET_Ping = False
 
-    '
     ' If passed a name, get the IP address
-    '
     If Not Z_IsDottedQuad(sAddress) Then sAddress = PSINET_LookupIPAddress(sAddress)
     If sAddress = "" Then Exit Function
 
-    '
     ' Init the sockets api
-    '
     If Z_SocketsInitialize Then
 
-        '
         ' Build string of random characters
-        '
         For iPtr = 1 To DATA_SIZE
             sTmp = sTmp & Chr$(Rnd() * 254 + 1)
         Next
 
-        '
         ' Ping an ip address, passing the address and the ECHO structure
-        '
         lAddress = Z_AddressStringToLong(sAddress)
         hPort = IcmpCreateFile()
         IcmpSendEcho hPort, lAddress, sTmp, Len(sTmp), 0, stECHO, Len(stECHO), lTimeout
         IcmpCloseHandle hPort
 
-        '
         ' Get the results from the ECHO structure
-        '
         sRoundTripTime = stECHO.RoundTripTime
         CopyMemory abAddr(0), stECHO.Address, 4
         sIPAddress = CStr(abAddr(0)) & "." & CStr(abAddr(1)) & "." & CStr(abAddr(2)) & "." & CStr(abAddr(3))
@@ -1701,9 +1438,7 @@ Dim abAddr(3) As Byte
         If iPtr > 1 Then bDataMatch = (Left$(stECHO.data, iPtr - 1) = sTmp)
         If stECHO.Status = 0 And stECHO.Address = lAddress Then PSINET_Ping = True
 
-        '
         ' Clean up the sockets connection
-        '
         WSACleanup
     End If
 
@@ -1712,54 +1447,30 @@ End Function
 
 
 Private Function Z_IsDottedQuad(ByVal sIPString$) As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function Z_IsDottedQuad
 '
 '                           sIPString$   - Dot format of hostname
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 April 2002   First created for WebSneak
-'
-'                  PURPOSE: Verifies that the host string is in the correct
+' Verifies that the host string is in the correct
 '                           xxx.xxx.xxx.xxx format
-'
-'****************************************************************************
-'
 '
 Dim sSplit$()
 Dim iCtr%
 
-    '
     ' Split at the "."
-    '
     sSplit = Split(sIPString, ".")
 
-    '
     ' should be 4 elements
-    '
     If UBound(sSplit) <> 3 Then Exit Function
 
-    '
     ' Check each element
-    '
     For iCtr = 0 To 3
         
-        '
         ' Should be numeric
-        '
         If Not IsNumeric(sSplit(iCtr)) Then Exit Function
 
-        '
         ' range check
-        '
         If iCtr = 0 Then
             If Val(sSplit(iCtr)) > 239 Then Exit Function
         Else
@@ -1773,26 +1484,12 @@ End Function
 
 
 Public Function PSINET_LookupIPAddress$(Optional ByVal sHostName$)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSINET_LookupIPAddress
 '
 '                            sHostName$     - Name of the host
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 April 2002   First created for WebSneak
-'
-'                  PURPOSE: Uses DNS to return the IP address of the host
-'
-'****************************************************************************
-'
+' Uses DNS to return the IP address of the host
 '
 Dim lpHost&
 Dim stHost As HostEnt
@@ -1802,83 +1499,53 @@ Dim iCnt%
 Dim sIPAddr$
 
 
-    '
     ' Init winsock api
-    '
     If Not Z_SocketsInitialize() Then
         PSINET_LookupIPAddress = ""
         Exit Function
     End If
     
-    '
     ' If no name given, use local host
-    '
     If sHostName = "" Then sHostName = PSINET_GetLocalHostName
     sHostName = Trim(sHostName) & vbNullChar
     
-    '
     ' Call api
-    '
     lpHost = gethostbyname(sHostName)
     If lpHost Then
     
-        '
         ' Extract the data...
-        '
         CopyMemory stHost, ByVal lpHost, Len(stHost)
         CopyMemory dwIPAddr, ByVal stHost.hAddrList, 4
         ReDim abIPAddr(1 To stHost.hLen)
         CopyMemory abIPAddr(1), ByVal dwIPAddr, stHost.hLen
 
-        '
         ' Convert format
-        '
         For iCnt = 1 To stHost.hLen
             sIPAddr = sIPAddr & abIPAddr(iCnt) & "."
         Next
 
-        '
         ' set the return value
-        '
         PSINET_LookupIPAddress = Mid$(sIPAddr, 1, Len(sIPAddr) - 1)
     Else
         WSAGetLastError
         PSINET_LookupIPAddress = ""
     End If
     
-    '
     ' Close the sockets library
-    '
     WSACleanup
 
 End Function
 
 
 Private Function Z_SocketsInitialize() As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function Z_SocketsInitialize
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 April 2002   First created for WebSneak
-'
-'                  PURPOSE: Opens the sockets library - returns true if OK
-'
-'****************************************************************************
-'
+' Opens the sockets library - returns true if OK
 '
 Dim stWSAD As WSADATA
 
-    '
     ' Initialize Windows sockets
-    '
     Z_SocketsInitialize = False
     If WSAStartup(WS_VERSION_REQD, stWSAD) <> ERROR_SUCCESS Then Exit Function
     If stWSAD.wMaxSockets < MIN_SOCKETS_REQD Then Exit Function
@@ -1889,41 +1556,23 @@ End Function
 
 
 Private Function Z_AddressStringToLong&(ByVal sIPAddr$)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function Z_AddressStringToLong
 '
 '                            sIPAddr$     - IP address in dot format
 '
 '                          ) As Long
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 April 2002   First created for WebSneak
-'
-'                  PURPOSE: Converts an IP address into a long
-'
-'****************************************************************************
-'
+' Converts an IP address into a long
 '
 Dim sParts$()
 
-    '
     ' Convert an ip address string to a long value
-    '
     sParts = Split(sIPAddr, ".")
     If UBound(sParts) <> 3 Then
         Z_AddressStringToLong = 0
         Exit Function
     End If
 
-    '
     ' Build the long value out of the hex of the extracted strings
-    '
     Z_AddressStringToLong = Val("&H" & Right$("00" & Hex$(sParts(3)), 2) & _
             Right$("00" & Hex$(sParts(2)), 2) & _
             Right$("00" & Hex$(sParts(1)), 2) & _
@@ -1934,49 +1583,27 @@ End Function
 
 
 Public Function PSINET_GetLocalHostName$()
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSINET_GetLocalHostName
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 April 2002   First created for WebSneak
-'
-'                  PURPOSE: Returns the name of the local host
-'
-'****************************************************************************
-'
+' Returns the name of the local host
 '
 Dim sHostName$
 Dim iPtr%
 
-    '
     ' Create a buffer
-    '
     sHostName = String$(256, vbNullChar)
 
-    '
     ' Init winsock api
-    '
     If Not Z_SocketsInitialize() Then Exit Function
 
-    '
     ' Get the local hosts name
-    '
     If GetHostName(sHostName, Len(sHostName)) = ERROR_SUCCESS Then
         iPtr = InStr(sHostName, vbNullChar)
         If iPtr > 1 Then PSINET_GetLocalHostName = Mid$(sHostName, 1, iPtr - 1)
     End If
     
-    '
     ' Cleanup the sockets library
-    '
     WSACleanup
 
 End Function

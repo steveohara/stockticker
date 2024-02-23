@@ -1,39 +1,16 @@
 Attribute VB_Name = "General"
-'****************************************************************************
 '
-'   Pivotal Solutions Ltd © 2000
+' Copyright (c) 2024, Pivotal Solutions and/or its affiliates. All rights reserved.
+' Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
 '
-'****************************************************************************
-'
-' LANGUAGE:             Microsoft Visual Basic V5
-'
-' MODULE NAME:          PIVOTAL_General
-'
-' MODULE TYPE:          BASIC Module
-'
-' FILE NAME:            PSGEN.BAS
-'
-' MODIFICATION HISTORY: Steve O'Hara    03 February 1997   First created for DocBlazer
-'
-' PURPOSE:              Provides general purpose functions and procedures.
-'
-'
-'****************************************************************************
-'
-'****************************************************
-' MODULE VARIABLE DECLARATIONS
-'****************************************************
+' Provides general purpose functions and procedures.
 '
 Option Explicit
 
-    '
     ' Error base
-    '
     Public Const PSGEN_ERROR_BASE = 10000
     
-    '
     ' Common HTTP entities
-    '
     Public Const PSGEN_HTTP_ENTITY_ALLOW = "Allow"
     Public Const PSGEN_HTTP_ENTITY_ENCODING = "Content-Encoding"
     Public Const PSGEN_HTTP_ENTITY_LENGTH = "Content-Length"
@@ -51,21 +28,15 @@ Option Explicit
     Public Const PSGEN_HTTP_ENTITY_USER_AGENT = "User-Agent"
     Public Const PSGEN_HTTP_ENTITY_AUTHENTICATE = "WWW-Authenticate"
 
-    '
     ' Mimetype file sections
-    '
     Public Const PSGEN_MIMETYPE_FILE = "mimetypes.ini"
     Public Const PSGEN_MIMETYPE_SECTION = "MimeTypes"
     Public Const PSGEN_MIMETYPE_SECTION_REVERSE = "Reverse MimeTypes"
     
-    '
     ' ImageMagick modules location
-    '
     Public Const PSGEN_IMAGEMAGICK = "MAGICK_MODULE_PATH"
     
-    '
     ' System setup constants
-    '
     Public Const PSGEN_BASE_SCHEDULE = "SERVER_BASE_SCHEDULE"
     Public Const PSGEN_DEFAULT_SCHEDULE = 30
     Public Const PSGEN_TICK_PERIOD = "SERVER_TICK_PERIOD"
@@ -73,9 +44,7 @@ Option Explicit
     Dim miShutdownRequested As Boolean
     Public gbPollForTaskFinish As Boolean
     
-    '
     ' Document definitions
-    '
     Public Type PSGEN_FIELD_VALUES
         sName As String
         sValue As String
@@ -99,24 +68,18 @@ Option Explicit
         iStatus As Integer                 ' Status of the document
     End Type
 
-    '
     ' Node sub-types
-    '
     Public Const PSGEN_SUBTYPE_EMAIL = 0
     Public Const PSGEN_SUBTYPE_FTP = 1
     Public Const PSGEN_SUBTYPE_DIR = 2
     Public Const PSGEN_SUBTYPE_DEL = 3
     Public Const PSGEN_SUBTYPE_EDIT = 4
     
-    '
     ' Encryption constants
-    '
     Const ENCRYPT_START_CHAR = 127
     Const NO_OF_CHARS = 255
     
-    '
     ' RTF to HTML Conversion
-    '
     Declare Function ConvertRtfToHTML Lib "irun.dll" Alias "EXRTF2WEB" (ByVal sRtfFile$, sHtmlFile$, ByVal lOptions%, ByVal sBackColor As Any, ByVal sTitle As Any, ByVal lDPI%) As Integer
     
     Public Const EXO_RESULTS = 1
@@ -127,14 +90,10 @@ Option Explicit
     Public Const EXO_MEMORY = 20
     Public Const EXO_NOHEADER = 64
     
-    '
     ' Handles used by some of the functions
-    '
     Dim mlDesktop&
 
-    '
     ' Windows API calls
-    '
     Type SHITEMID
         cb As Long
         abID() As Byte
@@ -378,9 +337,7 @@ Option Explicit
     Public Const HH_DISPLAY_SEARCH = &H3        ' not currently implemented
     Public Declare Function htmlhelp Lib "hhctrl.ocx" Alias "HtmlHelpA" (ByVal hWnd As Long, ByVal lpHelpFile As String, ByVal wCommand As Long, ByVal dwdata As Long) As Long
     
-    '
     ' User defined type required by Shell_NotifyIcon API call
-    '
     Public Type PSGEN_NOTIFY_ICON_DATA
         lSize As Long
         lWnd As Long
@@ -447,9 +404,7 @@ Option Explicit
     Public Const HWND_BROADCAST As Long = &HFFFF&
     Public Const WM_WININICHANGE As Long = &H1A
 
-    '
     ' GetWindow () Constants
-    '
     Public Const GW_CHILD = 5
     Public Const GW_HWNDFIRST = 0
     Public Const GW_HWNDLAST = 1
@@ -482,9 +437,7 @@ Option Explicit
     Public Const DT_END_ELLIPSIS = &H8000
     Public Const DT_WORD_ELLIPSIS = &H40000
     
-    '
     ' GetWindowWord () Constants
-    '
     Public Const GWW_HINSTANCE = (-6)
     
     Public Const SND_SYNC = &H0
@@ -561,16 +514,12 @@ Option Explicit
     Public Const TRANSPARENT = 1
     Public Const OPAQUE = 2
         
-    '
     ' Window placement
-    '
     Public Const CW_USEDEFAULT = &H80000000
     
-    '
     ' Registry API constants. The first, ERROR_SUCCESS, is used to check that API registry
     ' functions have completed successfully. The second indicates a 'base' registry key that
     ' the license key will be saved in.
-    '
     ' The next two constants, respectively, define how a license key will be written to/
     ' retrieved from the registry (in binary form, so a Byte Array will be used), and how the
     ' registry value will be stored (non-volatile, meaning that the license key always remains
@@ -594,9 +543,7 @@ Option Explicit
     Public Const GWL_USERDATA = -21
     Public Const GWL_STYLE = -16
     
-    '
     ' Edge function values
-    '
     Public Const BDR_RAISEDOUTER = &H1
     Public Const BDR_SUNKENOUTER = &H2
     Public Const BDR_RAISEDINNER = &H4
@@ -634,17 +581,13 @@ Option Explicit
     
     Public Const CB_SETDROPPEDWIDTH = &H160
     
-    '
     ' System Metrics
-    '
     Public Const SM_CXVSCROLL = 2
     Public Const SM_CYHSCROLL = 3
     Public Const SM_CYVSCROLL = 20
     Public Const SM_CXHSCROLL = 21
     
-    '
     ' Operating system version information
-    '
     Public Const VER_PLATFORM_WIN32s = 0
     Public Const VER_PLATFORM_WIN32_WINDOWS = 1
     Public Const VER_PLATFORM_WIN32_NT = 2
@@ -667,9 +610,7 @@ Option Explicit
         rcNormalPosition As RECT
     End Type
     
-    '
     ' Menu stuff
-    '
     Public Const LB_RESETCONTENT = (WM_USER + 5)
     Public Const MF_INSERT = &H0
     Public Const MF_CHANGE = &H80
@@ -727,9 +668,7 @@ Option Explicit
     Public Const TPM_VCENTERALIGN = &H10&
     Public Const TPM_VERTICAL = &H40&
     
-    '
     ' Message hook types
-    '
     Public Const WH_KEYBOARD = 2
     Public Const WH_CALLWNDPROC = 4
     Public Const WH_CBT = 5
@@ -1337,9 +1276,7 @@ Option Explicit
                             cy As Long) As Boolean
                             
                             
-    '
     ' Event log interface
-    '
     Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
     Declare Function GlobalFree Lib "kernel32" (ByVal hMem As Long) As Long
     
@@ -1579,9 +1516,7 @@ Option Explicit
     Const GMEM_ZEROINIT = &H40
     Const GPTR = &H42
     
-    '
     ' GIF Stuff
-    '
     Private Type GifScreenDescriptor
         logical_screen_width As Integer
         logical_screen_height As Integer
@@ -1761,11 +1696,9 @@ Option Explicit
         Flags      As Long
     End Type
 
-    '
     ' Local enum, indicating what action to
     ' take on each pass through the callback
     ' procedure.
-    '
     Private Enum SetupIterateCabinetActions
         sicCount
         sicReport
@@ -1773,27 +1706,21 @@ Option Explicit
         sicGetXML
     End Enum
     
-    '
     ' Notification messages, handled in the callback
     ' procedure. This class doesn't handle them all.
-    '
     Private Const SPFILENOTIFY_FILEINCABINET = &H11
     Private Const SPFILENOTIFY_NEEDNEWCABINET = &H12
     Private Const SPFILENOTIFY_FILEEXTRACTED = &H13
     
-    '
     ' Instructions sent out of the callback procedure.
     ' Tells Windows what to do next.
-    '
     Private Enum FILEOP
         FILEOP_ABORT = 0
         FILEOP_DOIT = 1
         FILEOP_SKIP = 2
     End Enum
 
-    '
     ' Used for the CAB extraction
-    '
     Dim msFileToExtract$
     Dim msOutputFile$
     
@@ -1881,39 +1808,31 @@ Dim sBuffer$
 Dim bytTemp() As Byte
 Dim i%
     
-    '
     ' Callback procedure for SetupIterateCabinet
     ' Handle the callback for the CAB file.
-    '
     On Error Resume Next
     Z_CabinetCallback = NO_ERROR
     Select Case Notification
         Case SPFILENOTIFY_NEEDNEWCABINET
             
         Case SPFILENOTIFY_FILEEXTRACTED
-            '
             ' Copy the bytes passed into a FILEPATHS structure.
             ' Although this procedure gets a parameter of
             ' type FileCabinetInfo, you want to cast it as a
             ' FILEPATHS structure. The LSET statement does that
             ' for you. You can also use the CopyMemory API function,
             ' but this is simpler.
-            '
             LSet fp = Param1
             Z_CabinetCallback = fp.Win32Error
         
         Case SPFILENOTIFY_FILEINCABINET
-            '
             ' Given a string pointer, copy the value
             ' of the string into a new, safe location.
-            '
             lLen = lstrlen(Param1.NameInCabinet)
             sBuffer = Space(lLen)
             Call CopyMemory(ByVal sBuffer, ByVal Param1.NameInCabinet, lLen)
             If StrComp(sBuffer, msFileToExtract, vbTextCompare) = 0 Then
-                '
                 ' Copy the byte array to the output location.
-                '
                 bytTemp = StrConv(msOutputFile, vbFromUnicode)
                 For i = LBound(bytTemp) To UBound(bytTemp)
                     Param1.FullTargetName(i + 1) = bytTemp(i)
@@ -1931,62 +1850,40 @@ End Function
 
 Public Function PSGEN_ExtractFileFromCabinet(ByVal sSourceFilename$, ByVal sCabinetFilename$, ByVal sDestinationFilename$) As Boolean
 Attribute PSGEN_ExtractFileFromCabinet.VB_Description = "Extracts the file from the given cabinet and places it in the destination file"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2005
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_ExtractFileFromCabinet
 '
 '                     sSourceFilename$   - Name of the file to extract
 '                     sCabinetFilename$  - Filename of the CAB
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    27 October 2005   First created for MediaWeb
-'
-'                  PURPOSE: Extracts the file from the given cabinet and
+' Extracts the file from the given cabinet and
 '                           places it in the destination file.
 '                           Returns true if it worked OK
-'
-'****************************************************************************
-'
 '
 Dim bReturn As Boolean
 Dim lReturn&
 
-    '
     ' Extracts the file(s) from the cabinet. FileToExtract can specify
     ' the file to extract or if ommitted all files will be extracted.
     ' OutputPath can specify the folder to extract to. The default is the
     ' same folder as the cab file. When extracting a single file,
     ' OutputFile can specify the extract file name. The default is the
     ' original file name.
-    '
     On Error Resume Next
     If PSGEN_FileExists(sCabinetFilename) Then
         
-        '
         ' Set up the module-level variables
         ' tracking which file(s) you want to extract,
         ' and where you want to put them.
-        '
         msFileToExtract = sSourceFilename
         msOutputFile = sDestinationFilename
         lReturn = SetupIterateCabinet(sCabinetFilename, 0, AddressOf Z_CabinetCallback, sicExtract)
         
-        '
         ' If the return value is 0, the call to SetupIterateCabinet failed.
-        '
         bReturn = (lReturn <> 0)
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_ExtractFileFromCabinet = bReturn
 
 End Function
@@ -1994,27 +1891,13 @@ End Function
 
 Public Function PSGEN_GetFileVersion$(ByVal sFilename$, ByVal eType As FileVersionTypes)
 Attribute PSGEN_GetFileVersion.VB_Description = "Returns a dot separated version string for the filename"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2005
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetFileVersion
 '
 '                     sFilename$         - Full path filename to get version info.
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    27 October 2005   First created for MediaWeb
-'
-'                  PURPOSE: Returns a dot separated version string for the
+' Returns a dot separated version string for the
 '                           filename
-'
-'****************************************************************************
-'
 '
 Dim lHandle&, lInfoSize&, lFixedInfoSize&, lInfoAddress&
 Dim abBuffer() As Byte
@@ -2024,29 +1907,21 @@ Dim stVersionInfo As VersionInformationType
 Dim sReturn$
 
 
-    '
     ' Get the version information buffer size
-    '
     On Error Resume Next
     lInfoSize = GetFileVersionInfoSize(sFilename, lHandle)
     If lInfoSize > 0 Then
 
-        '
         ' Load the fixed file information into a buffer
-        '
         ReDim abBuffer(1 To lInfoSize)
         If GetFileVersionInfo(sFilename, 0&, lInfoSize, abBuffer(1)) <> 0 Then
             If VerQueryValue(abBuffer(1), "\", lInfoAddress, lFixedInfoSize) <> 0 Then
         
-                '
                 ' Copy the information from the buffer into a usable structure
-                '
                 If lInfoAddress <> 0 Then
                     MoveMemory stFileVer, lInfoAddress, Len(stFileVer)
                 
-                    '
                     ' Get the version information
-                    '
                     With stFileVer
                     If eType = VersionStructure Then
                         sReturn = Format$(.dwStrucVersionh) & "." & Format$(.dwStrucVersionl)
@@ -2063,9 +1938,7 @@ Dim sReturn$
         End If
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetFileVersion = sReturn
 
 End Function
@@ -2074,40 +1947,22 @@ End Function
 
 Public Sub PSGEN_ShowInTaskBar(ByVal lHwnd&, ByVal bShow As Boolean)
 Attribute PSGEN_ShowInTaskBar.VB_Description = "Shows or hides a form from the toolbar"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2005
-'
-'****************************************************************************
-'
-'                     NAME: Sub PSGEN_ShowInTaskBar
 '
 '                     lHwnd&                       - Handle of the window to show in taskbar
 '                     bShow As Boolean             - True if the app should show in toolbar
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    07 October 2005   First created for PivotalStock
-'
-'                  PURPOSE: Shows or hides a form from the toolbar
-'
-'****************************************************************************
-'
+' Shows or hides a form from the toolbar
 '
 Const GWL_EXSTYLE = (-20)
 Const WS_EX_APPWINDOW = &H40000
 
 Dim lStyle As Long
 
-    '
     ' We have to hide the window first while we make the change
-    '
     On Error Resume Next
     Call ShowWindow(lHwnd, SW_HIDE)
     
-    '
     ' Get the current style and modify it
-    '
     lStyle = GetWindowLong(lHwnd, GWL_EXSTYLE)
     If bShow Then
         lStyle = lStyle Or WS_EX_APPWINDOW
@@ -2115,67 +1970,43 @@ Dim lStyle As Long
         If lStyle And WS_EX_APPWINDOW Then lStyle = lStyle - WS_EX_APPWINDOW
     End If
     
-    '
     ' Set the style
-    '
     Call SetWindowLong(lHwnd, GWL_EXSTYLE, lStyle)
     App.TaskVisible = bShow
     
-    '
     ' Show the form
-    '
     Call ShowWindow(lHwnd, SW_NORMAL)
 
 End Sub
 
 Public Function PSGEN_RemoveDuplicates$(ByVal sValue$, ByVal sSep$)
 Attribute PSGEN_RemoveDuplicates.VB_Description = "Returns a string where duplicate values have been removed\r\nValues are seperated by sSep"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2005
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_RemoveDuplicates
 '
 '                     sValue$            - String of sSep seperated values
 '                     sSep$              - Seperator string
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    29 July 2005   First created for MediaWeb
-'
-'                  PURPOSE: Returns a string where duplicate values have been
+' Returns a string where duplicate values have been
 '                           removed
 '                           Values are seperated by sSep
-'
-'****************************************************************************
-'
 '
 Dim sReturn$
 Dim asValues$()
 Dim iCnt%
 
-    '
     ' Loop through the list of values
-    '
     On Error Resume Next
     asValues = Split(sValue, sSep)
     For iCnt = 0 To UBound(asValues)
         
-        '
         ' If the value is in the list then ignore it
-        '
         If InStr(1, sSep + sReturn + sSep, asValues(iCnt), vbTextCompare) = 0 Then
             sReturn = sReturn + IIf(sReturn = "", "", sSep) + asValues(iCnt)
         End If
     Next iCnt
 
-    '
     ' Return value to caller
-    '
     PSGEN_RemoveDuplicates = sReturn
 
 End Function
@@ -2183,37 +2014,19 @@ End Function
 
 Public Function PSGEN_GetProcessMemoryCount&()
 Attribute PSGEN_GetProcessMemoryCount.VB_Description = "Returns the number of bytes used by the current process"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2005
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetProcessMemoryCount
 '
 '                          ) As Long
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    13 March 2005   First created for PivotalBASISSlave
-'
-'                  PURPOSE: Returns the number of bytes used by the current
+' Returns the number of bytes used by the current
 '                           process
-'
-'****************************************************************************
-'
 '
 Dim stMemory As PROCESS_MEMORY_COUNTERS
 
-    '
     ' Call the API
-    '
     On Error Resume Next
     Call GetProcessMemoryInfo(GetCurrentProcess, stMemory, Len(stMemory))
     
-    '
     ' Return value to caller
-    '
     PSGEN_GetProcessMemoryCount = stMemory.WorkingSetSize
 
 End Function
@@ -2222,36 +2035,20 @@ End Function
 
 Public Function PSGEN_WorkDays&(ByVal dStart As Date, ByVal dEnd As Date)
 Attribute PSGEN_WorkDays.VB_Description = "Returns the number of work days between the two dates"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2004
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_WorkDays
 '
 '                     dStart As Date            - Start date
 '                     dEnd As Date              - End date
 '
 '                          ) As Long
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    27 July 2004   First created for PSMediaServices
-'
-'                  PURPOSE: Returns the number of work days between the two
+' Returns the number of work days between the two
 '                           dates
-'
-'****************************************************************************
-'
 '
 Dim lReturn&, lWholeWeeks&
 Dim dDateCnt As Date
 
 
-    '
     ' Determine how many weeks there are between the dates
-    '
     On Error Resume Next
     lWholeWeeks = DateDiff("w", dStart, dEnd)
     dDateCnt = DateAdd("ww", lWholeWeeks, dStart)
@@ -2262,9 +2059,7 @@ Dim dDateCnt As Date
     Loop
     lReturn = lWholeWeeks * 5 + lReturn
 
-    '
     ' Return value to caller
-    '
     PSGEN_WorkDays = lReturn
 
 End Function
@@ -2274,34 +2069,18 @@ End Function
 
 Public Function PSGEN_StartMutex&(ByVal sName$)
 Attribute PSGEN_StartMutex.VB_Description = "Creates and waits on the named mutex returning true if the mutex is owned by the caller"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2004
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_StartMutex
 '
 '                     sName$             - Name of the mutex
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    24 July 2004   First created for MediaWeb
-'
-'                  PURPOSE: Creates and waits on the named mutex returning
+' Creates and waits on the named mutex returning
 '                           the mutex handle if the mutex is owned by the caller
-'
-'****************************************************************************
-'
 '
 Const MUTEX_TIMEOUT = 5000
 Dim lReturn&
 
-    '
     ' Create the mutex and then wait on it
-    '
     On Error Resume Next
     sName = Replace(sName, "\", "")
     sName = Replace(sName, ".", "")
@@ -2310,52 +2089,30 @@ Dim lReturn&
     lReturn = CreateMutex(0, True, sName)
     If lReturn <> 0 Then
 
-        '
         ' Now wait on the mutex for a period
-        '
         If WaitForSingleObject(lReturn, MUTEX_TIMEOUT) = WAIT_TIMEOUT Then
             
-            '
             ' Couldn't lock the mutex so release our handle anyway
-            '
             Call ReleaseMutex(lReturn)
             lReturn = 0
             App.LogEvent "MutEx failed on file " + sName
         End If
     End If
     
-    '
     ' Return value to caller
-    '
     PSGEN_StartMutex = lReturn
 
 End Function
 
 
 Public Sub PSGEN_EndMutex(ByVal lMutex&)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2004
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_EndMutex
 '
 '                     lMutex&             - Handle of the mutex
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    24 July 2004   First created for MediaWeb
-'
-'                  PURPOSE: Releases the mutex
-'
-'****************************************************************************
-'
+' Releases the mutex
 '
 
-    '
     ' Close the mute if it is valid
-    '
     On Error Resume Next
     Call ReleaseMutex(lMutex)
     Call CloseHandle(lMutex)
@@ -2367,26 +2124,12 @@ End Sub
 
 Public Function PSGEN_ChooseFont(ByVal frmOwner As Form, ByVal objDefault As Font, Optional ByVal lFlags) As Font
 Attribute PSGEN_ChooseFont.VB_Description = "Returns a font from the user"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2004
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_ChooseFont
 '
 '                     objDefault As Font        - Default font to use
 '
 '                          ) As Font
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 May 2004   First created for PivotalDesktop
-'
-'                  PURPOSE: Returns a font from the user
-'
-'****************************************************************************
-'
+' Returns a font from the user
 '
 Dim stFontStructure As CHOOSEFONT_TYPE
 Dim stFont As LOGFONT
@@ -2395,10 +2138,8 @@ Dim sFontName$
 Dim objReturn As New StdFont
 
 
-    '
     ' Initialize the default selected font: Times New Roman, regular, black, 12 point.
     ' (Note that some of that information is in the CHOOSEFONT_TYPE structure instead.)
-    '
     On Error Resume Next
     stFont.lfHeight = (objDefault.size / 72) * frmOwner.ScaleY(1, vbInches, vbPixels) ' determine default height
     stFont.lfWidth = 0  ' determine default width
@@ -2415,16 +2156,12 @@ Dim objReturn As New StdFont
     stFont.lfPitchAndFamily = DEFAULT_PITCH Or FF_DONTCARE  ' default pitch, proportional with serifs
     stFont.lfFaceName = objDefault.Name & vbNullChar  ' string must be null-terminated
     
-    '
     ' Create the memory block which will act as the LOGFONT structure buffer
-    '
     hMem = GlobalAlloc(GMEM_MOVEABLE Or GMEM_ZEROINIT, Len(stFont))
     pMem = GlobalLock(hMem)  ' lock and get pointer
     CopyMemory ByVal pMem, stFont, Len(stFont)  ' copy structure's contents into block
     
-    '
     ' Initialize dialog box: Screen and printer fonts, point size between 10 and 72
-    '
     stFontStructure.lStructSize = Len(stFontStructure)  ' size of structure
     stFontStructure.hwndOwner = frmOwner.hWnd  ' window Form1 is opening this dialog box
     stFontStructure.hDC = Printer.hDC  ' device context of default printer (using VB's mechanism)
@@ -2445,10 +2182,8 @@ Dim objReturn As New StdFont
     stFontStructure.nSizeMin = 8  ' minimum point size
     stFontStructure.nSizeMax = 72  ' maximum point size
     
-    '
     ' Now, call the function.  If successful, copy the LOGFONT structure back into the structure
     ' and then print out the attributes we mentioned earlier that the user selected.
-    '
     lStatus = ChooseFont(stFontStructure)  ' open the dialog box
     objReturn.Charset = objDefault.Charset
     objReturn.Weight = objDefault.Weight
@@ -2470,16 +2205,12 @@ Dim objReturn As New StdFont
         objReturn.Strikethrough = stFont.lfStrikeOut <> 0
     End If
     
-    '
     ' Deallocate the memory block we created earlier.  Note that this must
     ' be done whether the function succeeded or not.
-    '
     lStatus = GlobalUnlock(hMem)  ' destroy pointer, unlock block
     lStatus = GlobalFree(hMem)  ' free the allocated memory
 
-    '
     ' Return value to caller
-    '
     Set PSGEN_ChooseFont = objReturn
 
 End Function
@@ -2488,59 +2219,35 @@ End Function
 
 Public Function PSGEN_CreateMimeTypeIniFile(ByVal sFilename$) As Boolean
 Attribute PSGEN_CreateMimeTypeIniFile.VB_Description = "Creates a mimetype file by reading the IIS default list"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2003
-'
-'****************************************************************************
-'
-'                     NAME: Sub PSGEN_CreateMimeTypeIniFile
 '
 '                     sFilename$         - Filename to use
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    12 November 2003   First created for PivotalBASISSlave
-'
-'                  PURPOSE: Creates a mimetype file by reading the IIS
+' Creates a mimetype file by reading the IIS
 '                           default list
-'
-'****************************************************************************
-'
 '
 Dim bReturn As Boolean
 Dim objMimeMap As Object
 Dim vMimeMap As Variant
 Dim iCnt
 
-    '
     ' Create the external objects
-    '
     On Error Resume Next
     Set objMimeMap = GetObject("IIS://localhost/mimemap")
     If Err = 0 Then
     
-        '
         ' Get the array of mimetypes
-        '
         vMimeMap = objMimeMap.Get("MimeMap")
         If IsArray(vMimeMap) Then
         
-            '
             ' Start the file off
-            '
             If PSGEN_WriteTextFile("[" + PSGEN_MIMETYPE_SECTION + "]" + vbCrLf, sFilename) Then
             
-                '
                 ' Output the mimetypes
-                '
                 For iCnt = LBound(vMimeMap) To UBound(vMimeMap)
                     Call PSGEN_WriteTextFile(Mid$(vMimeMap(iCnt).Extension, 2) + "=" + vMimeMap(iCnt).MIMEType + vbCrLf, sFilename, , True)
                 Next iCnt
                 
-                '
                 ' Now put out the file types
-                '
                 Call PSGEN_WriteTextFile("[" + PSGEN_MIMETYPE_SECTION_REVERSE + "]" + vbCrLf, sFilename, , True)
                 For iCnt = LBound(vMimeMap) To UBound(vMimeMap)
                     Call PSGEN_WriteTextFile(vMimeMap(iCnt).MIMEType + "=" + Mid$(vMimeMap(iCnt).Extension, 2) + vbCrLf, sFilename, , True)
@@ -2559,31 +2266,15 @@ End Function
 
 Public Sub PSGEN_LaunchBrowser(ByVal sURL$)
 Attribute PSGEN_LaunchBrowser.VB_Description = "Launches the default browser using the URL"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2003
-'
-'****************************************************************************
-'
-'                     NAME: Sub PSGEN_LaunchBrowser
 '
 '                     sURL$              - URL to launch
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    10 June 2003   First created for DialogLoadManager
-'
-'                  PURPOSE: Launches the default browser using the URL
-'
-'****************************************************************************
-'
+' Launches the default browser using the URL
 '
 Dim sBrowserExec As String * 255
 Dim sTmp$
 
-    '
     ' Get the default browser app
-    '
     On Error Resume Next
     sBrowserExec = Space(Len(sBrowserExec))
     sTmp = PSGEN_GetTempPathFilename("htm")
@@ -2591,9 +2282,7 @@ Dim sTmp$
     sBrowserExec = PSGEN_GetItem(1, vbNullChar, sBrowserExec)
     Kill sTmp
     
-    '
     ' Launch it with the URL as the argument
-    '
     Call ShellExecute(0&, "open", sBrowserExec, sURL, "", SW_SHOW)
 
 End Sub
@@ -2602,84 +2291,50 @@ End Sub
 
 Public Function PSGEN_GetHTMLFromClipboard$(ByVal lWindow&)
 Attribute PSGEN_GetHTMLFromClipboard.VB_Description = "Returns the HTML data from the clipboard"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2003
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetHTMLFromClipboard
 '
 '                     lWindow&           - Handle of window to own the clipboard
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    03 February 2003   First created for PivotalDesktop
-'
-'                  PURPOSE: Returns the HTML data from the clipboard
-'
-'****************************************************************************
-'
+' Returns the HTML data from the clipboard
 '
 Dim abData() As Byte
 Dim lMem&, lSize&, lPtr&, lFormat&
 Dim sReturn$
     
-    '
     ' Get the HTML custom format ID
-    '
     On Error Resume Next
     lFormat = RegisterClipboardFormat("HTML Format" + vbNullChar)
     If lFormat > &HC000& Then
     
-        '
         ' Open the clipboard for access
-        '
         If OpenClipboard(lWindow) Then
             
-            '
             ' Check if this data format is available
-            '
             If (IsClipboardFormatAvailable(lFormat) <> 0) Then
             
-                '
                 ' Get the memory handle to the data
-                '
                 lMem = GetClipboardData(lFormat)
                 If (lMem <> 0) Then
                     
-                    '
                     ' Get the size of this memory block
-                    '
                     lSize = GlobalSize(lMem)
                     If (lSize > 0) Then
                         
-                        '
                         ' Get a pointer to the memory
-                        '
                         lPtr = GlobalLock(lMem)
                         If (lPtr <> 0) Then
                             
-                            '
                             ' Resize the byte array to hold the data
-                            '
                             ReDim abData(0 To lSize - 1) As Byte
                             
-                            '
                             ' Copy from the pointer into the array
-                            '
                             CopyMemory abData(0), ByVal lPtr, lSize
                             
-                            '
                             ' Unlock the memory block
-                            '
                             GlobalUnlock lMem
                             
-                            '
                             ' Now return the data as a string
-                            '
                             sReturn = StrConv(abData, vbUnicode)
                         End If
                     End If
@@ -2689,65 +2344,41 @@ Dim sReturn$
         End If
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetHTMLFromClipboard = sReturn
 
 End Function
 
 Public Function PSGEN_GetSpecialFolderLocation$(ByVal lFolderID&)
 Attribute PSGEN_GetSpecialFolderLocation.VB_Description = "Returns the directory of the specified special folder"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetSpecialFolderLocation
 '
 '                     lFolderID&         - Special CSIDL folder identity
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    19 November 2002   First created for PivotalScan2PDF
-'
-'                  PURPOSE: Returns the directory of the specified special
+' Returns the directory of the specified special
 '                           folder
-'
-'****************************************************************************
-'
 '
 Dim lRet&
 Dim sLocation$, sReturn$
 Dim lPID&
 
 
-    '
     ' Retrieve a PIDL for the specified location
-    '
     On Error Resume Next
     If SHGetSpecialFolderLocationLong(0&, lFolderID, lPID) = 0 Then
         
-        '
         ' Convert the pidl to a physical path
-        '
         sLocation = Space$(MAX_PATH)
         If SHGetPathFromIDList(lPID, sLocation) <> 0 Then
             
-            '
             ' If successful, return the location
-            '
             sReturn = Left$(sLocation, InStr(sLocation, vbNullChar) - 1)
         End If
         Call CoTaskMemFree(lPID)
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetSpecialFolderLocation = sReturn
 
 End Function
@@ -2756,60 +2387,36 @@ End Function
 
 Public Function PSGEN_ConvertRtfToHtml$(ByVal sRTF$)
 Attribute PSGEN_ConvertRtfToHtml.VB_Description = "Converts the bit segment of RTF into HTML and returns it"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_ConvertRtfToHtml
 '
 '                     sRTF$              - RTF segment to convert
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    04 October 2002   First created for TeamPlayer
-'
-'                  PURPOSE: Converts the bit segment of RTF into HTML and
+' Converts the bit segment of RTF into HTML and
 '                           returns it
-'
-'****************************************************************************
-'
 '
 Dim sReturn$, sTmpRTF$, sTmpHTML$
 
 
-    '
     ' Create the temporary files
-    '
     On Error Resume Next
     sTmpRTF = PSGEN_GetTempPathFilename
     sTmpHTML = PSGEN_GetTempPathFilename
     Kill sTmpHTML
     
-    '
     ' Put the text into the RTF
-    '
     Call PSGEN_WriteTextFile(sRTF, sTmpRTF)
     
-    '
     ' Run the conversion
-    '
     If ConvertRtfToHTML(ByVal sTmpRTF, ByVal sTmpHTML, EXO_RESULTS + EXO_INLINECSS + EXO_WMF2GIF + EXO_HTML, 0&, 0&, 96) = 1 Then
         Call PSGEN_ReadTextFile(sTmpHTML, sReturn)
     End If
     
-    '
     ' Remove the temporary files
-    '
     Kill sTmpRTF
     Kill sTmpHTML
 
-    '
     ' Return value to caller
-    '
     PSGEN_ConvertRtfToHtml = sReturn
 
 End Function
@@ -2820,76 +2427,40 @@ End Function
 
 Public Function PSGEN_GetHTMLColor$(ByVal lColor#)
 Attribute PSGEN_GetHTMLColor.VB_Description = "Returns the HTML version of a windows colour"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetHTMLColor
 '
 '                     lColor&            - Windows colour to convert
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    14 May 2002   First created for TeamPlayer
-'
-'                  PURPOSE: Returns the HTML version of a windows colour
-'
-'****************************************************************************
-'
+' Returns the HTML version of a windows colour
 '
 Dim sReturn$, sTmp$
 
-    '
     ' Convert the color to a non-system version
-    '
     On Error Resume Next
     lColor = PSGEN_GetAPIColor(lColor)
     
-    '
     ' Now re-arrange the bits into a proper HTML colour
-    '
     sTmp = Replace(Format$(Hex(lColor), "@@@@@@"), " ", "0")
     sReturn = Mid$(sTmp, 5, 2) + Mid$(sTmp, 3, 2) + Mid$(sTmp, 1, 2)
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetHTMLColor = sReturn
 
 End Function
 
 Public Sub PSGEN_SetDefaultPrinter(ByVal sPrinter$)
 Attribute PSGEN_SetDefaultPrinter.VB_Description = "Sets the system wide default printer to that defined by the printer object"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Sub PSGEN_SetDefaultPrinter
 '
 '                     sPrinter$        - Printer to be the default
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    13 May 2002   First created for TeamPlayer
-'
-'                  PURPOSE: Sets the system wide default printer to that
+' Sets the system wide default printer to that
 '                           defined by the printer object
-'
-'****************************************************************************
-'
 '
 Dim sDeviceLine$
 Dim objTmp As Printer
 
-    '
     ' Initialise the line to go in the INI file
-    '
     On Error Resume Next
     For Each objTmp In Printers
         If StrComp(objTmp.DeviceName, sPrinter, vbTextCompare) = 0 Then
@@ -2899,15 +2470,11 @@ Dim objTmp As Printer
     Next objTmp
     If sDeviceLine <> "" Then
    
-        '
         ' Store the new printer information in the [WINDOWS] section
         ' of the WIN.INI file for the DEVICE= item
-        '
         Call WriteProfileString("windows", "Device", sDeviceLine)
           
-        '
         ' Cause all applications to reload the INI file
-        '
         Call SendMessage(HWND_BROADCAST, WM_WININICHANGE, 0, ByVal "windows")
     End If
 
@@ -2915,25 +2482,11 @@ End Sub
 
 Public Function PSGEN_GetListofPrinters$()
 Attribute PSGEN_GetListofPrinters.VB_Description = "Returns a null list of printers known to this server"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetListofPrinters
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    04 May 2002   First created for TeamPlayer
-'
-'                  PURPOSE: Returns a null list of printers known to this
+' Returns a null list of printers known to this
 '                           server
-'
-'****************************************************************************
-'
 '
 Dim sReturn$
 Dim bSuccess As Boolean
@@ -2945,9 +2498,7 @@ Dim sPName$, sSName$
 Dim lAttrib, lTemp&
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     lBuffer = 3072
     ReDim alBuffer((lBuffer \ 4) - 1)
@@ -2963,9 +2514,7 @@ Dim lAttrib, lTemp&
         If lRequired > lBuffer Then
             lBuffer = lRequired
             
-            '
             ' Buffer is too small so try again with correct size
-            '
             ReDim Buffer(lBuffer \ 4)
             bSuccess = EnumPrinters(PRINTER_ENUM_CONNECTIONS Or _
                                 PRINTER_ENUM_LOCAL, _
@@ -2977,9 +2526,7 @@ Dim lAttrib, lTemp&
                                 lEntries)
         End If
         
-        '
         ' Produce return list
-        '
         If bSuccess Then
             For lCnt = lEntries - 1 To 0 Step -1
                 sPName = Space$(StrLen(alBuffer(lCnt * 3)))
@@ -2992,38 +2539,22 @@ Dim lAttrib, lTemp&
         End If
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetListofPrinters = sReturn
 
 End Function
 
 Public Function PSGEN_GetPostCodeInfo$(ByVal sPostCode$, Optional sCounty$)
 Attribute PSGEN_GetPostCodeInfo.VB_Description = "Returns the postal region for the given post code.\r\nWill optionally also return the county"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetPostCodeInfo
 '
 '                     sPostCode$         - UK Post code to check
 '                     sCounty$           - Returned county name
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 April 2002   First created for TeamPlayer
-'
-'                  PURPOSE: Returns the postal region for the given post
+' Returns the postal region for the given post
 '                           code.
 '                           Will optionally also return the county
-'
-'****************************************************************************
-'
 '
 Const POST_LOOKUP = "AB,Aberdeen,,AL,St Albans,,B,Birmingham,,BA,Bath,,BB,Blackburn,,BD,Bradford,,BH,Bournemouth,,BL,Bolton,,BN,Brighton,,BR,Bromley,,BS,Bristol,,BT,Belfast,,CA,Carlisle,,CB,Cambridge,," + _
                     "CF,Cardiff,,CH,Chester,,CM,Chelmsford,,CO,Colchester,,CR,Croydon,,CT,Canterbury,,CV,Coventry,,CW,Crewe,,DA,Dartford,,DD,Dundee,,DE,Derby,,DG,Dumfries & Galloway,,DH,Durham,," + _
@@ -3042,9 +2573,7 @@ Dim asCodes$()
 Dim iCnt%
 
 
-    '
     ' Sanitise the post code and get the lookup value
-    '
     On Error Resume Next
     sReturn = UNKNOWN_CODE
     sCounty = UNKNOWN_CODE
@@ -3057,14 +2586,10 @@ Dim iCnt%
     Next iCnt
     If iCnt > Len(sPostCode) Then sCode = sPostCode
     
-    '
     ' Check that we have something to lookup
-    '
     If sCode <> "" Then
         
-        '
         ' Create an array of the strings to search through
-        '
         asCodes = Split(POST_LOOKUP, ",")
         For iCnt = 0 To UBound(asCodes) \ 3
             If asCodes(iCnt * 3) = sCode Then
@@ -3075,9 +2600,7 @@ Dim iCnt%
         Next iCnt
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetPostCodeInfo = sReturn
 
 End Function
@@ -3085,28 +2608,14 @@ End Function
 
 Public Sub PSGEN_ShowFloatingInfo(Optional ByVal sInfo$, Optional ByVal iXOffset%, Optional ByVal iYOffset%)
 Attribute PSGEN_ShowFloatingInfo.VB_Description = "Draws the floating information at the current cursor location\r\nIf the info is empty then it actually deletes it"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Sub PSGEN_ShowFloatingInfo
 '
 '                     iXOffset%          - X offset of the information
 '                     iYOffset%          - Y offset of the information
 '                     sInfo$             - Information
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    04 January 2002   First created for TeamPlayer
-'
-'                  PURPOSE: Draws the floating information at the current
+' Draws the floating information at the current
 '                           cursor location
 '                           If the info is empty then it actually deletes it
-'
-'****************************************************************************
-'
 '
 Dim stPoint As POINTAPI
 Dim lDCSrc&, lBitmapTmp&
@@ -3117,9 +2626,7 @@ Static ssInfo$
 Static objPic As Picture
 
 
-    '
     ' Determine if we are finishing the display
-    '
     On Error Resume Next
     lDesktop = GetDC(ByVal 0&)
     Call GetCursorPos(stPoint)
@@ -3134,14 +2641,10 @@ Static objPic As Picture
         Screen.MousePointer = vbNormal
     End If
     
-    '
     ' Now check if we are actually putting something out
-    '
     If sInfo <> "" And ((stRect.Left - iXOffset) <> stPoint.X Or (stRect.Top - iYOffset) <> stPoint.Y) Then
         
-        '
         ' If we already have a DC then replace the bit of screen with our copy
-        '
         If Not objPic Is Nothing Then
             lDCSrc = CreateCompatibleDC(lDesktop)
             lBitmapTmp = SelectObject(lDCSrc, objPic.Handle)
@@ -3150,9 +2653,7 @@ Static objPic As Picture
             Call DeleteDC(lDCSrc)
         End If
         
-        '
         ' Create a rectangle to put the text in and output it
-        '
         Call SetBkMode(lDesktop, TRANSPARENT)
         stRect.Left = stPoint.X + iXOffset
         stRect.Top = stPoint.Y + iYOffset
@@ -3170,31 +2671,15 @@ End Sub
 
 Public Function PSGEN_GetGreyScale&(ByVal lColor&)
 Attribute PSGEN_GetGreyScale.VB_Description = "Returns the greyscale value of the color"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2001
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetGreyScale
 '
 '                     lColor&            - color value
 '
 '                          ) As Long
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    05 December 2001   First created for MediaWeb
-'
-'                  PURPOSE: Returns the greyscale value of the color
-'
-'****************************************************************************
-'
+' Returns the greyscale value of the color
 '
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     PSGEN_GetGreyScale = ((77& * (lColor And &HFF&) + _
                  152& * (lColor And &HFF00&) \ &H100& + _
@@ -3204,27 +2689,13 @@ End Function
 
 Public Function PSGEN_TranslateComErrorCode$(Optional ByVal lError)
 Attribute PSGEN_TranslateComErrorCode.VB_Description = "Returns the message for the given error code returned after a COM object failure"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2001
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_TranslateComErrorCode
 '
 '                     lError&            - Normal VB Err.Number
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    20 September 2001   First created for MediaWeb
-'
-'                  PURPOSE: Returns the message for the given error code
+' Returns the message for the given error code
 '                           returned after a COM object failure
-'
-'****************************************************************************
-'
 '
 Const FORMAT_MESSAGE_FROM_SYSTEM = &H1000
 
@@ -3232,9 +2703,7 @@ Dim lRet&
 Dim sReturn$
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     If IsMissing(lError) Then lError = GetLastError
     sReturn = Space(256)
@@ -3245,44 +2714,26 @@ Dim sReturn$
        sReturn = "Error not found"
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_TranslateComErrorCode = sReturn
 
 End Function
 
 Public Function PSGEN_SwapWebCharacters$(ByVal sValue$)
 Attribute PSGEN_SwapWebCharacters.VB_Description = "Changes all non alphanumeric characters to their web equivalent"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2001
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_SwapWebCharacters
 '
 '                     sValue$            - Value to change
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    03 July 2001   First created for BikeSwapMonitor
-'
-'                  PURPOSE: Changes all non alphanumeric characters to their
+' Changes all non alphanumeric characters to their
 '                           web equivalent
-'
-'****************************************************************************
-'
 '
 Dim sReturn$, sTmp$
 Dim iCnt%
 
 
-    '
     ' Loop round each character
-    '
     On Error Resume Next
     sValue = Replace(sValue, vbCrLf, vbCr)
     For iCnt = 1 To Len(sValue)
@@ -3297,43 +2748,25 @@ Dim iCnt%
     Next iCnt
     sReturn = Replace(sReturn, vbCr, "%0D%0A")
 
-    '
     ' Return value to caller
-    '
     PSGEN_SwapWebCharacters = sReturn
 
 End Function
 
 Public Function PSGEN_SwapWebEntities$(ByVal sValue$)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2001
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_SwapWebEntities
 '
 '                     sValue$            - Value to change
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    03 July 2001   First created for BikeSwapMonitor
-'
-'                  PURPOSE: Changes all non alphanumeric characters to their
+' Changes all non alphanumeric characters to their
 '                           web equivalent
-'
-'****************************************************************************
-'
 '
 Dim sReturn$, sTmp$
 Dim iCnt%
 
 
-    '
     ' Loop round each character
-    '
     On Error Resume Next
     sReturn = Replace(sValue, "+", " ")
     If InStr(sReturn, "%") > 0 Then
@@ -3344,50 +2777,30 @@ Dim iCnt%
         Next iCnt
     End If
     
-    '
     ' Return value to caller
-    '
     PSGEN_SwapWebEntities = sReturn
 
 End Function
 
 Public Sub PSGEN_AssignPictureToMenu(ByVal objPicture As Object, ByVal objMenu As Menu)
 Attribute PSGEN_AssignPictureToMenu.VB_Description = "Assigns the picture given by the picture handle to the menu unchecked bitmap"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2001
-'
-'****************************************************************************
-'
-'                     NAME: Sub PSGEN_AssignPictureToMenu
 '
 '                     objPicture As Picture        - Picture object
 '                     objMenu As Menu           - Menu to assign picture to
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    01 April 2001   First created for TeamPlayer
-'
-'                  PURPOSE: Assigns the picture given by the picture handle
+' Assigns the picture given by the picture handle
 '                           to the menu unchecked bitmap
-'
-'****************************************************************************
-'
 '
 
 Dim lMenu&, lMenuID&
 
 
-    '
     ' Find the menu in question
-    '
     On Error Resume Next
     lMenu = PSGEN_GetMenuHandle(objMenu, lMenuID)
     If lMenu <> 0 Then
     
-        '
         ' We've found it so now assign the picture to the menu
-        '
         Call SetMenuItemBitmaps(lMenu, lMenuID, MF_BYCOMMAND, objPicture, 0)
     End If
 
@@ -3397,13 +2810,6 @@ End Sub
 
 Public Function PSGEN_GetMenuHandle&(ByVal objMenu As Menu, ByRef lRetMenuID&, Optional lMenu& = 0)
 Attribute PSGEN_GetMenuHandle.VB_Description = "Returns the API ID of the menu supplied"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2001
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetMenuID
 '
 '                     objMenu As menu           - The menu to get the ID from
 '                     lRetMemuID&               - Menu to which the item belongs
@@ -3411,35 +2817,22 @@ Attribute PSGEN_GetMenuHandle.VB_Description = "Returns the API ID of the menu s
 '
 '                          ) As Long
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    31 March 2001   First created for TeamPlayer
-'
-'                  PURPOSE: Returns the API ID of the menu supplied
-'
-'****************************************************************************
-'
+' Returns the API ID of the menu supplied
 '
 Dim lReturn&, lMenuID&
 Dim iMenus%, iCnt%
 Dim sCaption$
 
 
-    '
     ' Get the top level menu value if it hasn't been provided
-    '
     On Error Resume Next
     If lMenu = 0 Then lMenu = GetMenu(objMenu.Parent.hWnd)
 
-    '
     ' Loop through all the submenus looking for our caption
-    '
     iMenus = GetMenuItemCount(lMenu)
     For iCnt = 0 To iMenus - 1
         
-        '
         ' Get the menu caption
-        '
         lMenuID = GetMenuItemID(lMenu, iCnt)
         sCaption = String(127, vbNullChar)
         Call GetMenuString(lMenu, iCnt, sCaption, 127, MF_BYPOSITION)
@@ -3450,9 +2843,7 @@ Dim sCaption$
             Exit For
         Else
             
-            '
             ' If this is a popup then get it's handle and call ourselves again
-            '
             If lMenuID = -1 And GetSubMenu(lMenu, iCnt) <> 0 Then
                 lReturn = PSGEN_GetMenuHandle(objMenu, lRetMenuID, GetSubMenu(lMenu, iCnt))
                 If lReturn <> 0 Then Exit For
@@ -3461,9 +2852,7 @@ Dim sCaption$
     Next iCnt
 
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetMenuHandle = lReturn
 
 End Function
@@ -3472,32 +2861,16 @@ End Function
 
 Public Sub PSGEN_PositionForm(ByVal frmSubject As Form, Optional ByVal frmParent As Form = Nothing)
 Attribute PSGEN_PositionForm.VB_Description = "Centers the form on the parent and if that isn't provided then it centres it on the screen"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2001
-'
-'****************************************************************************
-'
-'                     NAME: Sub PSGEN_PositionForm
 '
 '                     frmSubject As Form        - Form to position
 '                     frmParent As Form         - Form to centre it on
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    19 March 2001   First created for TeamPlayer
-'
-'                  PURPOSE: Centers the form on the parent and if that isn't
+' Centers the form on the parent and if that isn't
 '                           provided then it centres it on the screen
 '
-'****************************************************************************
-'
-'
 
 
-    '
     ' Determine what to centre on
-    '
     On Error Resume Next
     If frmParent Is Nothing Then
         frmSubject.Move (Screen.Width - frmSubject.Width) / 2, (Screen.Height - frmSubject.Height) / 3
@@ -3513,13 +2886,6 @@ End Sub
 
 Public Function PSGEN_GetItemNumber%(ByVal sSep$, ByVal sItemValue$, ByVal sList$)
 Attribute PSGEN_GetItemNumber.VB_Description = "Returns the item number for the value and separator supplied"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetItemNumber
 '
 '                     sSep$              - Separators between items
 '                     sItemValue$        - Item to look for
@@ -3527,23 +2893,14 @@ Attribute PSGEN_GetItemNumber.VB_Description = "Returns the item number for the 
 '
 '                          ) As Integer
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    14 December 2000   First created for PivotalBASISSlave
-'
-'                  PURPOSE: Returns the item number for the value and
+' Returns the item number for the value and
 '                           separator supplied
-'
-'****************************************************************************
-'
 '
 Dim iReturn%, iCnt%
 Dim asTmp$()
 
 
-    '
     ' Get a list of items and loop through them all
-    '
     iReturn = 0
     On Error Resume Next
     asTmp = Split(sList, sSep, compare:=vbTextCompare)
@@ -3554,44 +2911,26 @@ Dim asTmp$()
         End If
     Next iCnt
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetItemNumber = iReturn
 
 End Function
 
 Public Sub PSGEN_DrawText(ByVal sValue$, ByVal lDC&, stRect As RECT)
 Attribute PSGEN_DrawText.VB_Description = "Draws the text using the rectangle supplied onto the device context supplied.\r\nExpands the bottom of the box to accomodate the text"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Sub PSGEN_DrawText
 '
 '                     sValue$            - String to draw
 '                     lDC&               - Drawing plane
 '                     stRect As RECT     - Drawing bounding rectangle
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    13 September 2000   First created for GURU
-'
-'                  PURPOSE: Draws the text using the rectangle supplied onto
+' Draws the text using the rectangle supplied onto
 '                           the device context supplied.
 '                           Expands the bottom of the box to accomodate the
 '                           text
 '
-'****************************************************************************
-'
-'
 
 
-    '
     ' Adjust the rectangle and then draw the text
-    '
     On Error Resume Next
     Call DrawText(lDC, sValue, Len(sValue), stRect, DT_CALCRECT + DT_WORDBREAK)
     Call DrawText(lDC, sValue, Len(sValue), stRect, DT_WORDBREAK)
@@ -3599,13 +2938,6 @@ Attribute PSGEN_DrawText.VB_Description = "Draws the text using the rectangle su
 End Sub
 
 Public Function PSGEN_ConvertImage$(ByVal sFile$, ByVal lWidth&, ByVal lHeight&, ByVal sType$, Optional ByVal sExtra$ = "")
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_ConvertImage
 '
 '                     sFile$             - File to convert
 '                     lWidth&            - Width in pixels
@@ -3615,11 +2947,7 @@ Public Function PSGEN_ConvertImage$(ByVal sFile$, ByVal lWidth&, ByVal lHeight&,
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    12 June 2000   First created for BikeSwap
-'
-'                  PURPOSE: Converts the file to the type specified and
+' Converts the file to the type specified and
 '                           scales it to the dimensions passed.
 '                           This functions uses the ImageMagick set of
 '                           utilities and so expects the neccersary DLLs and
@@ -3627,17 +2955,12 @@ Public Function PSGEN_ConvertImage$(ByVal sFile$, ByVal lWidth&, ByVal lHeight&,
 '                           Returns a temporary file if successful otherwise
 '                           rasies an error.
 '
-'****************************************************************************
-'
-'
 Dim sReturn$, sFeedback$, sCommand$, sPath$
 Dim sError$, sBatch$, sGeometery$, sCmd$
 Dim lActWidth&, lActHeight&
 
     
-    '
     ' We need to get the size of the file
-    '
     On Error Resume Next
     sPath = Environ(PSGEN_IMAGEMAGICK)
     If sPath = "" Then
@@ -3646,17 +2969,13 @@ Dim lActWidth&, lActHeight&
         sCommand = PSGEN_GetFileAttributes(sFile, True)
         If Err = 0 Then
         
-            '
             ' The width and height are after the name
-            '
             sCommand = Trim$(PSGEN_GetItem(1, vbCrLf, PSGEN_GetItem(2, "Geometry:", sCommand)))
             lActWidth = CLng(Trim$(PSGEN_GetItem(1, "x", sCommand)))
             lActHeight = CLng(Trim$(PSGEN_GetItem(2, "x", sCommand)))
             sGeometery = Format$(CLng(Format$((lWidth / lActWidth) * 100))) + "x" + Format$(CLng(Format$((lHeight / lActHeight) * 100))) + "%%"
             
-            '
             ' Build the required command line
-            '
             sFeedback = PSGEN_GetTempPathFilename
             Kill sFeedback
             sBatch = PSGEN_GetTempPathFilename("bat")
@@ -3671,9 +2990,7 @@ Dim lActWidth&, lActHeight&
                 sCmd = "command.com /c " + sBatch
             End If
         
-            '
             ' Run the command and gather the output
-            '
             If PSGEN_WaitForTask(sCmd, "Converting " + sFile + " to " + sReturn, True, 20000) <> 0 Then
                 Kill sReturn
                 Call PSGEN_ReadTextFile(sFeedback, sCommand, sError)
@@ -3683,9 +3000,7 @@ Dim lActWidth&, lActHeight&
                     Err.Raise vbObjectError + PSGEN_ERROR_BASE, "PSGEN_ConvertImage", sCommand
                 End If
             Else
-                '
                 ' Check that there was no feedback
-                '
                 Call PSGEN_ReadTextFile(sFeedback, sCommand, sError)
                 If sCommand <> "" Then
                     Kill sReturn
@@ -3699,33 +3014,17 @@ Dim lActWidth&, lActHeight&
         End If
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_ConvertImage = sReturn
 
 End Function
 
 Public Function PSGEN_InDevelopment(Optional bSetMode As Boolean = False) As Boolean
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Public Function PSGEN_InDevelopment
 '
 '                           oClassName      - Class name of the project
 '
-'             DEPENDENCIES: None
-'
-'     MODIFICATION HISTORY: Steve O'Hara    126th January 1998   First created for RTE from Desktop
-'
-'                  PURPOSE: This function returns true if we are in the
+' This function returns true if we are in the
 '                           VB IDE, otherwise false.
-'
-'****************************************************************************
-'
 '
 Static sbReturn As Boolean
  
@@ -3741,13 +3040,6 @@ End Function
 
 
 Public Function PSGEN_GetFolder$(ByVal sTitle$, Optional ByVal lOwner&, Optional sInstructions$, Optional ByVal sStartFolder$, Optional ByVal iSystemFolder%, Optional ByVal lRestrictions&)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetFolder
 '
 '                     sTitle$            - Title of dialog
 '                     lOwner&            - Owner window handle
@@ -3758,14 +3050,7 @@ Public Function PSGEN_GetFolder$(ByVal sTitle$, Optional ByVal lOwner&, Optional
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    28 October 1998   First created for Willow
-'
-'                  PURPOSE: Returns te name of the folder selected by the user
-'
-'****************************************************************************
-'
+' Returns te name of the folder selected by the user
 '
 Const MAX_PATH = 260
 
@@ -3773,9 +3058,7 @@ Dim sReturn$
 Dim lFolder&, lIDL&
 Dim stIDL As ITEMIDLIST
 
-    '
     ' Initialise error vector and set up the browse information
-    '
     sReturn = ""
     On Error Resume Next
     With mstBrowse
@@ -3792,32 +3075,22 @@ Dim stIDL As ITEMIDLIST
     msBrowseTitle = sTitle
     
   
-    '
     ' Show the selection dialog
-    '
     lIDL = SHBrowseForFolder(mstBrowse)
   
-    '
     ' If the dialog wasn't cancelled
-    '
     If lIDL <> 0 Then
     
-        '
         ' Get the path from the ID list
-        '
         sReturn = String$(MAX_PATH, 0)
         Call SHGetPathFromIDList(ByVal lIDL, ByVal sReturn)
         sReturn = Left$(sReturn, InStr(sReturn, vbNullChar) - 1)
     End If
   
-    '
     ' Frees the memory SHBrowseForFolder() allocated for the pointer to the item id list
-    '
     Call CoTaskMemFree(lIDL)
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetFolder = sReturn
 
 End Function
@@ -3825,109 +3098,67 @@ End Function
 
 
 Public Function PSGEN_FindFileInPath$(ByVal sFilename$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_FindFileInPath
 '
 '                     sFilename$         - Name of file to look for
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    22 April 1998   First created for Willow
-'
-'                  PURPOSE: Returns the fully specified path for the filename
+' Returns the fully specified path for the filename
 '                            by looking for the file in all the directories
 '                            specified in the PATH environment variable
-'
-'****************************************************************************
-'
 '
 Dim sReturn$, sPath$, sDir$
 Dim iCnt%, iItems%
 
 
-    '
     ' Initialise error vector and get the path
-    '
     On Error Resume Next
     sReturn = ""
     sFilename = Trim$(sFilename)
     sPath = Environ("PATH")
     If sPath <> "" Then
 
-        '
         ' Loop round each of the directories in the path looking to see if the file is there
-        '
         iItems = PSGEN_GetNoOfItems(";", sPath)
         For iCnt = 1 To iItems
             sDir = Trim$(PSGEN_GetItem(iCnt, ";", sPath))
             If sDir <> "" Then
                 
-                '
                 ' Check the directory and file
-                '
                 If Right$(sDir, 1) <> "\" Then sDir = sDir + "\"
                 If PSGEN_FileExists(sDir + sFilename) Then sReturn = sDir + sFilename
             End If
         Next iCnt
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_FindFileInPath = sReturn
 
 End Function
 Public Function PSGEN_DirectoryExists(ByVal sDirname$) As Boolean
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_DirectoryExists
 '
 '                     sDirname$         - Name of directory to check
 '
 '                          ) As Integer
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    22 April 1998   First created for Willow
-'
-'                  PURPOSE: Returns true if the the fully specified path
+' Returns true if the the fully specified path
 '                           exists
-'
-'****************************************************************************
-'
 '
 Dim bReturn As Boolean
 Dim sTmp$
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     sDirname = Trim$(PSGEN_GetItem(1, vbNullChar, sDirname))
     If sDirname <> "" Then
 
-        '
         ' Check for the name
-        '
         sTmp = Dir(sDirname, vbDirectory)
         bReturn = (Err = 0) And (sTmp <> "")
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_DirectoryExists = bReturn
 
 End Function
@@ -3935,48 +3166,28 @@ End Function
 
 
 Public Function PSGEN_FileExists%(ByVal sFilename$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_FileExists
 '
 '                     sfilename$         - Name of file to check
 '
 '                          ) As Integer
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    22 April 1998   First created for Willow
-'
-'                  PURPOSE: Returns true if the the fully specified path
+' Returns true if the the fully specified path
 '                            filename exists and can be opened for read access
-'
-'****************************************************************************
-'
 '
 Dim iReturn%, iFile%
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     iReturn = False
     sFilename = Trim$(sFilename)
 
-    '
     ' First check to see if it exists using the directory command
-    '
     If Left$(sFilename, 1) = "'" Then sFilename = Right$(sFilename, Len(sFilename) - 1)
     If Right$(sFilename, 1) = "'" Then sFilename = Left$(sFilename, Len(sFilename) - 1)
     If Trim$(sFilename) <> "" And Dir(sFilename, vbNormal Or vbHidden Or vbReadOnly) <> "" Then
     
-        '
         ' Try and open the file for read and shared access
-        '
         iFile = FreeFile
         Open sFilename For Input Access Read As iFile
         If Err = 0 Then
@@ -3986,22 +3197,13 @@ Dim iReturn%, iFile%
     End If
     Err.Clear
 
-    '
     ' Return value to caller
-    '
     PSGEN_FileExists = iReturn
 
 End Function
 
 
 Public Function PSGEN_FindWindowLike%(hWndArray&(), ByVal hWndStart&, sWindowText$, sClassName$, vID As Variant)
-'****************************************************************************
-'
-'       Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'       NAME:           Public Function PSGEN_FindWindowLike (
 '
 '                       hWndArray&()    - A long array used to return the window handles
 '                       hWndStart&      - The handle of the window to search under.
@@ -4013,7 +3215,7 @@ Public Function PSGEN_FindWindowLike%(hWndArray&(), ByVal hWndStart&, sWindowTex
 '
 '       DEPENDENCIES:   NONE
 '
-'       PURPOSE:        Finds the window handles of the windows matching the specified
+'        Finds the window handles of the windows matching the specified
 '                       parameters.  The routine searches through all of this hWndStart's
 '                       children and their children recursively. If hWndStart = 0 then
 '                       the routine searches through all windows.  vID can be a decimal
@@ -4021,8 +3223,6 @@ Public Function PSGEN_FindWindowLike%(hWndArray&(), ByVal hWndStart&, sWindowTex
 '                       will occur. To ignore the vID pass the Visual Basic Null function.
 '                       Returns the number of windows that matched the parameters.
 '                       Also returns the window handles in hWndArray()
-'
-'       MODIFICATION HISTORY: Steve O'Hara  10th July 1996   First created for Pivotal Addin
 '
 '****************************************************************************
 '
@@ -4035,9 +3235,7 @@ Dim lTmp&
 Static iLevel%
 Static iFound%
 
-    '
     ' Initialize first time through
-    '
     On Error Resume Next
     If iLevel = 0 Then
         iFound = 0
@@ -4045,25 +3243,17 @@ Static iFound%
         If hWndStart = 0 Then hWndStart = GetDesktopWindow()
     End If
 
-    '
     ' Increase recursion counter:
-    '
     iLevel = iLevel + 1
 
-    '
     ' Get first child window:
-    '
     hWnd = GetWindow(hWndStart, GW_CHILD)
     Do Until hWnd = 0
         
-        '
         ' Search children by recursion:
-        '
         lTmp = PSGEN_FindWindowLike(hWndArray(), hWnd, sWindowText, sClassName, vID)
 
-        '
         ' Get the window text and class name:
-        '
         sLocalWindowText = Space(255)
         lTmp = GetWindowText(hWnd, sLocalWindowText, 255)
         sLocalWindowText = Left$(sLocalWindowText, lTmp)
@@ -4071,9 +3261,7 @@ Static iFound%
         lTmp = GetClassName(hWnd, sLocalClassName, 255)
         sLocalClassName = Left$(sLocalClassName, lTmp)
 
-        '
         ' If window is a child get the vID:
-        '
         If GetParent(hWnd) <> 0 Then
             lTmp = GetWindowWord(hWnd, GWW_ID)
             vIdentity = CLng("&H" & Hex(lTmp))
@@ -4081,24 +3269,18 @@ Static iFound%
             vIdentity = Null
         End If
 
-        '
         ' Check that window matches the search parameters:
-        '
         If (sLocalWindowText Like sWindowText) And ((sLocalClassName Like sClassName) Or (sClassName = "")) Then
             If IsNull(vID) Then
             
-                '
                 ' If find a match, increment counter and add handle to array:
-                '
                 iFound = iFound + 1
                 ReDim Preserve hWndArray(0 To iFound)
                 hWndArray(iFound) = hWnd
             
             ElseIf Not IsNull(vIdentity) Then
                 If vIdentity = CLng(vID) Then
-                    '
                     ' If find a match increment counter and add handle to array:
-                    '
                     iFound = iFound + 1
                     ReDim Preserve hWndArray(0 To iFound)
                     hWndArray(iFound) = hWnd
@@ -4106,20 +3288,14 @@ Static iFound%
             End If
         End If
 
-        '
         ' Get next child window:
-        '
          hWnd = GetWindow(hWnd, GW_HWNDNEXT)
     Loop
 
-    '
     ' Decrement recursion counter:
-    '
     iLevel = iLevel - 1
 
-    '
     ' Return the number of windows found:
-    '
     PSGEN_FindWindowLike = iFound
 
 End Function
@@ -4131,67 +3307,37 @@ End Function
 
 
 Public Function PSGEN_ShutdownRequested%()
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Function PSGEN_ShutdownRequested
 '
 '
 '                          ) As Integer
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    21 January 1998   First created for DocBlazer
-'
-'                  PURPOSE:   Returns the state of the shutdown flag
-'
-'****************************************************************************
-'
+'   Returns the state of the shutdown flag
 '
 Dim iReturn%
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
 
-    '
     ' Return value to caller
-    '
     PSGEN_ShutdownRequested = miShutdownRequested
 
 End Function
 
 Public Sub PSGEN_RequestShutdown(ByVal iValue%)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Sub PSGEN_RequestShutdown
 '
 '                             iValue%     - Value to set flag to
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    21 January 1998   First created for DocBlazer
-'
-'                  PURPOSE:   Sets the module flag that tells the system that a
+'   Sets the module flag that tells the system that a
 '                             shutdown has been requested by the user.
 '
-'****************************************************************************
-'
-'
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     miShutdownRequested = iValue
 
@@ -4200,13 +3346,6 @@ End Sub
 
 
 Public Function PSGEN_ReadTextFile(ByVal sFilename$, sValue$, Optional sError$) As Boolean
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Function PSGEN_ReadTextFile
 '
 '                     sFilename$         - Filename to get data from
 '                     sValue$            - Variable to populate
@@ -4214,22 +3353,15 @@ Public Function PSGEN_ReadTextFile(ByVal sFilename$, sValue$, Optional sError$) 
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    29 January 1998   First created for DocBlazer
-'
-'                  PURPOSE:   Gets the contents of the text file into sValue.
+'   Gets the contents of the text file into sValue.
 '                             The limitation to this routine is that the file
 '                             cannot be greater than 32k bytes long.
-'
-'****************************************************************************
-'
 '
 Dim iFile%
 Dim bReturn As Boolean
 
 
-    '
     ' Initialise error vector and check data
-    '
     On Error Resume Next
     bReturn = False
     If PSGEN_FileExists(sFilename) Then
@@ -4239,15 +3371,11 @@ Dim bReturn As Boolean
             sError = "Cannot open file: '" + sFilename + "' - " + Err.Description
         Else
         
-            '
             ' Determine how many chunks there are
-            '
             sValue = Space(LOF(iFile))
             Get iFile, , sValue
             
-            '
             ' Check for any errors
-            '
             If Err <> 0 Then
                 sError = "Cannot read from text file: '" + sFilename + "' - " + Err.Description
                 bReturn = False
@@ -4260,9 +3388,7 @@ Dim bReturn As Boolean
         sError = "File does not exist or cannot be opened for reading - " + sFilename
     End If
     
-    '
     ' Return to caller
-    '
     PSGEN_ReadTextFile = bReturn
 
 End Function
@@ -4276,13 +3402,6 @@ End Function
 
 
 Function PSGEN_SetStringWidth$(frmback As Form, ByVal iWidth%, ByVal sVal$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Function PSGEN_SetStringwidth
 '
 '                     frmBack as Form    - Form to run font checks on
 '                     iWidth%            - Width in pixels to space the string to
@@ -4292,20 +3411,13 @@ Function PSGEN_SetStringWidth$(frmback As Form, ByVal iWidth%, ByVal sVal$)
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   steve o'hara    11 December 1997   First created for docblazer
-'
-'                  PURPOSE:   Stretches the string to the desired width based
+'   Stretches the string to the desired width based
 '                             upon the font characteristics of the specified form
-'
-'****************************************************************************
-'
 '
 
 Dim sReturn$
 
-    '
     ' Loop round adding spaces to the string to get it to the desired width
-    '
     sReturn = sVal
     On Error Resume Next
     Do While frmback.TextWidth(sReturn) < iWidth
@@ -4318,13 +3430,6 @@ End Function
 
 
 Public Function PSGEN_WriteTextFile%(ByVal sMessage$, ByVal sFilename$, Optional sError$, Optional bAppendFile As Boolean = False)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Function PSGEN_WriteTextFile
 '
 '                     sMessage$          - Data to output to the file
 '                     sFilename$         - Filename to create
@@ -4335,27 +3440,18 @@ Public Function PSGEN_WriteTextFile%(ByVal sMessage$, ByVal sFilename$, Optional
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   steve o'hara    11 December 1997   First created for docblazer
-'
-'                  PURPOSE:   Creates a file that contains the data supplied in
+'   Creates a file that contains the data supplied in
 '                             the message.  Returns any errors encountered.
-'
-'****************************************************************************
-'
 '
 Dim iReturn%, iFile%
 
-    '
     ' Initialise error vector and file handle
-    '
     On Error Resume Next
     iFile = FreeFile
     sError = ""
     iReturn = False
         
-    '
     ' Open a file for output
-    '
     If bAppendFile Then
         Open sFilename For Binary Access Read Write As #iFile
         If LOF(iFile) > 0 Then Seek iFile, LOF(iFile) + 1
@@ -4367,9 +3463,7 @@ Dim iReturn%, iFile%
         sError = "Cannot create data file: '" + sFilename + "' - " + Err.Description
     Else
 
-        '
         ' Write message body out to the file
-        '
         Put #iFile, , sMessage
         If Err <> 0 Then
             sError = "Cannot write to data file: '" + sFilename + "' - " + Err.Description
@@ -4379,9 +3473,7 @@ Dim iReturn%, iFile%
     End If
     Close iFile
     
-    '
     ' Return value to caller
-    '
     PSGEN_WriteTextFile = iReturn
 
 End Function
@@ -4389,13 +3481,6 @@ End Function
 
 
 Public Function PSGEN_GetKeyStrokes$(ByVal iKeyCode%)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Function PSGEN_GetKeyStrokes
 '
 '                     iKeycode%          - Key just pressed
 '
@@ -4403,16 +3488,11 @@ Public Function PSGEN_GetKeyStrokes$(ByVal iKeyCode%)
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    09 December 1997   First created for DocBlazer
-'
-'                  PURPOSE:   Returns the currently typed in string of
+'   Returns the currently typed in string of
 '                             characters based upon how close together the keys
 '                             have been pressed.  If more than KEY_WAIT
 '                             milliseconds has elapsed since the last call to
 '                             this routine, then only the passed keystroke is returned.
-'
-'****************************************************************************
-'
 '
 Const KEY_WAIT = 1000
 
@@ -4420,9 +3500,7 @@ Static sCurrentKeys$
 Static lCurrentTime&
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     If iKeyCode = 0 Then
         sCurrentKeys = ""
@@ -4435,9 +3513,7 @@ Static lCurrentTime&
     End If
     lCurrentTime = GetTickCount
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetKeyStrokes = sCurrentKeys
 
 End Function
@@ -4446,30 +3522,16 @@ End Function
     
 
 Public Sub PSGEN_SelectText(ByVal ctlText As Object)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Sub PSGEN_SelectText
 '
 '                     ctlText As Control           - Textbox to use
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    27 November 1997   First created for DocBlazer
-'
-'                  PURPOSE:   Selects all the text in a textbox
-'
-'****************************************************************************
-'
+'   Selects all the text in a textbox
 '
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     ctlText.SelStart = 0
     ctlText.SelLength = Len(ctlText.Text)
@@ -4478,48 +3540,30 @@ End Sub
 
 
 Public Sub PSGEN_ViewInNotepad(sValue$, Optional ByVal bWait As Boolean = True)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Sub PSGEN_ViewInNotepad
 '
 '                     sValue$            - Value to edit
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    04 November 1997   First created for DocBlazer
-'
-'                  PURPOSE:   Views the specified string in Notepad by writing
+'   Views the specified string in Notepad by writing
 '                             the string out to a temporary text file and
 '                             setting Notepad off.  It then waits for the
 '                             Notepad session to complete before it returns the
 '                             string to the user.
 '
-'****************************************************************************
-'
-'
 Dim sFile$, sTmp$
 
 
-    '
     ' Create a temporary filename and fill it with the data
-    '
     On Error Resume Next
     sFile = PSGEN_GetTempPathFilename()
     Call PSGEN_WriteTextFile(sValue, sFile, sTmp)
 
-    '
     ' Now launch notepad and wait for it to finish
-    '
     If bWait Then
         Call PSGEN_WaitForTask("notepad.exe " & sFile, "Edit " + sFile, False)
         
-        '
         ' Now get back the data from the file
-        '
         Call PSGEN_ReadTextFile(sFile, sValue, sTmp)
         If PSGEN_FileExists(sFile) Then Kill sFile
     Else
@@ -4530,13 +3574,6 @@ End Sub
 
 
 Public Function PSGEN_WaitForTask&(ByVal sTask$, ByVal sTitle$, ByVal iHidden%, Optional vTimeout As Variant)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Function PSGEN_WaitForTask
 '
 '                     sTask$             - Task to run
 '                     sTitle$            - Title to use
@@ -4547,14 +3584,9 @@ Public Function PSGEN_WaitForTask&(ByVal sTask$, ByVal sTitle$, ByVal iHidden%, 
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    04 November 1997   First created for DocBlazer
-'
-'                  PURPOSE:   Runs the shell task and waits for it to complete.
+'   Runs the shell task and waits for it to complete.
 '                             If specified will wait vTimeout seconds otherwise
 '                             the wait is infinite.
-'
-'****************************************************************************
-'
 '
 Dim stProc As PROCESS_INFORMATION
 Dim stStart As STARTUPINFO
@@ -4564,9 +3596,7 @@ Dim iStatus%
 Dim frmTmp As Form
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     If IsMissing(vTimeout) Then
         lTimeout = INFINITE
@@ -4578,9 +3608,7 @@ Dim frmTmp As Form
         End If
     End If
 
-    '
     ' Initialize the stStartupInfo structure:
-    '
     Set frmTmp = Screen.ActiveForm
     Call PSGEN_SetFormsEnabled(False)
     stStart.lpTitle = sTitle
@@ -4592,14 +3620,10 @@ Dim frmTmp As Form
     stSecurity.nLength = Len(stSecurity)
     stSecurity.bInheritHandle = 0
     stSecurity.lpSecurityDescriptor = PROCESS_ALL_ACCESS
-    '
     ' Start the shelled application:
-    '
     lRet = CreateProcessA(vbNullString, sTask, stSecurity, 0&, 1&, NORMAL_PRIORITY_CLASS + CREATE_SEPARATE_WOW_VDM, 0&, vbNullString, stStart, stProc)
       
-    '
     ' Wait for the shelled application to finish:
-    '
     lRet = WaitForSingleObject(stProc.hProcess, lTimeout)
     If lRet <> 0 Then Call TerminateProcess(stProc.hProcess, 0&)
     Call CloseHandle(stProc.hProcess)
@@ -4612,13 +3636,6 @@ Dim frmTmp As Form
 End Function
 
 Public Function PSGEN_PollForTask&(ByVal sTask$, ByVal sTitle$, ByVal iHidden%, Optional vTimeout As Variant)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Function PSGEN_PollForTask
 '
 '                     sTask$             - Task to run
 '                     sTitle$            - Title to use
@@ -4629,15 +3646,10 @@ Public Function PSGEN_PollForTask&(ByVal sTask$, ByVal sTitle$, ByVal iHidden%, 
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    04 November 1997   First created for DocBlazer
-'
-'                  PURPOSE:   Runs the shell task and waits for it to complete
+'   Runs the shell task and waits for it to complete
 '                             by polling to see if it is still running.
 '                             If specified will wait vTimeout seconds otherwise
 '                             the wait is infinite.
-'
-'****************************************************************************
-'
 '
 Const POLL_TIMEOUT = 1000
 Dim stProc As PROCESS_INFORMATION
@@ -4647,9 +3659,7 @@ Dim lRet&, lTimeout&, lTmp&, lStartTime&
 Dim iStatus%, iFinished%
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     gbPollForTaskFinish = False
     If IsMissing(vTimeout) Then
@@ -4661,9 +3671,7 @@ Dim iStatus%, iFinished%
             lTimeout = vTimeout
         End If
     End If
-    '
     ' Initialize the stStartupInfo structure:
-    '
     stStart.lpTitle = sTitle
     stStart.cb = Len(stStart)
     If iHidden Then
@@ -4676,14 +3684,10 @@ Dim iStatus%, iFinished%
     'stSecurity.lpSecurityDescriptor = PROCESS_ALL_ACCESS
     stSecurity.lpSecurityDescriptor = Null
     
-    '
     ' Start the shelled application:
-    '
     lRet = CreateProcessA(vbNullString, sTask, stSecurity, 0&, 1&, NORMAL_PRIORITY_CLASS + CREATE_SEPARATE_WOW_VDM, 0&, vbNullString, stStart, stProc)
   
-    '
     ' Wait for the shelled application to finish
-    '
     iFinished = False
     lStartTime = GetTickCount
     Do
@@ -4699,9 +3703,7 @@ Dim iStatus%, iFinished%
         Sleep 200
     Loop Until (lRet = 0) Or iFinished Or gbPollForTaskFinish
     
-    '
     ' Check if the thing has timed out
-    '
     If lRet <> 0 Then
         lRet = WAIT_TIMEOUT
     End If
@@ -4715,13 +3717,6 @@ End Function
 
 
 Public Function PSGEN_GetTempFilename$(Optional ByVal sExtension$ = "")
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 1997
-'
-'****************************************************************************
-'
-'                     NAME:   Function PSGEN_GetTempFilename
 '
 '                             sExtension    - The extension requested
 '
@@ -4729,25 +3724,16 @@ Public Function PSGEN_GetTempFilename$(Optional ByVal sExtension$ = "")
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    04 November 1997   First created for DocBlazer
-'
-'                  PURPOSE:   Creates a temporary unique filename
-'
-'****************************************************************************
-'
+'   Creates a temporary unique filename
 '
 Dim sReturn$
 
-    '
     ' Initialise error vector
     ' Get the temp filename
-    '
     On Error Resume Next
     sReturn = "ps" + Hex(GetTickCount) + IIf(sExtension = "", ".tmp", "." + sExtension)
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetTempFilename = sReturn
 
 End Function
@@ -4756,13 +3742,6 @@ End Function
     
 
 Public Function PSGEN_GetTempPathFilename$(Optional ByVal sExtension$ = "")
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 1997
-'
-'****************************************************************************
-'
-'                     NAME:   Function PSGEN_GetTempPathFilename
 '
 '                             sExtension    - The extension requested
 '
@@ -4770,20 +3749,13 @@ Public Function PSGEN_GetTempPathFilename$(Optional ByVal sExtension$ = "")
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    04 November 1997   First created for DocBlazer
-'
-'                  PURPOSE:   Creates a temporary unique filename in temp path
-'
-'****************************************************************************
-'
+'   Creates a temporary unique filename in temp path
 '
 Dim sReturn$, sFile$
 Dim sTmp As String * 255
 Dim sDir As String * 255
 
-    '
     ' Get the temp filename and clean it up
-    '
     On Error Resume Next
     sTmp = String(255, vbNullChar)
     sDir = String(255, vbNullChar)
@@ -4791,10 +3763,8 @@ Dim sDir As String * 255
     Call GetTempFileName(PSGEN_GetItem(1, vbNullChar, sDir), "ps", 0&, sTmp)
     sReturn = PSGEN_GetItem(1, vbNullChar, sTmp)
 
-    '
     ' If an extension has been provided then kill this file and
     ' create a new one with the required extension
-    '
     If sExtension <> "" Then
         sFile = sReturn
         sReturn = PSGEN_GetItem(1, ".tmp", sReturn) + "." + sExtension
@@ -4802,9 +3772,7 @@ Dim sDir As String * 255
         Name sFile As sReturn
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetTempPathFilename = sReturn
 
 End Function
@@ -4812,44 +3780,26 @@ End Function
 
 
 Public Function PSGEN_GetTempDir$()
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Function PSGEN_GetTempDir
 '
 '
 '                          ) As String
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    04 November 1997   First created for DocBlazer
-'
-'                  PURPOSE:   Returns the system temporary directory
-'
-'****************************************************************************
-'
+'   Returns the system temporary directory
 '
 Dim sReturn$
 Dim sDir As String * 255
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
 
-    '
     ' Get the temp filename and clean it up
-    '
     sDir = String(255, Chr(0))
     Call GetTempPath(Len(sDir), sDir)
     sReturn = PSGEN_GetItem(1, Chr(0), sDir)
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetTempDir = sReturn
 
 End Function
@@ -4861,8 +3811,6 @@ End Function
 Function PSGEN_ConvertTime(ByVal vSource As Variant, ByVal iToNumber%) As Variant
 '***************************************************************************
 '
-'       NAME:           Function PSGEN_ConvertTime  (
-'
 '                       vSource As Variant - Value of time to convert
 '                       iToNumber%         - Boolean True=Convert to long, False=convert to string
 '
@@ -4870,26 +3818,19 @@ Function PSGEN_ConvertTime(ByVal vSource As Variant, ByVal iToNumber%) As Varian
 '
 '       DEPENDENCIES:   None
 '
-'       PURPOSE:        Converts the source into either a long if iToNumber
+'        Converts the source into either a long if iToNumber
 '                       is true, or converts to a string.  The format for
 '                       time as a string is 'hh:mm:ss'.
 '                       If the seconds is not specified then it is assumed
 '                       to be zero.
 '
-'***************************************************************************
-'
-'
 Dim vReturn As Variant
 Dim sSource$
 
-    '
     ' Determine the action
-    '
     If iToNumber Then
         
-        '
         ' Check that the string source is in the correct format
-        '
         sSource = Trim$(vSource)
         If sSource Like "##:##" Then
             sSource = sSource + "00"
@@ -4898,9 +3839,7 @@ Dim sSource$
         End If
         vReturn = Replace(sSource, ":", "")
     Else
-        '
         ' Simply do some divisions to get the numbers
-        '
         sSource = Format$(Val(vSource), "000000")
         vReturn = Left$(sSource, 2) + ":" + Mid$(sSource, 3, 2) + ":" + Right$(sSource, 2)
     End If
@@ -4912,13 +3851,6 @@ End Function
 
 
 Public Function PSGEN_FormLoaded%(frmLookFor As Form)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Function PSGEN_FormLoaded
 '
 '                     frmLookFor   - Form to look for
 '
@@ -4926,20 +3858,13 @@ Public Function PSGEN_FormLoaded%(frmLookFor As Form)
 '
 '             DEPENDENCIES:  NONE
 '
-'     MODIFICATION HISTORY:  Steve O'Hara    26 March 1997   First created for RTE
-'
-'                  PURPOSE:  Determines if the form passsed is loaded in the project.
-'
-'****************************************************************************
-'
+'  Determines if the form passsed is loaded in the project.
 '
 Dim iReturn%
 Dim frmForm As Form
 
 
-    '
     ' Initialise error vector and loop through all the forms in the collection
-    '
     On Error Resume Next
     iReturn = False
     For Each frmForm In Forms
@@ -4949,9 +3874,7 @@ Dim frmForm As Form
         End If
     Next frmForm
 
-    '
     ' Return value to caller
-    '
     PSGEN_FormLoaded = iReturn
 
 End Function
@@ -4959,15 +3882,13 @@ End Function
 Sub PSGEN_SetTopMost(ByVal hWnd&)
 '*OBJS DESC START***********************************************************
 '
-'       NAME:           Sub PSGEN_SetTopMost (
-'
 '                       hWnd As Integer   - Window to make floating
 '
 '                       )
 '
 '       DEPENDENCIES:   SDK User DLL
 '
-'       PURPOSE:        This sub makes the specified window float on top
+'        This sub makes the specified window float on top
 '                       of ll others.
 '
 '*OBJS DESC END*************************************************************
@@ -4979,61 +3900,33 @@ End Sub
 
 
 Public Sub PSGEN_UnderConstruction()
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Sub PSGEN_UnderConstruction
 '
 '
 '             DEPENDENCIES:  NONE
 '
-'     MODIFICATION HISTORY:  Steve O'Hara    26 February 1997   First created for RTE
-'
-'                  PURPOSE:  A simple routine to act as a common ennunciation
+'  A simple routine to act as a common ennunciation
 '                            of the fact that a function in the application
 '                            may be under construction.
 '
-'****************************************************************************
-'
-'
 
-    '
     ' Show a message box telling the user that the system is under construction
-    '
     MsgBox "This facility is currently under construction and so is not available.", vbOKOnly + vbExclamation
 
 End Sub
 
 Public Sub PSGEN_SetFormsEnabled(ByVal iValue%)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Sub PSGEN_SetFormsEnabled
 '
 '                     iValue%            - Flag indicating whether to enable or disable the forms
 '
 '             DEPENDENCIES:  NONE
 '
-'     MODIFICATION HISTORY:  Steve O'Hara    21 February 1997   First created for RTE
-'
-'                  PURPOSE:  Enable/Disable all currently loaded forms within
+'  Enable/Disable all currently loaded forms within
 '                            the app
-'
-'****************************************************************************
-'
 '
 
 Dim frmForm As Form
 
-    '
     ' Set the correct mouse indicator
-    '
     On Error Resume Next
     If Not App.UnattendedApp Then
         If iValue Then
@@ -5042,9 +3935,7 @@ Dim frmForm As Form
             Screen.MousePointer = vbHourglass
         End If
     
-        '
         ' Now disable/enable all the forms
-        '
         For Each frmForm In Forms
             Err = 0
 '            If Not frmForm.MDIChild Then
@@ -5057,13 +3948,6 @@ End Sub
 
 
 Function PSGEN_TrimQuoted$(ByVal sInput$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Function PSGEN_TrimQuoted
 '
 '                         sInput$      - The string to work on
 '
@@ -5072,13 +3956,8 @@ Function PSGEN_TrimQuoted$(ByVal sInput$)
 '
 '             DEPENDENCIES:  NONE
 '
-'     MODIFICATION HISTORY:  Steve O'Hara    11th March 1997   First created for RTE from Desktop
-'
-'                  PURPOSE:  This routine removes leading and trailing blanks
+'  This routine removes leading and trailing blanks
 '                            within quoted strings
-'
-'****************************************************************************
-'
 '
 Dim bOutput%
 Dim bInQuote%
@@ -5086,23 +3965,17 @@ Dim sChar$
 Dim sOutput$
 Dim iCharPos%
     
-    '
     ' First, remove leading and trailing blanks.
-    '
     sInput = Trim$(sInput)
     sInput = Replace(sInput, "''", "~~")
     bInQuote = False
     sOutput = ""
     
-    '
     ' Remove leading blanks
-    '
     For iCharPos = 1 To Len(sInput)
         sChar = Mid$(sInput, iCharPos, 1)
         
-        '
         ' Set the flag that indicates whether or not we are within quotes.
-        '
         If sChar = "'" Then
             bInQuote = Not bInQuote
         End If
@@ -5112,18 +3985,14 @@ Dim iCharPos%
         
     Next iCharPos
 
-    '
     ' Remove trailing blanks
-    '
     sInput = sOutput
     sOutput = ""
     bInQuote = False
     For iCharPos = Len(sInput) To 1 Step -1
         sChar = Mid$(sInput, iCharPos, 1)
         
-        '
         ' Set the flag that indicates whether or not we are within quotes.
-        '
         If sChar = "'" Then
             bInQuote = Not bInQuote
         End If
@@ -5140,13 +4009,6 @@ End Function
 
 
 Function PSGEN_Trim$(ByVal sInput$, Optional ByVal sSep$ = vbCrLf)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Function PSGEN_Trim
 '
 '                         sInput$      - The string to work on
 '                         sSEp$        - Character sequence to trim off
@@ -5156,18 +4018,11 @@ Function PSGEN_Trim$(ByVal sInput$, Optional ByVal sSep$ = vbCrLf)
 '
 '             DEPENDENCIES:  NONE
 '
-'     MODIFICATION HISTORY:  Steve O'Hara    11th March 1997   First created for RTE from Desktop
-'
-'                  PURPOSE:  This routine removes leading and trailing sSep
-'
-'****************************************************************************
-'
+'  This routine removes leading and trailing sSep
 '
 Dim sOutput$
     
-    '
     ' First, remove leading and trailing blanks.
-    '
     On Error Resume Next
     sOutput = Trim$(sInput)
     If sOutput <> "" And sSep <> "" Then
@@ -5186,13 +4041,6 @@ End Function
 
 
 Function PSGEN_TrimTrail$(ByVal sInput$, Optional ByVal sSep$ = vbCrLf)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Function PSGEN_TrimTrail
 '
 '                         sInput$      - The string to work on
 '                         sSEp$        - Character sequence to trim off
@@ -5202,18 +4050,11 @@ Function PSGEN_TrimTrail$(ByVal sInput$, Optional ByVal sSep$ = vbCrLf)
 '
 '             DEPENDENCIES:  NONE
 '
-'     MODIFICATION HISTORY:  Steve O'Hara    11th March 1997   First created for RTE from Desktop
-'
-'                  PURPOSE:  This routine removes trailing sSep
-'
-'****************************************************************************
-'
+'  This routine removes trailing sSep
 '
 Dim sOutput$
     
-    '
     ' First, remove trailing blanks.
-    '
     On Error Resume Next
     sOutput = RTrim$(sInput)
     If sOutput <> "" And sSep <> "" Then
@@ -5228,13 +4069,6 @@ End Function
 
 
 Function PSGEN_RemoveBrackets$(ByVal sInput$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Function PSGEN_RemoveBrackets
 '
 '                       sInput&          - The string to work on
 '
@@ -5243,38 +4077,25 @@ Function PSGEN_RemoveBrackets$(ByVal sInput$)
 '
 '             DEPENDENCIES:  NONE
 '
-'     MODIFICATION HISTORY:  Steve O'Hara    12th March 1997   First created for RTE from Desktop
-'
-'                  PURPOSE:  This routine removes brackets that are not contained
+'  This routine removes brackets that are not contained
 '                            within single quotes.
-'
-'****************************************************************************
-'
 '
 Dim bInQuote%
 Dim sChar$
 Dim sOutput$
 Dim iCharPos%
     
-    '
     '   First, remove leading and trailing blanks.
-    '
     sInput = Trim$(sInput)
     
-    '
     '   Convert multiple blanks to a single one.
-    '
     For iCharPos = 1 To Len(sInput)
         sChar = Mid$(sInput, iCharPos, 1)
         
-        '
         ' Set the flag that indicates whether or not we are within quotes.
-        '
         If sChar = "'" Then bInQuote = Not bInQuote
         
-        '
         ' Add the character to the output string.
-        '
         If bInQuote Or ((sChar <> "(") And (sChar <> ")")) Then
             sOutput = sOutput + sChar
         End If
@@ -5288,13 +4109,6 @@ End Function
 
 
 Function PSGEN_SqueezeNonQuoted$(ByVal sInput$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Function PSGEN_SqueezeNonQuoted
 '
 '                       sInput&          - The string to squeeze
 '                          ) As String   - Modified string
@@ -5302,40 +4116,27 @@ Function PSGEN_SqueezeNonQuoted$(ByVal sInput$)
 '
 '             DEPENDENCIES:  NONE
 '
-'     MODIFICATION HISTORY:  Steve O'Hara    11th March 1997   First created for RTE from Desktop
-'
-'                  PURPOSE:  This routine removes leading and trailing blanks
+'  This routine removes leading and trailing blanks
 '                            and converts multiple contiguous internal blanks to
 '                            a single blank. It retains multiple blanks within
 '                            single quotes.
-'
-'****************************************************************************
-'
 '
 Dim bInQuote%
 Dim sChar$
 Dim sOutput$
 Dim iCharPos%
     
-    '
     '   First, remove leading and trailing blanks.
-    '
     sInput = Trim$(sInput)
     
-    '
     '   Convert multiple blanks to a single one.
-    '
     For iCharPos = 1 To Len(sInput)
         sChar = Mid$(sInput, iCharPos, 1)
         
-        '
         ' Set the flag that indicates whether or not we are within quotes.
-        '
         If sChar = "'" Then bInQuote = Not bInQuote
         
-        '
         ' Add the character to the output string.
-        '
         If bInQuote Or Not (sChar = " " And Mid$(sInput, iCharPos + 1, 1) = " ") Then
             sOutput = sOutput + sChar
         End If
@@ -5352,10 +4153,8 @@ End Function
 Sub PSGEN_SetWindowUpdate(ByVal hWnd&, ByVal iUpdate%)
     
     ' TITLE:    BDGN_SetWindowUpdate
-    '
-    ' PURPOSE:  To turn off/on updating for a window to minimize flicker when items
+    '  To turn off/on updating for a window to minimize flicker when items
     '           in the window are being modified/added/removed etc.
-    '
     ' USAGE:    BDGN_SetWindowUpdate hWnd, bReadOnly
     '
     '    where:
@@ -5372,26 +4171,14 @@ End Sub
 
 
 Public Sub PSGEN_TilePicture(ByVal lWindow&, ByVal lPicture&, Optional ByVal lDC&)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Sub GRUGEN_TilePicture
 '
 '                     lWindow&           - Destination window
 '                     lPicture&          - Handle of picture
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    16 September 1997   First created for steve
-'
-'                  PURPOSE:   Tiles a picture across the whole client area of
+'   Tiles a picture across the whole client area of
 '                             the specified window.
-'
-'****************************************************************************
-'
 '
 Dim stBitMap As BITMAP
 Dim lDCSrc&, lDCDest&
@@ -5401,14 +4188,10 @@ Dim lRows&, lCols&, lX&, lY&
 Dim lRowCnt&, lColCnt&
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
 
-    '
     ' Get destination rectangle and device context
-    '
     Call GetClientRect(lWindow, stRect)
     If lDC = 0 Then
         lDCDest = GetDC(lWindow)
@@ -5416,22 +4199,16 @@ Dim lRowCnt&, lColCnt&
         lDCDest = lDC
     End If
     
-    '
     ' Create source device context and select the bitmap into it
-    '
     lDCSrc = CreateCompatibleDC(lDCDest)
     lBitmapTmp = SelectObject(lDCSrc, lPicture)
     
-    '
     ' Get the size info about the source bitmap
-    '
     Call GetObjectA(lPicture, Len(stBitMap), stBitMap)
     lRows = stRect.Right \ stBitMap.bmWidth
     lCols = stRect.Bottom \ stBitMap.bmHeight
     
-    '
     ' Copy the bitmap across the whole window
-    '
     For lRowCnt = 0 To lRows
         lX = lRowCnt * stBitMap.bmWidth
         For lColCnt = 0 To lCols
@@ -5440,9 +4217,7 @@ Dim lRowCnt&, lColCnt&
         Next lColCnt
     Next lRowCnt
     
-    '
     ' Clean up after ourselves
-    '
     Call SelectObject(lDCSrc, lBitmapTmp)
     Call DeleteDC(lDCSrc)
     Call ReleaseDC(lWindow, lDCDest)
@@ -5455,8 +4230,6 @@ End Sub
 Function PSGEN_GetNoOfItems&(ByVal sSep$, ByVal sSource$)
 '***************************************************************************
 '
-'       NAME:           Function PSGEN_GetNoOfItems  (
-'
 '                       sSep As String     - Item delimiters
 '                       sSource As String  - String to search
 '
@@ -5464,24 +4237,17 @@ Function PSGEN_GetNoOfItems&(ByVal sSep$, ByVal sSource$)
 '
 '       DEPENDENCIES:   None
 '
-'       PURPOSE:        Returns the item string delimited by the seperator
+'        Returns the item string delimited by the seperator
 '                       characters.
-'
-'***************************************************************************
-'
 '
 Dim lCnt&
 
 
-    '
     ' Use the VB array functions
-    '
     lCnt = UBound(Split(sSource, sSep, -1, vbTextCompare)) + 1
     Err.Clear
 
-    '
     ' Return the modified value
-    '
     PSGEN_GetNoOfItems = lCnt
 
 
@@ -5489,57 +4255,37 @@ End Function
 
 
 Public Sub PSGEN_TranslateForm(sTLTFilename$, frmForm As Form)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Sub PSGEN_TranslateForm
 '
 '                     sTLTFilename$        - Name of the TLT file
 '                     frmForm As Form      - Form to translate
 '
 '             DEPENDENCIES:  NONE
 '
-'     MODIFICATION HISTORY:  Steve O'Hara    04 February 1997   First created for RTE
-'
-'                  PURPOSE:  Translates the form using the
+'  Translates the form using the
 '                            project TLT file and the tag
 '                            property of the form for the section
-'
-'****************************************************************************
-'
 '
 
 Dim ctlControl As Object
 Dim sTmp$
 
-    '
     ' Only do something if the tag property of the form contains a value
-    '
     If Trim$(frmForm.Tag) <> "" Then
         
-        '
         ' Loop round all the controls on the form looking for
         ' ones that will have a caption property
-        '
         On Error Resume Next
         For Each ctlControl In frmForm
             
-            '
             ' Do a dummy read to see if we get an error about the
             ' fact that a caption property is not supported
-            '
             sTmp = ctlControl.Caption
             If Err = 0 Then
                 ctlControl.Caption = PSGEN_GetTranslated(sTLTFilename, frmForm.Tag, ctlControl.Caption)
             End If
             Err = 0
             
-            '
             ' Same for any tool tips
-            '
             sTmp = ctlControl.ToolTipText
             If Err = 0 Then
                 ctlControl.ToolTipText = PSGEN_GetTranslated(sTLTFilename, frmForm.Tag, ctlControl.ToolTipText)
@@ -5551,13 +4297,6 @@ Dim sTmp$
 End Sub
 
 Private Function Z_GetINIStringSequence$(ByVal sSection$, ByVal sItem$, ByVal sDefault$, ByVal sFilename$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Function Z_GetINIStringSequence
 '
 '                     sSection$          - Section name in INI file
 '                     sItem$             - Item within the section
@@ -5568,17 +4307,12 @@ Private Function Z_GetINIStringSequence$(ByVal sSection$, ByVal sItem$, ByVal sD
 '
 '             DEPENDENCIES:  frmLibraries!lstLibraries
 '
-'     MODIFICATION HISTORY:  Mark Travis 16 June 1997   First created for RTE
-'
-'                  PURPOSE: Called from PSGEN_GetINIString when no entry was found.
+' Called from PSGEN_GetINIString when no entry was found.
 '                           Some stored INI values exceed the 256 character limit. They
 '                           are therefore stored as multiple entries in the ini
 '                           file. The item entry is stored as a sequence of entries
 '                           in which the original entry has a number added to the
 '                           end so the entry name has the syntax 'entry_1'
-'
-'****************************************************************************
-'
 '
 Const PSGEN_DEFAULT_STRING = ""
 
@@ -5608,9 +4342,7 @@ Dim iEntry%, iLength%
     Loop Until (iLength = 0)
     
     If (sReturn = "") Then
-        '
         ' No entry was found so return the default value
-        '
         sReturn = sDefault
     End If
     
@@ -5620,13 +4352,6 @@ End Function
 
 
 Private Function Z_PutINIStringSequence%(ByVal sSection$, ByVal sItem$, ByVal sValue$, ByVal sFilename$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Function Z_GetINIStringSequence
 '
 '                     sSection$          - Section name in INI file
 '                     sItem$             - Item within the section
@@ -5637,17 +4362,12 @@ Private Function Z_PutINIStringSequence%(ByVal sSection$, ByVal sItem$, ByVal sV
 '
 '             DEPENDENCIES:  frmLibraries!lstLibraries
 '
-'     MODIFICATION HISTORY:  Mark Travis 16 June 1997   First created for RTE
-'
-'                  PURPOSE: Called from PSGEN_PutINIString when the value to be stored
+' Called from PSGEN_PutINIString when the value to be stored
 '                           exceeds the 256 character limit. The value is therefore
 '                           stored as multiple entries in the ini file.
 '                           The item entry is stored as a sequence of entries
 '                           in which the original entry has a number added to the
 '                           end so the entry name has the syntax 'entry_1'
-'
-'****************************************************************************
-'
 '
 Const PSGEN_DEFAULT_STRING = ""
 Const WRITE_WIDTH = 200
@@ -5656,9 +4376,7 @@ Dim sSubValue$, sEntry$
 Dim iEntry%, iLength%, iTmp%
 Dim sTmp As String * 255
 
-    '
     ' Write the value to the ini file
-    '
     On Error Resume Next
     iEntry = 0
     If sValue <> "" Then
@@ -5666,27 +4384,21 @@ Dim sTmp As String * 255
             sEntry = sItem + "_" + Format$(iEntry)
             sSubValue = Mid$(sValue, iEntry * WRITE_WIDTH + 1, IIf((iEntry + 1) * WRITE_WIDTH > Len(sValue), Len(sValue) - (iEntry * WRITE_WIDTH), WRITE_WIDTH))
             
-            '
             ' Add text to end and start if start or end with a space or single quote
             ' In these cases the characters were getting 'lost'
-            '
             If Right(sSubValue, 1) = "'" Or Right(sSubValue, 1) = " " Then sSubValue = sSubValue + "@@@@"
             If Left(sSubValue, 1) = "'" Or Left(sSubValue, 1) = " " Then sSubValue = "@@@@" + sSubValue
             iTmp = WritePrivateProfileString(sSection, sEntry, sSubValue, sFilename)
             If iTmp <> 0 Then iEntry = iEntry + 1
         Loop Until ((iTmp = 0) Or (Len(sSubValue) < WRITE_WIDTH))
         
-        '
         ' Ensure there isn't an entry for when the entry was less than 256 characters
-        '
         If (GetPrivateProfileString(sSection, sItem, PSGEN_DEFAULT_STRING, sTmp, 255, sFilename) > 0) Then
             Call WritePrivateProfileString(sSection, sItem, 0&, sFilename)
         End If
     End If
     
-    '
     ' Delete all other entries that remain from previously stored values
-    '
     Do
         sEntry = sItem + "_" + Format$(iEntry)
         iLength = GetPrivateProfileString(sSection, sEntry, PSGEN_DEFAULT_STRING, sTmp, 255, sFilename)
@@ -5702,15 +4414,13 @@ End Function
 Public Function PSGEN_FindFile$(ByVal sFileToFind$)
 '***************************************************************************
 '
-'       NAME:           Sub PSGEN_FindFile (
-'
 '                       sFileToFind As String   - File to look for
 '
 '                       ) As String
 '
 '       DEPENDENCIES:   NONE
 '
-'       PURPOSE:        This function attempts to locate the file given
+'        This function attempts to locate the file given
 '                       by sFileToFind.  It first looks in the working
 '                       directory, then the directory in which the application
 '                       started and finally the Windows directory.  If it
@@ -5725,33 +4435,25 @@ Dim sFilename$
 Dim sWindowsDir As String * 127
 Dim iTmp%
 
-    '
     ' First check if it is in the current directory
-    '
     PSGEN_FindFile = ""
     On Error Resume Next
             
-    '
     ' Try the current directory
-    '
     If Right$(CurDir$, 1) = "\" Then sFilename = CurDir$ + sFileToFind Else sFilename = CurDir$ + "\" + sFileToFind
     sTmp = Dir$(sFilename)
     If (sTmp <> "") And (Err = 0) Then
         PSGEN_FindFile = sFilename
     Else
         
-        '
         ' Now try the application directory
-        '
         If Right$(App.path, 1) = "\" Then sFilename = App.path + sFileToFind Else sFilename = App.path + "\" + sFileToFind
         sTmp = Dir$(sFilename)
         If (sTmp <> "") And (Err = 0) Then
             PSGEN_FindFile = sFilename
         Else
             
-            '
             ' Now try the windows directory
-            '
             sWindowsDir = ""
             iTmp = GetWindowsDirectory(sWindowsDir, Len(sWindowsDir))
             sFilename = Trim$(sWindowsDir)
@@ -5771,13 +4473,11 @@ End Function
 Public Function PSGEN_SystemDirectory$()
 '***************************************************************************
 '
-'       NAME:           Sub PSGEN_SystemDirectory (
-'
 '                       ) As String
 '
 '       DEPENDENCIES:   NONE
 '
-'       PURPOSE:        This function returns the system directory
+'        This function returns the system directory
 '
 '***************************************************************************
 '
@@ -5785,9 +4485,7 @@ Public Function PSGEN_SystemDirectory$()
 Dim iCnt%
 Dim sWindowsDir As String * 255
 
-    '
     ' Call the API to get the directory
-    '
     On Error Resume Next
     sWindowsDir = ""
     iCnt = GetSystemDirectory(sWindowsDir, Len(sWindowsDir))
@@ -5799,13 +4497,6 @@ End Function
 
 
 Public Function PSGEN_GetTranslated$(ByVal sTLTFilename$, ByVal sSection$, ByVal sValue$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Function PSGEN_GetTranslated
 '
 '                     sTLTFilename$      - Name of the TLT file
 '                     sSection$          - TLT Section for translation items
@@ -5815,20 +4506,13 @@ Public Function PSGEN_GetTranslated$(ByVal sTLTFilename$, ByVal sSection$, ByVal
 '
 '             DEPENDENCIES:  NONE
 '
-'     MODIFICATION HISTORY:  Steve O'Hara    04 February 1997   First created for RTE
-'
-'                  PURPOSE:  Returns the translated string
+'  Returns the translated string
 '                            from within the TLT section defined
-'
-'****************************************************************************
-'
 '
 Dim sReturn As String * 255
 Dim iTmp%
 
-    '
     ' Check the value of the TLT file and use a default if empty
-    '
     On Error Resume Next
     iTmp = GetPrivateProfileString(sSection, sValue, sValue, sReturn, Len(sReturn), sTLTFilename)
     If iTmp > 1 Then
@@ -5840,13 +4524,6 @@ Dim iTmp%
 End Function
 
 Public Sub PSGEN_PutINIString(ByVal sIniFileName$, ByVal sSection$, ByVal sItem$, ByVal sValue$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Function PSGEN_PutINIString
 '
 '                     sINIFilename$      - INI file to use
 '                     sSection$          - Section name in INI file
@@ -5855,24 +4532,17 @@ Public Sub PSGEN_PutINIString(ByVal sIniFileName$, ByVal sSection$, ByVal sItem$
 '
 '             DEPENDENCIES:  frmLibraries!lstLibraries
 '
-'     MODIFICATION HISTORY:  Steve O'Hara    04 February 1997   First created for RTE
-'
-'                  PURPOSE:  Sets the item value in the specified section in the
+'  Sets the item value in the specified section in the
 '                            default INI file for the current library.
 '                            If the Section name starts with '*' then the library
 '                            is not used as a qulifier, the Section name is used
 '                            explicitly.
 '
-'****************************************************************************
-'
-'
 Dim iTmp%
 Dim sSectionHeader$
 Dim lMutex&
 
-    '
     ' Check the value of the INI file and use a default if empty
-    '
     On Error Resume Next
     lMutex = PSGEN_StartMutex(sIniFileName)
     sSectionHeader = Trim$(sSection)
@@ -5897,10 +4567,8 @@ Dim lMutex&
     End If
     Call PSGEN_EndMutex(lMutex)
     
-    '
     ' Check to see that the INI file write worked Ok, sometimes it will fail
     ' because it is set read-only.
-    '
     If iTmp = 0 Then
         If App.StartMode = vbSModeStandalone Then
             MsgBox "Write to INI file (" + sIniFileName + ") failed", vbOKOnly + vbExclamation
@@ -5913,13 +4581,6 @@ End Sub
 
 
 Public Function PSGEN_GetINIString$(ByVal sIniFileName$, ByVal sSection$, ByVal sItem$, ByVal sDefault$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:  Function PSGEN_GetINIString
 '
 '                     sINIFilename$      - INI file to use
 '                     sSection$          - Section name in INI file
@@ -5930,17 +4591,12 @@ Public Function PSGEN_GetINIString$(ByVal sIniFileName$, ByVal sSection$, ByVal 
 '
 '             DEPENDENCIES:  frmLibraries!lstLibraries
 '
-'     MODIFICATION HISTORY:  Steve O'Hara    04 February 1997   First created for RTE
-'
-'                  PURPOSE:  Retrieves the item value from the specified section in the
+'  Retrieves the item value from the specified section in the
 '                            default INI file for the current open library.  If the
 '                            item is not present, then the default value is returned
 '                            If the Section name starts with '*' then the library
 '                            is not used as a qulifier, the Section name is used
 '                            explicitly.
-'
-'****************************************************************************
-'
 '
 Const PSGEN_DEFAULT_STRING = ""
 Dim sValue As String * 32000
@@ -5948,9 +4604,7 @@ Dim sSectionHeader$, sReturn$, sTmp$
 Dim iTmp%
 Dim lMutex&
 
-    '
     ' Check the value of the INI file and use a default if empty
-    '
     On Error Resume Next
     lMutex = PSGEN_StartMutex(sIniFileName)
     sSectionHeader = Trim$(sSection)
@@ -5978,13 +4632,6 @@ Dim lMutex&
 End Function
 
 Public Function PSGEN_InsertTextIntoFile%(ByVal sText$, ByVal sIntoFile$, ByVal sHere$, sError$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Function PSGEN_InsertTextIntoFile
 '
 '                     sText$              - Text to insert
 '                     sIntoFile$          - File to insert into
@@ -5995,50 +4642,35 @@ Public Function PSGEN_InsertTextIntoFile%(ByVal sText$, ByVal sIntoFile$, ByVal 
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    3rd March 1998     First created for DocBlazer
-'
-'                  PURPOSE:   Inserts sText into sIntoFile replacing the
+'   Inserts sText into sIntoFile replacing the
 '                             string sHere. Returns any errors encountered.
-'
-'****************************************************************************
-'
 '
 Dim iReturn%, iOutput%
 Dim iIntoFile%
 Dim sOutput$, sLine$, sTmp$
 
 
-    '
     ' Initialise error vector and file handle
-    '
     On Error GoTo InsertFileError
     sError = ""
     iReturn = False
         
-    '
     ' Create a temporary output file
-    '
     iOutput = FreeFile
     sOutput = PSGEN_GetTempPathFilename()
     Open sOutput For Output Access Write As #iOutput
     iIntoFile = FreeFile
     Open sIntoFile For Input Access Read As #iIntoFile
 
-    '
     ' Open all the files Ok so read everything up to the marker
     ' into the output file
-    '
     While Not EOF(iIntoFile)
         Line Input #iIntoFile, sLine
         
-        '
         ' Look to see if the marker is in the line
-        '
         If InStr(1, sLine, sHere, vbTextCompare) > 0 Then
             
-            '
             ' Now output the whole of the insertion file
-            '
             Print #iOutput, PSGEN_GetItem(1, sHere, sLine);
             Print #iOutput, sText;
             Print #iOutput, PSGEN_GetItem(2, sHere, sLine)
@@ -6049,15 +4681,11 @@ Dim sOutput$, sLine$, sTmp$
     Close iOutput
     Close iIntoFile
     
-    '
     ' Move the output file to overwrite the old one
-    '
     If PSGEN_FileExists(sIntoFile) Then Kill sIntoFile
     Name sOutput As sIntoFile
     
-    '
     ' Return value to caller
-    '
     PSGEN_InsertTextIntoFile = True
     Exit Function
     
@@ -6071,13 +4699,6 @@ InsertFileError:
 End Function
 
 Public Function PSGEN_InsertTextFile%(ByVal sFromFile$, ByVal sIntoFile$, ByVal sHere$, sError$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME:   Function PSGEN_InsertTextFile
 '
 '                     sFromFile$          - File to insert
 '                     sIntoFile$          - File to insert into
@@ -6088,50 +4709,35 @@ Public Function PSGEN_InsertTextFile%(ByVal sFromFile$, ByVal sIntoFile$, ByVal 
 '
 '             DEPENDENCIES:   NONE
 '
-'     MODIFICATION HISTORY:   Steve O'Hara    3rd March 1998     First created for DocBlazer
-'
-'                  PURPOSE:   Inserts sFromFile into sIntoFile replacing the
+'   Inserts sFromFile into sIntoFile replacing the
 '                             string sHere. Returns any errors encountered.
-'
-'****************************************************************************
-'
 '
 Dim iReturn%, iOutput%, iFirstLine%
 Dim iFromFile%, iIntoFile%
 Dim sOutput$, sLine$, sTmp$
 
 
-    '
     ' Initialise error vector and file handle
-    '
     On Error GoTo InsertFileError
     sError = ""
     iReturn = False
         
-    '
     ' Create a temporary output file to act as the output
-    '
     iOutput = FreeFile
     sOutput = PSGEN_GetTempPathFilename()
     Open sOutput For Output Access Write As #iOutput
     iIntoFile = FreeFile
     Open sIntoFile For Input Access Read As #iIntoFile
 
-    '
     ' Open all the files Ok so read everything up to the marker
     ' into the output file
-    '
     While Not EOF(iIntoFile)
         Line Input #iIntoFile, sLine
         
-        '
         ' Look to see if the marker is in the line
-        '
         If InStr(1, sLine, sHere, vbTextCompare) > 0 Then
             
-            '
             ' Now output the whole of the insertion file
-            '
             Print #iOutput, PSGEN_GetItem(1, sHere, sLine);
             iFromFile = FreeFile
             Open sFromFile For Input Access Read As #iFromFile
@@ -6151,15 +4757,11 @@ Dim sOutput$, sLine$, sTmp$
     Close iOutput
     Close iIntoFile
     
-    '
     ' Move the output file to overwrite the old one
-    '
     If PSGEN_FileExists(sIntoFile) Then Kill sIntoFile
     Name sOutput As sIntoFile
     
-    '
     ' Return value to caller
-    '
     PSGEN_InsertTextFile = True
     Exit Function
     
@@ -6175,13 +4777,6 @@ End Function
 
 
 Public Function Z_FolderCallback&(ByVal lHandle&, ByVal lMsg&, ByVal lParam&, ByVal lData&)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_FolderCallback
 '
 '                     lHandle&           - Dialog handle
 '                     lMsg&              - Message ID
@@ -6190,39 +4785,26 @@ Public Function Z_FolderCallback&(ByVal lHandle&, ByVal lMsg&, ByVal lParam&, By
 '
 '                          ) As Integer
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    27 March 2000   First created for PSDeployment
-'
-'                  PURPOSE: This is called from the shell folder selection
+' This is called from the shell folder selection
 '                           dialog when it is initialised. It is Z_ but public
 '                           because it is called from an external DLL and so has
 '                           to be public but shouldn't be called by anyone else
 '
-'****************************************************************************
-'
-'
 Dim lReturn&, lTmp&
 Dim sTmp$
 
-    '
     ' Determine what it is we're mean't to do
-    '
     On Error Resume Next
     Select Case lMsg
         
-        '
         ' Set the first directory
-        '
         Case BFFM_INITIALIZED
             If Trim$(msBrowseInitDir) <> "" Then
                 sTmp = StrConv(msBrowseInitDir, vbUnicode)
                 Call SendMessage(lHandle, BFFM_SETSELECTION, 1, ByVal sTmp)
             End If
 
-        '
         ' Track the selection
-        '
         Case BFFM_SELCHANGED
             sTmp = String$(MAX_PATH, 0)
             Call SHGetPathFromIDList(ByVal lParam, ByVal sTmp)
@@ -6232,44 +4814,26 @@ Dim sTmp$
             
     End Select
     
-    '
     ' Return value to caller
-    '
     Z_FolderCallback = 0
 
 End Function
 
 
 Public Function PSGEN_AddressOf&(ByVal lAddress&)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_AddressOf
 '
 '                     lAddress&          - Address of function
 '
 '                          ) As Long
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    27 March 2000   First created for PSDeployment
-'
-'                  PURPOSE: Returns the address of a function by returning
+' Returns the address of a function by returning
 '                           the parameter passed.
 '                           The function should be called with the AddressOf
 '                           function
 '                           e.g. PSGEN_AddressOf(addressof MyFunction)
 '
-'****************************************************************************
-'
-'
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     PSGEN_AddressOf = lAddress
 
@@ -6277,34 +4841,18 @@ End Function
 
 
 Public Function PSGEN_GetControl(ByVal frmForm As Form, ByVal sDataField$) As Control
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetControl
 '
 '                     frmForm As Form           - Form to look through
 '                     sDataField$               - Field name
 '
 '                          ) As Control
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    02 March 2000   First created for ConScriptConsole
-'
-'                  PURPOSE: Returns the control with the matching data field
-'
-'****************************************************************************
-'
+' Returns the control with the matching data field
 '
 Dim ctlReturn As Object
 Dim objTmp As Object
 
-    '
     ' Loop round all the controls on the form
-    '
     On Error Resume Next
     For Each objTmp In frmForm.Controls
         If StrComp(objTmp.DataField, sDataField, vbTextCompare) = 0 Then
@@ -6316,9 +4864,7 @@ Dim objTmp As Object
         Err.Clear
     Next objTmp
 
-    '
     ' Return value to caller
-    '
     Set PSGEN_GetControl = ctlReturn
 
 End Function
@@ -6328,8 +4874,6 @@ End Function
 Function PSGEN_GetItem$(ByVal iItem%, ByVal sSep$, ByVal sSource$)
 '*OBJS DESC START***********************************************************
 '
-'       NAME:           Function PSGEN_GetItem  (
-'
 '                       iItem As Integer   - Item number to get
 '                       sSep As String     - Item delimiters
 '                       sSource As String  - String to search
@@ -6338,7 +4882,7 @@ Function PSGEN_GetItem$(ByVal iItem%, ByVal sSep$, ByVal sSource$)
 '
 '       DEPENDENCIES:   None
 '
-'       PURPOSE:        Returns the item string delimited by the seperator
+'        Returns the item string delimited by the seperator
 '                       characters.
 '
 '*OBJS DESC END*************************************************************
@@ -6348,9 +4892,7 @@ Dim sOutput$
 Dim iStart%, iFound%, iCnt%
 
 
-    '
     ' Loop until we have got to the end of the string or the item number
-    '
     On Error Resume Next
     sOutput = ""
     iStart = 1
@@ -6359,9 +4901,7 @@ Dim iStart%, iFound%, iCnt%
         iFound = InStr(iStart, sSource, sSep)
         If iFound <> 0 Then
             
-            '
             ' Have we found the item number we're interested in
-            '
             iCnt = iCnt + 1
             If iCnt = iItem Then
                 sOutput = Mid$(sSource, iStart, iFound - iStart)
@@ -6371,10 +4911,8 @@ Dim iStart%, iFound%, iCnt%
             End If
         Else
 
-            '
             ' Nothing found so either return nothing or the whole thing
             ' if this is the first item we're looking for
-            '
             If (iCnt = 0) And (iItem = 1) Then
                 sOutput = sSource
             ElseIf iCnt = iItem - 1 Then
@@ -6386,48 +4924,30 @@ Dim iStart%, iFound%, iCnt%
 
     Loop Until iFound = 0
 
-    '
     ' Return the modified value
-    '
     PSGEN_GetItem = sOutput
 
 End Function
 
 
 Public Function PSGEN_GetFileAttributes$(ByVal sFile$, ByVal bVerbose As Boolean)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetFileAttributes
 '
 '                     sFile$             - File to convert
 '                     bVerbose           - True for full listing
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    12 June 2000   First created for BikeSwap
-'
-'                  PURPOSE: Returns information about the given image file.
+' Returns information about the given image file.
 '                           This function uses the ImageMagick set of
 '                           utilities and so expects the neccersary DLLs and
 '                           EXEs to be in the path.
 '                           When this is used on Win9x the system doesn't return
 '                           the single line non-verbose value.
 '
-'****************************************************************************
-'
-'
 Dim sReturn$, sFeedback$, sCommand$
 Dim sError$, sBatch$, sCmd$, sPath$
     
-    '
     ' Build the required command line
-    '
     On Error Resume Next
     sPath = Environ(PSGEN_IMAGEMAGICK)
     If sPath = "" Then
@@ -6445,9 +4965,7 @@ Dim sError$, sBatch$, sCmd$, sPath$
             sCmd = "command.com /c " + sBatch
         End If
     
-        '
         ' Run the command and gather the output
-        '
         If PSGEN_WaitForTask(sCmd, "Getting information for " + sFile, True, 20000) <> 0 Then
             Kill sReturn
             Call PSGEN_ReadTextFile(sFeedback, sCommand, sError)
@@ -6457,9 +4975,7 @@ Dim sError$, sBatch$, sCmd$, sPath$
                 Err.Raise vbObjectError + PSGEN_ERROR_BASE, "PSGEN_GetFileAttributes", sCommand
             End If
         Else
-            '
             ' Check that there was some feedback
-            '
             Call PSGEN_ReadTextFile(sFeedback, sReturn, sError)
             If sReturn = "" Then
                 Err.Raise vbObjectError + PSGEN_ERROR_BASE, "PSGEN_GetFileAttributes", "No feedback produced"
@@ -6469,56 +4985,34 @@ Dim sError$, sBatch$, sCmd$, sPath$
         Kill sBatch
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetFileAttributes = sReturn
 
 End Function
 
 
 Public Function PSGEN_GetLoginUsername$()
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetLoginUsername
 '
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    06 April 2000   First created for PivotalDesktop
-'
-'                  PURPOSE: Returns the username of the currently logged in
+' Returns the username of the currently logged in
 '                           user from the machine
-'
-'****************************************************************************
-'
 '
 Const MAX_LEN = 255
 Dim sReturn$
 Dim lLength&
 
-    '
     ' Initialise the return variable
-    '
     On Error Resume Next
     sReturn = String(MAX_LEN, vbNullChar)
     lLength = MAX_LEN
     
-    '
     ' Get the username and cut it down to the actual value
-    '
     Call GetUserName(sReturn, lLength)
     sReturn = PSGEN_GetItem(1, vbNullChar, sReturn)
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetLoginUsername = sReturn
 
 End Function
@@ -6526,46 +5020,26 @@ End Function
 
 
 Public Function PSGEN_GetComputerName$()
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetComputerName
 '
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    06 April 2000   First created for PivotalDesktop
-'
-'                  PURPOSE: Returns the name of the machine
-'
-'****************************************************************************
-'
+' Returns the name of the machine
 '
 Const MAX_LEN = 255
 Dim sReturn$
 Dim lLength&
 
-    '
     ' Initialise the return variable
-    '
     On Error Resume Next
     sReturn = String(MAX_LEN, vbNullChar)
     lLength = MAX_LEN
     
-    '
     ' Get the username and cut it down to the actual value
-    '
     Call GetComputerName(sReturn, lLength)
     sReturn = PSGEN_GetItem(1, vbNullChar, sReturn)
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetComputerName = sReturn
 
 End Function
@@ -6574,77 +5048,43 @@ End Function
 
 
 Public Function PSGEN_IsSystemNT() As Boolean
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_IsSystemNT
 '
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    16 December 1999   First created for DocBlazer
-'
-'                  PURPOSE: Returns true if the operating system is NT
-'
-'****************************************************************************
-'
+' Returns true if the operating system is NT
 '
 Dim bReturn As Boolean
 Dim stInfo As OSVERSIONINFO
 
 
-    '
     ' Initialise error vector and the info structure
-    '
     On Error Resume Next
     stInfo.dwOSVersionInfoSize = Len(stInfo)
     Call GetVersionEx(stInfo)
     bReturn = (stInfo.dwPlatformId = VER_PLATFORM_WIN32_NT)
 
-    '
     ' Return value to caller
-    '
     PSGEN_IsSystemNT = bReturn
 
 End Function
 
 
 Public Function PSGEN_CreateFilePath(ByVal sPath$, Optional sError$) As Boolean
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_CreateFilePath
 '
 '                     sPath$             - Folder path to create
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    27 March 2000   First created for PSDeployment
-'
-'                  PURPOSE: Creates the path specified
+' Creates the path specified
 '                           Returns True if it created the folders Ok
-'
-'****************************************************************************
-'
 '
 Dim bReturn As Boolean
 Dim sDrive$, sBuildPath$
 Dim asPaths$()
 Dim iCnt%
 
-    '
     ' Determine the drive and pair down the folder
-    '
     On Error Resume Next
     If InStr(sPath, ":") = 0 Then
         sDrive = PSGEN_GetItem(1, ":", CurDir)
@@ -6653,9 +5093,7 @@ Dim iCnt%
         sPath = PSGEN_GetItem(2, ":", sPath)
     End If
     
-    '
     ' Recurse through each folder trying to build it
-    '
     If sPath = "" Or sPath = "\" Then
         bReturn = (Dir(sDrive + ":", vbDirectory) <> "")
     Else
@@ -6663,9 +5101,7 @@ Dim iCnt%
         sBuildPath = sDrive + ":"
         For iCnt = 0 To UBound(asPaths)
             
-            '
             ' Build up the path checking if it exists already
-            '
             sBuildPath = sBuildPath + IIf(iCnt = 1, "", "\") + asPaths(iCnt)
             If Dir(sBuildPath, vbDirectory) = "" Then
                 MkDir sBuildPath
@@ -6678,42 +5114,24 @@ Dim iCnt%
         bReturn = (iCnt > UBound(asPaths))
     End If
     
-    '
     ' Return value to caller
-    '
     PSGEN_CreateFilePath = bReturn
 
 End Function
 
 Public Function PSGEN_GetAPIColor&(ByVal lColor#, Optional ByVal lPal)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetAPIColor
 '
 '                     lColor&            - VB color value
 '                     lPal&              - Pallette
 '
 '                          ) As Long
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    07 May 1999   First created for Willow
-'
-'                  PURPOSE: Returns a correct API useable color value
-'
-'****************************************************************************
-'
+' Returns a correct API useable color value
 '
 Dim lReturn&
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     If lColor > 2147483647 Then lColor = &H80000000 + Abs(2147483647 - lColor + 1)
     If lColor < 0 Then
@@ -6724,9 +5142,7 @@ Dim lReturn&
         lReturn = lColor
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetAPIColor = lReturn
 
 End Function
@@ -6734,13 +5150,6 @@ End Function
 
 
 Public Function PSGEN_SelectOpenFile$(ByVal lOwner&, ByVal sFilter$, ByVal lFlags&, ByVal sTitle$, Optional lHookProc)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_SelectOpenFile
 '
 '                     lOwner&            - Owner window handle
 '                     sFilter$           - File types
@@ -6750,23 +5159,14 @@ Public Function PSGEN_SelectOpenFile$(ByVal lOwner&, ByVal sFilter$, ByVal lFlag
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    24 January 1999   First created for XList 32
-'
-'                  PURPOSE: Returns the selected file
-'
-'****************************************************************************
-'
+' Returns the selected file
 '
 Dim stOpenFile As OPENFILENAME
 Dim lReturn&
 Dim sReturn$
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     stOpenFile.lStructSize = Len(stOpenFile)
     stOpenFile.hwndOwner = lOwner
@@ -6791,22 +5191,13 @@ Dim sReturn$
         sReturn = PSGEN_GetItem(1, vbNullChar, Trim$(stOpenFile.lpstrFile))
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_SelectOpenFile = sReturn
 
 End Function
 
 
 Public Function PSGEN_SelectSaveFile$(ByVal lOwner&, ByVal sFilter$, ByVal lFlags&, ByVal sTitle$)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_SelectSaveFile
 '
 '                     lOwner&            - Owner window handle
 '                     sFilter$           - File types
@@ -6815,23 +5206,14 @@ Public Function PSGEN_SelectSaveFile$(ByVal lOwner&, ByVal sFilter$, ByVal lFlag
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    24 January 1999   First created for XList 32
-'
-'                  PURPOSE: Returns the selected file
-'
-'****************************************************************************
-'
+' Returns the selected file
 '
 Dim stOpenFile As OPENFILENAME
 Dim lReturn&
 Dim sReturn$, sExt$
 
 
-    '
     ' Initialise error vector
-    '
     On Error Resume Next
     stOpenFile.lStructSize = Len(stOpenFile)
     stOpenFile.hwndOwner = lOwner
@@ -6851,9 +5233,7 @@ Dim sReturn$, sExt$
     Else
         sReturn = PSGEN_GetItem(1, vbNullChar, Trim$(stOpenFile.lpstrFile))
         
-        '
         ' If there is no extension, then get one from the fropdown
-        '
         If InStr(sReturn, ".") = 0 Or PSGEN_GetItem(PSGEN_GetNoOfItems(".", sReturn), ".", sReturn) = "" Then
             sExt = PSGEN_GetItem(stOpenFile.nFilterIndex * 2, vbNullChar, sFilter)
             sExt = Trim$(Replace(PSGEN_GetItem(1, ";", sExt), "*", ""))
@@ -6861,36 +5241,20 @@ Dim sReturn$, sExt$
         End If
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_SelectSaveFile = sReturn
 
 End Function
 
 
 Public Function PSGEN_ChooseColor&(ByVal lOwner&, ByVal lStartColor&)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_ChooseColor
 '
 '                     lOwner&            - Handle of the owner window
 '                     lStartColor&       - Starting color
 '
 '                          ) As Long
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    22 November 1998   First created for XList 32
-'
-'                  PURPOSE: Chooses a color from the common dialog
-'
-'****************************************************************************
-'
+' Chooses a color from the common dialog
 '
 Dim lReturn&
 Dim abCustomColors() As Byte
@@ -6898,9 +5262,7 @@ Dim iCnt As Integer
 Dim stColor As ChooseColor
 
 
-    '
     ' Initialise error vector and the custom colors
-    '
     stColor.rgbResult = lStartColor
     On Error Resume Next
     ReDim abCustomColors(0 To (16 * 4) - 1) As Byte
@@ -6908,59 +5270,37 @@ Dim stColor As ChooseColor
         abCustomColors(iCnt) = 0
     Next iCnt
 
-    '
     ' Now setup the structure with the flags
-    '
     stColor.lStructSize = Len(stColor)
     stColor.hwndOwner = lOwner
     stColor.hInstance = 0
     stColor.lpCustColors = StrConv(abCustomColors, vbUnicode)
     stColor.Flags = 0
     
-    '
     ' Show the dialog and then retrieve the selected and custom colors
-    '
     Call ChooseColorAPI(stColor)
     lReturn = stColor.rgbResult
     abCustomColors = StrConv(stColor.lpCustColors, vbFromUnicode)
     
-    '
     ' Return value to caller
-    '
     PSGEN_ChooseColor = lReturn
 
 End Function
 
 
 Public Function PSGEN_GetKeysPressed$()
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_GetKeysPressed
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    29 August 2000   First created for ScreenGrabber
-'
-'                  PURPOSE: Returns a string representing the keys currently
+' Returns a string representing the keys currently
 '                           being held down
-'
-'****************************************************************************
-'
 '
 Dim abState(255) As Byte
 Dim iCnt%
 Dim sKey$, sKeys$
 
 
-    '
     ' Get the key states
-    '
     On Error Resume Next
     sKeys = ""
     Call GetKeyboardState(abState(0))
@@ -6986,9 +5326,7 @@ Dim sKey$, sKeys$
          If sKey <> "" Then sKeys = sKeys + IIf(sKeys = "", "", " + ") + sKey
     Next iCnt
 
-    '
     ' Return value to caller
-    '
     PSGEN_GetKeysPressed = sKeys
 
 End Function
@@ -7000,74 +5338,49 @@ Public Sub PSGEN_DrawRoundedShadow(ByVal frmWork As Form)
 '
 '****************************************************************************
 '
-'                     NAME: Sub PSGEN_DrawRoundedShadow
-'
 '                     frmWork As Form           - Form to round
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    08 January 2000   First created for nlTeamSelector
-'
-'                  PURPOSE: Draws the shadow effect round rectangles
-'
-'****************************************************************************
-'
+' Draws the shadow effect round rectangles
 '
 Const PI_VAL = 3.142
 
-    '
     ' Top Left
-    '
     On Error Resume Next
     frmWork.DrawWidth = 2
     frmWork.Circle (10, 10), 9, vbWhite, PI_VAL / 2, PI_VAL * 1.05
     frmWork.DrawWidth = 1
     frmWork.Circle (9, 9), 8, vb3DLight, PI_VAL / 2, PI_VAL
 
-    '
     ' Top right
-    '
     frmWork.Circle (frmWork.ScaleWidth - 12, 10), 10, vb3DShadow, 0, PI_VAL * 0.6
     frmWork.Circle (frmWork.ScaleWidth - 13, 10), 10, vb3DShadow, 0, PI_VAL * 0.6
 
-    '
     ' Bottom left
-    '
     frmWork.Circle (9, frmWork.ScaleHeight - 11), 9, vb3DLight, PI_VAL, PI_VAL * 1.6
     frmWork.Circle (10, frmWork.ScaleHeight - 12), 10, vb3DLight, PI_VAL, PI_VAL * 1.6
     frmWork.Circle (11, frmWork.ScaleHeight - 14), 12, vb3DShadow, PI_VAL, PI_VAL * 1.6
 
-    '
     ' Bottom right
-    '
     frmWork.Circle (frmWork.ScaleWidth - 12, frmWork.ScaleHeight - 12), 9, vb3DShadow, PI_VAL * 1.5, PI_VAL * 1.999
     frmWork.DrawWidth = 2
     frmWork.Circle (frmWork.ScaleWidth - 13, frmWork.ScaleHeight - 12), 11, vb3DShadow, PI_VAL * 1.5, PI_VAL * 1.999
     frmWork.Circle (frmWork.ScaleWidth - 14, frmWork.ScaleHeight - 13), 12, vb3DShadow, PI_VAL * 1.5, PI_VAL * 1.999
     frmWork.DrawWidth = 1
 
-    '
     ' Top Line
-    '
     frmWork.DrawWidth = 1
     frmWork.Line (11, 0)-(frmWork.ScaleWidth - 10, 0), vb3DLight
     frmWork.Line (10, 1)-(frmWork.ScaleWidth - 12, 1), vbWhite
     
-    '
     ' Bottom Line
-    '
     frmWork.Line (11, frmWork.ScaleHeight - 2)-(frmWork.ScaleWidth - 10, frmWork.ScaleHeight - 2), vb3DShadow
     frmWork.Line (9, frmWork.ScaleHeight - 3)-(frmWork.ScaleWidth - 10, frmWork.ScaleHeight - 3), vb3DShadow
     
-    '
     ' Left side
-    '
     frmWork.Line (0, 11)-(0, frmWork.ScaleHeight - 9), vb3DLight
     frmWork.Line (1, 9)-(1, frmWork.ScaleHeight - 11), vbWhite
     
-    '
     ' Right side
-    '
     frmWork.Line (frmWork.ScaleWidth - 2, 10)-(frmWork.ScaleWidth - 2, frmWork.ScaleHeight - 10), vb3DShadow
     frmWork.Line (frmWork.ScaleWidth - 3, 10)-(frmWork.ScaleWidth - 3, frmWork.ScaleHeight - 10), vb3DShadow
 
@@ -7076,13 +5389,6 @@ End Sub
 
 
 Public Function PSGEN_MontageImage$(ByVal sFile$, ByVal lX&, ByVal lY&, ByVal sAddFile$, Optional ByVal sExtra$ = "")
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_MontageImage
 '
 '                     sFile$             - File to convert
 '                     lX&                - X position
@@ -7092,11 +5398,7 @@ Public Function PSGEN_MontageImage$(ByVal sFile$, ByVal lX&, ByVal lY&, ByVal sA
 '
 '                          ) As String
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    12 June 2000   First created for BikeSwap
-'
-'                  PURPOSE: Montages sAddFile onto sFile at the
+' Montages sAddFile onto sFile at the
 '                           location specified.
 '                           This functions uses the ImageMagick set of
 '                           utilities and so expects the neccersary DLLs and
@@ -7104,16 +5406,11 @@ Public Function PSGEN_MontageImage$(ByVal sFile$, ByVal lX&, ByVal lY&, ByVal sA
 '                           Returns a temporary file if successful otherwise
 '                           rasies an error.
 '
-'****************************************************************************
-'
-'
 Dim sReturn$, sFeedback$, sCommand$, sPath$
 Dim sError$, sBatch$, sGeometery$, sCmd$
     
     
-    '
     ' Build the required command line
-    '
     On Error Resume Next
     sPath = Environ(PSGEN_IMAGEMAGICK)
     If sPath = "" Then
@@ -7134,9 +5431,7 @@ Dim sError$, sBatch$, sGeometery$, sCmd$
             sCmd = "command.com /c " + sBatch
         End If
     
-        '
         ' Run the command and gather the output
-        '
         If PSGEN_WaitForTask(sCmd, "Montaging " + sFile + " to " + sReturn, True, 20000) <> 0 Then
             Kill sReturn
             Call PSGEN_ReadTextFile(sFeedback, sCommand, sError)
@@ -7146,9 +5441,7 @@ Dim sError$, sBatch$, sGeometery$, sCmd$
                 Err.Raise vbObjectError + PSGEN_ERROR_BASE, "PSGEN_MontageImage", sCommand
             End If
         Else
-            '
             ' Check that there was no feedback
-            '
             Call PSGEN_ReadTextFile(sFeedback, sCommand, sError)
             If sCommand <> "" Then
                 Kill sReturn
@@ -7159,9 +5452,7 @@ Dim sError$, sBatch$, sGeometery$, sCmd$
         Kill sBatch
     End If
 
-    '
     ' Return value to caller
-    '
     PSGEN_MontageImage = sReturn
 
 End Function
@@ -7173,20 +5464,11 @@ Public Sub PSGEN_DialANumber(ByVal sNumber$, ByVal iPortNumber%)
 '
 '****************************************************************************
 '
-'                     NAME: Sub PSGEN_DialANumber
-'
 '                     sNumber$           - Phone number
 '                     iPortNumber%       - Comms port to use
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    16 March 2000   First created for GURU
-'
-'                  PURPOSE: Dials the phone assuming that a modem is attached
+' Dials the phone assuming that a modem is attached
 '                           to the comms port specified
-'
-'****************************************************************************
-'
 '
 ' The number of seconds to wait for the modem to dial before
 ' .. resetting the modem. If the phone hangs up prematurely
@@ -7199,27 +5481,21 @@ Dim lOpenPort&, lRetBytes&, lStartTime&
 Dim iCnt%
 
 
-    '
     ' Open the communications port for read/write (&HC0000000).
     ' Must specify existing file (3).
-    '
     On Error Resume Next
     lOpenPort = CreateFile("COM" + Format$(iPortNumber), &HC0000000, 0, 0, 3, 0, 0)
     If lOpenPort = -1 Then
         MsgBox "Unable to open communication port COM" + Format$(iPortNumber), vbOKOnly + vbExclamation
     Else
     
-        '
         ' Wait 2 seconds for the port to initialise
-        '
         lStartTime = Timer
         While Timer < lStartTime + 1
            DoEvents
         Wend
             
-        '
         ' Send the telephone number to the modem
-        '
         For iCnt = 1 To Len(sNumber)
             Select Case Mid$(sNumber, iCnt, 1)
                 Case "0" To "9"
@@ -7232,29 +5508,21 @@ Dim iCnt%
             MsgBox "Unable to dial number " & sNumber, vbOKOnly + vbExclamation
         Else
         
-            '
             ' Flush the buffer to make sure it actually wrote
-            '
             Call FlushFileBuffers(lOpenPort)
             
-            '
             ' Wait WAITSECONDS seconds for the phone to dial
-            '
             lStartTime = Timer
             While Timer < lStartTime + WAITSECONDS
                DoEvents
             Wend
             
-            '
             ' Reset the modem and take it off line
-            '
             sModemCommand = "ATH0" & sNumber & vbCrLf
             bModemCommand = StrConv(sModemCommand, vbFromUnicode)
             Call WriteFile(lOpenPort, bModemCommand(0), Len(sModemCommand), lRetBytes, 0)
             
-            '
             ' Flush the buffer again and close the communications port
-            '
             Call FlushFileBuffers(lOpenPort)
             Call CloseHandle(lOpenPort)
         End If
@@ -7269,19 +5537,13 @@ Public Function PSGEN_IsSameText(ByVal sString1$, ByVal sString2$, Optional ByVa
 '
 '****************************************************************************
 '
-'                     NAME: Function PSGEN_IsSameText
-'
 '                     sString1           - String to compare
 '                     sString2           - String to compare
 '                     iCompare           - Type of comparison
 '
 '                     ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    16 March 2000   First created for GURU
-'
-'                  PURPOSE: Compares the two strings and returns true if they
+' Compares the two strings and returns true if they
 '                           are the same
 '
 '****************************************************************************
@@ -7511,29 +5773,15 @@ End Function
 
 
 Public Function PSGEN_SortArray(ByVal vSource As Variant) As Variant
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2001
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_SortArray
 '
 '                     vSource As variant           - Array to sort
 '
 '                          ) As Long
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    22 November 2001   First created for PivotalExtendedControls
-'
-'                  PURPOSE: Returns a variant array which is a sorted version
+' Returns a variant array which is a sorted version
 '                           of the variant array passed
 '                           Expects the array to be 2 dimensions, first
 '                           dimension the sort and the second the item data
-'
-'****************************************************************************
-'
 '
 Dim vReturn As Variant
 Dim vTmpVal1 As Variant
@@ -7544,9 +5792,7 @@ Dim bNumeric As Boolean
 Dim bIsObject As Boolean
     
     
-    '
     ' Determine if the sort should be numeric
-    '
     vReturn = vSource
     lFirstRow = LBound(vReturn)
     lLastRow = UBound(vReturn)
@@ -7562,23 +5808,17 @@ Dim bIsObject As Boolean
     lSecondDim = UBound(vReturn, 2)
     ReDim vTmpVal1(lSecondDim)
     
-    '
     ' Determine the optimum sort start point
-    '
     lNumRows = lLastRow - lFirstRow + 1
     Do
       lGapSize = lGapSize * 3 + 1
     Loop Until lGapSize > lNumRows
     
-    '
     ' Keep going until the gap is closed
-    '
     Do
         lGapSize = lGapSize \ 3
       
-        '
         ' Loop round each of the elements flipping their contents
-        '
         For lCnt = (lGapSize + lFirstRow) To lLastRow
             lCurPos = lCnt
             sTmpVal0 = vReturn(lCnt, 0)
@@ -7591,9 +5831,7 @@ Dim bIsObject As Boolean
             Next lTmp
             
             If bNumeric Then
-                '
                 ' Keep flipping until we find a value that is greater
-                '
                 Do While Val(vReturn(lCurPos - lGapSize, 0)) > Val(sTmpVal0)
                     vReturn(lCurPos, 0) = vReturn(lCurPos - lGapSize, 0)
                     If bIsObject Then
@@ -7605,9 +5843,7 @@ Dim bIsObject As Boolean
                     If (lCurPos - lGapSize) < lFirstRow Then Exit Do
                 Loop
             Else
-                '
                 ' Keep flipping until we find a value that is greater
-                '
                 Do While StrComp(vReturn(lCurPos - lGapSize, 0), sTmpVal0, vbTextCompare) > 0
                     vReturn(lCurPos, 0) = vReturn(lCurPos - lGapSize, 0)
                     For lTmp = 1 To lSecondDim
@@ -7632,37 +5868,21 @@ Dim bIsObject As Boolean
         Next lCnt
     Loop Until lGapSize = 1
     
-    '
     ' Return the sorted array
-    '
     PSGEN_SortArray = vReturn
 
 End Function
 
 
 Public Function PSGEN_SortArraySimple(ByVal vSource As Variant) As Variant
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2001
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_SortArraySimple
 '
 '                     vSource As variant           - Array to sort
 '
 '                          ) As Long
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    22 November 2001   First created for PivotalExtendedControls
-'
-'                  PURPOSE: Returns a variant array which is a sorted version
+' Returns a variant array which is a sorted version
 '                           of the variant array passed
 '                           Expects the array to be single dimension
-'
-'****************************************************************************
-'
 '
 Dim vReturn As Variant
 Dim vTmpVal As Variant
@@ -7671,9 +5891,7 @@ Dim lFirstRow&, lLastRow&, lNumRows&
 Dim bNumeric As Boolean
     
     
-    '
     ' Determine if the sort should be numeric
-    '
     vReturn = vSource
     lFirstRow = LBound(vReturn)
     lLastRow = UBound(vReturn)
@@ -7685,40 +5903,30 @@ Dim bNumeric As Boolean
         End If
     Next lCnt
     
-    '
     ' Determine the optimum sort start point
-    '
     lNumRows = lLastRow - lFirstRow + 1
     Do
       lGapSize = lGapSize * 3 + 1
     Loop Until lGapSize > lNumRows
     
-    '
     ' Keep going until the gap is closed
-    '
     Do
         lGapSize = lGapSize \ 3
       
-        '
         ' Loop round each of the elements flipping their contents
-        '
         For lCnt = (lGapSize + lFirstRow) To lLastRow
             lCurPos = lCnt
             vTmpVal = vReturn(lCnt)
             
             If bNumeric Then
-                '
                 ' Keep flipping until we find a value that is greater
-                '
                 Do While Val(vReturn(lCurPos - lGapSize)) > Val(vTmpVal)
                     vReturn(lCurPos) = vReturn(lCurPos - lGapSize)
                     lCurPos = lCurPos - lGapSize
                     If (lCurPos - lGapSize) < lFirstRow Then Exit Do
                 Loop
             Else
-                '
                 ' Keep flipping until we find a value that is greater
-                '
                 Do While StrComp(vReturn(lCurPos - lGapSize), vTmpVal, vbTextCompare) > 0
                     vReturn(lCurPos) = vReturn(lCurPos - lGapSize)
                     lCurPos = lCurPos - lGapSize
@@ -7729,22 +5937,13 @@ Dim bNumeric As Boolean
         Next lCnt
     Loop Until lGapSize = 1 Or lLastRow < 0
     
-    '
     ' Return the sorted array
-    '
     PSGEN_SortArraySimple = vReturn
 
 End Function
 
 
 Public Sub PSGEN_DrawTransparentPicture(dest As PictureBox, ByVal srcBmp&, ByVal DestX&, ByVal DestY&, ByVal TransColor&)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2001
-'
-'****************************************************************************
-'
-'                     NAME: Sub PSGEN_DrawTransparentPicture
 '
 '                        lDest        - ldc of the device context to paint the picture on
 '                        picSource    - Picture to paint
@@ -7758,18 +5957,11 @@ Public Sub PSGEN_DrawTransparentPicture(dest As PictureBox, ByVal srcBmp&, ByVal
 '                        lMaskColor   - Color to mask, must be a valid HCOLORREF
 '                        lPal         - Must be a valid HPALETTE
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    08 February 1999   First created for GURU
-'
-'                  PURPOSE: Draws a bitmap or icon to a ldc, applying a disabled or embossed
+' Draws a bitmap or icon to a ldc, applying a disabled or embossed
 '                           look to the picture.  If the DrawState API is available it will
 '                           be used else, the effect will be mimicked.  If the passed picture
 '                           is a bitmap a mask color can be provided to make the areas of the
 '                           picture that have that color transparent
-'
-'****************************************************************************
-'
 '
 
 Const PIXEL = 3
@@ -7794,9 +5986,7 @@ Dim OrigColor As Long 'Holds original background color from source DC
 Dim Success As Long 'Stores result of call to Windows API
 
         
-    '
     ' Initialise the DCs
-    '
     destScale = dest.ScaleMode 'Store ScaleMode to restore later
     dest.ScaleMode = PIXEL 'Set ScaleMode to pixels for Windows GDI
     'Retrieve bitmap to get width (bmp.bmWidth) & height (bmp.bmHeight)
@@ -7860,25 +6050,11 @@ End Sub
 
 
 Public Function PSGEN_Win32TimetoVbDate(ByVal rTime As Currency) As Date
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2001
-'
-'****************************************************************************
-'
-'                     NAME: Sub PSGEN_Win32TimetoVbDate
 '
 '                        rTime#       - Converts Win32 file time (WIN32_FIND_DATA) to VB
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    08 February 1999   First created for GURU
-'
-'                  PURPOSE: Converts the file time and dates you get from Win32
+' Converts the file time and dates you get from Win32
 '                           into a standard VB date
-'
-'****************************************************************************
-'
 '
 
 ' Difference between day zero for VB dates and Win32 dates
@@ -7895,9 +6071,7 @@ Const MILLESECONDS_PER_DAY As Double = 10000000# * 60# * 60# * 24# / 10000#
 Dim rAdjustedTime As Currency
 
     
-    '
     ' Call API to convert from UTC time to local time
-    '
     On Error Resume Next
     If FileTimeToLocalFileTime(rTime, rAdjustedTime) Then
         
@@ -7911,13 +6085,6 @@ Dim rAdjustedTime As Currency
 End Function
 
 Public Function PSGEN_Log(ByVal sMessage$, Optional ByVal iLogType As LogEventTypes = LogEventTypes.LogInformation, Optional ByVal sSource$ = "") As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2001
-'
-'****************************************************************************
-'
-'                     NAME: Sub PSGEN_Log
 '
 '                        iLogType%    - Type of event to register
 '                        sMessage$    - Message to register
@@ -7925,39 +6092,26 @@ Public Function PSGEN_Log(ByVal sMessage$, Optional ByVal iLogType As LogEventTy
 '
 '                        ) as Boolean  - Returns true if successful
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    08 February 2003   First created for ASPHelper
-'
-'                  PURPOSE: Writes a message to the NT Event log.
+' Writes a message to the NT Event log.
 '                           If sSource is empty, then the App.Title value is used
-'
-'****************************************************************************
-'
 '
 
 Dim lEventID&
 Dim hEventLog&
 
 
-    '
     ' Open the event log on this machine
-    '
     If sSource = "" Then sSource = App.Title
     hEventLog = RegisterEventSource(vbNullString, sSource)
 
-    '
     ' ReportEvent returns 0 if failed, any other number indicates success
-    '
     If ReportEvent(hEventLog, iLogType, 0, 0, 0, 1, Len(sMessage), sMessage, 0) = 0 Then
         PSGEN_Log = False
     Else
         PSGEN_Log = True
     End If
 
-    '
     ' Free the resources
-    '
     Call DeregisterEventSource(hEventLog)
     
     Debug.Print Format(Now(), "dd/MM/yy hh:mm:ss") + " " + sMessage
@@ -7965,13 +6119,6 @@ Dim hEventLog&
 End Function
 
 Public Function Z_DialogCallback&(ByVal lHandle&, ByVal lMsg&, ByVal lParam&, ByVal lData&)
-'****************************************************************************
-'
-'     Pivotal Solutions Ltd © 2000
-'
-'****************************************************************************
-'
-'                     NAME: Function Z_DialogCallback
 '
 '                     lHandle&           - Dialog handle
 '                     lMsg&              - Message ID
@@ -7980,33 +6127,22 @@ Public Function Z_DialogCallback&(ByVal lHandle&, ByVal lMsg&, ByVal lParam&, By
 '
 '                          ) As Integer
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    27 March 2000   First created for PSDeployment
-'
-'                  PURPOSE: This is called from the shell folder selection
+' This is called from the shell folder selection
 '                           dialog when it is initialised. It is Z_ but public
 '                           because it is called from an external DLL and so has
 '                           to be public but shouldn't be called by anyone else
-'
-'****************************************************************************
-'
 '
 Const WM_TIMER = &H113
 
 Dim lReturn&, lTmp&
 Dim stRect As RECT
 
-    '
     ' Determine what it is we're mean't to do
-    '
     On Error Resume Next
     Select Case lMsg
         
-        '
         ' Used by the Open or Save As dialog
         ' Centre the window and bring it to the front
-        '
         Case WM_INITDIALOG
             lTmp = GetParent(lHandle)
             Call GetWindowRect(lTmp, stRect)
@@ -8014,9 +6150,7 @@ Dim stRect As RECT
 
     End Select
     
-    '
     ' Return value to caller
-    '
     Z_DialogCallback = 0
 
 End Function
@@ -8083,13 +6217,6 @@ End Function
 
 
 Public Function PSIMAGE_SaveFileToGIF(ByVal sInFile$, ByVal sGifFile$, Optional hDC&, Optional bUseTrans As Boolean, Optional ByVal lTransColor&) As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2004
-'
-'****************************************************************************
-'
-'                     NAME: Function PSIMAGE_SaveFileToGIF
 '
 '                     sInFile$           - Input file
 '                     sGifFile$          - GIF File to save to
@@ -8099,29 +6226,18 @@ Public Function PSIMAGE_SaveFileToGIF(ByVal sInFile$, ByVal sGifFile$, Optional 
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    19 March 2004   First created for MediaServices
-'
-'                  PURPOSE: Saves a filename to GIF
-'
-'****************************************************************************
-'
+' Saves a filename to GIF
 '
 Dim bReturn As Boolean
 Dim objPicture As New StdPicture
 
 
-    '
     ' Load the source picture
-    '
     On Error Resume Next
     Set objPicture = LoadPicture(sInFile)
     If Err = 0 Then bReturn = PSGEN_SaveGIF(objPicture, sGifFile, hDC, bUseTrans, lTransColor)
 
-    '
     ' Return value to caller
-    '
     PSIMAGE_SaveFileToGIF = bReturn
 
 End Function
@@ -8129,13 +6245,6 @@ End Function
 
 
 Public Function PSGEN_SaveGIF(ByVal objPic As StdPicture, ByVal sFilename$, Optional hDC&, Optional bUseTrans As Boolean, Optional ByVal lTransColor&) As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2004
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_SaveGIF
 '
 '                     objPic             - Picture object to use
 '                     sGifFile$          - GIF File to save to
@@ -8145,16 +6254,9 @@ Public Function PSGEN_SaveGIF(ByVal objPic As StdPicture, ByVal sFilename$, Opti
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
+' Saves a filename to GIF
 '
-'     MODIFICATION HISTORY: Steve O'Hara    19 March 2004   First created for MediaServices
-'
-'                  PURPOSE: Saves a filename to GIF
-'
-'****************************************************************************
-'
-'
-   
+
 Dim stScreen As GifScreenDescriptor
 Dim stImage As GifImageDescriptor
 Dim stBitmapInfo As BITMAPINFO256
@@ -8176,17 +6278,13 @@ Dim astGifPalette(0 To 255) As RGBTRIPLE
 Dim abDataBuffer(255) As Byte
 
 
-    '
     ' Get image size and allocate buffer memory
-    '
     Call GetObjectAPI(objPic, Len(stBitMap), stBitMap)
     lPicWidth = stBitMap.bmWidth
     lPicHeight = stBitMap.bmHeight
     ReDim buf(CLng(((lPicWidth + 3) \ 4) * 4), lPicHeight) As Byte
 
-    '
     ' Prepare DC for paintings
-    '
     lDCScn = CreateDCAsNull("DISPLAY", ByVal 0&, ByVal 0&, ByVal 0&)
     lDC256 = CreateCompatibleDC(lDCScn)
     If hDC = 0 Then
@@ -8197,13 +6295,11 @@ Dim abDataBuffer(255) As Byte
     End If
     DeleteDC lDCScn
 
-    '
     ' Since GIF works only with 256 colors, reduce color depth to 256
     ' This sample use simpliest HalfTone palette to reduce color depth
     ' If you want advanced color manipulation with web-safe palettes or
     ' optimal palette with the specified number of colors using octree
     ' quantisation, visit http://vbaccelerator.com/codelib/gfx/octree.htm
-    '
 
     If stBitMap.bmBitsPixel <> 8 Then lDib256 = Z_CreateDib256(lDC256, stBitmapInfo, lPicWidth, lPicHeight)
     If lDib256 <> 0 Then
@@ -8226,9 +6322,7 @@ Dim abDataBuffer(255) As Byte
         Next
     End If
 
-    '
     ' Fill gif file info
-    '
     For lRow = 0 To 255
         astGifPalette(lRow).rgbBlue = stBitmapInfo.bmiColors(lRow).rgbBlue
         astGifPalette(lRow).rgbGreen = stBitmapInfo.bmiColors(lRow).rgbGreen
@@ -8249,16 +6343,12 @@ Dim abDataBuffer(255) As Byte
     stImage.Height = lPicHeight
     stImage.Width = lPicWidth
     
-    '
     ' Get rid of the existing file and create a new one
-    '
     If PSGEN_FileExists(sFilename) Then Kill sFilename
     iOutFile = FreeFile
     Open sFilename For Binary As iOutFile
 
-    '
     ' Write GIF header and header info
-    '
     If bUseTrans = True Then
         Put #iOutFile, , GIF89a
     Else
@@ -8284,9 +6374,7 @@ Dim abDataBuffer(255) As Byte
     abDataBuffer(0) = 0
     iBitPosition = CHAR_BIT
 
-    '
     ' Process pixels data using LZW/GIF compression
-    '
     For lRow = 1 To lPicHeight
         Set objColorTable = New Collection
         Call Z_OutputBitsToGif(iOutFile, CLEARCODE, CODESIZE, iBitPosition, abDataBuffer)
@@ -8323,9 +6411,7 @@ Dim abDataBuffer(255) As Byte
     Put #iOutFile, , GIFTERMINATOR
     Close iOutFile
    
-    '
     ' Clear up all the temporary objects
-    '
     Erase buf
     If hDC = 0 Then
         SelectObject lSrchDc, lOldObj
@@ -8335,21 +6421,12 @@ Dim abDataBuffer(255) As Byte
     DeleteObject lDib256
     DeleteDC lDC256
    
-    '
     ' Return status to caller
-    '
     PSGEN_SaveGIF = True
 
 End Function
 
 Private Sub Z_OutputBitsToGif(ByVal iOutFile%, ByVal iValue%, ByVal iCount%, ByRef iBitPosition%, abDataBuffer() As Byte)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2004
-'
-'****************************************************************************
-'
-'                     NAME: Sub Z_OutputBitsToGif
 '
 '                     iOutFile%          - Open file handle
 '                     iValue%            - Pixel value to output
@@ -8357,14 +6434,7 @@ Private Sub Z_OutputBitsToGif(ByVal iOutFile%, ByVal iValue%, ByVal iCount%, ByR
 '                     iBitPosition%      - Position to place value
 '                     abDataBuffer       - Buffer to fill
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    19 March 2004   First created for MediaServices
-'
-'                  PURPOSE: Outputs values to the GIF
-'
-'****************************************************************************
-'
+' Outputs values to the GIF
 '
 
 Dim iCnt%, iBit%
@@ -8388,13 +6458,6 @@ Dim iCnt%, iBit%
 End Sub
 
 Private Sub Z_OutputCode(ByVal iOutFile%, ByVal iCode%, ByRef iCodeCount%, ByRef iBitPosition%, ByRef objColorTable As Collection, ByRef abDataBuffer() As Byte)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2004
-'
-'****************************************************************************
-'
-'                     NAME: Sub Z_OutputCode
 '
 '                     iOutFile%          - Open file handle
 '                     iCode%             - Code to output
@@ -8402,19 +6465,10 @@ Private Sub Z_OutputCode(ByVal iOutFile%, ByVal iCode%, ByRef iCodeCount%, ByRef
 '                     objcolorTable      - Collection of colors in the palette
 '                     abDataBuffer       - Buffer to fill
 '
-'             DEPENDENCIES: NONE
+' Outputs color code to the GIF
 '
-'     MODIFICATION HISTORY: Steve O'Hara    19 March 2004   First created for MediaServices
-'
-'                  PURPOSE: Outputs color code to the GIF
-'
-'****************************************************************************
-'
-'
-      
-   '
+
    ' Output the file code
-   '
    On Error Resume Next
    iCodeCount = iCodeCount + 1
    If iCodeCount > LASTCODE Then
@@ -8428,24 +6482,10 @@ End Sub
 
 
 Private Function Z_Power2&(ByVal iPower%)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2004
-'
-'****************************************************************************
-'
-'                     NAME: Function Z_Power2
 '
 '                     iPower%          - 2 to the power of
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    19 March 2004   First created for MediaServices
-'
-'                  PURPOSE: Returns 2 to the power of
-'
-'****************************************************************************
-'
+' Returns 2 to the power of
 '
 
 Dim aPower2(31) As Long
@@ -8489,27 +6529,13 @@ End Function
 
 
 Private Function Z_CreateDib256&(ByVal hDC&, stBitmapInfo As BITMAPINFO256, ByVal lPicWidth&, ByVal lPicHeight&)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2004
-'
-'****************************************************************************
-'
-'                     NAME: Sub Z_CreateDib256
 '
 '                     hDC%               - Context to use for colors
 '                     stBitmapInfo       - Bitmap information
 '                     lPicWidth&         - Width of output GIF
 '                     lPicHeight&         - Height of output GIF
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    19 March 2004   First created for MediaServices
-'
-'                  PURPOSE: Returns a 256 color DIB
-'
-'****************************************************************************
-'
+' Returns a 256 color DIB
 '
 
 Dim lScanSize&, lPtr&, lIndex&
@@ -8527,9 +6553,7 @@ Dim rA&, gA&, bA&
         .biSizeImage = lScanSize * lPicHeight
     End With
     
-    '
     ' Halftone 256 colour palette
-    '
     For b = 0 To &H100 Step &H40
        If b = &H100 Then
           bA = b - 1
@@ -8563,34 +6587,18 @@ End Function
 
 
 Public Function PSGEN_NormaliseString$(ByVal sValue$)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2004
-'
-'****************************************************************************
-'
-'                     NAME: Function PSGEN_NormaliseString
 '
 '                     sValue$           to Value to normalise
 '
 '                     return  to string with all foreign characters removed
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    19 March 2004   First created for MediaServices
-'
-'                  PURPOSE: Changes all the accented characters with similar ASCII versions
-'
-'****************************************************************************
-'
+' Changes all the accented characters with similar ASCII versions
 '
 
 Dim sReturn$
 Dim lCnt&
 
-    '
     ' Loop through all the characters
-    '
     sReturn = sValue
     For lCnt = 1 To Len(sValue)
         Select Case Asc(Mid(sValue, lCnt, 1))
@@ -8665,13 +6673,6 @@ Dim lCnt&
 End Function
 
 Public Sub PSGEN_DrawTransparentRectangle(ByVal lDC&, ByVal lLeft&, ByVal lTop&, ByVal lRight&, ByVal lBottom&, ByVal lBorderColor As OLE_COLOR, ByVal lFillColor As OLE_COLOR, ByVal iTransparency%)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2006
-'
-'****************************************************************************
-'
-'                     NAME: Sub PSGEN_DrawTransparentRectangle
 '
 '                     lDC&                      - Device context to draw on
 '                     lLeft&                    - Left coordinate
@@ -8682,33 +6683,22 @@ Public Sub PSGEN_DrawTransparentRectangle(ByVal lDC&, ByVal lLeft&, ByVal lTop&,
 '                     lFillColor As OLE_COLOR   - Color to use as highlight
 '                     iTransparency%            - Level of transparency to se (0-255)
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    09 May 2006   First created for Project1
-'
-'                  PURPOSE: Draws a transparent rectangle at the pixel
+' Draws a transparent rectangle at the pixel
 '                           coordinates using the border color, fill color and level of
 '                           transparency provided
-'
-'****************************************************************************
-'
 '
 Dim lSrcDC&, lSrcBmp&, lBrush&, lBlend&
 Dim stRect As RECT
 Dim stBlend As BLEND_PROPS
 
 
-    '
     ' Create a DC to read from
-    '
     On Error Resume Next
     lSrcDC = CreateCompatibleDC(lDC)
     lSrcBmp = CreateCompatibleBitmap(lDC, lRight - lLeft, lBottom - lTop)
     Call SelectObject(lSrcDC, lSrcBmp)
     
-    '
     ' Fill the source with the colour
-    '
     stRect.Left = 0
     stRect.Top = 0
     stRect.Right = lRight - lLeft
@@ -8717,15 +6707,11 @@ Dim stBlend As BLEND_PROPS
     Call FillRect(lSrcDC, stRect, lBrush)
     Call DeleteObject(lBrush)
 
-    '
     ' Now set the blending
-    '
     stBlend.tBlendAmount = iTransparency
     Call CopyMemory(lBlend, stBlend, 4)
 
-    '
     ' Blend the two DCs
-    '
     Call AlphaBlend(lDC, lLeft, lTop, lRight - lLeft, lBottom - lTop, lSrcDC, 0, 0, lRight - lLeft, lBottom - lTop, lBlend)
     stRect.Left = lLeft
     stRect.Top = lTop
@@ -8734,9 +6720,7 @@ Dim stBlend As BLEND_PROPS
     lBrush = CreateSolidBrush(lBorderColor)
     Call FrameRect(lDC, stRect, lBrush)
     Call DeleteObject(lBrush)
-    '
     ' Clean up
-    '
     Call DeleteDC(lSrcDC)
     Call DeleteObject(lSrcBmp)
 

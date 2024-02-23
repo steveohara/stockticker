@@ -433,6 +433,12 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+'
+' Copyright (c) 2024, Pivotal Solutions and/or its affiliates. All rights reserved.
+' Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+'
+' This is the alarm notification popup window
+'
 Option Explicit
 
     Dim mbytSound() As Byte ' Always store binary data in byte arrays!
@@ -467,9 +473,7 @@ End Sub
 
 Private Sub Form_Load()
 
-    '
     ' Position the form in the middle of the display
-    '
     CentreForm Me
     PSGEN_SetTopMost hWnd
 
@@ -477,12 +481,14 @@ End Sub
 
 
 Public Sub ShowLowAlarm(ByVal objSymbol As cSymbol)
-
+'
+' Show the alarm for a low threshold for the given symbol
+'
+' objSymbol - Symbol to show alarm for
+'
 Dim sFilename$
 
-    '
     ' Set the display
-    '
     mbIsLow = True
     Caption = "Low Alarm " + objSymbol.Code
     txtSymbol.Text = objSymbol.LowAlarmValue
@@ -501,12 +507,14 @@ End Sub
 
 
 Public Sub ShowHighAlarm(ByVal objSymbol As cSymbol)
-
+'
+' Show the alarm for a high threshold for the given symbol
+'
+' objSymbol - Symbol to show alarm for
+'
 Dim sFilename$
 
-    '
     ' Set the display
-    '
     Caption = "High Alarm " + objSymbol.Code
     txtSymbol.Text = objSymbol.HighAlarmValue
     If objSymbol.HighAlarmSoundEnabled Then
@@ -524,7 +532,11 @@ End Sub
 
 
 Private Sub Z_DisplaySymbol(ByVal objSymbol As cSymbol)
-
+'
+' Displays the details of the specified symbol
+'
+' objSymbol - Symbol to show data for
+'
 Dim lUpColor&, lDownColor&
 
     If objSymbol.AlarmShowing Then
@@ -533,15 +545,11 @@ Dim lUpColor&, lDownColor&
         Set mobjSymbol = objSymbol
         mobjSymbol.AlarmShowing = True
     
-        '
         ' Get the up down colours
-        '
         lUpColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UP_COLOUR, Format(vbGreen)))
         lDownColor = CLng(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOWN_COLOUR, Format(vbRed)))
         
-        '
         ' Set the display
-        '
         lblValue(0).Caption = objSymbol.FormattedValue
         lblValue(1).Caption = objSymbol.FormattedCost
         lblValue(2).Caption = Format(objSymbol.Shares)
@@ -571,6 +579,12 @@ End Sub
 
 
 Private Sub Z_PlayWaveRes(Optional vntResourceID As Variant, Optional vntFlags)
+'
+' Plays the specified sound for the alarm
+'
+' vntResourceID - The resource ID of the sound
+' vntFlags      - Optional flags to modify the sound
+'
     If Not IsMissing(vntResourceID) Then
         mbytSound = LoadResData(vntResourceID, "WAVE")
         If IsMissing(vntFlags) Then vntFlags = SND_NODEFAULT Or SND_ASYNC Or SND_MEMORY Or SND_LOOP
@@ -582,8 +596,12 @@ Private Sub Z_PlayWaveRes(Optional vntResourceID As Variant, Optional vntFlags)
 End Sub
 
 Private Sub Z_PlayWave(ByVal sFilename$, Optional vntFlags)
+'
+' Plays the specified sound filename
+'
+' sFilename - The full path of the file to play
+' vntFlags  - Optional flags to modify the sound
+'
     If IsMissing(vntFlags) Then vntFlags = SND_NODEFAULT Or SND_ASYNC Or SND_LOOP
     sndPlaySound ByVal sFilename, vntFlags
 End Sub
-
-

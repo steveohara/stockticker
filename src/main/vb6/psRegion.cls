@@ -11,6 +11,12 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+'
+' Copyright (c) 2024, Pivotal Solutions and/or its affiliates. All rights reserved.
+' Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+'
+' Simple holder for a rectangle coordinates
+'
 Option Explicit
 
     Public Top&

@@ -376,18 +376,14 @@ Public Property Let Item(Optional ByVal Key As Variant, ByVal RHS As Variant)
     'Add new Item or change existing Item's value.
     '
     'When IsArray = True:
-    '
     '   Pass a Null as Key to add a new item at the end of the "array."
-    '
     '   Pass an index (Long) as Key to assign a new value to an
     '   existing Item.  However if the index is greater than .Count
     '   the value is added as a new entry at the end of the "array."
     '
     'When IsArray = False (i.e. a JSON "object"):
-    '
     '   Pass a name (String) as Key.  If the named Item exists its
     '   value is updated.  If it does not exist a new Item is added.
-    '
     'Item reassignment for existing items (assign new value) is
     'implemented as remove and re-add.  This means changing the value
     'of an "object's" Item moves it to the end of the list.

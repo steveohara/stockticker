@@ -1,41 +1,18 @@
 Attribute VB_Name = "Support"
-'****************************************************************************
 '
-'   Pivotal Solutions Ltd © 2004
+' Copyright (c) 2024, Pivotal Solutions and/or its affiliates. All rights reserved.
+' Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
 '
-'****************************************************************************
-'
-' LANGUAGE:             Microsoft Visual Basic V6.00
-'
-' MODULE NAME:          Pivotal_Main
-'
-' MODULE TYPE:          BASIC Form
-'
-' FILE NAME:            PSMAIN.FRM
-'
-' MODIFICATION HISTORY: Steve O'Hara    30 April 2004   First created for ScaffoldTicker
-'
-' PURPOSE:              Main ticker interface
-'
-'
-'****************************************************************************
-'
-'****************************************************
-' MODULE VARIABLE DECLARATIONS
-'****************************************************
+' Main ticker interface. This is the main entry point into the application
 '
 Option Explicit
 
-    '
     ' Version number form the build system
-    '
     Public Const VERSION_NAME = "Pivotal Stock Ticker (pivotalstockticker.exe)"
     Public Const VERSION_NUMBER = "3.5.7"
     Public Const VERSION_TIMESTAMP = "10-Feb-2024 08:20"
 
-    '
     ' Registry entries
-    '
     Dim mobjReg As New cRegistry
 
     Public Const REG_SETTINGS = "Settings"
@@ -134,24 +111,10 @@ Option Explicit
 
 Public Sub CentreForm(ByVal frmCentre As Form)
 Attribute CentreForm.VB_Description = "Centres the form on the appropriate monitor"
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2008
-'
-'****************************************************************************
-'
-'                     NAME: Sub CentreForm
 '
 '                     frmCentre As Form         - Form to centre
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    05 September 2008   First created for StockTicker
-'
-'                  PURPOSE: Centres the form on the appropriate monitor
-'
-'****************************************************************************
-'
+' Centres the form on the appropriate monitor
 '
 Const SM_CXVIRTUALSCREEN = 78
 
@@ -159,9 +122,7 @@ Dim lScreenWidth&, lLeft&, lMonitorWidth&
 Dim stRect As RECT
 
 
-    '
     ' Centre the scrrens on the appropriate monitor
-    '
     On Error Resume Next
     Call GetWindowRect(frmMain.hWnd, stRect)
     lScreenWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN)
@@ -187,9 +148,7 @@ Dim objSymbol As cSymbol
 Dim objReturn As Collection
 Dim iCnt%
 
-    '
     ' Get the symbol keys from the registry
-    '
     On Error Resume Next
     Set objReturn = New Collection
     asSymbols = mobjReg.GetSubkeys(App.Title, REG_SYMBOLS)
@@ -199,9 +158,7 @@ Dim iCnt%
         Next
         asSymbols = PSGEN_SortArraySimple(asSymbols)
         
-        '
         ' Loop round all the symbols
-        '
         For Each sSymbolKey In asSymbols
             Set objSymbol = New cSymbol
             objSymbol.Init Split(sSymbolKey, "|")(1)
@@ -218,15 +175,11 @@ Public Sub WriteSymbolsToRegistry(objSymbols As Collection)
 
 Dim objSymbol As cSymbol
 
-    '
     ' Clear the registry
-    '
     On Error Resume Next
     mobjReg.DeleteSetting App.Title, REG_SYMBOLS, vbNullString
 
-    '
     ' Loop round all the symbols
-    '
     For Each objSymbol In objSymbols
         objSymbol.Save
     Next
@@ -284,27 +237,13 @@ End Function
 
 
 Public Function PSMAIN_CheckForUpgrade(Optional ByVal bForceDownload As Boolean) As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSMAIN_CheckForUpgrade
 '
 '                          bForceDownload as boolean   - True if the products are upgraded without asking the user
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 June 2002   First created for Constructor
-'
-'                  PURPOSE: Checks the web site to see if there is an upgrade
+' Checks the web site to see if there is an upgrade
 '                           available and optionally upgrades the system if there is
-'
-'****************************************************************************
-'
 '
 Dim bReturn As Boolean
 Dim iMouse%
@@ -315,9 +254,7 @@ Dim asList$()
 Dim asTmp$()
 Dim iCnt%
 
-    '
     ' Get the server details
-    '
     On Error Resume Next
     iMouse = Screen.MousePointer
     Screen.MousePointer = vbHourglass
@@ -325,31 +262,23 @@ Dim iCnt%
     sDir = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UPGRADE_DIR, REG_UPGRADE_DIR_DEF)
     sDir = IIf(InStr(sDir, "/") = 1, "", "/") + Replace(sDir, " ", "%20")
     
-    '
     ' Check that the server is reachable
-    '
     If Not PSINET_Ping(sServer, 1000) Then
         MsgBox "Cannot reach the upgrade server at this time", vbCritical + vbOKOnly
     Else
     
-        '
         ' OK, the server is accessible so let's get the list of available upgrades
-        '
         sServer = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_UPGRADE_SERVER, REG_UPGRADE_SERVER_DEF)
         If Not PSINET_GetHTTPFile("http://" + sServer + sDir, sList) Then
             MsgBox "Problem reading the list of upgrades - " + Err.Description, vbCritical + vbOKOnly
         Else
         
-            '
             ' Determine the list of files from the names on the server
             ' They will follow this pattern; name_xxxx_yyyy_zzz where xxxx is the major version,
             ' yyyy is the minor and zzzz is the revision
-            '
             asList = Split(sList, "<A HREF=""" + sDir, compare:=vbTextCompare)
             
-            '
             ' Now loop through all the possible updates to see if there is one greater than we already are
-            '
             If UBound(asList) > 0 Then
                 lLatestMajor = App.Major
                 lLatestMinor = App.Minor
@@ -361,9 +290,7 @@ Dim iCnt%
                         lMinor = CLng(asTmp(2))
                         lRev = CLng(asTmp(3))
                         
-                        '
                         ' Check is this is the latest version
-                        '
                         If (lMajor > lLatestMajor) Or _
                            (lMajor = lLatestMajor And lMinor > lLatestMinor) Or _
                            (lMajor = lLatestMajor And lMinor = lLatestMinor And lRev > lLatestRev) Then
@@ -375,26 +302,20 @@ Dim iCnt%
                     End If
                 Next
                 
-                '
                 ' Have we got a later version to download
-                '
                 If sDownload = "" Then
                     MsgBox "The current version you are running (v" + Format(lLatestMajor) + "." + Format(lLatestMinor) + "." + Format(lRev) + ") is the latest version available" + vbCrLf + vbCrLf + "No need to upgrade", vbInformation + vbOKOnly
                 Else
                     If MsgBox("A later version of the application is available for download (v" + Format(lLatestMajor) + "." + Format(lLatestMinor) + "." + Format(lRev) + ")" + vbCrLf + vbCrLf + "Download and install it ?", vbQuestion + vbYesNo + vbDefaultButton1) = vbYes Then
                     
-                        '
                         ' Download the file
-                        '
                         sDownload = "http://" + sServer + sDir + "/" + Split(Split(sDownload, "<")(0), ">")(1)
                         sFilename = App.path + "\" + App.EXEName + "_download.exe"
                         If Not Z_GetHTTPFileToFile(sDownload, sFilename) Then
                             MsgBox "Problem downloading the upgrade - " + Err.Description, vbCritical + vbOKOnly
                         Else
                         
-                            '
                             ' Now swap the executable
-                            '
                             MsgBox App.Title + " now needs to restart to use the new version", vbInformation + vbOKOnly
                             Shell sFilename + " " + Command, vbHide
                             End
@@ -409,40 +330,24 @@ Dim iCnt%
         End If
     End If
 
-    '
     ' Return value to caller
-    '
     Screen.MousePointer = iMouse
     PSMAIN_CheckForUpgrade = bReturn
 
 End Function
 
 Private Function Z_GetHTTPFileToFile(ByVal sURL$, ByVal sFilename$, Optional ByVal lFlags& = (INTERNET_FLAG_RELOAD + INTERNET_FLAG_PRAGMA_NOCACHE), Optional vCookies, Optional vHeaders) As Boolean
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2002
-'
-'****************************************************************************
-'
-'                     NAME: Function PSINET_GetHTTPFile
 '
 '                     sURL$              - The URL of the file to get
 '                     sValue$            - Contents of the file
 '
 '                          ) As Boolean
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    25 April 2002   First created for WebSneak
-'
-'                  PURPOSE: Returns the contents of a remote HTTP file in
+' Returns the contents of a remote HTTP file in
 '                           sValue
 '                           If successful, then returns true
 '                           The sURL should be expressed as a full spec HTTP
 '                           URL
-'
-'****************************************************************************
-'
 '
 Const BUF_LENGTH = 32000
 Dim bReturn As Boolean
@@ -452,9 +357,7 @@ Dim lFile&, lLength&, lSession&, lTmp&, lFileLength&
 Dim bFinished As Boolean
 Dim iCnt%, iFile%
 
-    '
     ' Set the cookies
-    '
     On Error Resume Next
     Err.Clear
     If Not IsMissing(vCookies) Then
@@ -464,14 +367,10 @@ Dim iCnt%, iFile%
         Next iCnt
     End If
     
-    '
     ' Connect to the session
-    '
     lSession = InternetOpen(App.Title, INTERNET_OPEN_TYPE_DIRECT, "", "", 0)
     
-    '
     ' Get the file
-    '
     If Not IsMissing(vHeaders) Then
         vHeaders = Join(vHeaders, vbNullChar)
         lFile = InternetOpenUrl(lSession, sURL, vHeaders, Len(vHeaders), lFlags, 0)
@@ -482,24 +381,18 @@ Dim iCnt%, iFile%
         Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, PSINET_TranslateErrorCode(Err.LastDllError)
     Else
         
-        '
         ' Check that we got the file we wanted
-        '
         lLength = Len(sBuffer)
         Call HttpQueryInfo(lFile, HTTP_QUERY_STATUS_CODE, ByVal sBuffer, lLength, lTmp)
         If Left(sBuffer, 1) <> "2" Then
             Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, "STATUS:" + PSINET_GetHttpCodeMessage(Val(Left(sBuffer, lLength)))
         Else
-            '
             ' Get the file length
-            '
             lLength = Len(sBuffer)
             Call HttpQueryInfo(lFile, HTTP_QUERY_CONTENT_LENGTH, ByVal sBuffer, lLength, lTmp)
             lFileLength = CLng(Left(sBuffer, lLength))
             
-            '
             ' Download the file in chunks
-            '
             iFile = FreeFile
             If PSGEN_FileExists(sFilename) Then Kill sFilename
             Open sFilename For Binary Access Write As #iFile
@@ -523,9 +416,7 @@ Dim iCnt%, iFile%
     Call InternetCloseHandle(lSession)
     DoEvents
 
-    '
     ' Return value to caller
-    '
     Z_GetHTTPFileToFile = bReturn
 
 End Function
@@ -746,9 +637,7 @@ Dim asArgs$()
 Dim bHandled As Boolean
 Dim sExeFile$
     
-    '
     ' Need to check if we are being run with a command
-    '
     asArgs = Split(Command$, " ")
     bHandled = False
     If UBound(asArgs) > -1 Then
@@ -758,14 +647,10 @@ Dim sExeFile$
         End If
     End If
     
-    '
     ' Show the main dialog if we are not just running a command line
-    '
     If Not bHandled Then
     
-        '
         ' Check to see if this is the upgrade
-        '
         If App.EXEName Like "*_download" Then
             sExeFile = Split(App.EXEName, "_download")(0) + ".exe"
             If PSGEN_ProcessExists(sExeFile) > 0 Then
@@ -778,9 +663,7 @@ Dim sExeFile$
             End
         Else
             
-            '
             ' Check to see if the app is already running
-            '
             If PSGEN_ProcessExists(App.EXEName + ".exe") > 1 Then
                 End
             Else

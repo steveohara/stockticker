@@ -780,8 +780,16 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-    Dim mobjReg As New cRegistry
-    Dim mbDirty As Boolean
+'
+' Copyright (c) 2024, Pivotal Solutions and/or its affiliates. All rights reserved.
+' Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+'
+' This is the main settings window that contains all the general, non-stock
+' display settings
+'
+
+Dim mobjReg As New cRegistry
+Dim mbDirty As Boolean
     
 Private Sub chkAlwaysOnTop_Click()
     
@@ -948,9 +956,7 @@ Dim lTmp&
     ElseIf Index = 0 Then
         Unload Me
     
-    '
     ' Backup the registry to a file
-    '
     ElseIf Index = 2 Then
         sFilename = PSGEN_SelectSaveFile(cmdMain(Index).hWnd, "Backup Files" + vbNullChar + "*.bck", OFN_EXPLORER + OFN_OVERWRITEPROMPT + OFN_PATHMUSTEXIST + OFN_SHAREAWARE, "Save to File")
         If sFilename <> "" Then
@@ -963,17 +969,13 @@ Dim lTmp&
             End If
         End If
     
-    '
     ' Reload the registry from a file
-    '
     ElseIf Index = 3 Then
         sFilename = PSGEN_SelectOpenFile(cmdMain(Index).hWnd, "Backup Files" + vbNullChar + "*.bck", OFN_EXPLORER + OFN_OVERWRITEPROMPT + OFN_PATHMUSTEXIST + OFN_SHAREAWARE, "Save to File")
         If sFilename <> "" Then
             If MsgBox("Are you sure you want to restore these settings and lose your current values?", vbQuestion + vbYesNo + vbDefaultButton1) = vbYes Then
                 
-                '
                 ' Backup the original
-                '
                 Err.Clear
                 sBackup = App.path + "\backup_" + Format(Now, "ddmmyy_hhNNss") + ".bck"
                 sError = mobjReg.SaveToFile(sBackup, App.Title)
@@ -981,9 +983,7 @@ Dim lTmp&
                     MsgBox "Error whilst backing up settings to" + vbCrLf + vbCrLf + sBackup + vbCrLf + vbCrLf + sError, vbCritical
                 Else
                 
-                    '
                     ' Now delete the original and load the new values
-                    '
                     PSGEN_Log "Backup settings to " + sBackup
                     sError = mobjReg.LoadFromFile(sFilename, App.Title)
                     If sError = "" Then
@@ -1015,14 +1015,10 @@ Private Sub Form_Load()
 Dim sFont$
 Dim iCnt%
 
-    '
     ' Position the form in the middle of the display
-    '
     CentreForm Me
     
-    '
     ' Display the normal stuff
-    '
     txtProxy.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_PROXY)
     txtFrequency.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FREQUENCY, Format(REG_FREQUENCY_DEF))
     txtCurrency.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY)

@@ -1,28 +1,9 @@
 Attribute VB_Name = "GDIPlus"
-'****************************************************************************
 '
-'   Pivotal Solutions Ltd © 2008
+' Copyright (c) 2024, Pivotal Solutions and/or its affiliates. All rights reserved.
+' Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
 '
-'****************************************************************************
-'
-' LANGUAGE:             Microsoft Visual Basic V6
-'
-' MODULE NAME:          Pivotal_GDIPlus
-'
-' MODULE TYPE:          BASIC Module
-'
-' FILE NAME:            PSGDIPLUS.BAS
-'
-' MODIFICATION HISTORY: Steve O'Hara    31 August 2008   First created for StockTicker
-'
-' PURPOSE:              GDI+ Calls
-'
-'
-'****************************************************************************
-'
-'****************************************************
-' MODULE VARIABLE DECLARATIONS
-'****************************************************
+' GDI+ Calls
 '
 Option Explicit
 
@@ -78,7 +59,7 @@ Private Declare Function DeleteDC Lib "gdi32" (ByVal hDC As Long) As Long
 Private Declare Function CreateStreamOnHGlobal Lib "ole32" (ByRef hGlobal As Any, ByVal fDeleteOnRelease As Long, ByRef ppStream As IUnknown) As Long
 
 ' GDI+ functions
-Private Declare Function GdipLoadImageFromFile Lib "gdiplus.dll" (ByVal FileName As Long, GpImage As Long) As Long
+Private Declare Function GdipLoadImageFromFile Lib "gdiplus.dll" (ByVal filename As Long, GpImage As Long) As Long
 Private Declare Function GdiplusStartup Lib "gdiplus.dll" (Token As Long, gdipInput As GdiplusStartupInput, GdiplusStartupOutput As Long) As Long
 Private Declare Function GdipCreateFromHDC Lib "gdiplus.dll" (ByVal hDC As Long, GpGraphics As Long) As Long
 Private Declare Function GdipSetInterpolationMode Lib "gdiplus.dll" (ByVal Graphics As Long, ByVal InterMode As Long) As Long
@@ -105,8 +86,12 @@ Private Const InterpolationModeHighQualityBicubic = 7
 Private Const GDIP_WMF_PLACEABLEKEY = &H9AC6CDD7
 Private Const UnitPixel = 2
 
-' Initialises GDI Plus
 Public Function InitGDIPlus() As Long
+'
+' Initialises the GDI+ subsystem
+'
+' RETURN: Handle to the new GDI+ context
+'
     Dim Token    As Long
     Dim gdipInit As GdiplusStartupInput
     
@@ -115,13 +100,25 @@ Public Function InitGDIPlus() As Long
     InitGDIPlus = Token
 End Function
 
-' Frees GDI Plus
 Public Sub FreeGDIPlus(Token As Long)
+'
+' Destroys the GDI+ session
+'
     GdiplusShutdown Token
 End Sub
 
-' Loads the picture (optionally resized)
 Public Function LoadPictureGDIPlus(PicFile As String, Optional Width As Long = -1, Optional Height As Long = -1, Optional ByVal BackColor As Long = vbWhite, Optional RetainRatio As Boolean = False) As IPicture
+'
+' Loads the specified picture given the filename and will optionally resize it
+'
+' PicFile    - Full spec filename of the picture
+' Width      - Width to scale to
+' Height     - Height to scale to
+' BackColor  - Background colour to set for transparent regions
+' RetainRatio- True if the aspect ration should be preserved
+'
+' RETURN: Handle to the loaded image in memory
+'
     Dim hDC     As Long
     Dim hBitmap As Long
     Dim Img     As Long
@@ -152,8 +149,16 @@ Public Function LoadPictureGDIPlus(PicFile As String, Optional Width As Long = -
     Set LoadPictureGDIPlus = CreatePicture(hBitmap)
 End Function
 
-' Initialises the hDC to draw
 Private Sub InitDC(hDC As Long, hBitmap As Long, BackColor As Long, Width As Long, Height As Long)
+'
+' Initialises the canvas to draw on given by the hDC
+'
+' hDC        - Handle of the canvas
+' hBitmap    - Bitmap to draw
+' BackColor  - Background colour to set for transparent regions
+' Width      - Width to scale to
+' Height     - Height to scale to
+'
     Dim hBrush As Long
         
     ' Create a memory DC and select a bitmap into it, fill it in with the backcolor
@@ -166,8 +171,16 @@ Private Sub InitDC(hDC As Long, hBitmap As Long, BackColor As Long, Width As Lon
     DeleteObject SelectObject(hDC, hBrush)
 End Sub
 
-' Resize the picture using GDI plus
 Private Sub gdipResize(Img As Long, hDC As Long, Width As Long, Height As Long, Optional RetainRatio As Boolean = False)
+'
+' Resize the picture using GDI plus
+'
+' Img        - Handle of the memory image
+' hDC        - Canvas on which it is drawn
+' Width      - Width to scale to
+' Height     - Height to scale to
+' RetainRatio- True if the aspect ration should be preserved
+'
     Dim Graphics   As Long      ' Graphics Object Pointer
     Dim OrWidth    As Long      ' Original Image Width
     Dim OrHeight   As Long      ' Original Image Height
@@ -201,8 +214,13 @@ Private Sub gdipResize(Img As Long, hDC As Long, Width As Long, Height As Long, 
     GdipDeleteGraphics Graphics
 End Sub
 
-' Replaces the old bitmap of the hDC, Returns the bitmap and Deletes the hDC
 Private Sub GetBitmap(hDC As Long, hBitmap As Long)
+'
+' Replaces the old bitmap of the hDC, Returns the bitmap and Deletes the hDC
+'
+' hDC        - Canvas on which it is drawn
+' hBitmap    - Bitmap to draw
+'
     hBitmap = SelectObject(hDC, hBitmap)
     DeleteDC hDC
 End Sub
@@ -228,8 +246,18 @@ Private Function CreatePicture(hBitmap As Long) As IPicture
     Set CreatePicture = IPic
 End Function
 
-' Returns a resized version of the picture
+'
 Public Function Resize(Handle As Long, PicType As PictureTypeConstants, Width As Long, Height As Long, Optional BackColor As Long = vbWhite, Optional RetainRatio As Boolean = False) As IPicture
+'
+' Returns a resized version of the picture
+'
+' Handle     - Handle of the memory image
+' PicType    - Type of picture
+' Width      - Width to scale to
+' Height     - Height to scale to
+' BackColor  - Background colour to set for transparent regions
+' RetainRatio- True if the aspect ration should be preserved
+'
     Dim Img       As Long
     Dim hDC       As Long
     Dim hBitmap   As Long
@@ -259,19 +287,32 @@ Public Function Resize(Handle As Long, PicType As PictureTypeConstants, Width As
     End If
 End Function
 
-' Fills in the wmfPlacable header
 Private Sub FillInWmfHeader(WmfHeader As wmfPlaceableFileHeader, Width As Long, Height As Long)
+'
+' Fills in the wmfPlacable header
+'
+' WmfHeader  - File header
+' Width      - Width to scale to
+' Height     - Height to scale to
+'
     WmfHeader.BoundingBox.Right = Width
     WmfHeader.BoundingBox.Bottom = Height
     WmfHeader.Inch = 1440
     WmfHeader.Key = GDIP_WMF_PLACEABLEKEY
 End Sub
 
-
-
-'Loading the sample image to the picture box using GDI+
 Public Function LoadPictureFromStringGDIPlus(Pic As String, Optional Width As Long = -1, Optional Height As Long = -1, Optional ByVal BackColor As Long = vbWhite, Optional RetainRatio As Boolean = False) As IPicture
-
+'
+' Loading the sample image to the picture box using GDI+
+'
+' Pic        - Full spec filename of the picture
+' Width      - Width to scale to
+' Height     - Height to scale to
+' BackColor  - Background colour to set for transparent regions
+' RetainRatio- True if the aspect ration should be preserved
+'
+' RETURN: Handle to the loaded image in memory
+'
 Dim objImageStream As IUnknown
 Dim asByte() As Byte
 Dim hDC     As Long

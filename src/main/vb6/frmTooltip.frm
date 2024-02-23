@@ -29,34 +29,13 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-'****************************************************************************
 '
-'   Pivotal Solutions Ltd © 2008
+' Copyright (c) 2024, Pivotal Solutions and/or its affiliates. All rights reserved.
+' Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
 '
-'****************************************************************************
-'
-' LANGUAGE:             Microsoft Visual Basic V6.00
-'
-' MODULE NAME:          Pivotal_Preview
-'
-' MODULE TYPE:          BASIC Form
-'
-' FILE NAME:            PSPREVIEW.FRM
-'
-' MODIFICATION HISTORY: Steve O'Hara    28 August 2008   First created for StockTicker
-'
-' PURPOSE:              Provides a way of showing a preview of data from
-'                           Yahoo
-'
-'
-'****************************************************************************
-'
-'****************************************************
-' MODULE VARIABLE DECLARATIONS
-'****************************************************
+' Provides a way of showing a preview of data (summarised/chart etc.)
 '
 Option Explicit
-
 
     Private msCaption$
     Private mstPoint As POINTAPI
@@ -68,19 +47,20 @@ Private Sub Form_Activate()
 End Sub
 
 Public Sub ShowToolTip(ByVal objFont As Font, ByVal sText$)
-
+'
+' Provides a way of showing a preview of data (summarised/chart etc.)
+'
+' objFont - Font to use to display text
+' sText   - Text to display
+'
 Dim lWidth&, lHeight&, lLeft&, lTop&
 Dim rTextWidth#, rTextHeight#
 
-    '
     ' Check if we need to do anything
-    '
     timClose.Enabled = False
     If Not Visible Or sText <> msCaption Then
 
-        '
         ' Get all the metrics
-        '
         Cls
         Font.Charset = objFont.Charset
         Font.size = Font.size
@@ -90,9 +70,7 @@ Dim rTextWidth#, rTextHeight#
         rTextHeight = TextHeight(sText) + 4
         rTextWidth = TextWidth(sText) + 6
         
-        '
         ' Position the tooltip
-        '
         Call GetCursorPos(mstPoint)
         lLeft = mstPoint.X - (rTextWidth / 3)
         If lLeft + rTextWidth > lWidth Then
@@ -105,9 +83,7 @@ Dim rTextWidth#, rTextHeight#
         End If
         Move lLeft * Screen.TwipsPerPixelX, lTop * Screen.TwipsPerPixelY, rTextWidth * Screen.TwipsPerPixelX, rTextHeight * Screen.TwipsPerPixelY
         
-        '
         ' Print the text
-        '
         CurrentX = 2
         CurrentY = 1
         Print sText;
@@ -124,7 +100,9 @@ Dim rTextWidth#, rTextHeight#
 End Sub
 
 Public Sub HideTooltip()
-    
+'
+' Hides the tooltip window
+'
     Visible = False
     timClose.Enabled = False
     

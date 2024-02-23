@@ -322,31 +322,12 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-'****************************************************************************
+
 '
-'   Pivotal Solutions Ltd © 2008
+' Copyright (c) 2024, Pivotal Solutions and/or its affiliates. All rights reserved.
+' Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
 '
-'****************************************************************************
-'
-' LANGUAGE:             Microsoft Visual Basic V6.00
-'
-' MODULE NAME:          Pivotal_Preview
-'
-' MODULE TYPE:          BASIC Form
-'
-' FILE NAME:            PSPREVIEW.FRM
-'
-' MODIFICATION HISTORY: Steve O'Hara    28 August 2008   First created for StockTicker
-'
-' PURPOSE:              Provides a way of showing a preview of data from
-'                           Yahoo
-'
-'
-'****************************************************************************
-'
-'****************************************************
-' MODULE VARIABLE DECLARATIONS
-'****************************************************
+' Provides a way of showing a preview of data from online data sources
 '
 Option Explicit
 
@@ -471,7 +452,10 @@ Private Sub timOpen_Timer()
 End Sub
 
 Public Sub HideChart(Optional ByVal bImmediately As Boolean)
-    
+'
+' Hides the chart window
+'
+
     If bImmediately Then
         timOpen.Enabled = False
         timClose.Enabled = False
@@ -543,24 +527,10 @@ Dim stRect As RECT
 End Sub
 
 Private Sub Z_ShowChart(objStockSymbol As Object)
-'****************************************************************************
-'
-'   Pivotal Solutions Ltd © 2008
-'
-'****************************************************************************
-'
-'                     NAME: Sub Z_ShowChart
 '
 '                     sSymbol$           - Symbol to show chart for
 '
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    28 August 2008   First created for StockTicker
-'
-'                  PURPOSE: Shows a chart window
-'
-'****************************************************************************
-'
+' Shows a chart window
 '
 Dim sTmp$, sSymbol$
 Dim lWidth&, lToken&, lTmp&, lLeft&, lTop&, lHeight&
@@ -574,9 +544,7 @@ Dim iCnt%
 Dim objChart As cChart
 Dim bLoaded As Boolean
 
-    '
     ' Determine the type of symbol
-    '
     On Error Resume Next
     timClose.Enabled = False
     If TypeOf objStockSymbol Is cSymbol Then
@@ -589,9 +557,7 @@ Dim bLoaded As Boolean
         sSymbol = objStock.Code
     End If
 
-    '
     ' Load and position the display
-    '
     Z_ShowHeaders
     lLeft = mlLeftPos
     lTop = (frmMain.Top + frmMain.Height) / Screen.TwipsPerPixelY
@@ -612,9 +578,7 @@ Dim bLoaded As Boolean
     picGraph.Print sSymbol
     DoEvents
     
-    '
     ' Draw the useful text
-    '
     Cls
     CurrentX = LEFT_MARGIN
     CurrentY = 5
@@ -799,9 +763,7 @@ Dim bLoaded As Boolean
     Print "Updated:" + Format(objSymbol.LastUpdate)
     Line (512, 0)-(687, 339), vbWhite, B
     
-    '
     ' Get the graph
-    '
     bLoaded = False
     Set objChart = mobjChartCache.Item(sSymbol + "-" + Format(mbOneDay))
     If Not objChart Is Nothing Then
@@ -823,10 +785,8 @@ Dim bLoaded As Boolean
             Call PSINET_GetHTTPFile(sChartUrl + "?symbol=" + sSymbol + ".N&duration=" + IIf(mbOneDay, "1", "5") + "&headerType=quote&width=500&height=342", sTmp, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=10000)
         End If
         
-        '
         ' Draw the graph
         ' Initialise GDI+
-        '
         lToken = InitGDIPlus
         
         ' Load pictures
@@ -847,22 +807,8 @@ Dim bLoaded As Boolean
 End Sub
 
 Private Sub Z_ShowDaySummary()
-'****************************************************************************
 '
-'   Pivotal Solutions Ltd © 2008
-'
-'****************************************************************************
-'
-'                     NAME: Sub Z_ShowDaySummary
-'
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    28 January 2024   First created for StockTicker
-'
-'                  PURPOSE: Shows a summary of the day position
-'
-'****************************************************************************
-'
+' Shows a summary of the day position
 '
 Dim lWidth&, lLeft&, lTop&, lHeight&, lWidest&, lTableTop&
 Dim lTextColor&, lUpColor&, lDownColor&, lUpArrowColor&, lDownArrowColor&
@@ -874,9 +820,7 @@ Dim i%, iSortColumn%
     On Error Resume Next
     timClose.Enabled = False
         
-    '
     ' Draw the useful text
-    '
     Cls
     Font.Charset = frmMain.Font.Charset
     Font.size = frmMain.Font.size
@@ -900,14 +844,10 @@ Dim i%, iSortColumn%
     lblHeader(3).Move 220, lblHeader(0).Top
     lTableTop = lblHeader(0).Top + lblHeader(0).Height + 2
     
-    '
     ' Show the sort indicator
-    '
     Z_ShowSortIndicator sSortOrder = "asc", lblHeader(iSortColumn)
     
-    '
     ' Each stock sumarised for the day
-    '
     CurrentY = lTableTop + 2
     CurrentX = 10
     rTotalChange = 0
@@ -939,17 +879,13 @@ Dim i%, iSortColumn%
     Next
     lWidest = lWidest + 5
     
-    '
     ' Add a line under the title
-    '
     ForeColor = lTextColor
     lTop = CurrentY
     Line (10, lTableTop)-(lWidest, lTableTop)
     CurrentY = lTop
     
-    '
     ' Add the total value
-    '
     FontBold = True
     CurrentY = CurrentY + 5
     Line (10, CurrentY)-(lWidest, CurrentY)
@@ -960,9 +896,7 @@ Dim i%, iSortColumn%
     ForeColor = IIf(rTotalChange > 0, lUpColor, IIf(rTotalChange < 0, lDownColor, lTextColor))
     Print FormatCurrencyValue(sCurrencySymbol, rTotalChange) & " (" + Format(rTotalChange / (frmMain.mobjTotal.TotalValue - rTotalChange), "0.00%") + ")"
     
-    '
     ' Resize the window to match the content
-    '
     lLeft = mlLeftPos
     lWidest = lWidest + 10
     lTop = frmMain.Top + frmMain.Height
@@ -978,22 +912,8 @@ Dim i%, iSortColumn%
 End Sub
 
 Private Sub Z_ShowSummary()
-'****************************************************************************
 '
-'   Pivotal Solutions Ltd © 2008
-'
-'****************************************************************************
-'
-'                     NAME: Sub Z_ShowSummary
-'
-'             DEPENDENCIES: NONE
-'
-'     MODIFICATION HISTORY: Steve O'Hara    28 January 2024   First created for StockTicker
-'
-'                  PURPOSE: Shows a summary of the position
-'
-'****************************************************************************
-'
+' Shows a summary of the position
 '
 Dim lWidth&, lLeft&, lTop&, lHeight&, lWidest&, lTableTop&
 Dim lTextColor&, lUpColor&, lDownColor&, lUpArrowColor&, lDownArrowColor&
@@ -1005,9 +925,7 @@ Dim i%, iSortColumn%
     On Error Resume Next
     timClose.Enabled = False
         
-    '
     ' Draw the useful text
-    '
     Cls
     Font.Charset = frmMain.Font.Charset
     Font.size = frmMain.Font.size
@@ -1043,14 +961,10 @@ Dim i%, iSortColumn%
     
     lTableTop = lblSummaryHeader(0).Top + lblSummaryHeader(0).Height + 2
     
-    '
     ' Show the sort indicator
-    '
     Z_ShowSortIndicator sSortOrder = "asc", lblSummaryHeader(iSortColumn)
     
-    '
     ' Each stock sumarised for the day
-    '
     CurrentY = lTableTop + 2
     CurrentX = 10
     For Each objStock In Z_SortSummaryCollection(frmMain.mobjSummaryStocks, sSortOrder = "asc", iSortColumn)
@@ -1091,17 +1005,13 @@ Dim i%, iSortColumn%
     Next
     lWidest = lWidest + 30
     
-    '
     ' Add a line under the title
-    '
     ForeColor = lTextColor
     lTop = CurrentY
     Line (10, lTableTop)-(lWidest, lTableTop)
     CurrentY = lTop
     
-    '
     ' Add the total value
-    '
     CurrentY = CurrentY + 5
     Line (10, CurrentY)-(lWidest, CurrentY)
     CurrentY = CurrentY + 5
@@ -1126,9 +1036,7 @@ Dim i%, iSortColumn%
     ForeColor = IIf(frmMain.mobjTotal.TotalValue > frmMain.mobjTotal.TotalCost, lUpColor, IIf(frmMain.mobjTotal.TotalValue < frmMain.mobjTotal.TotalCost, lDownColor, lTextColor))
     Print "  " + frmMain.mobjTotal.FormattedLossPercent
             
-    '
     ' Resize the window to match the content
-    '
     lLeft = mlLeftPos
     lWidest = lWidest + 10
     lTop = frmMain.Top + frmMain.Height

@@ -435,6 +435,12 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+'
+' Copyright (c) 2024, Pivotal Solutions and/or its affiliates. All rights reserved.
+' Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+'
+' Contains the interface for adding/editing stock transactions
+'
     Dim mobjReg As New cRegistry
     Public mobjSymbols As New Collection
     Dim mbDirty As Boolean
@@ -443,9 +449,7 @@ Attribute VB_Exposed = False
     
 Private Sub chkShow_Click(Index As Integer)
 
-    '
     ' Save the changes
-    '
     txtSymbol_Change 0
 
 End Sub
@@ -455,9 +459,7 @@ Private Sub cmdList_Click(Index As Integer)
 Dim objSymbol As New cSymbol
 Dim iIndex%
 
-    '
     ' Remove the selected symbol
-    '
     If Index = 0 Then
         If lstSymbols.ListIndex > -1 Then
             mobjSymbols.Remove Format(lstSymbols.ItemData(lstSymbols.ListIndex))
@@ -472,9 +474,7 @@ Dim iIndex%
             End If
         End If
     
-    '
     ' Create a new symbol and add it to the list
-    '
     ElseIf Index = 1 Then
         objSymbol.RegKey = Format(DateDiff("s", DateSerial(2008, 1, 1), Now) + Format(lstSymbols.ListCount))
         objSymbol.Code = "YHOO"
@@ -508,14 +508,10 @@ End Sub
 
 Private Sub Form_Load()
 
-    '
     ' Position the form in the middle of the display
-    '
     CentreForm Me
     
-    '
     ' Display the symbols and select the first one
-    '
     Set mobjSymbols = ReadSymbolsFromRegistry
     Z_DisplaySymbolList
     If lstSymbols.ListCount > 0 Then lstSymbols.ListIndex = 0
@@ -552,15 +548,11 @@ Private Sub Z_DisplaySymbol(ByVal sSymbolKey$)
 
 Dim objSymbol As New cSymbol
 
-    '
     ' Get the symbol from the local store
-    '
     On Error Resume Next
     Set objSymbol = mobjSymbols.Item(sSymbolKey)
     
-    '
     ' Display the values to the screen
-    '
     txtSymbol(0).Text = objSymbol.Code
     txtSymbol(3).Text = objSymbol.CurrencyName
     txtSymbol(1).Text = objSymbol.Alias
@@ -597,9 +589,7 @@ Private Sub Z_SaveSymbol()
 Dim objSymbol As New cSymbol
 Dim iIndex%
 
-    '
     ' Save the values from the screen
-    '
     On Error Resume Next
     If lstSymbols.ListIndex > -1 Then
         objSymbol.RegKey = lstSymbols.ItemData(lstSymbols.ListIndex)
@@ -630,15 +620,11 @@ Dim iIndex%
         objSymbol.HighAlarmSoundEnabled = chkShow(15).Value = vbChecked
         objSymbol.HighAlarmValue = PSGEN_GetLocaleValue(txtSymbol(7).Text)
         
-        '
         ' Put them into the local storage
-        '
         mobjSymbols.Remove objSymbol.RegKey
         mobjSymbols.Add objSymbol, objSymbol.RegKey
         
-        '
         ' Rearrange the list to reflect any change names
-        '
         lstSymbols.List(lstSymbols.ListIndex) = objSymbol.DisplayName
     End If
     
