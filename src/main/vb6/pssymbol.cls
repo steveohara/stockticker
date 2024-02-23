@@ -57,8 +57,12 @@ Option Explicit
     Public FromNasdaqRealTime As Boolean
     Public LastUpdate As Date
 
-
 Public Sub Init(ByVal sRegKey)
+'
+' Initiliases the sybol information by reading the data from the registry using the specific key
+'
+' sRegKey - Key of the symbol (transaction)
+'
 
     On Error Resume Next
     RegKey = sRegKey
@@ -104,6 +108,9 @@ Public Sub Init(ByVal sRegKey)
 End Sub
 
 Public Sub Save()
+'
+' Saves this symbol information to the registry
+'
 
     On Error Resume Next
     mobjReg.SaveSetting App.Title, REG_SYMBOLS + "\" + RegKey, REG_SYMBOL, UCase(Trim(Code))
@@ -136,36 +143,66 @@ Public Sub Save()
 End Sub
 
 Public Function DisplayName$()
+'
+' Returns the display name of the symbol
+'
+' RETURN Lebel if specified or symbol name if not
+'
 
     DisplayName = IIf(Alias = "", Code, Alias)
 
 End Function
 
 Public Function FormattedValue$()
+'
+' Returns the current formatted price of this stock symbol
+'
+' RETURN Formated price
+'
 
     FormattedValue = FormatCurrencyValue(CurrencySymbol, CurrentPrice)
 
 End Function
 
 Public Function FormattedTotalValue$()
+'
+' Returns the current formatted value of this stock symbol
+'
+' RETURN Formated value
+'
 
     FormattedTotalValue = FormatCurrencyValue(CurrencySymbol, CurrentPrice * Shares)
 
 End Function
 
 Public Function FormattedCost$()
+'
+' Returns the current formatted cost of this stock symbol
+'
+' RETURN Formated cost
+'
 
     FormattedCost = FormatCurrencyValue(CurrencySymbol, Price)
 
 End Function
 
 Public Function FormattedTotalCost$()
+'
+' Returns the current formatted total cost of this stock symbol
+'
+' RETURN Formated total cost
+'
 
     FormattedTotalCost = FormatCurrencyValue(CurrencySymbol, Price * Shares)
 
 End Function
 
 Public Function SortKey$()
+'
+' Returns a key that ensures this symbol is displayed sorted by its ticker symbol and the registry position
+'
+' RETURN Key to use for sorting
+'
 
     SortKey = Code & Space(10 - Len(Code)) & RegKey & Space(20 - Len(RegKey))
 
