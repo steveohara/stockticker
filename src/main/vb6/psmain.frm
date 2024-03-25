@@ -1107,6 +1107,9 @@ Private Function Z_GetSymbolData()
 '
 ' Returns the user counts display string
 '
+Static objOldValues As New Collection
+Static objOldPercents As New Collection
+
 Dim objSymbol As cSymbol
 Dim objStock As cStock
 Dim sSymbols$
@@ -1114,7 +1117,7 @@ Dim sURL$, sCSV$
 Dim asTmp As Variant
 Dim sSymbol As Variant
 Dim iCnt%
-Dim rTotalInvested#, rTotalValue#, rRate#, rOldPrice#, rCurrentValue#
+Dim rTotalInvested#, rTotalValue#, rRate#, rOldPrice#, rOldPercent#, rCurrentValue#
 Dim sCurrencySymbol$
 Dim objSymLookup As New Collection
 Dim objSymsToLookup As New Collection
@@ -1128,7 +1131,6 @@ Dim sLine As Variant
 Dim SymbolInfo As Variant
 Dim objAlarm As frmAlarm
 Dim rCurrentPrice#, rStartPrice#
-Static objOldValues As New Collection
 Dim bFound As Boolean
 Dim rDayLow#, rDayHigh#, rDayOpen#
 Dim iCols As Integer
@@ -1567,44 +1569,46 @@ Dim bGotExchangeRates As Boolean
                 
                 ' Check for an alarm condition
                 If objOldValues Is Nothing Then Set objOldValues = New Collection
+                If objOldPercents Is Nothing Then Set objOldPercents = New Collection
+                rOldPrice = 0
                 rOldPrice = objOldValues.Item(objSymbol.Code)
-                If Err = 0 Then
-                    If objSymbol.LowAlarmEnabled Then
-                        
-                        ' If this is a percentage change then base it on the last recorded value
-                        If objSymbol.LowAlarmIsPercent Then
-                            If objSymbol.CurrentPrice <= ((objSymbol.LowAlarmValue / 100) * rOldPrice) Then
-                                Set objAlarm = New frmAlarm
-                                Call objAlarm.ShowLowAlarm(objSymbol)
-                                Call objOldValues.Add(objSymbol.CurrentPrice, objSymbol.Code)
-                            End If
-                        Else
-                            If objSymbol.CurrentPrice <= objSymbol.LowAlarmValue And rOldPrice > objSymbol.LowAlarmValue Then
-                                Set objAlarm = New frmAlarm
-                                Call objAlarm.ShowLowAlarm(objSymbol)
-                            End If
-                            Call objOldValues.Add(objSymbol.CurrentPrice, objSymbol.Code)
-                        End If
-                    End If
+                rOldPercent = 0
+                rOldPercent = objOldValues.Item(objSymbol.Code)
+                If objSymbol.LowAlarmEnabled Then
                     
-                    If objSymbol.HighAlarmEnabled And Not objSymbol.AlarmShowing Then
-                        If objSymbol.LowAlarmIsPercent Then
-                            If objSymbol.CurrentPrice >= ((objSymbol.HighAlarmValue / 100) * rOldPrice) Then
-                                Set objAlarm = New frmAlarm
-                                Call objAlarm.ShowHighAlarm(objSymbol)
-                                Call objOldValues.Add(objSymbol.CurrentPrice, objSymbol.Code)
-                            End If
-                        Else
-                            If objSymbol.CurrentPrice >= objSymbol.HighAlarmValue And rOldPrice < objSymbol.HighAlarmValue Then
-                                Set objAlarm = New frmAlarm
-                                Call objAlarm.ShowHighAlarm(objSymbol)
-                            End If
+                    ' If this is a percentage change then base it on the last recorded value
+                    If objSymbol.LowAlarmIsPercent Then
+                        If objSymbol.PercentChange <= objSymbol.LowAlarmValue And (rOldPercent = 0 Or rOldPercent > objSymbol.LowAlarmValue) Then
+                            Set objAlarm = New frmAlarm
+                            Call objAlarm.ShowLowAlarm(objSymbol)
                             Call objOldValues.Add(objSymbol.CurrentPrice, objSymbol.Code)
                         End If
+                    Else
+                        If objSymbol.CurrentPrice <= objSymbol.LowAlarmValue And (rOldPrice = 0 Or rOldPrice > objSymbol.LowAlarmValue) Then
+                            Set objAlarm = New frmAlarm
+                            Call objAlarm.ShowLowAlarm(objSymbol)
+                        End If
+                        Call objOldValues.Add(objSymbol.CurrentPrice, objSymbol.Code)
                     End If
-                Else
-                    Call objOldValues.Add(objSymbol.CurrentPrice, objSymbol.Code)
                 End If
+                
+                If objSymbol.HighAlarmEnabled And Not objSymbol.AlarmShowing Then
+                    If objSymbol.HighAlarmIsPercent Then
+                        If objSymbol.PercentChange >= objSymbol.HighAlarmValue And (rOldPercent = 0 Or rOldPercent < objSymbol.HighAlarmValue) Then
+                            Set objAlarm = New frmAlarm
+                            Call objAlarm.ShowHighAlarm(objSymbol)
+                            Call objOldValues.Add(objSymbol.CurrentPrice, objSymbol.Code)
+                        End If
+                    Else
+                        If objSymbol.CurrentPrice >= objSymbol.HighAlarmValue And (rOldPrice = 0 Or rOldPrice < objSymbol.HighAlarmValue) Then
+                            Set objAlarm = New frmAlarm
+                            Call objAlarm.ShowHighAlarm(objSymbol)
+                        End If
+                        Call objOldValues.Add(objSymbol.CurrentPrice, objSymbol.Code)
+                    End If
+                End If
+                Call objOldValues.Add(objSymbol.CurrentPrice, objSymbol.Code)
+                Call objOldPercents.Add(objSymbol.PercentChange, objSymbol.Code)
             End If
         Next
     End If

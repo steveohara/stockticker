@@ -153,6 +153,28 @@ Public Function DisplayName$()
 
 End Function
 
+Public Function PercentChange#()
+'
+' Returns the percentage cange between the current price and the cost
+'
+' RETURN Percentage change
+'
+
+    PercentChange = ((CurrentPrice - Price) * 100) / Price
+
+End Function
+
+Public Function FormattedPercentChange$()
+'
+' Returns the percentage cange between the current price and the cost
+'
+' RETURN Percentage change
+'
+
+    FormattedPercentChange = Format((CurrentPrice - Price) / Price, "0.00%")
+
+End Function
+
 Public Function FormattedValue$()
 '
 ' Returns the current formatted price of this stock symbol

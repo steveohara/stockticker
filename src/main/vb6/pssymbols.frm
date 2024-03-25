@@ -26,7 +26,7 @@ Begin VB.Form frmSymbols
          Index           =   14
          Left            =   3075
          TabIndex        =   22
-         ToolTipText     =   "Treat the value as a percentage drop"
+         ToolTipText     =   "Treat the value as a percentage of the base cost"
          Top             =   360
          Width           =   1230
       End
@@ -36,7 +36,7 @@ Begin VB.Form frmSymbols
          Index           =   13
          Left            =   360
          TabIndex        =   20
-         ToolTipText     =   "Current price that this stock is being traded at"
+         ToolTipText     =   "Enable an alarm to trigger if price rises above a threshold"
          Top             =   30
          Width           =   1695
       End
@@ -46,7 +46,7 @@ Begin VB.Form frmSymbols
          Index           =   15
          Left            =   3075
          TabIndex        =   23
-         ToolTipText     =   "Sound an audible alert when the alrm is triggered"
+         ToolTipText     =   "Sound an audible alert when the alarm is triggered"
          Top             =   630
          Width           =   1395
       End
@@ -66,6 +66,7 @@ Begin VB.Form frmSymbols
          Index           =   7
          Left            =   180
          TabIndex        =   40
+         ToolTipText     =   "Value of stock above which will trigger an alarm"
          Top             =   420
          Width           =   1305
       End
@@ -91,7 +92,7 @@ Begin VB.Form frmSymbols
          Index           =   12
          Left            =   3075
          TabIndex        =   19
-         ToolTipText     =   "Sound an audible alert when the alrm is triggered"
+         ToolTipText     =   "Sound an audible alert when the alarm is triggered"
          Top             =   630
          Width           =   1395
       End
@@ -101,7 +102,7 @@ Begin VB.Form frmSymbols
          Index           =   10
          Left            =   360
          TabIndex        =   16
-         ToolTipText     =   "Current price that this stock is being traded at"
+         ToolTipText     =   "Enable an alarm to trigger if price drops below a threshold"
          Top             =   30
          Width           =   1695
       End
@@ -111,7 +112,7 @@ Begin VB.Form frmSymbols
          Index           =   11
          Left            =   3075
          TabIndex        =   18
-         ToolTipText     =   "Treat the value as a percentage rise"
+         ToolTipText     =   "Treat the value as a percentage of the base cost"
          Top             =   360
          Width           =   1230
       End
@@ -123,6 +124,7 @@ Begin VB.Form frmSymbols
          Index           =   1
          Left            =   270
          TabIndex        =   38
+         ToolTipText     =   "Value of stock below which will trigger an alarm"
          Top             =   420
          Width           =   1215
       End

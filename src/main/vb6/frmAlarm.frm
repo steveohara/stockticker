@@ -84,7 +84,7 @@ Begin VB.Form frmAlarm
          Index           =   8
          Left            =   120
          TabIndex        =   15
-         Top             =   1590
+         Top             =   1470
          Width           =   1005
       End
       Begin VB.Label lblValue 
@@ -104,7 +104,7 @@ Begin VB.Form frmAlarm
          Index           =   8
          Left            =   1410
          TabIndex        =   14
-         Top             =   1590
+         Top             =   1470
          Width           =   1275
       End
       Begin VB.Label lblLabel 
@@ -128,7 +128,7 @@ Begin VB.Form frmAlarm
          Index           =   6
          Left            =   120
          TabIndex        =   12
-         Top             =   690
+         Top             =   660
          Width           =   1005
       End
       Begin VB.Label lblLabel 
@@ -140,7 +140,7 @@ Begin VB.Form frmAlarm
          Index           =   5
          Left            =   120
          TabIndex        =   11
-         Top             =   990
+         Top             =   930
          Width           =   1005
       End
       Begin VB.Label lblLabel 
@@ -152,7 +152,7 @@ Begin VB.Form frmAlarm
          Index           =   4
          Left            =   120
          TabIndex        =   10
-         Top             =   1290
+         Top             =   1200
          Width           =   1005
       End
       Begin VB.Label lblValue 
@@ -192,7 +192,7 @@ Begin VB.Form frmAlarm
          Index           =   5
          Left            =   1410
          TabIndex        =   8
-         Top             =   690
+         Top             =   660
          Width           =   1275
       End
       Begin VB.Label lblValue 
@@ -212,7 +212,7 @@ Begin VB.Form frmAlarm
          Index           =   6
          Left            =   1410
          TabIndex        =   7
-         Top             =   990
+         Top             =   930
          Width           =   1275
       End
       Begin VB.Label lblValue 
@@ -232,7 +232,7 @@ Begin VB.Form frmAlarm
          Index           =   7
          Left            =   1410
          TabIndex        =   6
-         Top             =   1290
+         Top             =   1200
          Width           =   1275
       End
    End
@@ -289,7 +289,7 @@ Begin VB.Form frmAlarm
          Index           =   1
          Left            =   120
          TabIndex        =   23
-         Top             =   690
+         Top             =   660
          Width           =   1005
       End
       Begin VB.Label lblLabel 
@@ -301,7 +301,7 @@ Begin VB.Form frmAlarm
          Index           =   2
          Left            =   120
          TabIndex        =   22
-         Top             =   990
+         Top             =   930
          Width           =   1005
       End
       Begin VB.Label lblLabel 
@@ -313,7 +313,7 @@ Begin VB.Form frmAlarm
          Index           =   3
          Left            =   120
          TabIndex        =   21
-         Top             =   1290
+         Top             =   1200
          Width           =   1005
       End
       Begin VB.Label lblValue 
@@ -355,7 +355,7 @@ Begin VB.Form frmAlarm
          Index           =   1
          Left            =   1410
          TabIndex        =   19
-         Top             =   690
+         Top             =   660
          Width           =   1215
       End
       Begin VB.Label lblValue 
@@ -375,7 +375,7 @@ Begin VB.Form frmAlarm
          Index           =   2
          Left            =   1410
          TabIndex        =   18
-         Top             =   990
+         Top             =   930
          Width           =   1215
       End
       Begin VB.Label lblValue 
@@ -391,11 +391,11 @@ Begin VB.Form frmAlarm
             Strikethrough   =   0   'False
          EndProperty
          ForeColor       =   &H00FFFFFF&
-         Height          =   195
+         Height          =   615
          Index           =   3
          Left            =   1410
          TabIndex        =   17
-         Top             =   1290
+         Top             =   1200
          Width           =   1215
       End
    End
@@ -502,6 +502,7 @@ Dim sFilename$
     End If
     lblPercent.Visible = objSymbol.LowAlarmIsPercent
     Call Z_DisplaySymbol(objSymbol)
+    SetFocus
 
 End Sub
 
@@ -527,6 +528,7 @@ Dim sFilename$
     End If
     lblPercent.Visible = objSymbol.HighAlarmIsPercent
     Call Z_DisplaySymbol(objSymbol)
+    SetFocus
 
 End Sub
 
@@ -554,7 +556,7 @@ Dim lUpColor&, lDownColor&
         lblValue(1).Caption = objSymbol.FormattedCost
         lblValue(2).Caption = Format(objSymbol.Shares)
         lblValue(3).ForeColor = IIf(objSymbol.CurrentPrice > objSymbol.Price, lUpColor, IIf(objSymbol.CurrentPrice < objSymbol.Price, lDownColor, frmPreview.ForeColor))
-        lblValue(3).Caption = FormatCurrencyValueWithSymbol(objSymbol.CurrencySymbol, objSymbol.CurrencyName, objSymbol.Shares * (objSymbol.CurrentPrice - objSymbol.Price))
+        lblValue(3).Caption = FormatCurrencyValueWithSymbol(objSymbol.CurrencySymbol, objSymbol.CurrencyName, objSymbol.Shares * (objSymbol.CurrentPrice - objSymbol.Price)) & vbCrLf & "(" & objSymbol.FormattedPercentChange & ")"
     
         lblValue(4).Caption = FormatCurrencyValue(objSymbol.CurrencySymbol, objSymbol.DayStart)
         lblValue(5).Caption = FormatCurrencyValue(objSymbol.CurrencySymbol, objSymbol.DayLow)
