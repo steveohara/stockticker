@@ -23,7 +23,7 @@ Option Explicit
 
     Public Code$
     Public DisplayName$
-    Public NumberOfShares&
+    Public NumberOfShares#
     Public TotalCost#
     Public TotalValue#
     Public CurrentPrice#
@@ -34,7 +34,7 @@ Option Explicit
     Public Position As New cRegion
     
     
-Public Sub AddStock(ByVal lNumbeOfShares&, ByVal rPrice#)
+Public Sub AddStock(ByVal rNumbeOfShares#, ByVal rPrice#)
 '
 ' Adds the specified amount of sahes by aggregating the total cost
 '
@@ -42,9 +42,9 @@ Public Sub AddStock(ByVal lNumbeOfShares&, ByVal rPrice#)
 ' rPrice#         - Price paid for these shares
 '
     
-    NumberOfShares = NumberOfShares + lNumbeOfShares
-    TotalCost = TotalCost + (lNumbeOfShares * rPrice)
-    TotalValue = lNumbeOfShares * CurrentPrice
+    NumberOfShares = NumberOfShares + rNumbeOfShares
+    TotalCost = TotalCost + (rNumbeOfShares * rPrice)
+    TotalValue = rNumbeOfShares * CurrentPrice
     
 End Sub
 

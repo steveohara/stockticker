@@ -624,7 +624,11 @@ Dim bLoaded As Boolean
         
         Print "Shares:";
         CurrentX = LEFT_MARGIN_VALUE
-        Print Format(objSymbol.Shares, "#,###,##0")
+        If CDbl(Format(objSymbol.Shares, "0.000")) > CDbl(Format(objSymbol.Shares, "0")) Then
+            Print Format(objSymbol.Shares, "#,###,##0.00")
+        Else
+            Print Format(objSymbol.Shares, "#,###,##0")
+        End If
         CurrentX = LEFT_MARGIN
         CurrentY = CurrentY + 1
         
@@ -984,7 +988,11 @@ Dim i%, iSortColumn%
         
         CurrentX = 210
         ForeColor = lTextColor
-        Print Format(objStock.NumberOfShares, "#,###,##0");
+        If CDbl(Format(objStock.NumberOfShares, "0.000")) > CDbl(Format(objStock.NumberOfShares, "0")) Then
+            Print Format(objStock.NumberOfShares, "#,###,##0.00");
+        Else
+            Print Format(objStock.NumberOfShares, "#,###,##0");
+        End If
         
         CurrentX = 280
         Print FormatCurrencyValue(sCurrencySymbol, ConvertCurrency(objStock, objStock.TotalCost));
