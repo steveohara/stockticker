@@ -405,7 +405,7 @@ Private Sub Class_Initialize()
 
     ' Set the default name
     CompanyName = DEF_COMPANY_NAME
-    REGISTRY_ROOT = RegistryClasses.RegLocalMachine
+    REGISTRY_ROOT = RegistryClasses.RegCurrentUser
 
 End Sub
 Public Function GetMimeType$(ByVal sType$)
