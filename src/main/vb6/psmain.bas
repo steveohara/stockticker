@@ -9,8 +9,8 @@ Option Explicit
 
     ' Version number form the build system
     Public Const VERSION_NAME = "Pivotal Stock Ticker (pivotalstockticker.exe)"
-    Public Const VERSION_NUMBER = "3.5.9"
-    Public Const VERSION_TIMESTAMP = "24-May-2024 16:09"
+    Public Const VERSION_NUMBER = "3.6.0"
+    Public Const VERSION_TIMESTAMP = "01-Jun-2024 10:41"
 
     ' Registry entries
     Dim mobjReg As New cRegistry
@@ -94,6 +94,7 @@ Option Explicit
     Public Const REG_ALPHA_VANTAGE_KEY = "AlphaVantage key"
     Public Const REG_MARKET_STACK_KEY = "MarketStack key"
     Public Const REG_TWELVE_DATA_KEY = "TwelveData key"
+    Public Const REG_FINHUB_KEY = "Finhub key"
     Public Const REG_FREE_CURRENCY_KEY = "FreeCurrency key"
     Public Const REG_ITALIC = "Italic"
     

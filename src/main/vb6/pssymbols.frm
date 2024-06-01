@@ -143,7 +143,7 @@ Begin VB.Form frmSymbols
       Height          =   285
       Index           =   3
       Left            =   4395
-      TabIndex        =   5
+      TabIndex        =   6
       ToolTipText     =   "Currency e.g. GBP, USD etc"
       Top             =   1410
       Width           =   900
@@ -203,7 +203,7 @@ Begin VB.Form frmSymbols
       Height          =   285
       Index           =   4
       Left            =   7005
-      TabIndex        =   6
+      TabIndex        =   5
       Top             =   1020
       Width           =   885
    End

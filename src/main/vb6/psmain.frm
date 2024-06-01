@@ -1124,7 +1124,7 @@ Dim objSymsToLookup As New Collection
 Dim objExchangeLookup As New Collection
 Dim sUniqueSymbols$, sSummaryCurrencySymbol$, sSummaryCurrencyName$, sUniqueIndexes$
 Dim objSummaryStocks As New Collection
-Dim sProxy$, sReturnedSymbolName$, sTmp$, sIexKey$, sAlphaVantageKey$, sMarketStackKey$, sTwelveDataKey, sFreeCurrencyKey$
+Dim sProxy$, sReturnedSymbolName$, sTmp$, sIexKey$, sAlphaVantageKey$, sMarketStackKey$, sTwelveDataKey, sFreeCurrencyKey$, sFinhubKey$
 Dim sSymbolName As Variant
 Dim asSymRows$(), asSymVals$()
 Dim sLine As Variant
@@ -1148,6 +1148,7 @@ Dim bGotExchangeRates As Boolean
     sAlphaVantageKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_ALPHA_VANTAGE_KEY)
     sMarketStackKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_MARKET_STACK_KEY)
     sTwelveDataKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TWELVE_DATA_KEY)
+    sFinhubKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FINHUB_KEY)
     sFreeCurrencyKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FREE_CURRENCY_KEY)
     sSummaryCurrencyName = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY)
     sSummaryCurrencySymbol = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY_SYMBOL)
@@ -1440,8 +1441,42 @@ Dim bGotExchangeRates As Boolean
             Next
         End If
         
+        ' Now get a list of all the symbols from Finhub
+        If sFinhubKey <> "" Then
+            For Each sSymbol In objSymsToLookup
+                rDayOpen = 0
+                rDayHigh = 0
+                rDayLow = 0
+                rCurrentPrice = 0
+                
+                DoEvents
+                If mbCapturing Then Exit Function
+                PSGEN_Log "Getting stock price from Finnhub for " + sSymbol
+                Call PSINET_GetHTTPFile("https://finnhub.io/api/v1/quote?symbol=" + Replace(sSymbol, "^", ".") + "&token=" + sFinhubKey, sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=2)
+    
+                ' Put the stock values into the lookup
+                If Trim(sCSV) <> "" Then
+                    PSGEN_Log "Got stock price from Finnhub successfully for " + sSymbol
+                    Set bag = New JsonBag
+                    bag.JSON = sCSV
+                    rDayOpen = CDbl(bag.Item("o"))
+                    rDayHigh = CDbl(bag.Item("h"))
+                    rDayLow = CDbl(bag.Item("l"))
+                    rCurrentPrice = CDbl(bag.Item("c"))
+                    sTmp = """" + sSymbol + """"
+                    sTmp = sTmp + "," + Format(rCurrentPrice)
+                    sTmp = sTmp + "," + Format(rDayLow)
+                    sTmp = sTmp + "," + Format(rDayHigh)
+                    sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                    objSymLookup.Add sTmp, sSymbol
+                    objSymsToLookup.Remove sSymbol
+                Else
+                    PSGEN_Log "Failed to get stock price from Finnhub for " + sSymbol + " - " + Err.Description, LogEventTypes.LogError
+                End If
+            Next
+        End If
+        
         ' Now get a list of all the symbols from Yahoo
-        '
         For Each sSymbol In objSymsToLookup
             rDayOpen = 0
             rDayHigh = 0
