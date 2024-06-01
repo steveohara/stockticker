@@ -2,7 +2,7 @@ VERSION 5.00
 Begin VB.Form frmSettings 
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Settings"
-   ClientHeight    =   10845
+   ClientHeight    =   11160
    ClientLeft      =   6165
    ClientTop       =   3150
    ClientWidth     =   6585
@@ -10,8 +10,16 @@ Begin VB.Form frmSettings
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   10845
+   ScaleHeight     =   11160
    ScaleWidth      =   6585
+   Begin VB.TextBox txtTiingoToken 
+      Height          =   285
+      Left            =   1740
+      TabIndex        =   34
+      ToolTipText     =   "The token to enable the use of the Alpha Vantage cloud API"
+      Top             =   9750
+      Width           =   4635
+   End
    Begin VB.TextBox txtFinhubKey 
       Height          =   285
       Left            =   1740
@@ -23,9 +31,9 @@ Begin VB.Form frmSettings
    Begin VB.TextBox txtFreeCurrencyKey 
       Height          =   285
       Left            =   1740
-      TabIndex        =   34
+      TabIndex        =   35
       ToolTipText     =   "The token to enable the use of the Free Currency exchage rate cloud API"
-      Top             =   9735
+      Top             =   10095
       Width           =   4635
    End
    Begin VB.CheckBox chkShowDailyChange 
@@ -206,20 +214,20 @@ Begin VB.Form frmSettings
       Caption         =   "Restore"
       Height          =   390
       Index           =   3
-      Left            =   1350
-      TabIndex        =   36
+      Left            =   1320
+      TabIndex        =   37
       ToolTipText     =   "Restore your settings and symbols from a backup file"
-      Top             =   10245
+      Top             =   10515
       Width           =   1050
    End
    Begin VB.CommandButton cmdMain 
       Caption         =   "Backup"
       Height          =   390
       Index           =   2
-      Left            =   180
-      TabIndex        =   35
+      Left            =   150
+      TabIndex        =   36
       ToolTipText     =   "Backup your settings and symbols to a file"
-      Top             =   10245
+      Top             =   10515
       Width           =   1050
    End
    Begin VB.CheckBox chkShowTotalValue 
@@ -356,9 +364,9 @@ Begin VB.Form frmSettings
       Enabled         =   0   'False
       Height          =   390
       Index           =   1
-      Left            =   4020
-      TabIndex        =   37
-      Top             =   10290
+      Left            =   3990
+      TabIndex        =   38
+      Top             =   10560
       Width           =   1125
    End
    Begin VB.CommandButton cmdMain 
@@ -366,9 +374,9 @@ Begin VB.Form frmSettings
       Caption         =   "Cancel"
       Height          =   390
       Index           =   0
-      Left            =   5280
-      TabIndex        =   38
-      Top             =   10275
+      Left            =   5250
+      TabIndex        =   39
+      Top             =   10545
       Width           =   1125
    End
    Begin VB.CheckBox chkShowTotal 
@@ -383,11 +391,22 @@ Begin VB.Form frmSettings
    Begin VB.Label lblLabel 
       Alignment       =   1  'Right Justify
       BackStyle       =   0  'Transparent
+      Caption         =   "Tiingo Token"
+      Height          =   225
+      Index           =   27
+      Left            =   -90
+      TabIndex        =   67
+      Top             =   9780
+      Width           =   1755
+   End
+   Begin VB.Label lblLabel 
+      Alignment       =   1  'Right Justify
+      BackStyle       =   0  'Transparent
       Caption         =   "Finhub Token"
       Height          =   225
       Index           =   26
       Left            =   -90
-      TabIndex        =   65
+      TabIndex        =   66
       Top             =   9450
       Width           =   1755
    End
@@ -398,8 +417,8 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   25
       Left            =   -90
-      TabIndex        =   64
-      Top             =   9765
+      TabIndex        =   65
+      Top             =   10125
       Width           =   1755
    End
    Begin VB.Label lblLabel 
@@ -418,7 +437,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   13
       Left            =   330
-      TabIndex        =   51
+      TabIndex        =   52
       Top             =   6900
       Width           =   1095
    End
@@ -437,7 +456,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   24
       Left            =   3750
-      TabIndex        =   63
+      TabIndex        =   64
       Top             =   1290
       Width           =   1755
    End
@@ -448,7 +467,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   23
       Left            =   3945
-      TabIndex        =   62
+      TabIndex        =   63
       Top             =   1590
       Width           =   1560
    End
@@ -459,7 +478,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   22
       Left            =   -90
-      TabIndex        =   61
+      TabIndex        =   62
       Top             =   9120
       Width           =   1755
    End
@@ -470,7 +489,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   21
       Left            =   -90
-      TabIndex        =   60
+      TabIndex        =   61
       Top             =   8775
       Width           =   1755
    End
@@ -481,7 +500,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   20
       Left            =   -90
-      TabIndex        =   59
+      TabIndex        =   60
       Top             =   8415
       Width           =   1755
    End
@@ -492,7 +511,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   19
       Left            =   -90
-      TabIndex        =   58
+      TabIndex        =   59
       Top             =   8055
       Width           =   1755
    End
@@ -512,7 +531,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   0
       Left            =   360
-      TabIndex        =   57
+      TabIndex        =   58
       Top             =   7725
       Width           =   1095
    End
@@ -531,7 +550,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   18
       Left            =   -60
-      TabIndex        =   56
+      TabIndex        =   57
       Top             =   2730
       Width           =   1755
    End
@@ -542,7 +561,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   17
       Left            =   -60
-      TabIndex        =   55
+      TabIndex        =   56
       Top             =   2370
       Width           =   1755
    End
@@ -552,7 +571,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   16
       Left            =   2520
-      TabIndex        =   54
+      TabIndex        =   55
       Top             =   540
       Width           =   825
    End
@@ -563,7 +582,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   15
       Left            =   -60
-      TabIndex        =   53
+      TabIndex        =   54
       Top             =   540
       Width           =   1755
    End
@@ -574,7 +593,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   14
       Left            =   -60
-      TabIndex        =   52
+      TabIndex        =   53
       Top             =   180
       Width           =   1755
    End
@@ -593,7 +612,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   12
       Left            =   2295
-      TabIndex        =   50
+      TabIndex        =   51
       Top             =   7230
       Width           =   1755
    End
@@ -604,7 +623,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   11
       Left            =   -90
-      TabIndex        =   49
+      TabIndex        =   50
       Top             =   7230
       Width           =   1755
    End
@@ -615,7 +634,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   10
       Left            =   2325
-      TabIndex        =   48
+      TabIndex        =   49
       Top             =   6495
       Width           =   1755
    End
@@ -635,7 +654,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   9
       Left            =   405
-      TabIndex        =   47
+      TabIndex        =   48
       Top             =   6120
       Width           =   1935
    End
@@ -662,7 +681,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   8
       Left            =   -75
-      TabIndex        =   46
+      TabIndex        =   47
       Top             =   6495
       Width           =   1755
    End
@@ -673,7 +692,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   7
       Left            =   540
-      TabIndex        =   45
+      TabIndex        =   46
       Top             =   1995
       Width           =   1155
    End
@@ -684,7 +703,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   6
       Left            =   2205
-      TabIndex        =   44
+      TabIndex        =   45
       Top             =   1605
       Width           =   1155
    End
@@ -695,7 +714,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   5
       Left            =   1605
-      TabIndex        =   43
+      TabIndex        =   44
       Top             =   1305
       Width           =   1755
    End
@@ -706,7 +725,7 @@ Begin VB.Form frmSettings
       Height          =   195
       Index           =   4
       Left            =   555
-      TabIndex        =   42
+      TabIndex        =   43
       Top             =   1635
       Width           =   1155
    End
@@ -726,7 +745,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   3
       Left            =   495
-      TabIndex        =   41
+      TabIndex        =   42
       Top             =   960
       Width           =   2190
    End
@@ -753,7 +772,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   2
       Left            =   -45
-      TabIndex        =   40
+      TabIndex        =   41
       Top             =   1305
       Width           =   1755
    End
@@ -773,7 +792,7 @@ Begin VB.Form frmSettings
       Height          =   225
       Index           =   1
       Left            =   450
-      TabIndex        =   39
+      TabIndex        =   40
       Top             =   3075
       Width           =   870
    End
@@ -969,6 +988,7 @@ Dim lTmp&
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_MARKET_STACK_KEY, txtMarketStackKey.Text
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_TWELVE_DATA_KEY, txtTwelveDataKey.Text
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_FINHUB_KEY, txtFinhubKey.Text
+        mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_TIINGO_KEY, txtTiingoToken.Text
         mobjReg.SaveSetting App.Title, REG_SETTINGS, REG_FREE_CURRENCY_KEY, txtFreeCurrencyKey.Text
         mbDirty = False
         Unload Me
@@ -1074,6 +1094,7 @@ Dim iCnt%
     txtMarketStackKey.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_MARKET_STACK_KEY)
     txtTwelveDataKey.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TWELVE_DATA_KEY)
     txtFinhubKey.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FINHUB_KEY)
+    txtTiingoToken.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TIINGO_KEY)
     txtFreeCurrencyKey.Text = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FREE_CURRENCY_KEY)
     
     sFont = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FONT, frmMain.Font.Name)
@@ -1166,6 +1187,12 @@ Private Sub txtProxy_Change()
 End Sub
 
 Private Sub txtFrequency_Change()
+
+    Z_SetDirty True
+
+End Sub
+
+Private Sub txtTiingoToken_Change()
 
     Z_SetDirty True
 

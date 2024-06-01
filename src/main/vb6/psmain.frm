@@ -1124,7 +1124,7 @@ Dim objSymsToLookup As New Collection
 Dim objExchangeLookup As New Collection
 Dim sUniqueSymbols$, sSummaryCurrencySymbol$, sSummaryCurrencyName$, sUniqueIndexes$
 Dim objSummaryStocks As New Collection
-Dim sProxy$, sReturnedSymbolName$, sTmp$, sIexKey$, sAlphaVantageKey$, sMarketStackKey$, sTwelveDataKey, sFreeCurrencyKey$, sFinhubKey$
+Dim sProxy$, sReturnedSymbolName$, sTmp$, sIexKey$, sAlphaVantageKey$, sMarketStackKey$, sTwelveDataKey, sFreeCurrencyKey$, sFinhubKey$, sTiingoKey$
 Dim sSymbolName As Variant
 Dim asSymRows$(), asSymVals$()
 Dim sLine As Variant
@@ -1149,6 +1149,7 @@ Dim bGotExchangeRates As Boolean
     sMarketStackKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_MARKET_STACK_KEY)
     sTwelveDataKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TWELVE_DATA_KEY)
     sFinhubKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FINHUB_KEY)
+    sTiingoKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_TIINGO_KEY)
     sFreeCurrencyKey = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FREE_CURRENCY_KEY)
     sSummaryCurrencyName = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY)
     sSummaryCurrencySymbol = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY_SYMBOL)
@@ -1472,6 +1473,45 @@ Dim bGotExchangeRates As Boolean
                     objSymsToLookup.Remove sSymbol
                 Else
                     PSGEN_Log "Failed to get stock price from Finnhub for " + sSymbol + " - " + Err.Description, LogEventTypes.LogError
+                End If
+            Next
+        End If
+        
+        ' Now get a list of all the symbols from Tiingo
+        If sTiingoKey <> "" Then
+            For Each sSymbol In objSymsToLookup
+                rDayOpen = 0
+                rDayHigh = 0
+                rDayLow = 0
+                rCurrentPrice = 0
+                
+                DoEvents
+                If mbCapturing Then Exit Function
+                PSGEN_Log "Getting stock price from Tiingo for " + sSymbol
+                Call PSINET_GetHTTPFile("https://api.tiingo.com/iex/?tickers=" + Replace(sSymbol, "^", ".") + "&token=" + sTiingoKey, sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=2)
+    
+                ' Put the stock values into the lookup
+                If Trim(sCSV) <> "" Then
+                    Err.Clear
+                    PSGEN_Log "Got stock price from Tiingo successfully for " + sSymbol
+                    Set bag = New JsonBag
+                    bag.JSON = sCSV
+                    Set bag = bag.Item(1)
+                    If Err = 0 Then
+                        rDayOpen = CDbl(bag.Item("open"))
+                        rDayHigh = CDbl(bag.Item("high"))
+                        rDayLow = CDbl(bag.Item("low"))
+                        rCurrentPrice = CDbl(bag.Item("last"))
+                        sTmp = """" + sSymbol + """"
+                        sTmp = sTmp + "," + Format(rCurrentPrice)
+                        sTmp = sTmp + "," + Format(rDayLow)
+                        sTmp = sTmp + "," + Format(rDayHigh)
+                        sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                        objSymLookup.Add sTmp, sSymbol
+                        objSymsToLookup.Remove sSymbol
+                    End If
+                Else
+                    PSGEN_Log "Failed to get stock price from Tiingo for " + sSymbol + " - " + Err.Description, LogEventTypes.LogError
                 End If
             Next
         End If
