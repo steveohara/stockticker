@@ -1544,7 +1544,7 @@ Dim bGotExchangeRates As Boolean
                     sTmp = sTmp + "," + Format(rCurrentPrice)
                     sTmp = sTmp + "," + Format(rDayLow)
                     sTmp = sTmp + "," + Format(rDayHigh)
-                    sTmp = sTmp + "," + Format(rCurrentPrice - rDayOpen)
+                    sTmp = sTmp + "," + IIf(rDayOpen = 0, "0.0", Format(rCurrentPrice - rDayOpen))
                     objSymLookup.Add sTmp, sSymbol
                     objSymsToLookup.Remove sSymbol
                 Else
