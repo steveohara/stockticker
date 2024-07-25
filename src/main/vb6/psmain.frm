@@ -5,8 +5,8 @@ Begin VB.Form frmMain
    BackColor       =   &H00404040&
    BorderStyle     =   0  'None
    ClientHeight    =   2130
-   ClientLeft      =   8850
-   ClientTop       =   6540
+   ClientLeft      =   9810
+   ClientTop       =   2190
    ClientWidth     =   5880
    ControlBox      =   0   'False
    BeginProperty Font 
@@ -2100,7 +2100,7 @@ Private Sub timMouse_Timer()
         iIndex = Val(timMouse.Tag)
         Call GetCursorPos(stPoint)
         lHwnd = WindowFromPoint(stPoint.X, stPoint.Y)
-        If lHwnd <> picSize(iIndex).hWnd Then
+        If lHwnd <> picSize(iIndex).hWnd And lHwnd <> picData.hWnd And lHwnd <> frmMain.hWnd Then
             picSize(iIndex).BackColor = &H0
             timMouse.Enabled = False
             timMouse.Tag = ""
