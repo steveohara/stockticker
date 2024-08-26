@@ -371,14 +371,6 @@ Dim sURL$
 
 End Sub
 
-Private Sub Z_ShowNasdaqChart(ByVal sSymbol)
-'
-' Shows the admin page of choice
-'
-    Call PSGEN_LaunchBrowser("http://www.nasdaq.com/symbol/" + sSymbol + "/real-time")
-
-End Sub
-
 Private Sub Z_DisplayData(Optional ByVal sData = "")
 '
 '                     sData$             - Data to display
@@ -569,11 +561,7 @@ Dim objSymbol As Object
     Set objSymbol = Z_GetSymbolUnderMouse
     If Not objSymbol Is Nothing Then
         frmPreview.HideChart True
-        If objSymbol.FromNasdaqRealTime Then
-            Call Z_ShowNasdaqChart(objSymbol.Code)
-        Else
-            Call Z_ShowYahooChart(objSymbol.Code)
-        End If
+        Call Z_ShowYahooChart(objSymbol.Code)
     End If
 
 End Sub
@@ -1311,6 +1299,7 @@ Dim bGotExchangeRates As Boolean
                             sTmp = sTmp + "," + Format(rDayLow)
                             sTmp = sTmp + "," + Format(rDayHigh)
                             sTmp = sTmp + "," + Format(rCurrentPrice - rDayOpen)
+                            sTmp = sTmp + ",IEX"
                             objSymLookup.Add sTmp, sSymbol
                             objSymsToLookup.Remove sSymbol
                         Else
@@ -1352,6 +1341,7 @@ Dim bGotExchangeRates As Boolean
                         sTmp = sTmp + "," + Format(rDayLow)
                         sTmp = sTmp + "," + Format(rDayHigh)
                         sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                        sTmp = sTmp + ",AlphaVantage"
                         objSymLookup.Add sTmp, sSymbol
                         objSymsToLookup.Remove sSymbol
                     Else
@@ -1396,6 +1386,7 @@ Dim bGotExchangeRates As Boolean
                             sTmp = sTmp + "," + Format(rDayLow)
                             sTmp = sTmp + "," + Format(rDayHigh)
                             sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                            sTmp = sTmp + ",TwelveData"
                             objSymLookup.Add sTmp, sSymbol
                             objSymsToLookup.Remove sSymbol
                         End If
@@ -1434,6 +1425,7 @@ Dim bGotExchangeRates As Boolean
                     sTmp = sTmp + "," + Format(rDayLow)
                     sTmp = sTmp + "," + Format(rDayHigh)
                     sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                    sTmp = sTmp + ",MarketStack"
                     objSymLookup.Add sTmp, sSymbol
                     objSymsToLookup.Remove sSymbol
                 Else
@@ -1469,6 +1461,7 @@ Dim bGotExchangeRates As Boolean
                     sTmp = sTmp + "," + Format(rDayLow)
                     sTmp = sTmp + "," + Format(rDayHigh)
                     sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                    sTmp = sTmp + ",Finhub"
                     objSymLookup.Add sTmp, sSymbol
                     objSymsToLookup.Remove sSymbol
                 Else
@@ -1507,6 +1500,7 @@ Dim bGotExchangeRates As Boolean
                         sTmp = sTmp + "," + Format(rDayLow)
                         sTmp = sTmp + "," + Format(rDayHigh)
                         sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                        sTmp = sTmp + ",Tiingo"
                         objSymLookup.Add sTmp, sSymbol
                         objSymsToLookup.Remove sSymbol
                     End If
@@ -1545,6 +1539,7 @@ Dim bGotExchangeRates As Boolean
                     sTmp = sTmp + "," + Format(rDayLow)
                     sTmp = sTmp + "," + Format(rDayHigh)
                     sTmp = sTmp + "," + IIf(rDayOpen = 0, "0.0", Format(rCurrentPrice - rDayOpen))
+                    sTmp = sTmp + ",Yahoo"
                     objSymLookup.Add sTmp, sSymbol
                     objSymsToLookup.Remove sSymbol
                 Else
@@ -1581,6 +1576,7 @@ Dim bGotExchangeRates As Boolean
                 sTmp = sTmp + "," + Format(rDayLow)
                 sTmp = sTmp + "," + Format(rDayHigh)
                 sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                sTmp = sTmp + ",Reuters"
                 objSymLookup.Add sTmp, sSymbol
                 objSymsToLookup.Remove sSymbol
             Else
@@ -1613,9 +1609,9 @@ Dim bGotExchangeRates As Boolean
                     objSymbol.DayHigh = Val(SymbolInfo(3))
                     objSymbol.DayChange = Val(SymbolInfo(4))
                     objSymbol.DayStart = objSymbol.CurrentPrice - objSymbol.DayChange
-                    objSymbol.FromNasdaqRealTime = Val(SymbolInfo(5)) > 0
                     objSymbol.ErrorDescription = ""
                     objSymbol.LastUpdate = Now
+                    objSymbol.Source = SymbolInfo(5)
                 End If
                     
                 If Not objSymbol.ExcludeFromSummary Then
@@ -1637,6 +1633,7 @@ Dim bGotExchangeRates As Boolean
                     objStock.CurrencyName = objSymbol.CurrencyName
                     objStock.DayStart = objSymbol.DayStart
                     objStock.DayChange = objSymbol.DayChange
+                    objStock.Source = objSymbol.Source
                     objStock.AddStock objSymbol.Shares, objSymbol.Price
                     objSummaryStocks.Add objStock, objStock.DisplayName
                     If objStock.CurrencySymbol = "" And objSymbol.CurrencySymbol <> "" Then objStock.CurrencySymbol = objSymbol.CurrencySymbol
@@ -1793,7 +1790,6 @@ Dim objSymbols As Collection
                 If objSymbol.ShowChangeUpDown Or objSymbol.ShowChange Or objSymbol.ShowChangePercent Or objSymbol.ShowProfitLoss Then
                     picData.ForeColor = IIf(objSymbol.CurrentPrice > objSymbol.Price, lUpColor, IIf(objSymbol.CurrentPrice < objSymbol.Price, lDownColor, lTextColor))
                     picData.Print objSymbol.DisplayName;
-                    Call Z_ShowNasdaq(objSymbol)
                 
                     ' Show the price
                     If objSymbol.ShowPrice Then
@@ -1832,7 +1828,6 @@ Dim objSymbols As Collection
                 Else
                     picData.ForeColor = IIf(objSymbol.CurrentPrice > objSymbol.DayStart, lUpColor, IIf(objSymbol.CurrentPrice < objSymbol.Price, lDownColor, lTextColor))
                     picData.Print objSymbol.DisplayName;
-                    Call Z_ShowNasdaq(objSymbol)
                     
                     ' Show the price
                     If objSymbol.ShowPrice Then
@@ -1887,25 +1882,6 @@ Dim objSymbols As Collection
     mbScrolling = picData.CurrentX > picText.ScaleWidth + 8
 
 End Sub
-
-Private Function Z_ShowNasdaq(objSymbol As cSymbol)
-
-Dim i%
-Dim lTmp&
-
-    If objSymbol.FromNasdaqRealTime Then
-        i = picData.FontSize
-        lTmp = picData.ForeColor
-        picData.CurrentY = picData.CurrentY + 2
-        picData.FontSize = 7
-        picData.ForeColor = vbYellow
-        picData.Print "*";
-        picData.ForeColor = lTmp
-        picData.FontSize = i
-        picData.CurrentY = picData.CurrentY - 2
-    End If
-
-End Function
 
 Private Function Z_GetSymbolUnderMouse() As Object
 

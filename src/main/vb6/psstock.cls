@@ -32,6 +32,7 @@ Option Explicit
     Public DayStart#
     Public DayChange#
     Public Position As New cRegion
+    Public Source$
     
     
 Public Sub AddStock(ByVal rNumbeOfShares#, ByVal rPrice#)

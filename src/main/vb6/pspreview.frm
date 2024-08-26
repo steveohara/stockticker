@@ -333,6 +333,7 @@ Option Explicit
 
     Const LEFT_MARGIN = 520
     Const LEFT_MARGIN_VALUE = 600
+    Const CHART_HEIGHT = 356
 
     Dim mobjReg As New cRegistry
 
@@ -564,11 +565,11 @@ Dim bLoaded As Boolean
     lWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN)
     lHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN)
     If lLeft + 700 > lWidth Then lLeft = lWidth - 700
-    If lTop + 342 > lHeight Then lTop = (frmMain.Top / Screen.TwipsPerPixelY) - 342
-    Move lLeft * Screen.TwipsPerPixelX, lTop * Screen.TwipsPerPixelY, 690 * Screen.TwipsPerPixelX, 342 * Screen.TwipsPerPixelY
+    If lTop + CHART_HEIGHT > lHeight Then lTop = (frmMain.Top / Screen.TwipsPerPixelY) - CHART_HEIGHT
+    Move lLeft * Screen.TwipsPerPixelX, lTop * Screen.TwipsPerPixelY, 690 * Screen.TwipsPerPixelX, CHART_HEIGHT * Screen.TwipsPerPixelY
     
     Set picGraph.Picture = Nothing
-    picGraph.Move 0, 0, 512, 342
+    picGraph.Move 0, 0, 512, CHART_HEIGHT
     picGraph.CurrentX = 180
     picGraph.CurrentY = 110
     picGraph.ForeColor = vbBlack
@@ -594,13 +595,6 @@ Dim bLoaded As Boolean
     FontBold = True
     Print "Overall Position"
     FontSize = FontSize - 1
-    If objSymbol.FromNasdaqRealTime Then
-        CurrentX = LEFT_MARGIN
-        lTmp = ForeColor
-        ForeColor = vbYellow
-        Print "Real Time"
-        ForeColor = lTmp
-    End If
     CurrentY = CurrentY + 2
     FontBold = False
     CurrentX = LEFT_MARGIN
@@ -761,11 +755,13 @@ Dim bLoaded As Boolean
     
     FontBold = False
     CurrentX = LEFT_MARGIN
-    CurrentY = 324
+    CurrentY = CHART_HEIGHT - 36
     FontSize = IIf(FontSize > 9, 9, FontSize)
     ForeColor = vbGrayText
-    Print "Updated:" + Format(objSymbol.LastUpdate)
-    Line (512, 0)-(687, 339), vbWhite, B
+    Print "Source: " & objStockSymbol.Source
+    CurrentX = LEFT_MARGIN
+    Print "Updated: " + Format(objSymbol.LastUpdate)
+    Line (512, 0)-(687, CHART_HEIGHT - 4), vbWhite, B
     
     ' Get the graph
     bLoaded = False
@@ -781,12 +777,12 @@ Dim bLoaded As Boolean
         sProxy = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_PROXY)
         
         sChartUrl = "https://www.reuters.wallst.com/enhancements/chartapi/index_chart_api.asp"
-        Call PSINET_GetHTTPFile(sChartUrl + "?symbol=" + sSymbol + "&duration=" + IIf(mbOneDay, "1", "5") + "&headerType=quote&width=500&height=342", sTmp, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=10000)
+        Call PSINET_GetHTTPFile(sChartUrl + "?symbol=" + sSymbol + "&duration=" + IIf(mbOneDay, "1", "5") + "&headerType=quote&width=500&height=" & CHART_HEIGHT, sTmp, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=10000)
         If sTmp = "" Then
-            Call PSINET_GetHTTPFile(sChartUrl + "?symbol=" + sSymbol + ".OQ&duration=" + IIf(mbOneDay, "1", "5") + "&headerType=quote&width=500&height=342", sTmp, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=10000)
+            Call PSINET_GetHTTPFile(sChartUrl + "?symbol=" + sSymbol + ".OQ&duration=" + IIf(mbOneDay, "1", "5") + "&headerType=quote&width=500&height=" & CHART_HEIGHT, sTmp, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=10000)
         End If
         If sTmp = "" Then
-            Call PSINET_GetHTTPFile(sChartUrl + "?symbol=" + sSymbol + ".N&duration=" + IIf(mbOneDay, "1", "5") + "&headerType=quote&width=500&height=342", sTmp, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=10000)
+            Call PSINET_GetHTTPFile(sChartUrl + "?symbol=" + sSymbol + ".N&duration=" + IIf(mbOneDay, "1", "5") + "&headerType=quote&width=500&height=" & CHART_HEIGHT, sTmp, sProxyName:=sProxy, lConnectionTimeout:=2000, lReadTimeout:=10000)
         End If
         
         ' Draw the graph
@@ -794,7 +790,7 @@ Dim bLoaded As Boolean
         lToken = InitGDIPlus
         
         ' Load pictures
-        picGraph.Picture = LoadPictureFromStringGDIPlus(sTmp, 500, 342)
+        picGraph.Picture = LoadPictureFromStringGDIPlus(sTmp, 500, CHART_HEIGHT - 6)
         
         ' Free GDI+
         FreeGDIPlus lToken

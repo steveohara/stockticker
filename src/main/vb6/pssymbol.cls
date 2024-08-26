@@ -54,8 +54,8 @@ Option Explicit
     Public HighAlarmIsPercent As Boolean
     Public HighAlarmSoundEnabled As Boolean
     Public AlarmShowing As Boolean
-    Public FromNasdaqRealTime As Boolean
     Public LastUpdate As Date
+    Public Source$
 
 Public Sub Init(ByVal sRegKey)
 '
