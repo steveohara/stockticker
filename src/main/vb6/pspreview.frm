@@ -76,6 +76,46 @@ Begin VB.Form frmPreview
       Left            =   645
       Top             =   660
    End
+   Begin VB.Label lblHeader 
+      Caption         =   "Source"
+      BeginProperty Font 
+         Name            =   "Calibri"
+         Size            =   8.25
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   255
+      Index           =   4
+      Left            =   2640
+      MousePointer    =   7  'Size N S
+      TabIndex        =   15
+      Tag             =   "Sort by change (percent)"
+      Top             =   3480
+      Width           =   1095
+   End
+   Begin VB.Label lblSummaryHeader 
+      Caption         =   "Source"
+      BeginProperty Font 
+         Name            =   "Calibri"
+         Size            =   8.25
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   255
+      Index           =   8
+      Left            =   6630
+      MousePointer    =   7  'Size N S
+      TabIndex        =   14
+      Tag             =   "Sort by change (value)"
+      Top             =   3990
+      Width           =   1095
+   End
    Begin VB.Label lblSummaryHeader 
       Caption         =   "Gain/Loss"
       BeginProperty Font 
@@ -842,6 +882,7 @@ Dim i%, iSortColumn%
     lblHeader(1).Move 65, lblHeader(0).Top
     lblHeader(2).Move 140, lblHeader(0).Top
     lblHeader(3).Move 220, lblHeader(0).Top
+    lblHeader(4).Move 350, lblHeader(0).Top
     lTableTop = lblHeader(0).Top + lblHeader(0).Height + 2
     
     ' Show the sort indicator
@@ -872,6 +913,10 @@ Dim i%, iSortColumn%
         
         CurrentX = 270
         Print "(" & FormatCurrencyValue(objStock.CurrencySymbol, objStock.DayChange) & ")";
+        
+        CurrentX = 350
+        ForeColor = lTextColor
+        Print objStock.Source;
         
         rTotalChange = rTotalChange + rChangeValue
         lWidest = IIf(CurrentX > lWidest, CurrentX, lWidest)
@@ -958,6 +1003,7 @@ Dim i%, iSortColumn%
     lblSummaryHeader(5).Move 370, lblSummaryHeader(0).Top
     lblSummaryHeader(6).Move 460, lblSummaryHeader(0).Top
     lblSummaryHeader(7).Move 530, lblSummaryHeader(0).Top
+    lblSummaryHeader(8).Move 620, lblSummaryHeader(0).Top
     
     lTableTop = lblSummaryHeader(0).Top + lblSummaryHeader(0).Height + 2
     
@@ -1003,6 +1049,10 @@ Dim i%, iSortColumn%
         
         CurrentX = 530
         Print FormatCurrencyValue(sCurrencySymbol, ConvertCurrency(objStock, objStock.TotalValue - objStock.TotalCost));
+        
+        CurrentX = 620
+        ForeColor = lTextColor
+        Print objStock.Source;
         
         lWidest = IIf(CurrentX > lWidest, CurrentX, lWidest)
         Print ""
@@ -1072,7 +1122,9 @@ Private Function Z_SortDaySummaryCollection(ByVal objStocks As Collection, ByVal
         ElseIf bAscending Then
             For j = 1 To objReturn.Count
                 Set objSlot = objReturn(j)
-                If iColumn = 3 Then
+                If iColumn = 4 Then
+                    bFoundSlot = StrComp(objNew.Source, objSlot.Source) < 0
+                ElseIf iColumn = 3 Then
                     bFoundSlot = (objNew.DayChange / objNew.DayStart) < (objSlot.DayChange / objSlot.DayStart)
                 ElseIf iColumn = 2 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.DayChange * objNew.NumberOfShares) < ConvertCurrency(objSlot, objSlot.DayChange * objSlot.NumberOfShares)
@@ -1094,7 +1146,9 @@ Private Function Z_SortDaySummaryCollection(ByVal objStocks As Collection, ByVal
         Else
             For j = objReturn.Count To 1 Step -1
                 Set objSlot = objReturn(j)
-                If iColumn = 3 Then
+                If iColumn = 4 Then
+                    bFoundSlot = StrComp(objNew.Source, objSlot.Source) < 0
+                ElseIf iColumn = 3 Then
                     bFoundSlot = (objNew.DayChange / objNew.DayStart) < (objSlot.DayChange / objSlot.DayStart)
                 ElseIf iColumn = 2 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.DayChange * objNew.NumberOfShares) < ConvertCurrency(objSlot, objSlot.DayChange * objSlot.NumberOfShares)
@@ -1136,7 +1190,9 @@ Private Function Z_SortSummaryCollection(ByVal objStocks As Collection, ByVal bA
         ElseIf bAscending Then
             For j = 1 To objReturn.Count
                 Set objSlot = objReturn(j)
-                If iColumn = 7 Then
+                If iColumn = 8 Then
+                    bFoundSlot = StrComp(objNew.Source, objSlot.Source) < 0
+                ElseIf iColumn = 7 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.TotalCost - objNew.TotalValue) < ConvertCurrency(objSlot, objSlot.TotalCost - objSlot.TotalValue)
                 ElseIf iColumn = 6 Then
                     bFoundSlot = objNew.LossPercent < objSlot.LossPercent
@@ -1166,7 +1222,9 @@ Private Function Z_SortSummaryCollection(ByVal objStocks As Collection, ByVal bA
         Else
             For j = objReturn.Count To 1 Step -1
                 Set objSlot = objReturn(j)
-                If iColumn = 7 Then
+                If iColumn = 8 Then
+                    bFoundSlot = StrComp(objNew.Source, objSlot.Source) < 0
+                ElseIf iColumn = 7 Then
                     bFoundSlot = ConvertCurrency(objNew, objNew.TotalCost - objNew.TotalValue) < ConvertCurrency(objSlot, objSlot.TotalCost - objSlot.TotalValue)
                 ElseIf iColumn = 6 Then
                     bFoundSlot = objNew.LossPercent < objSlot.LossPercent
