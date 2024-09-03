@@ -1120,7 +1120,7 @@ Dim SymbolInfo As Variant
 Dim objAlarm As frmAlarm
 Dim rCurrentPrice#, rStartPrice#
 Dim bFound As Boolean
-Dim rDayLow#, rDayHigh#, rDayOpen#
+Dim rDayLow#, rDayHigh#, rDayOpen#, rDayClose#
 Dim iCols As Integer
 Dim sName$
 Dim data As Object
@@ -1340,7 +1340,7 @@ Dim bGotExchangeRates As Boolean
                         sTmp = sTmp + "," + Format(rCurrentPrice)
                         sTmp = sTmp + "," + Format(rDayLow)
                         sTmp = sTmp + "," + Format(rDayHigh)
-                        sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                        sTmp = sTmp + "," + Format(rCurrentPrice - rDayOpen)
                         sTmp = sTmp + ",AlphaVantage"
                         objSymLookup.Add sTmp, sSymbol
                         objSymsToLookup.Remove sSymbol
@@ -1372,9 +1372,10 @@ Dim bGotExchangeRates As Boolean
                     sCSV = Replace(Split(sCSV, vbLf)(1), ";", ",")
                     Call ParseCSV(sCSV, asSymVals)
                     If UBound(asSymVals) > 8 Then
-                        rDayOpen = CDbl(asSymVals(9))
-                        rDayHigh = CDbl(asSymVals(7))
-                        rDayLow = CDbl(asSymVals(8))
+                        rDayOpen = CDbl(asSymVals(7))
+                        rDayHigh = CDbl(asSymVals(8))
+                        rDayLow = CDbl(asSymVals(9))
+                        rDayClose = CDbl(asSymVals(10))
                         
                         Call PSINET_GetHTTPFile("https://api.twelvedata.com/price?format=csv&apikey=" + sTwelveDataKey + "&symbol=" + Replace(sSymbol, ".L", ""), sCSV, sProxyName:=sProxy, lConnectionTimeout:=1000, lReadTimeout:=1000, iRetries:=2)
                         If Trim(sCSV) <> "" Then
@@ -1385,7 +1386,7 @@ Dim bGotExchangeRates As Boolean
                             sTmp = sTmp + "," + Format(rCurrentPrice)
                             sTmp = sTmp + "," + Format(rDayLow)
                             sTmp = sTmp + "," + Format(rDayHigh)
-                            sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                            sTmp = sTmp + "," + Format(rCurrentPrice - rDayClose)
                             sTmp = sTmp + ",TwelveData"
                             objSymLookup.Add sTmp, sSymbol
                             objSymsToLookup.Remove sSymbol
@@ -1415,7 +1416,7 @@ Dim bGotExchangeRates As Boolean
                 ' Put the stock values into the lookup
                 If Trim(sCSV) <> "" Then
                     PSGEN_Log "Got stock price from Market Stack successfully for " + sSymbol
-                    rDayOpen = CDbl(Split(Split(sCSV, """close"":", 2)(1), ",", 2)(0))
+                    rDayClose = CDbl(Split(Split(sCSV, """close"":", 2)(1), ",", 2)(0))
                     rDayHigh = CDbl(Split(Split(sCSV, """high"":", 2)(1), ",", 2)(0))
                     rDayLow = CDbl(Split(Split(sCSV, """low"":", 2)(1), ",", 2)(0))
                     rCurrentPrice = CDbl(Split(Split(sCSV, """last"":", 2)(1), ",", 2)(0))
@@ -1424,7 +1425,7 @@ Dim bGotExchangeRates As Boolean
                     sTmp = sTmp + "," + Format(rCurrentPrice)
                     sTmp = sTmp + "," + Format(rDayLow)
                     sTmp = sTmp + "," + Format(rDayHigh)
-                    sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                    sTmp = sTmp + "," + Format(rCurrentPrice - rDayClose)
                     sTmp = sTmp + ",MarketStack"
                     objSymLookup.Add sTmp, sSymbol
                     objSymsToLookup.Remove sSymbol
@@ -1452,6 +1453,7 @@ Dim bGotExchangeRates As Boolean
                     PSGEN_Log "Got stock price from Finnhub successfully for " + sSymbol
                     Set bag = New JsonBag
                     bag.JSON = sCSV
+                    rDayClose = CDbl(bag.Item("pc"))
                     rDayOpen = CDbl(bag.Item("o"))
                     rDayHigh = CDbl(bag.Item("h"))
                     rDayLow = CDbl(bag.Item("l"))
@@ -1460,7 +1462,7 @@ Dim bGotExchangeRates As Boolean
                     sTmp = sTmp + "," + Format(rCurrentPrice)
                     sTmp = sTmp + "," + Format(rDayLow)
                     sTmp = sTmp + "," + Format(rDayHigh)
-                    sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                    sTmp = sTmp + "," + Format(rCurrentPrice - rDayClose)
                     sTmp = sTmp + ",Finhub"
                     objSymLookup.Add sTmp, sSymbol
                     objSymsToLookup.Remove sSymbol
@@ -1491,6 +1493,7 @@ Dim bGotExchangeRates As Boolean
                     bag.JSON = sCSV
                     Set bag = bag.Item(1)
                     If Err = 0 Then
+                        rDayClose = CDbl(bag.Item("prevClose"))
                         rDayOpen = CDbl(bag.Item("open"))
                         rDayHigh = CDbl(bag.Item("high"))
                         rDayLow = CDbl(bag.Item("low"))
@@ -1499,7 +1502,7 @@ Dim bGotExchangeRates As Boolean
                         sTmp = sTmp + "," + Format(rCurrentPrice)
                         sTmp = sTmp + "," + Format(rDayLow)
                         sTmp = sTmp + "," + Format(rDayHigh)
-                        sTmp = sTmp + "," + Format(rDayHigh - rDayLow)
+                        sTmp = sTmp + "," + Format(rCurrentPrice - rDayClose)
                         sTmp = sTmp + ",Tiingo"
                         objSymLookup.Add sTmp, sSymbol
                         objSymsToLookup.Remove sSymbol
@@ -1529,7 +1532,7 @@ Dim bGotExchangeRates As Boolean
                 Set bag = New JsonBag
                 bag.JSON = sCSV
                 Set bag = bag.Item("quoteSummary").Item("result")(1).Item("price")
-                rDayOpen = CDbl(bag.Item("regularMarketPreviousClose").Item("fmt"))
+                rDayClose = CDbl(bag.Item("regularMarketPreviousClose").Item("fmt"))
                 rDayHigh = CDbl(bag.Item("regularMarketDayHigh").Item("fmt"))
                 rDayLow = CDbl(bag.Item("regularMarketDayLow").Item("fmt"))
                 rCurrentPrice = CDbl(bag.Item("regularMarketPrice").Item("fmt"))
@@ -1538,7 +1541,7 @@ Dim bGotExchangeRates As Boolean
                     sTmp = sTmp + "," + Format(rCurrentPrice)
                     sTmp = sTmp + "," + Format(rDayLow)
                     sTmp = sTmp + "," + Format(rDayHigh)
-                    sTmp = sTmp + "," + IIf(rDayOpen = 0, "0.0", Format(rCurrentPrice - rDayOpen))
+                    sTmp = sTmp + "," + IIf(rDayOpen = 0, "0.0", Format(rCurrentPrice - rDayClose))
                     sTmp = sTmp + ",Yahoo"
                     objSymLookup.Add sTmp, sSymbol
                     objSymsToLookup.Remove sSymbol
