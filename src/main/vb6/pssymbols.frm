@@ -136,7 +136,7 @@ Begin VB.Form frmSymbols
       Left            =   6975
       TabIndex        =   2
       ToolTipText     =   "Do not use this symbol"
-      Top             =   285
+      Top             =   270
       Width           =   1500
    End
    Begin VB.TextBox txtSymbol 
@@ -230,7 +230,7 @@ Begin VB.Form frmSymbols
       Left            =   4395
       TabIndex        =   1
       Top             =   240
-      Width           =   1335
+      Width           =   1545
    End
    Begin VB.ListBox lstSymbols 
       Height          =   5910

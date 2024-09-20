@@ -37,6 +37,7 @@ Option Explicit
     Public ShowDayChangePercent As Boolean
     Public ShowDayChangeUpDown As Boolean
     Public ExcludeFromSummary As Boolean
+    Public ObserveOnly As Boolean
     Public Disabled As Boolean
     Public CurrentPrice#
     Public DayStart#

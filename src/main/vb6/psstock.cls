@@ -30,6 +30,7 @@ Option Explicit
     Public CurrencySymbol$
     Public CurrencyName$
     Public DayStart#
+    Public DayHigh#
     Public DayChange#
     Public Position As New cRegion
     Public Source$
@@ -181,5 +182,23 @@ Public Function FormattedTotalValue$()
 
 End Function
 
+Public Function toString$()
+
+    toString = DisplayName + "," + Format(DayStart) + "," + Format(DayHigh) + "," + Format(DayChange) + "," + Source
+
+End Function
+
+Public Function initFromString(ByVal sInfo$)
+
+Dim objInfo As Variant
+
+    objInfo = Split(sInfo, ",")
+    DisplayName = objInfo(0)
+    DayStart = Val(objInfo(1))
+    DayHigh = Val(objInfo(2))
+    DayChange = Val(objInfo(3))
+    Source = objInfo(4)
+
+End Function
 
 

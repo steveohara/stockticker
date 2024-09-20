@@ -986,6 +986,7 @@ Dim i%, iSortColumn%
     sSortOrder = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_SORT_ORDER, "asc")
     iSortColumn = CInt(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_SORT_COLUMN, "0"))
     sCurrencySymbol = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_CURRENCY_SYMBOL, "£")
+    
     If PSGEN_IsCommaLocale Then
         rTotalInvestment = CDbl("0" + Replace(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_TOTAL, "0"), ".", ","))
         rMargin = CDbl("0" + Replace(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_SUMMARY_MARGIN, "0"), ".", ","))

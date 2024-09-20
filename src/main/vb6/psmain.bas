@@ -10,7 +10,7 @@ Option Explicit
     ' Version number form the build system
     Public Const VERSION_NAME = "Pivotal Stock Ticker (pivotalstockticker.exe)"
     Public Const VERSION_NUMBER = "3.6.6"
-    Public Const VERSION_TIMESTAMP = "03-Sep-2024 22:36"
+    Public Const VERSION_TIMESTAMP = "20-Sep-2024 13:29"
 
     ' Registry entries
     Dim mobjReg As New cRegistry
@@ -725,7 +725,9 @@ Dim rRate#
     rRate = frmMain.mobjExchangeRates.Item(objSymbol.CurrencyName)
     If rRate > 0 Then
         ConvertCurrency = rValue * rRate
-        If InStr(1, "abcdefghijklmnopqrstuvwxyz", objSymbol.CurrencySymbol, vbTextCompare) > 0 Then ConvertCurrency = ConvertCurrency / 100
+        
+        ' If the currency symbol is in lower case, then assume it is decimal pence/cents
+        If InStr(1, "abcdefghijklmnopqrstuvwxyz", objSymbol.CurrencySymbol, vbBinaryCompare) > 0 Then ConvertCurrency = ConvertCurrency / 100
     End If
 
 End Function
