@@ -1280,6 +1280,20 @@ Option Explicit
     Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
     Declare Function GlobalFree Lib "kernel32" (ByVal hMem As Long) As Long
     
+    Private Const KEY_QUERY_VALUE = &H1                 ' Registry key access constants
+    Private Const KEY_SET_VALUE = &H2
+    Private Const KEY_CREATE_SUB_KEY = &H4
+    Private Const KEY_ENUMERATE_SUB_KEYS = &H8
+    Private Const KEY_NOTIFY = &H10
+    Private Const KEY_CREATE_LINK = &H20
+    Private Const SYNCHRONIZE = &H100000
+    Private Const STANDARD_RIGHTS_ALL = &H1F0000
+    Private Const KEY_ALL_ACCESS = ((STANDARD_RIGHTS_ALL Or KEY_QUERY_VALUE Or KEY_SET_VALUE Or KEY_CREATE_SUB_KEY Or KEY_ENUMERATE_SUB_KEYS Or KEY_NOTIFY Or KEY_CREATE_LINK) And (Not SYNCHRONIZE))
+    Private Const KEY_READ = ((KEY_QUERY_VALUE Or KEY_ENUMERATE_SUB_KEYS Or KEY_NOTIFY) And (Not SYNCHRONIZE))
+    
+    Const EV_PATH$ = "System\CurrentControlSet\Services\Eventlog\Application\"
+    Const EVT_DLL = "%SystemRoot%\System32\msvbvm60.dll"
+
     Public Const EVENTLOG_ERROR_TYPE = 1
     Public Const EVENTLOG_WARNING_TYPE = 2
     Public Const EVENTLOG_INFORMATION_TYPE = 4
@@ -6084,10 +6098,12 @@ Dim rAdjustedTime As Currency
 
 End Function
 
-Public Function PSGEN_Log(ByVal sMessage$, Optional ByVal iLogType As LogEventTypes = LogEventTypes.LogInformation, Optional ByVal sSource$ = "") As Boolean
+Public Function PSGEN_Log(ByVal sMessage$, Optional ByVal iLogType As LogEventTypes = LogEventTypes.LogInformation, Optional ByVal lEventId As EventIdTypes = EventIdTypes.General, Optional ByVal lSourceId As SourceIdTypes = SourceIdTypes.General, Optional ByVal sSource$ = "") As Boolean
 '
 '                        iLogType%    - Type of event to register
 '                        sMessage$    - Message to register
+'                        lEventId&    - Optional Event ID to use
+'                        lSourceId&   - Oprional source ID
 '                        sSource$     - Optional source name
 '
 '                        ) as Boolean  - Returns true if successful
@@ -6096,16 +6112,30 @@ Public Function PSGEN_Log(ByVal sMessage$, Optional ByVal iLogType As LogEventTy
 '                           If sSource is empty, then the App.Title value is used
 '
 
-Dim lEventID&
-Dim hEventLog&
+Dim lHowKeyCreated&, lResult&
+Dim hEventLog&, lRegistryKey&
+Dim sRegKey$
+Dim saAttr As SECURITY_ATTRIBUTES
 
 
     ' Open the event log on this machine
     If sSource = "" Then sSource = App.Title
     hEventLog = RegisterEventSource(vbNullString, sSource)
+    
+    sRegKey = EV_PATH & sSource
+    lResult = RegOpenKeyEx(RegistryClasses.RegLocalMachine, sRegKey, 0&, KEY_ALL_ACCESS, lRegistryKey)
+    If lResult <> 0 And lResult <> 5 Then
+        If Not RegCreateKeyEx(RegistryClasses.RegLocalMachine, sRegKey, 0&, vbNullString, 0, KEY_ALL_ACCESS, saAttr, lRegistryKey, lHowKeyCreated) Then
+            RegSetValueEx lRegistryKey, "EventMessageFile", 0, 1, ByVal EVT_DLL, Len(EVT_DLL)
+            RegSetValueEx lRegistryKey, "TypesSupported", 0, 4, 4&, 4
+            RegCloseKey lRegistryKey
+        End If
+    Else
+        RegCloseKey lRegistryKey
+    End If
 
     ' ReportEvent returns 0 if failed, any other number indicates success
-    If ReportEvent(hEventLog, iLogType, 0, 0, 0, 1, Len(sMessage), sMessage, 0) = 0 Then
+    If ReportEvent(hEventLog, iLogType, lSourceId, lEventId, 0, 1, Len(sMessage), sMessage, 0) = 0 Then
         PSGEN_Log = False
     Else
         PSGEN_Log = True

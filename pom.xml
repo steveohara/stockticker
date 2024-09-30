@@ -7,7 +7,7 @@
     <properties>
         <project.major.version>3</project.major.version>
         <project.minor.version>6</project.minor.version>
-        <project.revision.version>6</project.revision.version>
+        <project.revision.version>7</project.revision.version>
         <project.vb6.executable>C:\Program Files (x86)\Microsoft Visual Studio\VB98\vb6.exe</project.vb6.executable>
         <maven.build.timestamp.format>dd-MMM-yyyy HH:mm</maven.build.timestamp.format>
     </properties>

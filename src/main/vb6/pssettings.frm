@@ -1003,7 +1003,7 @@ Dim lTmp&
             sError = mobjReg.SaveToFile(sFilename, App.Title)
             If sError = "" Then
                 MsgBox "Settings saved successfully to" + vbCrLf + vbCrLf + sFilename, vbInformation
-                PSGEN_Log "Saved settings to " + sBackup
+                PSGEN_Log "Saved settings to " + sBackup, LogEventTypes.LogInformation, EventIdTypes.BackupRestore, SourceIdTypes.Backup
             Else
                 MsgBox "Error whilst saving settings to" + vbCrLf + vbCrLf + sFilename + vbCrLf + vbCrLf + sError, vbCritical
             End If
@@ -1024,9 +1024,10 @@ Dim lTmp&
                 Else
                 
                     ' Now delete the original and load the new values
-                    PSGEN_Log "Backup settings to " + sBackup
+                    PSGEN_Log "Backing up settings to " + sBackup, LogEventTypes.LogInformation, EventIdTypes.BackupRestore, SourceIdTypes.Backup
                     sError = mobjReg.LoadFromFile(sFilename, App.Title)
                     If sError = "" Then
+                        PSGEN_Log "Loaded settings from " + sFilename, LogEventTypes.LogInformation, EventIdTypes.BackupRestore, SourceIdTypes.Restore
                         MsgBox "Settings loaded successfully from" + vbCrLf + vbCrLf + sFilename, vbInformation
                         Unload frmMain
                         frmMain.Show

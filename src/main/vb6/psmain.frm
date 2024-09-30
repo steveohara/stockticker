@@ -1154,12 +1154,12 @@ Dim objAlarm As frmAlarm
                 If objStock Is Nothing Then
                     sSymbolInfo = mobjReg.GetSetting(App.Title, REG_LAST_GOOD_VALUES, objSymbol.Code, "")
                     If sSymbolInfo = "" Then
-                        PSGEN_Log "Couldn't get data for " + objSymbol.Code + " - and no historic values to use", LogEventTypes.LogError
+                        PSGEN_Log "Couldn't get data for " + objSymbol.Code + " - and no historic values to use", LogEventTypes.LogError, EventIdTypes.StockPrices
                         objSymbol.ErrorDescription = "Couldn't refresh value and no historic data to retrieve"
                     Else
                         Set objStock = New cStock
                         Call objStock.initFromString(sSymbolInfo)
-                        PSGEN_Log "Couldn't get data for " + objSymbol.Code + " - using historic value", LogEventTypes.LogWarning
+                        PSGEN_Log "Couldn't get data for " + objSymbol.Code + " - using historic value", LogEventTypes.LogWarning, EventIdTypes.StockPrices
                         objSymbol.ErrorDescription = "Couldn't refresh value"
                     End If
                 Else

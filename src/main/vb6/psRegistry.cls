@@ -48,6 +48,19 @@ Private Type OSVERSIONINFO
     szCSDVersion As String * 128      '  Maintenance string for PSS usage
 End Type
 
+Public Enum EventIdTypes
+    General = &O0
+    BackupRestore = &O1
+    ExchangeRates = &O2
+    StockPrices = &O3
+End Enum
+
+Public Enum SourceIdTypes
+    General = &O0
+    Backup = &O1
+    Restore = &O2
+End Enum
+
 '**********
 ' Windows API Constants
 '**********
@@ -588,7 +601,7 @@ Dim asSymbols As Variant
         Close iFile
     Else
         SaveToFile = "Error trying to open file [" & sFilename & "] for output" & vbCrLf & Err.Description
-        PSGEN_Log SaveToFile, LogError
+        PSGEN_Log SaveToFile, LogError, EventIdTypes.BackupRestore, SourceIdTypes.Backup
     End If
 
 End Function
@@ -638,7 +651,7 @@ Dim bGotFirstSection As Boolean
         Close iFile
     Else
         LoadFromFile = "Error trying to open file [" & sFilename & "] for output" & vbCrLf & Err.Description
-        PSGEN_Log LoadFromFile, LogError
+        PSGEN_Log LoadFromFile, LogError, EventIdTypes.BackupRestore, SourceIdTypes.Restore
     End If
 
 End Function
