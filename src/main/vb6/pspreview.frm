@@ -631,7 +631,7 @@ Dim bLoaded As Boolean
     ' Day Position
     ' ******************************************
     Font.Charset = frmMain.Font.Charset
-    Font.size = IIf(frmMain.Font.size > 10, 10, frmMain.Font.size)
+    Font.size = 10
     FontBold = True
     Print "Overall Position"
     FontSize = FontSize - 1
@@ -863,7 +863,7 @@ Dim i%, iSortColumn%
     ' Draw the useful text
     Cls
     Font.Charset = frmMain.Font.Charset
-    Font.size = frmMain.Font.size
+    Font.size = 10
     FontBold = False
     Width = 2000 * Screen.TwipsPerPixelX
     Height = 2000 * Screen.TwipsPerPixelX
@@ -973,7 +973,7 @@ Dim i%, iSortColumn%
     ' Draw the useful text
     Cls
     Font.Charset = frmMain.Font.Charset
-    Font.size = frmMain.Font.size
+    Font.size = 10
     FontBold = False
     Width = 2000 * Screen.TwipsPerPixelX
     Height = 2000 * Screen.TwipsPerPixelX
