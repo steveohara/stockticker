@@ -162,6 +162,9 @@ Begin VB.Form frmMain
          Begin VB.Menu mnuFontSize8pt 
             Caption         =   "8pt"
          End
+         Begin VB.Menu mnuFontSize9pt 
+            Caption         =   "9pt"
+         End
          Begin VB.Menu mnuFontSize10pt 
             Caption         =   "10pt"
          End
@@ -900,6 +903,13 @@ Private Sub mnuFontSize8pt_Click()
 
 End Sub
 
+Private Sub mnuFontSize9pt_Click()
+
+    Call mobjReg.SaveSetting(App.Title, REG_SETTINGS, REG_FONTSIZE, "9")
+    Form_Load
+
+End Sub
+
 Private Sub mnuRefresh_Click()
 
     timData.Enabled = False
@@ -1318,6 +1328,7 @@ Private Sub Z_DrawSymbolText()
 
 Dim asSymbols$()
 Dim i%, iLeft%, iTop%
+Dim rSpace#
 Dim lBackColor&, lTextColor&, lUpColor&, lDownColor&, lTmp&
 Dim bNotFirst As Boolean
 Dim objSymbol As cSymbol
@@ -1338,6 +1349,11 @@ Dim objSymbols As Collection
     picData.CurrentX = 0
     picData.CurrentY = 1
     picData.BackColor = BackColor
+    
+    ' Work out the spacing
+    rSpace = (10# * (picData.FontSize / 10#))
+    If (rSpace > 10) Then rSpace = 10
+        
     If mobjCurrentSymbols.Count > 0 Then
     
         ' Split the text into it's constituents
@@ -1348,7 +1364,7 @@ Dim objSymbols As Collection
                 bShownOtherData = False
                 
                 ' Display all the bits starting with the correct colour
-                If bNotFirst Then picData.CurrentX = picData.CurrentX + 10
+                If bNotFirst Then picData.CurrentX = picData.CurrentX + rSpace
                 objSymbol.Position.Left = CurrentX + picData.CurrentX
                 If objSymbol.ShowChangeUpDown Or objSymbol.ShowChange Or objSymbol.ShowChangePercent Or objSymbol.ShowProfitLoss Then
                     picData.ForeColor = IIf(objSymbol.CurrentPrice > objSymbol.Price, lUpColor, IIf(objSymbol.CurrentPrice < objSymbol.Price, lDownColor, lTextColor))
@@ -1356,21 +1372,21 @@ Dim objSymbols As Collection
                 
                     ' Show the price
                     If objSymbol.ShowPrice Then
-                        picData.CurrentX = picData.CurrentX + 4
+                        picData.CurrentX = picData.CurrentX + 3
                         picData.Print objSymbol.FormattedValue;
                     End If
                     
                     ' Show the price difference
                     If objSymbol.ShowChange Then
                         bShownOtherData = True
-                        picData.CurrentX = picData.CurrentX + 4
+                        picData.CurrentX = picData.CurrentX + 3
                         picData.Print FormatCurrencyValue(objSymbol.CurrencySymbol, objSymbol.CurrentPrice - objSymbol.Price);
                     End If
                     
                     ' Show the change in percent
                     If objSymbol.ShowChangePercent Then
                         bShownOtherData = True
-                        picData.CurrentX = picData.CurrentX + 4
+                        picData.CurrentX = picData.CurrentX + 3
                         If objSymbol.Price <> 0 Then
                             picData.Print Format((objSymbol.CurrentPrice - objSymbol.Price) / objSymbol.Price, "0.00%");
                         Else
@@ -1380,7 +1396,7 @@ Dim objSymbols As Collection
                     
                     ' Show the profit/loss
                     If objSymbol.ShowProfitLoss Then
-                        picData.CurrentX = picData.CurrentX + 4
+                        picData.CurrentX = picData.CurrentX + 3
                         picData.Print FormatCurrencyValueWithSymbol(objSymbol.CurrencySymbol, objSymbol.CurrencyName, (objSymbol.CurrentPrice * objSymbol.Shares) - (objSymbol.Price * objSymbol.Shares));
                     End If
                 
@@ -1394,7 +1410,7 @@ Dim objSymbols As Collection
                     
                     ' Show the price
                     If objSymbol.ShowPrice Then
-                        picData.CurrentX = picData.CurrentX + 4
+                        picData.CurrentX = picData.CurrentX + 3
                         picData.Print objSymbol.FormattedValue;
                     End If
                 End If
@@ -1403,18 +1419,18 @@ Dim objSymbols As Collection
                 If objSymbol.ShowDayChange Or objSymbol.ShowDayChangePercent Or objSymbol.ShowDayChangeUpDown Then
                     bShownBraces = (bShownOtherData And (objSymbol.ShowDayChange Or objSymbol.ShowDayChangePercent)) Or (objSymbol.ShowChangeUpDown And objSymbol.ShowDayChangeUpDown)
                     picData.ForeColor = IIf(objSymbol.CurrentPrice > objSymbol.DayStart, lUpColor, IIf(objSymbol.CurrentPrice < objSymbol.DayStart, lDownColor, lTextColor))
-                    picData.CurrentX = picData.CurrentX + 4
+                    picData.CurrentX = picData.CurrentX + 3
                     If bShownBraces Then picData.Print "(";
                 
                     ' Show the Day price difference
                     If objSymbol.ShowDayChange Then
-                        picData.CurrentX = picData.CurrentX + 4
+                        picData.CurrentX = picData.CurrentX + 3
                         picData.Print FormatCurrencyValue(objSymbol.CurrencySymbol, objSymbol.CurrentPrice - objSymbol.DayStart);
                     End If
                     
                     ' Show the Day change in percent
                     If objSymbol.ShowDayChangePercent Then
-                        picData.CurrentX = picData.CurrentX + 4
+                        picData.CurrentX = picData.CurrentX + 3
                         If objSymbol.DayStart <> 0 Then
                             picData.Print Format(objSymbol.DayChange / objSymbol.DayStart, "0.00%");
                         Else
@@ -1424,7 +1440,7 @@ Dim objSymbols As Collection
                     
                     ' Show the day profit/loss
                     If objSymbol.ShowProfitLoss And objSymbol.ShowDayChange Then
-                        picData.CurrentX = picData.CurrentX + 4
+                        picData.CurrentX = picData.CurrentX + 3
                         picData.Print FormatCurrencyValueWithSymbol(objSymbol.CurrencySymbol, objSymbol.CurrencyName, (objSymbol.CurrentPrice * objSymbol.Shares) - (objSymbol.DayStart * objSymbol.Shares));
                     End If
                     
@@ -1511,9 +1527,10 @@ Dim stRect As RECT
     mnuDockAutoHide.Checked = PSGEN_IsSameText(mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_DOCK_AUTOHIDE), "true")
     
     ' Set the font
-    sPos = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FONTSIZE, "7")
+    sPos = mobjReg.GetSetting(App.Title, REG_SETTINGS, REG_FONTSIZE, "10")
     mnuFontSize7pt.Checked = (sPos = "7")
     mnuFontSize8pt.Checked = (sPos = "8")
+    mnuFontSize9pt.Checked = (sPos = "9")
     mnuFontSize10pt.Checked = (sPos = "10")
     mnuFontSize12pt.Checked = (sPos = "12")
     Font.size = Val(sPos)
