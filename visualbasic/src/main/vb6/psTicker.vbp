@@ -38,7 +38,7 @@ VersionComments="A Windows stock ticker bar"
 VersionCompanyName="Pivotal Solutions Ltd"
 VersionFileDescription="A Windows stock ticker bar"
 VersionLegalCopyright="Pivotal Solutions Ltd"
-VersionProductName="Pivotal Stock Ticker"
+VersionProductName="pivotalstockticker"
 CondComp="NoMdiMain = -1"
 CompilationType=0
 OptimizationType=0

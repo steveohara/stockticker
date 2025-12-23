@@ -8,9 +8,9 @@ Attribute VB_Name = "Support"
 Option Explicit
 
     ' Version number form the build system
-    Public Const VERSION_NAME = "Pivotal Stock Ticker (pivotalstockticker.exe)"
+    Public Const VERSION_NAME = "pivotalstockticker (pivotalstockticker.exe)"
     Public Const VERSION_NUMBER = "3.6.9"
-    Public Const VERSION_TIMESTAMP = "20-Oct-2024 21:53"
+    Public Const VERSION_TIMESTAMP = "23-Dec-2025 13:19"
 
     ' Registry entries
     Dim mobjReg As New cRegistry

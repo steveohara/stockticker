@@ -3,26 +3,30 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <modules>
+        <module>visualbasic</module>
+        <module>java</module>
+    </modules>
 
     <properties>
         <project.major.version>3</project.major.version>
         <project.minor.version>6</project.minor.version>
         <project.revision.version>9</project.revision.version>
-        <project.vb6.executable>C:\Program Files (x86)\Microsoft Visual Studio\VB98\vb6.exe</project.vb6.executable>
         <maven.build.timestamp.format>dd-MMM-yyyy HH:mm</maven.build.timestamp.format>
     </properties>
 
     <groupId>com.pivotal-solutions</groupId>
-    <artifactId>pivotalstockticker</artifactId>
+    <artifactId>pivotalstockticker-pom</artifactId>
     <name>Pivotal Stock Ticker</name>
     <organization>
         <name>Pivotal Solutions Ltd</name>
         <url>https://www.pivotal-solutions.co.uk</url>
     </organization>
     <url>https://github.com/steveohara/stockticker</url>
-    <version>${project.major.version}.${project.minor.version}.${project.revision.version}</version>
-    <description>A Windows stock ticker bar</description>
-    <packaging>jar</packaging>
+    <version>3.6.9</version>
+    <description>A stock ticker bar</description>
+
+    <packaging>pom</packaging>
 
     <developers>
         <developer>
@@ -40,7 +44,7 @@
     <licenses>
         <license>
             <name>The Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
 
@@ -48,297 +52,5 @@
         <connection>scm:git:https://github.com/steveohara/stockticker.git</connection>
         <url>https://github.com/steveohara/stockticker</url>
     </scm>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>io.github.floverfelt</groupId>
-                <artifactId>find-and-replace-maven-plugin</artifactId>
-                <version>1.1.0</version>
-                <executions>
-                    <execution>
-                        <id>version1</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>src\main\vb6</baseDir>
-                            <fileMask>.vbp</fileMask>
-                            <findRegex>MajorVer=[0-9]+</findRegex>
-                            <replaceValue>MajorVer=${project.major.version}</replaceValue>
-                            <recursive>false</recursive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>version2</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>src\main\vb6</baseDir>
-                            <fileMask>.vbp</fileMask>
-                            <findRegex>MinorVer=[0-9]+</findRegex>
-                            <replaceValue>MinorVer=${project.minor.version}</replaceValue>
-                            <recursive>false</recursive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>version3</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>src\main\vb6</baseDir>
-                            <fileMask>.vbp</fileMask>
-                            <findRegex>RevisionVer=[0-9]+</findRegex>
-                            <replaceValue>RevisionVer=${project.revision.version}</replaceValue>
-                            <recursive>false</recursive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>version4</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>src\main\vb6</baseDir>
-                            <fileMask>.vbp</fileMask>
-                            <findRegex>VersionProductName=.+</findRegex>
-                            <replaceValue>VersionProductName="${project.name}"</replaceValue>
-                            <recursive>false</recursive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>version5</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>src\main\vb6</baseDir>
-                            <fileMask>.vbp</fileMask>
-                            <findRegex>VersionLegalCopyright=.+</findRegex>
-                            <replaceValue>VersionLegalCopyright="${project.organization.name}"</replaceValue>
-                            <recursive>false</recursive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>version6</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>src\main\vb6</baseDir>
-                            <fileMask>.vbp</fileMask>
-                            <findRegex>VersionCompanyName=.+</findRegex>
-                            <replaceValue>VersionCompanyName="${project.organization.name}"</replaceValue>
-                            <recursive>false</recursive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>version7</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>src\main\vb6</baseDir>
-                            <fileMask>.vbp</fileMask>
-                            <findRegex>VersionComments=.+</findRegex>
-                            <replaceValue>VersionComments="${project.description}"</replaceValue>
-                            <recursive>false</recursive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>version8</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>src\main\vb6</baseDir>
-                            <fileMask>.vbp</fileMask>
-                            <findRegex>Description=.+</findRegex>
-                            <replaceValue>Description="${project.description}"</replaceValue>
-                            <recursive>false</recursive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>version9</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>src\main\vb6</baseDir>
-                            <fileMask>.vbp</fileMask>
-                            <findRegex>ExeName32=.+</findRegex>
-                            <replaceValue>ExeName32="${project.artifactId}.exe"</replaceValue>
-                            <recursive>false</recursive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>version10</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>src\main\vb6</baseDir>
-                            <fileMask>psmain.bas</fileMask>
-                            <findRegex>Public Const VERSION_NUMBER.+</findRegex>
-                            <replaceValue>Public Const VERSION_NUMBER = "${project.version}"</replaceValue>
-                            <recursive>false</recursive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>version11</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>src\main\vb6</baseDir>
-                            <fileMask>psmain.bas</fileMask>
-                            <findRegex>Public Const VERSION_NAME.+</findRegex>
-                            <replaceValue>Public Const VERSION_NAME = "${project.name} (${project.artifactId}.exe)"</replaceValue>
-                            <recursive>false</recursive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>version12</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>src\main\vb6</baseDir>
-                            <fileMask>psmain.bas</fileMask>
-                            <findRegex>Public Const VERSION_TIMESTAMP.+</findRegex>
-                            <replaceValue>Public Const VERSION_TIMESTAMP = "${maven.build.timestamp}"</replaceValue>
-                            <recursive>false</recursive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>version13</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <fileMask>README.md</fileMask>
-                            <findRegex>(?i)version:[^`]+</findRegex>
-                            <replaceValue>Version: ${project.version} [${maven.build.timestamp}]</replaceValue>
-                            <recursive>false</recursive>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.3.2</version>
-                <executions>
-                    <execution>
-                        <id>tidy1</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <workingDirectory>${project.basedir}</workingDirectory>
-                            <executable>"${project.basedir}\installer\unix2dos.exe"</executable>
-                            <arguments>
-                                <argument>"${project.basedir}\src\main\vb6\psticker.vbp"</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>tidy2</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <workingDirectory>${project.basedir}</workingDirectory>
-                            <executable>"${project.basedir}\installer\unix2dos.exe"</executable>
-                            <arguments>
-                                <argument>"${project.basedir}\src\main\vb6\psmain.bas"</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>dependencies</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <workingDirectory>${project.basedir}</workingDirectory>
-                            <executable>"${project.vb6.executable}"</executable>
-                            <arguments>
-                                <argument>/m</argument>
-                                <argument>"${project.basedir}\src\main\vb6\psticker.vbp"</argument>
-                                <argument>/outdir</argument>
-                                <argument>"${project.build.directory}"</argument>
-                                <argument>/out</argument>
-                                <argument>"${project.build.directory}\build.log"</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>com.coderplus.maven.plugins</groupId>
-                <artifactId>copy-rename-maven-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-file1</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <sourceFile>${project.build.directory}\${project.artifactId}.exe</sourceFile>
-                            <destinationFile>${project.basedir}\releases\${project.artifactId}-${project.major.version}_${project.minor.version}_${project.revision.version}.exe</destinationFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-file2</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <sourceFile>${project.build.directory}\${project.artifactId}.exe</sourceFile>
-                            <destinationFile>${project.basedir}\releases\latest\${project.artifactId}.exe</destinationFile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
