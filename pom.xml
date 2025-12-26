@@ -9,9 +9,6 @@
     </modules>
 
     <properties>
-        <project.major.version>3</project.major.version>
-        <project.minor.version>6</project.minor.version>
-        <project.revision.version>9</project.revision.version>
         <maven.build.timestamp.format>dd-MMM-yyyy HH:mm</maven.build.timestamp.format>
     </properties>
 
@@ -23,10 +20,9 @@
         <url>https://www.pivotal-solutions.co.uk</url>
     </organization>
     <url>https://github.com/steveohara/stockticker</url>
-    <version>3.6.9</version>
     <description>A stock ticker bar</description>
-
     <packaging>pom</packaging>
+    <version>1.0.0</version>
 
     <developers>
         <developer>

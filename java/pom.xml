@@ -6,10 +6,11 @@
     <parent>
         <groupId>com.pivotal-solutions</groupId>
         <artifactId>pivotalstockticker-pom</artifactId>
-        <version>3.6.9</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>pivotalstockticker-jar</artifactId>
+    <packaging>jar</packaging>
     <version>1.0.0</version>
 
     <properties>
@@ -22,8 +23,6 @@
         <slf4j.version>2.0.17</slf4j.version>
         <junit5.version>5.8.1</junit5.version>
     </properties>
-
-    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>

@@ -48,7 +48,7 @@ Dim sSummaryCurrencyName$
         Call Z_GetExchangeRatesFromER(objExchangeLookup, sSummaryCurrencyName, objExchangeRates)
     End If
     
-    PSGEN_Log "Got exchange rates " & IIf(objExchangeLookup.Count = 0, "successfully", "unsuccessfully"), IIf(objExchangeLookup.Count = 0, LogEventTypes.LogInformation, LogEventTypes.LogWarning), EventIdTypes.ExchangeRates
+    PSGEN_Log "Got all exchange rates " & IIf(objExchangeLookup.Count = 0, "successfully", "unsuccessfully"), IIf(objExchangeLookup.Count = 0, LogEventTypes.LogInformation, LogEventTypes.LogWarning), EventIdTypes.ExchangeRates
     PSDATA_GetExchangeRates = (objExchangeLookup.Count = 0)
 
 End Function
@@ -236,7 +236,7 @@ Dim rRate#
                             objExchangeLookup.Remove sCurrency
                             Z_GetExchangeRatesFromER = True
                             
-                            ' Update the mast list we have been sent
+                            ' Update the master list we have been sent
                             objExchangeRates.Remove sCurrency
                             objExchangeRates.Add rRate, sCurrency
                         End If

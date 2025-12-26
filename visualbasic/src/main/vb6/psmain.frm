@@ -1116,7 +1116,7 @@ Dim objSymbolsWithData As New Collection
 
 Dim sSymbol As Variant
 Dim sSymbolInfo As Variant
-Dim rTotalInvested#, rTotalValue#, rOldPrice#, rOldPercent#
+Dim rTotalInvested#, rTotalValue#, rOldPrice#, rOldPercent#, rTimePeriod#
 Dim sSummaryCurrencySymbol$, sSummaryCurrencyName$, sCurrencySymbol$
 Dim objAlarm As frmAlarm
 
@@ -1134,13 +1134,15 @@ Dim objAlarm As frmAlarm
     ' Loop through all the symbols getting the lists
     If mobjCurrentSymbols.Count > 0 Then
         
-        ' Only attempt to get the exchanges rates every 10 minutes after the first successful get
+        ' Only attempt to get the exchanges rates every 60 minutes after the first successful get
         ' Do this by using the tag as a counter of seconds
-        If Val(timData.Tag) >= (600 / timData.Interval) Or timData.Tag = "" Then
+        rTimePeriod = Val(timData.Tag) * (timData.Interval / 60000)
+        If rTimePeriod >= 60 Or timData.Tag = "" Then
             If Not PSDATA_GetExchangeRates(mobjCurrentSymbols, mobjExchangeRates) Then
                 timData.Tag = ""
             Else
-                timData.Tag = "600"
+                ' Try again in 20 minutes
+                timData.Tag = Format(20 * (60000 / timData.Interval))
             End If
         End If
         timData.Tag = IIf(timData.Tag = "", 1, Format(Val(timData.Tag) + 1))

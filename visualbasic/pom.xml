@@ -6,13 +6,14 @@
     <parent>
         <groupId>com.pivotal-solutions</groupId>
         <artifactId>pivotalstockticker-pom</artifactId>
-        <version>3.6.9</version>
+        <version>1.0.0</version>
     </parent>
 
     <name>pivotalstockticker</name>
     <artifactId>pivotalstockticker-exe</artifactId>
     <description>A Windows stock ticker bar</description>
     <packaging>pom</packaging>
+    <version>3.6.10</version>
 
     <properties>
         <vb6.executable>C:\Program Files (x86)\Microsoft Visual Studio\VB98\vb6.exe</vb6.executable>
@@ -21,6 +22,20 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>parse-version</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>parse-version</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>io.github.floverfelt</groupId>
                 <artifactId>find-and-replace-maven-plugin</artifactId>
@@ -37,7 +52,7 @@
                             <baseDir>src\main\vb6</baseDir>
                             <fileMask>.vbp</fileMask>
                             <findRegex>MajorVer=[0-9]+</findRegex>
-                            <replaceValue>MajorVer=${project.major.version}</replaceValue>
+                            <replaceValue>MajorVer=${parsedVersion.majorVersion}</replaceValue>
                             <recursive>false</recursive>
                         </configuration>
                     </execution>
@@ -52,7 +67,7 @@
                             <baseDir>src\main\vb6</baseDir>
                             <fileMask>.vbp</fileMask>
                             <findRegex>MinorVer=[0-9]+</findRegex>
-                            <replaceValue>MinorVer=${project.minor.version}</replaceValue>
+                            <replaceValue>MinorVer=${parsedVersion.minorVersion}</replaceValue>
                             <recursive>false</recursive>
                         </configuration>
                     </execution>
@@ -67,7 +82,7 @@
                             <baseDir>src\main\vb6</baseDir>
                             <fileMask>.vbp</fileMask>
                             <findRegex>RevisionVer=[0-9]+</findRegex>
-                            <replaceValue>RevisionVer=${project.revision.version}</replaceValue>
+                            <replaceValue>RevisionVer=${parsedVersion.incrementalVersion}</replaceValue>
                             <recursive>false</recursive>
                         </configuration>
                     </execution>
@@ -307,7 +322,7 @@
                         </goals>
                         <configuration>
                             <sourceFile>${project.build.directory}\${exe.name}</sourceFile>
-                            <destinationFile>${project.basedir}\releases\${project.name}-${project.major.version}_${project.minor.version}_${project.revision.version}.exe
+                            <destinationFile>${project.basedir}\releases\${project.name}-${parsedVersion.majorVersion}_${parsedVersion.minorVersion}_${parsedVersion.incrementalVersion}.exe
                             </destinationFile>
                         </configuration>
                     </execution>

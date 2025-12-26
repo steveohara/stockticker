@@ -9,8 +9,8 @@ Option Explicit
 
     ' Version number form the build system
     Public Const VERSION_NAME = "pivotalstockticker (pivotalstockticker.exe)"
-    Public Const VERSION_NUMBER = "3.6.9"
-    Public Const VERSION_TIMESTAMP = "23-Dec-2025 13:19"
+    Public Const VERSION_NUMBER = "3.6.10"
+    Public Const VERSION_TIMESTAMP = "26-Dec-2025 14:20"
 
     ' Registry entries
     Dim mobjReg As New cRegistry
@@ -206,7 +206,7 @@ Public Function FormatCurrencyValueWithSymbol$(ByVal sSymbol$, ByVal sCurrency$,
            PSGEN_IsSameText(sCurrency, "gip") Or _
            PSGEN_IsSameText(sCurrency, "fkp") Or _
            PSGEN_IsSameText(sCurrency, "egp") Then
-            FormatCurrencyValueWithSymbol = Format(rValue / 100, "£#,0.00")
+            FormatCurrencyValueWithSymbol = Format(rValue / 100, "ï¿½#,0.00")
         
         ElseIf PSGEN_IsSameText(sCurrency, "usd") Or _
                PSGEN_IsSameText(sCurrency, "bnd") Or _
@@ -225,7 +225,7 @@ Public Function FormatCurrencyValueWithSymbol$(ByVal sSymbol$, ByVal sCurrency$,
             FormatCurrencyValueWithSymbol = Format(rValue / 100, "$#,0.00")
         
         ElseIf PSGEN_IsSameText(sCurrency, "eur") Then
-            FormatCurrencyValueWithSymbol = Format(rValue / 100, "€#,0.00")
+            FormatCurrencyValueWithSymbol = Format(rValue / 100, "ï¿½#,0.00")
         
         Else
             FormatCurrencyValueWithSymbol = Format(rValue, "#,0.00") + sSymbol

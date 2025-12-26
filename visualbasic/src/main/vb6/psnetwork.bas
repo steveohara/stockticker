@@ -658,7 +658,7 @@ Private Type ICMP_ECHO_REPLY
     DataSize                    As Long
     DataPointer                 As Long
     options                     As ICMP_OPTIONS
-    data                        As String * 250
+    Data                        As String * 250
 End Type
 
 Private Const WS_VERSION_REQD   As Long = &H101
@@ -1116,18 +1116,31 @@ Public Function PSINET_GetHTTPFile(ByVal sURL$, sValue$, Optional ByVal sTitle$,
 '                           URL
 '
 Dim bReturn As Boolean
-Dim iRetry%
+Dim iRetry%, iCnt%
+Dim sError$
 
     On Error Resume Next
     While iRetry <= iRetries And Not bReturn
         Err.Clear
         bReturn = Z_GetHTTPFile(sURL, sValue, sTitle, lFlags, vCookies, vHeaders, lUseSession, sProxyName, sProxyByPass, lConnectionTimeout, lReadTimeout)
+        sError = Err.Description
         iRetry = iRetry + 1
+        If Not bReturn Then
+            If InStr(1, sError, "STATUS:4", vbTextCompare) = 0 Then
+                For iCnt = 0 To iRetry * 10
+                    Sleep 100
+                    DoEvents
+                    DoEvents
+                Next
+            Else
+                iRetry = iRetries + 1
+            End If
+        End If
     Wend
 
-    If Err.Description <> "" Then
+    If sError <> "" Then
         On Error GoTo 0
-        Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, Err.Description
+        Err.Raise vbObjectError + ERROR_OFFSET, ERROR_SOURCE, sError
     End If
     PSINET_GetHTTPFile = bReturn
     
@@ -1161,7 +1174,7 @@ Dim lFile&, lLength&, lSession&, lTmp&
 Dim bFinished As Boolean
 Dim iCnt%
 Dim dTimeOut As Date
-Dim sError$
+Dim sError$, sStatus$, sStatusCode$
 
     ' Set the cookies
     On Error Resume Next
@@ -1208,19 +1221,22 @@ Dim sError$
         ' Check that we got the file we wanted
         lLength = Len(sBuffer)
         Call HttpQueryInfo(lFile, HTTP_QUERY_STATUS_CODE, ByVal sBuffer, lLength, lTmp)
-        If Left(sBuffer, 1) <> "2" Then
-            sError = "STATUS:" + PSINET_GetHttpCodeMessage(Val(Left(sBuffer, lLength)))
+        sStatusCode = Left(sBuffer, lLength)
+        sStatus = PSINET_GetHttpCodeMessage(Val(sStatusCode))
+        While Not bFinished
+            sBuffer = vbNullString
+            If InternetReadFile(lFile, sBuffer, Len(sBuffer), lLength) = 0 Then
+                sError = PSINET_TranslateErrorCode(Err.LastDllError)
+                bFinished = True
+            Else
+                sValue = sValue & Left$(sBuffer, lLength)
+                bFinished = (lLength = 0)
+            End If
+        Wend
+        If Left(sStatusCode, 1) <> "2" Then
+            sError = "STATUS:" + sStatus + vbCrLf + sValue
+            sValue = ""
         Else
-            While Not bFinished
-                sBuffer = vbNullString
-                If InternetReadFile(lFile, sBuffer, Len(sBuffer), lLength) = 0 Then
-                    sError = PSINET_TranslateErrorCode(Err.LastDllError)
-                    bFinished = True
-                Else
-                    sValue = sValue & Left$(sBuffer, lLength)
-                    bFinished = (lLength = 0)
-                End If
-            Wend
             bReturn = True
         End If
     End If
@@ -1434,8 +1450,8 @@ Dim abAddr(3) As Byte
         sIPAddress = CStr(abAddr(0)) & "." & CStr(abAddr(1)) & "." & CStr(abAddr(2)) & "." & CStr(abAddr(3))
         sDataSize = stECHO.DataSize & " bytes"
 
-        iPtr = InStr(stECHO.data, vbNullChar)
-        If iPtr > 1 Then bDataMatch = (Left$(stECHO.data, iPtr - 1) = sTmp)
+        iPtr = InStr(stECHO.Data, vbNullChar)
+        If iPtr > 1 Then bDataMatch = (Left$(stECHO.Data, iPtr - 1) = sTmp)
         If stECHO.Status = 0 And stECHO.Address = lAddress Then PSINET_Ping = True
 
         ' Clean up the sockets connection
