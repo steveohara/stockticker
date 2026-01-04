@@ -61,7 +61,6 @@ public class PreferencesService {
         settingsPrefs.putInt("windowX", settings.getWindowX());
         settingsPrefs.putInt("windowY", settings.getWindowY());
         settingsPrefs.putInt("windowWidth", settings.getWindowWidth());
-        settingsPrefs.putInt("windowHeight", settings.getWindowHeight());
         try {
             settingsPrefs.flush();
         }
@@ -73,7 +72,7 @@ public class PreferencesService {
     public Settings loadSettings() {
         Settings settings = new Settings();
         settings.setProxy(settingsPrefs.get("proxy", ""));
-        settings.setFrequency(settingsPrefs.getInt("frequency", 60));
+        settings.setUpdateFrequency(settingsPrefs.getInt("frequency", 60));
         settings.setSummaryCurrency(settingsPrefs.get("summaryCurrency", "USD"));
         settings.setSummaryCurrencySymbol(settingsPrefs.get("summaryCurrencySymbol", "$"));
         settings.setSummaryTotal(settingsPrefs.getDouble("summaryTotal", 0.0));
@@ -106,7 +105,6 @@ public class PreferencesService {
         settings.setWindowX(settingsPrefs.getInt("windowX", 100));
         settings.setWindowY(settingsPrefs.getInt("windowY", 100));
         settings.setWindowWidth(settingsPrefs.getInt("windowWidth", 800));
-        settings.setWindowHeight(settingsPrefs.getInt("windowHeight", 60));
         return settings;
     }
 

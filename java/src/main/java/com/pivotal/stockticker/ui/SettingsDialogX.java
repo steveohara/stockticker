@@ -258,7 +258,7 @@ public class SettingsDialogX extends JDialog {
 
     private void saveSettings() {
         settings.setProxy(proxyField.getText());
-        settings.setFrequency((Integer) frequencySpinner.getValue());
+        settings.setUpdateFrequency((Integer) frequencySpinner.getValue());
         settings.setSummaryCurrency(currencyCodeField.getText());
         settings.setSummaryCurrencySymbol(currencySymbolField.getText());
         settings.setAlwaysOnTop(alwaysOnTopCheck.isSelected());

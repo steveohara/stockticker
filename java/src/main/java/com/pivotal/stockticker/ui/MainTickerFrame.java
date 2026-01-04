@@ -49,7 +49,7 @@ public class MainTickerFrame extends JFrame {
         setTitle("Stock Ticker");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setUndecorated(true);
-        setBounds(settings.getWindowX(), settings.getWindowY(), settings.getWindowWidth(), settings.getWindowHeight());
+        setBounds(settings.getWindowX(), settings.getWindowY(), settings.getWindowWidth(), 25);
         setAlwaysOnTop(settings.isAlwaysOnTop());
         tickerPanel = new JPanel() {
             @Override
@@ -59,7 +59,7 @@ public class MainTickerFrame extends JFrame {
             }
         };
         tickerPanel.setBackground(Color.BLACK);
-        tickerPanel.setPreferredSize(new Dimension(settings.getWindowWidth(), settings.getWindowHeight()));
+        tickerPanel.setPreferredSize(new Dimension(settings.getWindowWidth(), 25));
         setupContextMenu();
         setupDragging();
         add(tickerPanel);
@@ -285,6 +285,11 @@ public class MainTickerFrame extends JFrame {
         catch (Exception e) {
             log.error("Cannot set look and feel", e);
         }
-        SwingUtilities.invokeLater(MainTickerFrame::new);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new MainTickerFrame();
+            }
+        });
     }
 }
