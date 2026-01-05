@@ -1,6 +1,7 @@
 package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.StartupManager;
+import com.pivotal.stockticker.Utils;
 import com.pivotal.stockticker.VersionInfo;
 import com.pivotal.stockticker.model.Settings;
 import lombok.extern.slf4j.Slf4j;
@@ -127,7 +128,6 @@ public class TickerBar extends JFrame {
             public void mousePressed(MouseEvent e) {
                 dragStart = e.getPoint();
             }
-
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (dragStart != null) {
@@ -309,8 +309,7 @@ public class TickerBar extends JFrame {
         contextMenu.add(help);
         JMenuItem about = new JMenuItem("About...");
         about.addActionListener(e -> {
-            ;
-            JOptionPane.showMessageDialog(null, VersionInfo.getVersionString(), "About Stock Ticker", JOptionPane.INFORMATION_MESSAGE);
+            Utils.showTopmostMessage(VersionInfo.getVersionString(), "About", JOptionPane.INFORMATION_MESSAGE);
         });
         contextMenu.add(about);
         contextMenu.addSeparator();
@@ -383,12 +382,7 @@ public class TickerBar extends JFrame {
      * Exits the application, saving settings and stopping timers.
      */
     private void exitApplication() {
-//        if (scrollTimer != null) {
-//            scrollTimer.stop();
-//        }
-//        if (updateTimer != null) {
-//            updateTimer.stop();
-//        }
+        pnlStocks.stopScrolling();
         System.exit(0);
     }
 
