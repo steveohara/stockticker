@@ -224,7 +224,7 @@ abstract public class PersistanceManager {
                         break;
                     }
                 }
-                log.info("Field changed: {}", fieldName);
+                log.debug("Field changed: {}", fieldName);
             }
 
             return result;

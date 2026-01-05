@@ -14,6 +14,15 @@ import java.awt.*;
 @Getter
 @Setter
 public class Settings extends PersistanceManager {
+
+    public static final int FONT_SIZE_SMALL = 11;
+    public static final int FONT_SIZE_MEDIUM = 13;
+    public static final int FONT_SIZE_LARGE = 16;
+
+    public static final int SCROLL_SPEED_SLOW = 1;
+    public static final int SCROLL_SPEED_MEDIUM = 2;
+    public static final int SCROLL_SPEED_FAST = 4;
+
     private String proxy = null;
     private int frequency = 60;
     private String summaryCurrency = "USD";
@@ -25,12 +34,13 @@ public class Settings extends PersistanceManager {
     private Color normalTextColor = Color.WHITE;
     private Color upArrowColor = new Color(0, 255, 0);
     private Color downArrowColor = new Color(255, 0, 0);
-    private Font tickerFont = new Font("Arial", Font.PLAIN, 12);
-    private boolean showTotal = false;
-    private boolean showTotalPercent = false;
+    private int fontSize = FONT_SIZE_MEDIUM;
+    private int tickerSpeed = SCROLL_SPEED_MEDIUM;
+    private boolean showTotal = true;
+    private boolean showTotalPercent = true;
     private boolean showTotalCost = false;
-    private boolean showTotalValue = false;
-    private boolean showDailyChange = false;
+    private boolean showTotalValue = true;
+    private boolean showDailyChange = true;
     private boolean showPrice = false;
     private boolean showCostBase = false;
     private boolean alwaysOnTop = true;

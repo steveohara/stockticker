@@ -2,7 +2,6 @@ package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.model.Settings;
 import com.pivotal.stockticker.model.Symbol;
-import com.pivotal.stockticker.service.PreferencesService;
 import com.pivotal.stockticker.service.StockDataService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +17,6 @@ import java.util.List;
  * Main application frame for the stock ticker.
  */
 public class MainTickerFrame extends JFrame {
-    private final PreferencesService prefsService;
     private final StockDataService stockService;
     private Settings settings;
     private List<Symbol> symbols;
@@ -34,10 +32,7 @@ public class MainTickerFrame extends JFrame {
      * Constructs the main ticker frame, initializes UI components, and starts timers.
      */
     public MainTickerFrame() {
-        this.prefsService = new PreferencesService();
         this.stockService = new StockDataService();
-        this.settings = prefsService.loadSettings();
-        this.symbols = prefsService.loadSymbols();
         initializeUI();
         startTimers();
     }
@@ -110,7 +105,6 @@ public class MainTickerFrame extends JFrame {
                 if (dragStart[0] != null) {
                     settings.setWindowX(getX());
                     settings.setWindowY(getY());
-                    prefsService.saveSettings(settings);
                     dragStart[0] = null;
                 }
             }
@@ -224,7 +218,6 @@ public class MainTickerFrame extends JFrame {
     private void drawTicker(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setFont(settings.getTickerFont());
         FontMetrics fm = g2d.getFontMetrics();
         int textWidth = fm.stringWidth(tickerText);
         if (scrollPosition < -textWidth) {
@@ -239,22 +232,22 @@ public class MainTickerFrame extends JFrame {
      * Shows the symbols editing dialog.
      */
     private void showSymbolsDialog() {
-        SymbolsDialogX dialog = new SymbolsDialogX(this, symbols, prefsService);
-        dialog.setVisible(true);
-        symbols = dialog.getSymbols();
-        updateStockData();
+//        SymbolsDialogX dialog = new SymbolsDialogX(this, symbols, null);
+//        dialog.setVisible(true);
+//        symbols = dialog.getSymbols();
+//        updateStockData();
     }
 
     /**
      * Shows the settings dialog.
      */
     private void showSettingsDialog() {
-        SettingsDialogX dialog = new SettingsDialogX(this, settings, prefsService);
-        dialog.setVisible(true);
-        settings = dialog.getSettings();
-        setAlwaysOnTop(settings.isAlwaysOnTop());
-        updateTimer.setDelay(settings.getFrequency() * 1000);
-        tickerPanel.repaint();
+//        SettingsDialogX dialog = new SettingsDialogX(this, settings, null);
+//        dialog.setVisible(true);
+//        settings = dialog.getSettings();
+//        setAlwaysOnTop(settings.isAlwaysOnTop());
+//        updateTimer.setDelay(settings.getFrequency() * 1000);
+//        tickerPanel.repaint();
     }
 
     /**
@@ -263,7 +256,6 @@ public class MainTickerFrame extends JFrame {
     private void exitApplication() {
         settings.setWindowX(getX());
         settings.setWindowY(getY());
-        prefsService.saveSettings(settings);
         if (scrollTimer != null) {
             scrollTimer.stop();
         }

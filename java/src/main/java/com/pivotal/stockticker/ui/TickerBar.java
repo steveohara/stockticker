@@ -1,7 +1,7 @@
 package com.pivotal.stockticker.ui;
 
-import com.intellij.uiDesigner.core.GridConstraints;
-import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.pivotal.stockticker.StartupManager;
+import com.pivotal.stockticker.VersionInfo;
 import com.pivotal.stockticker.model.Settings;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.net.URI;
 
 @Slf4j
 public class TickerBar extends JFrame {
@@ -20,6 +21,14 @@ public class TickerBar extends JFrame {
     private ColouredTextPanel pnlSummary;
     private ColouredTextPanel pnlDaySummary;
     private JPanel pnlTicker;
+
+    private JCheckBoxMenuItem fontSizeItemSmall;
+    private JCheckBoxMenuItem fontSizeItemMedium;
+    private JCheckBoxMenuItem fontSizeItemLarge;
+    private JCheckBoxMenuItem onTop;
+    private JCheckBoxMenuItem scrollItemSlow;
+    private JCheckBoxMenuItem scrollItemNormal;
+    private JCheckBoxMenuItem scrollItemFast;
 
     private Point dragStart = null;
     private Point leftDragStart = null;
@@ -41,12 +50,40 @@ public class TickerBar extends JFrame {
      * Draw the content of the ticker
      */
     private void drawTickerContent() {
+        pnlSummary.cls();
+        pnlSummary.setFontColor(Color.WHITE);
+        pnlSummary.setCurrentX(4);
+        pnlSummary.print("this is to show the");
+        pnlSummary.setFontBold(true);
+        pnlSummary.setFontColor(Color.LIGHT_GRAY);
+        pnlSummary.print(" ↕ ");
+        pnlSummary.setFontBold(false);
+        pnlSummary.setFontColor(Color.WHITE);
+        pnlSummary.print("summary panel is");
+        pnlSummary.setFontColor(Color.RED);
+        pnlSummary.setFontBold(true);
+        pnlSummary.print(" ↓ ");
+        pnlSummary.setFontBold(false);
+        pnlSummary.setFontColor(Color.WHITE);
+        pnlSummary.print("growing");
+        pnlSummary.setFontColor(Color.GREEN);
+        pnlSummary.setFontBold(true);
+        pnlSummary.print(" ↑");
+
+        pnlDaySummary.cls();
+        pnlDaySummary.setFontColor(Color.RED);
+        pnlDaySummary.setCurrentX(10);
+        pnlDaySummary.print("summary panel is growing ");
+
         pnlStocks.cls();
-        pnlStocks.setFontColor(Color.RED);
+        pnlStocks.setFontColor(Color.GREEN);
+        pnlStocks.setCurrentX(10);
+        pnlStocks.print("hello");
         pnlStocks.setFontBold(true);
-        pnlStocks.print("hello steve");
+        pnlStocks.print(" steve");
         pnlStocks.setFontColor(Color.YELLOW);
         pnlStocks.setFontBold(false);
+        pnlStocks.setCurrentX(pnlStocks.getCurrentX() + 25);
         pnlStocks.print("hello steve again");
         pnlStocks.paintImmediately(pnlStocks.getBounds());
     }
@@ -57,13 +94,13 @@ public class TickerBar extends JFrame {
     private void initializeUI() {
 
         // Position and size the main frame
+        setType(Window.Type.UTILITY);
         setUndecorated(true);
         setAlwaysOnTop(settings.isAlwaysOnTop());
         setContentPane(pnlTicker);
-        setFont(settings.getTickerFont());
+        setFont(new Font("Calibri", Font.PLAIN, settings.getFontSize()));
         setLocation(settings.getWindowX(), settings.getWindowY());
-        pnlTicker.setSize(new Dimension(settings.getWindowWidth(), getFontMetrics(getFont()).getHeight() + 2));
-        pnlTicker.setPreferredSize(new Dimension(settings.getWindowWidth(), getFontMetrics(getFont()).getHeight() + 2));
+        pnlTicker.setPreferredSize(new Dimension(settings.getWindowWidth(), getFontMetrics(getFont()).getHeight()));
         setBackground(pnlTicker.getBackground());
         pack();
 
@@ -71,6 +108,9 @@ public class TickerBar extends JFrame {
         pnlDaySummary.setFont(getFont());
         pnlSummary.setFont(getFont());
         pnlStocks.setFont(getFont());
+        pnlSummary.setVisible(settings.isShowTotal() || settings.isShowTotalPercent() || settings.isShowTotalCost() || settings.isShowTotalValue());
+        pnlDaySummary.setVisible(settings.isShowDailyChange());
+        pnlStocks.setScrollSpeed(settings.getTickerSpeed());
 
         // Finalize and display the frame
         setVisible(true);
@@ -126,7 +166,6 @@ public class TickerBar extends JFrame {
                 leftDragStart = e.getPoint();
                 right = getLocationOnScreen().x + getWidth();
             }
-
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (leftDragStart != null) {
@@ -135,8 +174,17 @@ public class TickerBar extends JFrame {
                     leftDragStart = null;
                 }
             }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                pnlLeftDrag.setBackground(Color.LIGHT_GRAY);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                pnlLeftDrag.setBackground(pnlTicker.getBackground());
+            }
         });
 
+        // Track the dragging for left resize
         pnlLeftDrag.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
@@ -160,17 +208,27 @@ public class TickerBar extends JFrame {
             public void mousePressed(MouseEvent e) {
                 rightDragStart = e.getPoint();
                 left = getLocationOnScreen().x;
+                pnlRightDrag.setBackground(Color.LIGHT_GRAY);
             }
-
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (rightDragStart != null) {
                     settings.setWindowWidth(getWidth());
                     rightDragStart = null;
                 }
+                pnlLeftDrag.setBackground(pnlTicker.getBackground());
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                pnlRightDrag.setBackground(Color.LIGHT_GRAY);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                pnlRightDrag.setBackground(pnlTicker.getBackground());
             }
         });
 
+        // Track the dragging for right resize
         pnlRightDrag.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
@@ -201,24 +259,27 @@ public class TickerBar extends JFrame {
         contextMenu.addSeparator();
 
         JMenuItem fontSize = new JMenu("Font Size");
-        JMenuItem fontSizeItemSmall = new JMenuItem("Small");
-        fontSizeItemSmall.addActionListener(e -> setFontSize(8));
+        fontSizeItemSmall = new JCheckBoxMenuItem("Small", settings.getFontSize() == Settings.FONT_SIZE_SMALL);
+        fontSizeItemSmall.addActionListener(e -> setFontSize(Settings.FONT_SIZE_SMALL));
         fontSize.add(fontSizeItemSmall);
-        JMenuItem fontSizeItemMedium = new JMenuItem("Normal");
-        fontSizeItemMedium.addActionListener(e -> setFontSize(11));
+        fontSizeItemMedium = new JCheckBoxMenuItem("Normal", settings.getFontSize() == Settings.FONT_SIZE_MEDIUM);
+        fontSizeItemMedium.addActionListener(e -> setFontSize(Settings.FONT_SIZE_MEDIUM));
         fontSize.add(fontSizeItemMedium);
-        JMenuItem fontSizeItemLarge = new JMenuItem("Large");
-        fontSizeItemLarge.addActionListener(e -> setFontSize(14));
+        fontSizeItemLarge = new JCheckBoxMenuItem("Large", settings.getFontSize() == Settings.FONT_SIZE_LARGE);
+        fontSizeItemLarge.addActionListener(e -> setFontSize(Settings.FONT_SIZE_LARGE));
         fontSize.add(fontSizeItemLarge);
         contextMenu.add(fontSize);
         contextMenu.addSeparator();
 
         JMenuItem scroll = new JMenu("Scroll");
-        JMenuItem scrollItemSlow = new JMenuItem("Slow");
+        scrollItemSlow = new JCheckBoxMenuItem("Slow", settings.getTickerSpeed() == Settings.SCROLL_SPEED_SLOW);
+        scrollItemSlow.addActionListener(e -> setTicketSpeed(Settings.SCROLL_SPEED_SLOW));
         scroll.add(scrollItemSlow);
-        JMenuItem scrollItemNormal = new JMenuItem("Normal");
+        scrollItemNormal = new JCheckBoxMenuItem("Medium", settings.getTickerSpeed() == Settings.SCROLL_SPEED_MEDIUM);
+        scrollItemNormal.addActionListener(e -> setTicketSpeed(Settings.SCROLL_SPEED_MEDIUM));
         scroll.add(scrollItemNormal);
-        JMenuItem scrollItemFast = new JMenuItem("Fast");
+        scrollItemFast = new JCheckBoxMenuItem("Fast", settings.getTickerSpeed() == Settings.SCROLL_SPEED_FAST);
+        scrollItemFast.addActionListener(e -> setTicketSpeed(Settings.SCROLL_SPEED_FAST));
         scroll.add(scrollItemFast);
         contextMenu.add(scroll);
         contextMenu.addSeparator();
@@ -227,15 +288,30 @@ public class TickerBar extends JFrame {
         contextMenu.add(refresh);
         contextMenu.addSeparator();
 
-        JMenuItem onTop = new JMenuItem("Keep the ticket on top of other windows");
+        onTop = new JCheckBoxMenuItem("Keep the ticker on top of other windows", settings.isAlwaysOnTop());
+        onTop.addActionListener(e -> setOnTopMost(onTop.isSelected()));
         contextMenu.add(onTop);
-        JMenuItem runAtStartup = new JMenuItem("Run at Startup");
+        JCheckBoxMenuItem runAtStartup = new JCheckBoxMenuItem("Run at Startup", StartupManager.isStartupEnabled());
+        runAtStartup.addActionListener(e -> StartupManager.enableStartup(runAtStartup.isSelected()));
         contextMenu.add(runAtStartup);
         contextMenu.addSeparator();
 
-        JMenuItem help = new JMenuItem("Help");
+        JMenuItem help = new JMenuItem("Help...");
+        help.addActionListener(e -> {
+            try {
+                Desktop desktop = Desktop.getDesktop();
+                desktop.browse(new URI("https://github.com/steveohara/stockticker"));
+            }
+            catch (Exception ex) {
+                log.error("Failed to open help URL", ex);
+            }
+        });
         contextMenu.add(help);
         JMenuItem about = new JMenuItem("About...");
+        about.addActionListener(e -> {
+            ;
+            JOptionPane.showMessageDialog(null, VersionInfo.getVersionString(), "About Stock Ticker", JOptionPane.INFORMATION_MESSAGE);
+        });
         contextMenu.add(about);
         contextMenu.addSeparator();
 
@@ -259,6 +335,17 @@ public class TickerBar extends JFrame {
     }
 
     /**
+     * Sets whether the ticker should always be on top and updates settings.
+     *
+     * @param onTopMost True to keep the ticker on top, false otherwise.
+     */
+    private void setOnTopMost(boolean onTopMost) {
+        setAlwaysOnTop(onTopMost);
+        settings.setAlwaysOnTop(onTopMost);
+        onTop.setSelected(onTopMost);
+    }
+
+    /**
      * Sets the font size for the ticker and updates settings.
      *
      * @param size The new font size.
@@ -272,8 +359,24 @@ public class TickerBar extends JFrame {
         pnlStocks.setFont(newFont);
         pnlTicker.setPreferredSize(new Dimension(getWidth(), getFontMetrics(newFont).getHeight() + 2));
         setSize(new Dimension(getWidth(), getFontMetrics(newFont).getHeight() + 2));
-        settings.setTickerFont(newFont);
+        settings.setFontSize(size);
         drawTickerContent();
+        fontSizeItemSmall.setSelected(size == Settings.FONT_SIZE_SMALL);
+        fontSizeItemMedium.setSelected(size == Settings.FONT_SIZE_MEDIUM);
+        fontSizeItemLarge.setSelected(size == Settings.FONT_SIZE_LARGE);
+    }
+
+    /**
+     * Sets the ticker scroll speed and updates settings.
+     *
+     * @param speed The new scroll speed.
+     */
+    private void setTicketSpeed(int speed) {
+        settings.setTickerSpeed(speed);
+        pnlStocks.setScrollSpeed(speed);
+        scrollItemSlow.setSelected(speed == Settings.SCROLL_SPEED_SLOW);
+        scrollItemNormal.setSelected(speed == Settings.FONT_SIZE_MEDIUM);
+        scrollItemFast.setSelected(speed == Settings.FONT_SIZE_LARGE);
     }
 
     /**
@@ -294,31 +397,40 @@ public class TickerBar extends JFrame {
      */
     private void createUIComponents() {
         pnlTicker = new JPanel();
-        pnlTicker.setLayout(new GridLayoutManager(1, 5, new Insets(0, 0, 0, 0), 0, 0));
-        pnlTicker.setAlignmentX(0.0f);
-        pnlTicker.setAlignmentY(0.0f);
-        pnlTicker.setBackground(new Color(-16777216));
-        pnlTicker.setMaximumSize(new Dimension(2147483647, 24));
-        pnlTicker.setMinimumSize(new Dimension(100, 24));
-        pnlTicker.setPreferredSize(new Dimension(-1, 24));
-        pnlLeftDrag = new JPanel();
-        pnlLeftDrag.setBackground(new Color(-13276875));
-        pnlLeftDrag.setEnabled(true);
-        pnlLeftDrag.setToolTipText("Drag to change the width of the ticker");
-        pnlTicker.add(pnlLeftDrag, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(5, -1), new Dimension(5, -1), new Dimension(5, -1), 0, false));
-        pnlRightDrag = new JPanel();
-        pnlRightDrag.setBackground(new Color(-13276875));
-        pnlRightDrag.setToolTipText("Drag to change the width of the ticker");
-        pnlTicker.add(pnlRightDrag, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(5, -1), new Dimension(5, -1), new Dimension(5, -1), 0, false));
-        pnlStocks = new ColouredTextPanel();
-        pnlStocks.setBackground(new Color(-12500730));
-        pnlTicker.add(pnlStocks, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        pnlSummary = new ColouredTextPanel();
-        pnlSummary.setBackground(new Color(-12514785));
-        pnlTicker.add(pnlSummary, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(50, -1), new Dimension(50, -1), new Dimension(10000, -1), 0, false));
-        pnlDaySummary = new ColouredTextPanel();
-        pnlDaySummary.setBackground(new Color(-15659455));
-        pnlTicker.add(pnlDaySummary, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(50, -1), new Dimension(50, -1), new Dimension(1000, -1), 0, false));
-    }
+        pnlTicker.setLayout(new BoxLayout(pnlTicker, BoxLayout.X_AXIS));
+        pnlTicker.setBackground(Color.black);
 
+        // Fixed width drag panels
+        pnlLeftDrag = new JPanel();
+        pnlLeftDrag.setBackground(pnlTicker.getBackground());
+        pnlLeftDrag.setPreferredSize(new Dimension(7, 50));
+        pnlLeftDrag.setMaximumSize(pnlLeftDrag.getPreferredSize());
+        pnlLeftDrag.setMinimumSize(pnlLeftDrag.getPreferredSize());
+        pnlTicker.add(pnlLeftDrag);
+
+        // Growing panels
+        pnlSummary = new ColouredTextPanel();
+        pnlSummary.setBackground(pnlTicker.getBackground());
+        pnlSummary.setDisplayStyle(ColouredTextPanel.DISPLAY_STYLE.FIT);
+        pnlSummary.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY));
+        pnlTicker.add(pnlSummary);
+
+        pnlDaySummary = new ColouredTextPanel();
+        pnlDaySummary.setBackground(pnlTicker.getBackground());
+        pnlDaySummary.setDisplayStyle(ColouredTextPanel.DISPLAY_STYLE.FIT);
+        pnlDaySummary.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY));
+        pnlTicker.add(pnlDaySummary);
+
+        pnlStocks = new ColouredTextPanel();
+        pnlStocks.setBackground(pnlTicker.getBackground());
+        pnlStocks.setDisplayStyle(ColouredTextPanel.DISPLAY_STYLE.SCROLL);
+        pnlTicker.add(pnlStocks);
+
+        pnlRightDrag = new JPanel();
+        pnlRightDrag.setBackground(pnlTicker.getBackground());
+        pnlRightDrag.setPreferredSize(pnlLeftDrag.getPreferredSize());
+        pnlRightDrag.setMaximumSize(pnlLeftDrag.getPreferredSize());
+        pnlRightDrag.setMinimumSize(pnlLeftDrag.getPreferredSize());
+        pnlTicker.add(pnlRightDrag);
+    }
 }

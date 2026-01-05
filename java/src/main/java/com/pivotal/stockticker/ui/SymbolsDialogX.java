@@ -1,14 +1,12 @@
 package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.model.Symbol;
-import com.pivotal.stockticker.service.PreferencesService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.util.List;
 
 /**
  * Dialog for managing stock symbols and their settings.
@@ -16,8 +14,7 @@ import java.util.List;
 @Slf4j
 public class SymbolsDialogX extends JDialog {
     @Getter
-    private final List<Symbol> symbols;
-    private final PreferencesService prefsService;
+//    private final List<Symbol> symbols;
     private DefaultListModel<Symbol> listModel;
     private JList<Symbol> symbolList;
     private JTextField codeField, aliasField, priceField, sharesField, currencyCodeField, currencySymbolField;
@@ -29,21 +26,21 @@ public class SymbolsDialogX extends JDialog {
     private JTextField lowAlarmValueField;
     private Symbol currentSymbol;
 
-    /**
-     * Constructs the SymbolsDialog.
-     *
-     * @param parent      Parent frame
-     * @param symbols     List of symbols to manage
-     * @param prefsService Preferences service for saving/loading symbols
-     */
-    public SymbolsDialogX(Frame parent, List<Symbol> symbols, PreferencesService prefsService) {
-        super(parent, "Symbols", true);
-        this.symbols = symbols;
-        this.prefsService = prefsService;
-        initializeUI();
-        loadSymbols();
-    }
-
+//    /**
+//     * Constructs the SymbolsDialog.
+//     *
+//     * @param parent      Parent frame
+//     * @param symbols     List of symbols to manage
+//     * @param prefsService Preferences service for saving/loading symbols
+//     */
+//    public SymbolsDialogX(Frame parent, List<Symbol> symbols, PreferencesService prefsService) {
+//        super(parent, "Symbols", true);
+//        this.symbols = symbols;
+//        this.prefsService = prefsService;
+//        initializeUI();
+//        loadSymbols();
+//    }
+//
     /**
      * Initializes the user interface components.
      */
@@ -316,13 +313,13 @@ public class SymbolsDialogX extends JDialog {
      * Loads symbols into the list model.
      */
     private void loadSymbols() {
-        listModel.clear();
-        for (Symbol symbol : symbols) {
-            listModel.addElement(symbol);
-        }
-        if (!symbols.isEmpty()) {
-            symbolList.setSelectedIndex(0);
-        }
+//        listModel.clear();
+//        for (Symbol symbol : symbols) {
+//            listModel.addElement(symbol);
+//        }
+//        if (!symbols.isEmpty()) {
+//            symbolList.setSelectedIndex(0);
+//        }
     }
 
     /**
@@ -391,7 +388,6 @@ public class SymbolsDialogX extends JDialog {
             currentSymbol.setLowAlarmValue(Double.parseDouble(lowAlarmValueField.getText()));
             currentSymbol.setLowAlarmIsPercent(lowAlarmPercentCheck.isSelected());
             currentSymbol.setLowAlarmSoundEnabled(lowAlarmSoundCheck.isSelected());
-            prefsService.saveSymbol(currentSymbol);
             symbolList.repaint();
         }
         catch (NumberFormatException ex) {
@@ -403,26 +399,25 @@ public class SymbolsDialogX extends JDialog {
      * Adds a new symbol to the list.
      */
     private void addSymbol() {
-        Symbol newSymbol = new Symbol();
-        newSymbol.setCode("NEW");
-        symbols.add(newSymbol);
-        listModel.addElement(newSymbol);
-        symbolList.setSelectedValue(newSymbol, true);
+//        Symbol newSymbol = new Symbol();
+//        newSymbol.setCode("NEW");
+//        symbols.add(newSymbol);
+//        listModel.addElement(newSymbol);
+//        symbolList.setSelectedValue(newSymbol, true);
     }
 
     /**
      * Deletes the selected symbol from the list.
      */
     private void deleteSymbol() {
-        Symbol selected = symbolList.getSelectedValue();
-        if (selected != null) {
-            int confirm = JOptionPane.showConfirmDialog(this, "Delete symbol " + selected.getCode() + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                prefsService.deleteSymbol(selected.getRegKey());
-                symbols.remove(selected);
-                listModel.removeElement(selected);
-            }
-        }
+//        Symbol selected = symbolList.getSelectedValue();
+//        if (selected != null) {
+//            int confirm = JOptionPane.showConfirmDialog(this, "Delete symbol " + selected.getCode() + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+//            if (confirm == JOptionPane.YES_OPTION) {
+//                symbols.remove(selected);
+//                listModel.removeElement(selected);
+//            }
+//        }
     }
 
 }
