@@ -37,15 +37,12 @@ public class App {
         catch (Exception e) {
             log.error("Cannot set look and feel", e);
         }
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    new TickerBar();
-                }
-                catch (Exception e) {
-                    log.error("Cannot create main application window", e);
-                }
+        SwingUtilities.invokeLater(() -> {
+            try {
+                new TickerBar();
+            }
+            catch (Exception e) {
+                log.error("Cannot create main application window", e);
             }
         });
     }

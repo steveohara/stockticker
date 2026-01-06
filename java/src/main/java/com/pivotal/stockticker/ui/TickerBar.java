@@ -14,7 +14,7 @@ import java.awt.event.MouseMotionAdapter;
 import java.net.URI;
 
 @Slf4j
-public class TickerBar extends JFrame {
+public class TickerBar extends JFrame implements CallbackInterface {
     private final Settings settings = Settings.createProxy();
     private JPanel pnlLeftDrag;
     private JPanel pnlRightDrag;
@@ -39,9 +39,9 @@ public class TickerBar extends JFrame {
 
     public TickerBar() throws Exception {
         createUIComponents();
+        setupContextMenu();
         initializeUI();
         setupDragging();
-        setupContextMenu();
 
         drawTickerContent();
 
@@ -52,41 +52,48 @@ public class TickerBar extends JFrame {
      */
     private void drawTickerContent() {
         pnlSummary.cls();
-        pnlSummary.setFontColor(Color.WHITE);
+        pnlSummary.setFontColor(settings.getNormalTextColor());
         pnlSummary.setCurrentX(4);
         pnlSummary.print("this is to show the");
         pnlSummary.setFontBold(true);
-        pnlSummary.setFontColor(Color.LIGHT_GRAY);
+        pnlSummary.setFontColor(settings.getUpColor());
         pnlSummary.print(" ↕ ");
         pnlSummary.setFontBold(false);
-        pnlSummary.setFontColor(Color.WHITE);
+        pnlSummary.setFontColor(settings.getUpArrowColor());
         pnlSummary.print("summary panel is");
-        pnlSummary.setFontColor(Color.RED);
+        pnlSummary.setFontColor(settings.getNormalTextColor());
         pnlSummary.setFontBold(true);
         pnlSummary.print(" ↓ ");
         pnlSummary.setFontBold(false);
-        pnlSummary.setFontColor(Color.WHITE);
+        pnlSummary.setFontColor(settings.getDownColor());
         pnlSummary.print("growing");
-        pnlSummary.setFontColor(Color.GREEN);
+        pnlSummary.setFontColor(settings.getNormalTextColor());
         pnlSummary.setFontBold(true);
         pnlSummary.print(" ↑");
 
         pnlDaySummary.cls();
-        pnlDaySummary.setFontColor(Color.RED);
+        pnlDaySummary.setFontColor(settings.getNormalTextColor());
         pnlDaySummary.setCurrentX(10);
         pnlDaySummary.print("summary panel is growing ");
 
         pnlStocks.cls();
-        pnlStocks.setFontColor(Color.GREEN);
+        pnlStocks.setFontColor(settings.getNormalTextColor());
         pnlStocks.setCurrentX(10);
         pnlStocks.print("hello");
         pnlStocks.setFontBold(true);
         pnlStocks.print(" steve");
-        pnlStocks.setFontColor(Color.YELLOW);
+        pnlStocks.setFontColor(settings.getUpColor());
         pnlStocks.setFontBold(false);
         pnlStocks.setCurrentX(pnlStocks.getCurrentX() + 25);
         pnlStocks.print("hello steve again");
         pnlStocks.paintImmediately(pnlStocks.getBounds());
+    }
+
+    @Override
+    public void changed(Component c) {
+        initializeUI();
+        setFontSize(settings.getFontSize());
+        setTicketSpeed(settings.getTickerSpeed());
     }
 
     /**
@@ -95,23 +102,34 @@ public class TickerBar extends JFrame {
     private void initializeUI() {
 
         // Position and size the main frame
-        setType(Window.Type.UTILITY);
-        setUndecorated(true);
         setAlwaysOnTop(settings.isAlwaysOnTop());
-        setContentPane(pnlTicker);
-        setFont(new Font("Calibri", Font.PLAIN, settings.getFontSize()));
+        setFont(new Font(settings.getFontName(), settings.getFontStyle(), settings.getFontSize()));
         setLocation(settings.getWindowX(), settings.getWindowY());
-        pnlTicker.setPreferredSize(new Dimension(settings.getWindowWidth(), getFontMetrics(getFont()).getHeight()));
-        setBackground(pnlTicker.getBackground());
+        pnlTicker.setPreferredSize(new Dimension(settings.getWindowWidth(), getFontMetrics(getFont()).getHeight() + 1));
         pack();
+
+        // Apply background color settings to all panels
+        pnlTicker.setBackground(settings.getBackgroundColor());
+        pnlLeftDrag.setBackground(pnlTicker.getBackground());
+        pnlRightDrag.setBackground(pnlTicker.getBackground());
+        pnlSummary.setBackground(pnlTicker.getBackground());
+        pnlDaySummary.setBackground(pnlTicker.getBackground());
+        pnlStocks.setBackground(pnlTicker.getBackground());
+        setBackground(pnlTicker.getBackground());
 
         // Apply font settings to all panels
         pnlDaySummary.setFont(getFont());
         pnlSummary.setFont(getFont());
         pnlStocks.setFont(getFont());
-        pnlSummary.setVisible(settings.isShowTotal() || settings.isShowTotalPercent() || settings.isShowTotalCost() || settings.isShowTotalValue());
+        pnlSummary.setVisible(settings.isShowSummary());
         pnlDaySummary.setVisible(settings.isShowDailyChange());
         pnlStocks.setScrollSpeed(settings.getTickerSpeed());
+        pnlDaySummary.setBackground(pnlTicker.getBackground());
+        pnlSummary.setBackground(pnlTicker.getBackground());
+        pnlStocks.setBackground(pnlTicker.getBackground());
+        pnlDaySummary.setForeground(pnlTicker.getForeground());
+        pnlSummary.setForeground(pnlTicker.getForeground());
+        pnlStocks.setForeground(pnlTicker.getForeground());
 
         // Finalize and display the frame
         setVisible(true);
@@ -254,7 +272,7 @@ public class TickerBar extends JFrame {
 //        symbolsItem.addActionListener(e -> showSymbolsDialog());
         contextMenu.add(symbolsItem);
         JMenuItem settingsItem = new JMenuItem("Settings...");
-//        settingsItem.addActionListener(e -> showSettingsDialog());
+        settingsItem.addActionListener(e -> showSettingsDialog());
         contextMenu.add(settingsItem);
         contextMenu.addSeparator();
 
@@ -331,6 +349,14 @@ public class TickerBar extends JFrame {
         pnlTicker.setComponentPopupMenu(contextMenu);
         pnlLeftDrag.setComponentPopupMenu(contextMenu);
         pnlRightDrag.setComponentPopupMenu(contextMenu);
+    }
+
+    /**
+     * Displays the settings dialog.
+     */
+    private void showSettingsDialog() {
+        SettingsForm dialog = new SettingsForm(this, settings);
+        dialog.setVisible(true);
     }
 
     /**
@@ -426,5 +452,9 @@ public class TickerBar extends JFrame {
         pnlRightDrag.setMaximumSize(pnlLeftDrag.getPreferredSize());
         pnlRightDrag.setMinimumSize(pnlLeftDrag.getPreferredSize());
         pnlTicker.add(pnlRightDrag);
+
+        setType(Window.Type.UTILITY);
+        setUndecorated(true);
+        setContentPane(pnlTicker);
     }
 }

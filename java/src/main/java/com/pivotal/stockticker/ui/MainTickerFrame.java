@@ -192,21 +192,21 @@ public class MainTickerFrame extends JFrame {
                 totalCost += symbol.getPrice() * symbol.getShares();
             }
         }
-        if (settings.isShowTotal() || settings.isShowTotalPercent() || settings.isShowTotalCost() || settings.isShowTotalValue()) {
-            sb.append("    ||  SUMMARY: ");
-            if (settings.isShowTotalCost()) {
-                sb.append("Cost: ").append(settings.getSummaryCurrencySymbol()).append(String.format("%.2f", totalCost)).append(" ");
-            }
-            if (settings.isShowTotalValue()) {
-                sb.append("Value: ").append(settings.getSummaryCurrencySymbol()).append(String.format("%.2f", totalValue)).append(" ");
-            }
-            if (settings.isShowTotal()) {
-                sb.append("P/L: ").append(settings.getSummaryCurrencySymbol()).append(String.format("%+.2f", totalValue - totalCost)).append(" ");
-            }
-            if (settings.isShowTotalPercent() && totalCost > 0) {
-                sb.append(String.format("(%+.2f%%)", ((totalValue - totalCost) / totalCost) * 100)).append(" ");
-            }
-        }
+//        if (settings.isShowTotal() || settings.isShowTotalPercent() || settings.isShowTotalCost() || settings.isShowTotalValue()) {
+//            sb.append("    ||  SUMMARY: ");
+//            if (settings.isShowTotalCost()) {
+//                sb.append("Cost: ").append(settings.getSummaryCurrencySymbol()).append(String.format("%.2f", totalCost)).append(" ");
+//            }
+//            if (settings.isShowTotalValue()) {
+//                sb.append("Value: ").append(settings.getSummaryCurrencySymbol()).append(String.format("%.2f", totalValue)).append(" ");
+//            }
+//            if (settings.isShowTotal()) {
+//                sb.append("P/L: ").append(settings.getSummaryCurrencySymbol()).append(String.format("%+.2f", totalValue - totalCost)).append(" ");
+//            }
+//            if (settings.isShowTotalPercent() && totalCost > 0) {
+//                sb.append(String.format("(%+.2f%%)", ((totalValue - totalCost) / totalCost) * 100)).append(" ");
+//            }
+//        }
         tickerText = sb.toString();
     }
 

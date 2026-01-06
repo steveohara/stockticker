@@ -88,7 +88,10 @@ abstract public class PersistanceManager {
             Class<?> type = field.getType();
             String key = field.getName();
 
-            if (type == String.class) {
+            if (field.get(this) == null) {
+                prefs.remove(key);
+            }
+            else if (type == String.class) {
                 prefs.put(key, field.get(this).toString());
             }
             else if (type == int.class || type == Integer.class) {
