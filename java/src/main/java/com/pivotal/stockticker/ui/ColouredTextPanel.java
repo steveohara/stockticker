@@ -196,6 +196,15 @@ public class ColouredTextPanel extends JPanel {
     }
 
     /**
+     * Stops any ongoing scrolling of text
+     */
+    public void stopScrolling() {
+        if (scrollTimer != null) {
+            scrollTimer.stop();
+        }
+    }
+
+    /**
      * Prints the given text with the current styling settings
      * at the current position.
      *

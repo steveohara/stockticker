@@ -23,29 +23,33 @@ public class Settings extends PersistanceManager {
     public static final int SCROLL_SPEED_MEDIUM = 2;
     public static final int SCROLL_SPEED_FAST = 4;
 
-    private String proxy = null;
+    private String proxyServer = null;
     private int frequency = 60;
-    private String summaryCurrency = "USD";
-    private String summaryCurrencySymbol = "$";
-    private double summaryTotal = 0.0;
-    private double summaryMargin = 0.0;
+    private String currencyCode = null;
+    private String currencySymbol = null;
+    private double totalInvestment = 0.0;
+    private double margin = 0.0;
     private Color upColor = new Color(0, 255, 0);
     private Color downColor = new Color(255, 0, 0);
+    private Color backgroundColor = Color.BLACK;
     private Color normalTextColor = Color.WHITE;
     private Color upArrowColor = new Color(0, 255, 0);
     private Color downArrowColor = new Color(255, 0, 0);
+    private String fontName = "Calibri";
+    private boolean fontBold = false;
+    private boolean fontItalic = false;
     private int fontSize = FONT_SIZE_MEDIUM;
     private int tickerSpeed = SCROLL_SPEED_MEDIUM;
-    private boolean showTotal = true;
-    private boolean showTotalPercent = true;
+    private boolean showPortfolioProfitAndLoss = true;
+    private boolean showPortfolioProfitAndLossPercent = true;
     private boolean showTotalCost = false;
-    private boolean showTotalValue = true;
+    private boolean showTotalValue = false;
     private boolean showDailyChange = true;
-    private boolean showPrice = false;
-    private boolean showCostBase = false;
+    private boolean showUniqueSymbols = true;
     private boolean alwaysOnTop = true;
     private String highAlarmWaveFile = null;
     private String lowAlarmWaveFile = null;
+    private String iexToken = null;
     private String alphaVantageToken = null;
     private String marketStackToken = null;
     private String twelveDataToken = null;
@@ -76,4 +80,25 @@ public class Settings extends PersistanceManager {
     }
 
 
+    /**
+     * Returns the font style based on the bold and italic settings.
+     * @return The font style as an integer constant from the Font class.
+     */
+    public int getFontStyle() {
+        return (fontBold ? Font.BOLD : Font.PLAIN) |
+                (fontItalic ? Font.ITALIC : Font.PLAIN);
+
+    }
+
+    /**
+     * Determines if any summary information is set to be displayed.
+     *
+     * @return true if any summary display options are enabled, false otherwise.
+     */
+    public boolean isShowSummary() {
+        return showPortfolioProfitAndLoss ||
+               showPortfolioProfitAndLossPercent ||
+               showTotalCost ||
+               showTotalValue;
+    }
 }
