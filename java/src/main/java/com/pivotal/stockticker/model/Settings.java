@@ -1,5 +1,6 @@
 package com.pivotal.stockticker.model;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class Settings extends PersistanceManager {
     public static final int SCROLL_SPEED_FAST = 4;
 
     private String proxyServer = null;
+    @Setter(AccessLevel.NONE)
     private int frequency = 60;
     private String currencyCode = null;
     private String currencySymbol = null;
@@ -65,7 +67,7 @@ public class Settings extends PersistanceManager {
      *
      * @param frequency Update frequency in seconds.
      */
-    public void setUpdateFrequency(int frequency) {
+    public void setFrequency(int frequency) {
         this.frequency = Math.max(1, Math.min(600, frequency));
     }
 

@@ -37,6 +37,11 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private int left = 0;
     private int right = 0;
 
+    /**
+     * Constructor to initialize the ticker bar UI.
+     *
+     * @throws Exception if there is an error during initialization.
+     */
     public TickerBar() throws Exception {
         createUIComponents();
         setupContextMenu();
@@ -269,7 +274,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private void setupContextMenu() {
         JPopupMenu contextMenu = new JPopupMenu();
         JMenuItem symbolsItem = new JMenuItem("Edit Symbols...");
-//        symbolsItem.addActionListener(e -> showSymbolsDialog());
+        symbolsItem.addActionListener(e -> showSymbolsDialog());
         contextMenu.add(symbolsItem);
         JMenuItem settingsItem = new JMenuItem("Settings...");
         settingsItem.addActionListener(e -> showSettingsDialog());
@@ -349,6 +354,14 @@ public class TickerBar extends JFrame implements CallbackInterface {
         pnlTicker.setComponentPopupMenu(contextMenu);
         pnlLeftDrag.setComponentPopupMenu(contextMenu);
         pnlRightDrag.setComponentPopupMenu(contextMenu);
+    }
+
+    /**
+     * Displays the symbols dialog.
+     */
+    private void showSymbolsDialog() {
+        SymbolsForm dialog = new SymbolsForm(this, settings);
+        dialog.setVisible(true);
     }
 
     /**

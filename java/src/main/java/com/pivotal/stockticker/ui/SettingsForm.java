@@ -14,75 +14,6 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
     private final Settings settings;
     private final CallbackInterface caller;
-    private JButton btnBackground;
-    private JButton btnBackup;
-    private JButton btnCancel;
-    private JButton btnDownArrowColour;
-    private JButton btnDownColour;
-    private JButton btnHighAlarm;
-    private JButton btnLowAlarm;
-    private JButton btnNormalText;
-    private JButton btnOk;
-    private JButton btnRestore;
-    private JButton btnUpArrowColour;
-    private JButton btnUpColour;
-    private JCheckBox chkBold;
-    private JCheckBox chkItalic;
-    private JCheckBox chkShowUniqueSymbols;
-    private JCheckBox chkShowDailyChange;
-    private JCheckBox chkShowTotalCost;
-    private JCheckBox chkShowTotalProfit;
-    private JCheckBox chkShowTotalProfitPercentage;
-    private JCheckBox chkShowTotalValue;
-    private JLabel jLabel1;
-    private JLabel jLabel10;
-    private JLabel jLabel11;
-    private JLabel jLabel12;
-    private JLabel jLabel13;
-    private JLabel jLabel14;
-    private JLabel jLabel15;
-    private JLabel jLabel16;
-    private JLabel jLabel17;
-    private JLabel jLabel18;
-    private JLabel jLabel19;
-    private JLabel jLabel2;
-    private JLabel jLabel20;
-    private JLabel jLabel21;
-    private JLabel jLabel22;
-    private JLabel jLabel23;
-    private JLabel jLabel24;
-    private JLabel jLabel25;
-    private JLabel jLabel3;
-    private JLabel jLabel4;
-    private JLabel jLabel5;
-    private JLabel jLabel6;
-    private JLabel jLabel7;
-    private JLabel jLabel8;
-    private JPanel jPanel1;
-    private JPanel jPanel2;
-    private JPanel jPanel3;
-    private JPanel jPanel4;
-    private JSeparator jSeparator1;
-    private JSeparator jSeparator2;
-    private JSeparator jSeparator4;
-    private JTabbedPane jTabbedPane1;
-    private JComboBox<String> lstFont;
-    private JLabel jLabel26;
-    private JSpinner spnTickerUpdate;
-    private JTextField txtAlphaVantagToken;
-    private JTextField txtCurrencyCode;
-    private JTextField txtCurrencySymbol;
-    private JTextField txtFinHubToken;
-    private JTextField txtFreeCurrencyToken;
-    private JTextField txtHighAlarm;
-    private JTextField txtIexToken;
-    private JTextField txtLowAlarm;
-    private JTextField txtMargin;
-    private JTextField txtMarketStackToken;
-    private JTextField txtProxyServer;
-    private JTextField txtTiingoToken;
-    private JTextField txtTotalInvestment;
-    private JTextField txtTwelveDataToken;
 
     /**
      * Creates new form SettingsForm
@@ -164,7 +95,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
     }
 
     /**
-     * Setup the display with data from storage
+     * Set-up the display with data from storage
      *
      * @param settings Settings object to load data from
      */
@@ -855,4 +786,75 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         Utils.makeTextFieldNumeric(txtTotalInvestment);
         Utils.makeTextFieldNumeric(txtMargin);
     }
+
+    private JButton btnBackground;
+    private JButton btnBackup;
+    private JButton btnCancel;
+    private JButton btnDownArrowColour;
+    private JButton btnDownColour;
+    private JButton btnHighAlarm;
+    private JButton btnLowAlarm;
+    private JButton btnNormalText;
+    private JButton btnOk;
+    private JButton btnRestore;
+    private JButton btnUpArrowColour;
+    private JButton btnUpColour;
+    private JCheckBox chkBold;
+    private JCheckBox chkItalic;
+    private JCheckBox chkShowUniqueSymbols;
+    private JCheckBox chkShowDailyChange;
+    private JCheckBox chkShowTotalCost;
+    private JCheckBox chkShowTotalProfit;
+    private JCheckBox chkShowTotalProfitPercentage;
+    private JCheckBox chkShowTotalValue;
+    private JLabel jLabel1;
+    private JLabel jLabel10;
+    private JLabel jLabel11;
+    private JLabel jLabel12;
+    private JLabel jLabel13;
+    private JLabel jLabel14;
+    private JLabel jLabel15;
+    private JLabel jLabel16;
+    private JLabel jLabel17;
+    private JLabel jLabel18;
+    private JLabel jLabel19;
+    private JLabel jLabel2;
+    private JLabel jLabel20;
+    private JLabel jLabel21;
+    private JLabel jLabel22;
+    private JLabel jLabel23;
+    private JLabel jLabel24;
+    private JLabel jLabel25;
+    private JLabel jLabel3;
+    private JLabel jLabel4;
+    private JLabel jLabel5;
+    private JLabel jLabel6;
+    private JLabel jLabel7;
+    private JLabel jLabel8;
+    private JPanel jPanel1;
+    private JPanel jPanel2;
+    private JPanel jPanel3;
+    private JPanel jPanel4;
+    private JSeparator jSeparator1;
+    private JSeparator jSeparator2;
+    private JSeparator jSeparator4;
+    private JTabbedPane jTabbedPane1;
+    private JComboBox<String> lstFont;
+    private JLabel jLabel26;
+    private JSpinner spnTickerUpdate;
+    private JTextField txtAlphaVantagToken;
+    private JTextField txtCurrencyCode;
+    private JTextField txtCurrencySymbol;
+    private JTextField txtFinHubToken;
+    private JTextField txtFreeCurrencyToken;
+    private JTextField txtHighAlarm;
+    private JTextField txtIexToken;
+    private JTextField txtLowAlarm;
+    private JTextField txtMargin;
+    private JTextField txtMarketStackToken;
+    private JTextField txtProxyServer;
+    private JTextField txtTiingoToken;
+    private JTextField txtTotalInvestment;
+    private JTextField txtTwelveDataToken;
+
 }

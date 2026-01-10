@@ -5,7 +5,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * Represents a stock symbol with all its display and configuration properties.
@@ -14,7 +13,7 @@ import java.util.Objects;
 @Slf4j
 @Getter
 @Setter
-public class Symbol {
+public class Symbol extends PersistanceManager {
     private String regKey;
     private String code;
     private String alias;
@@ -31,14 +30,6 @@ public class Symbol {
     private boolean showDayChangePercent;
     private boolean showDayChangeUpDown;
     private boolean excludeFromSummary;
-    private boolean observeOnly;
-    private boolean disabled;
-    private double currentPrice;
-    private double dayStart;
-    private double dayChange;
-    private double dayHigh;
-    private double dayLow;
-    private String errorDescription;
 
     // Alarm properties
     private boolean lowAlarmEnabled;
@@ -51,10 +42,20 @@ public class Symbol {
     private boolean highAlarmSoundEnabled;
     private boolean alarmShowing;
 
+    // Live values with defaults from storage
+    private boolean disabled;
+    private double currentPrice;
+    private double dayStart;
+    private double dayChange;
+    private double dayHigh;
+    private double dayLow;
+    private String errorDescription;
     private LocalDateTime lastUpdate;
     private String source;
 
-    // Constructor initializing default values
+    /**
+     * Default constructor initializing default values.
+     */
     public Symbol() {
         this.regKey = String.valueOf(System.currentTimeMillis());
         this.currencySymbol = "$";
@@ -174,20 +175,4 @@ public class Symbol {
         this.code = code != null ? code.trim().toUpperCase() : null;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Symbol symbol = (Symbol) o;
-        return Objects.equals(regKey, symbol.regKey);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(regKey);
-    }
 }
