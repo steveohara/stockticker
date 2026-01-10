@@ -19,12 +19,10 @@ import java.awt.*;
 @Getter
 public class CheckBoxFrame extends JPanel {
 
+    private static final int TITLE_X = 10;
+
     private final JCheckBox titleCheckbox;
     private final JPanel contentPanel;
-
-    private static final int TITLE_HEIGHT = 18;
-    private static final int TITLE_X = 10;
-    private static final int BORDER_GAP = 6;
 
     /**
      * Constructs a CheckboxFrame with the specified title.
@@ -37,7 +35,7 @@ public class CheckBoxFrame extends JPanel {
 
         titleCheckbox = new JCheckBox(title);
         titleCheckbox.setOpaque(true);
-        titleCheckbox.setBounds(TITLE_X, 0, 200, TITLE_HEIGHT);
+        titleCheckbox.setBounds(TITLE_X, 0, titleCheckbox.getPreferredSize().width, titleCheckbox.getPreferredSize().height);
 
         contentPanel = new JPanel();
         contentPanel.setOpaque(false);
@@ -53,23 +51,30 @@ public class CheckBoxFrame extends JPanel {
 
     @Override
     public Insets getInsets() {
-        return new Insets(TITLE_HEIGHT + BORDER_GAP, 8, 8, 8);
+        return new Insets(titleCheckbox.getPreferredSize().height / 2, 0, 0, 0);
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        Insets insets = getInsets();
+        Dimension titleSize = titleCheckbox.getPreferredSize();
+        Dimension contentSize = contentPanel.getPreferredSize();
+        int width = Math.max(titleSize.width, contentSize.width) + insets.left + insets.right;
+        int height = contentSize.height + insets.top + insets.bottom;
+        return new Dimension(width, height);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         Graphics2D g2 = (Graphics2D) g.create();
-
         Color shadow = UIManager.getColor("controlShadow");
         Color highlight = UIManager.getColor("controlHighlight");
 
         int w = getWidth() - 1;
         int h = getHeight() - 1;
-        int y = TITLE_HEIGHT / 2;
 
-        // Top border (split around checkbox)
+        int y = titleCheckbox.getPreferredSize().height / 2;
         int titleWidth = titleCheckbox.getPreferredSize().width;
 
         g2.setColor(shadow);
@@ -102,6 +107,11 @@ public class CheckBoxFrame extends JPanel {
         setEnabledRecursive(contentPanel, enabled);
     }
 
+    /** Recursively sets the enabled state of all components within a container.
+     *
+     * @param c       The container whose components' enabled state is to be set.
+     * @param enabled The enabled state to set.
+     */
     private void setEnabledRecursive(Container c, boolean enabled) {
         for (Component comp : c.getComponents()) {
             comp.setEnabled(enabled);

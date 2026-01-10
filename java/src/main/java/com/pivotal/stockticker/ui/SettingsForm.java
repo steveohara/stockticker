@@ -121,8 +121,8 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         chkItalic.setSelected(settings.isFontItalic());
 
         // Alarms
-        txtHighAlarm.setText(settings.getHighAlarmWaveFile() != null ? settings.getHighAlarmWaveFile() : "");
-        txtLowAlarm.setText(settings.getLowAlarmWaveFile() != null ? settings.getLowAlarmWaveFile() : "");
+        txtHighAlarm.setText(settings.getHighAlarmWaveFile());
+        txtLowAlarm.setText(settings.getLowAlarmWaveFile());
 
         // Display
         spnTickerUpdate.setValue(settings.getFrequency());
@@ -134,18 +134,18 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         chkShowUniqueSymbols.setSelected(settings.isShowUniqueSymbols());
 
         // API Keys
-        txtIexToken.setText(settings.getIexToken() != null ? settings.getIexToken() : "");
-        txtAlphaVantagToken.setText(settings.getAlphaVantageToken() != null ? settings.getAlphaVantageToken() : "");
-        txtMarketStackToken.setText(settings.getMarketStackToken() != null ? settings.getMarketStackToken() : "");
-        txtTwelveDataToken.setText(settings.getTwelveDataToken() != null ? settings.getTwelveDataToken() : "");
-        txtFinHubToken.setText(settings.getFinhubToken() != null ? settings.getFinhubToken() : "");
-        txtTiingoToken.setText(settings.getTiingoToken() != null ? settings.getTiingoToken() : "");
-        txtFreeCurrencyToken.setText(settings.getFreeCurrencyToken() != null ? settings.getFreeCurrencyToken() : "");
+        txtIexToken.setText(settings.getIexToken());
+        txtAlphaVantagToken.setText(settings.getAlphaVantageToken());
+        txtMarketStackToken.setText(settings.getMarketStackToken());
+        txtTwelveDataToken.setText(settings.getTwelveDataToken());
+        txtFinHubToken.setText(settings.getFinhubToken());
+        txtTiingoToken.setText(settings.getTiingoToken());
+        txtFreeCurrencyToken.setText(settings.getFreeCurrencyToken());
 
         // Other
-        txtProxyServer.setText(settings.getProxyServer() != null ? settings.getProxyServer() : "");
-        txtCurrencyCode.setText(settings.getCurrencyCode() != null ? settings.getCurrencyCode() : "");
-        txtCurrencySymbol.setText(settings.getCurrencySymbol() != null ? settings.getCurrencySymbol() : "");
+        txtProxyServer.setText(settings.getProxyServer());
+        txtCurrencyCode.setText(settings.getCurrencyCode());
+        txtCurrencySymbol.setText(settings.getCurrencySymbol());
         txtTotalInvestment.setText(String.valueOf(settings.getTotalInvestment()));
         txtMargin.setText(String.valueOf(settings.getMargin()));
     }
@@ -168,8 +168,8 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         settings.setFontItalic(chkItalic.isSelected());
 
         // Alarms
-        settings.setHighAlarmWaveFile(txtHighAlarm.getText().trim().isEmpty() ? null : txtHighAlarm.getText().trim());
-        settings.setLowAlarmWaveFile(txtLowAlarm.getText().trim().isEmpty() ? null : txtLowAlarm.getText().trim());
+        settings.setHighAlarmWaveFile(txtHighAlarm.getText().trim());
+        settings.setLowAlarmWaveFile(txtLowAlarm.getText().trim());
 
         // Display
         settings.setFrequency((Integer) spnTickerUpdate.getValue());
@@ -181,18 +181,18 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         settings.setShowUniqueSymbols(chkShowUniqueSymbols.isSelected());
 
         // API Keys
-        settings.setIexToken(txtIexToken.getText().trim().isEmpty() ? null : txtIexToken.getText().trim());
-        settings.setAlphaVantageToken(txtAlphaVantagToken.getText().trim().isEmpty() ? null : txtAlphaVantagToken.getText().trim());
-        settings.setMarketStackToken(txtMarketStackToken.getText().trim().isEmpty() ? null : txtMarketStackToken.getText().trim());
-        settings.setTwelveDataToken(txtTwelveDataToken.getText().trim().isEmpty() ? null : txtTwelveDataToken.getText().trim());
-        settings.setFinhubToken(txtFinHubToken.getText().trim().isEmpty() ? null : txtFinHubToken.getText().trim());
-        settings.setTiingoToken(txtTiingoToken.getText().trim().isEmpty() ? null : txtTiingoToken.getText().trim());
-        settings.setFreeCurrencyToken(txtFreeCurrencyToken.getText().trim().isEmpty() ? null : txtFreeCurrencyToken.getText().trim());
+        settings.setIexToken(txtIexToken.getText().trim());
+        settings.setAlphaVantageToken(txtAlphaVantagToken.getText().trim());
+        settings.setMarketStackToken(txtMarketStackToken.getText().trim());
+        settings.setTwelveDataToken(txtTwelveDataToken.getText().trim());
+        settings.setFinhubToken(txtFinHubToken.getText().trim());
+        settings.setTiingoToken(txtTiingoToken.getText().trim());
+        settings.setFreeCurrencyToken(txtFreeCurrencyToken.getText().trim());
 
         // Other
-        settings.setProxyServer(txtProxyServer.getText().trim().isEmpty() ? null : txtProxyServer.getText().trim());
-        settings.setCurrencyCode(txtCurrencyCode.getText().trim().isEmpty() ? null : txtCurrencyCode.getText().trim());
-        settings.setCurrencySymbol(txtCurrencySymbol.getText().trim().isEmpty() ? null : txtCurrencySymbol.getText().trim());
+        settings.setProxyServer(txtProxyServer.getText().trim());
+        settings.setCurrencyCode(txtCurrencyCode.getText().trim());
+        settings.setCurrencySymbol(txtCurrencySymbol.getText().trim());
         try {
             settings.setMargin(Double.parseDouble(txtMargin.getText().trim()));
         }

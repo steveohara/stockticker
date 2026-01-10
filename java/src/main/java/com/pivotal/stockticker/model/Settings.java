@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
+import java.util.prefs.Preferences;
 
 /**
  * Application settings and configuration
@@ -72,15 +73,15 @@ public class Settings extends PersistanceManager {
     }
 
     /**
-     * Creates a proxy instance of this class so that we can intercept method calls.
+     * Creates an auto-saving proxy instance of this class so that we can intercept method calls
+     * and automatically save the values to persistent storage.
      *
      * @return A proxy instance of this class.
      * @throws Exception if proxy creation fails.
      */
-    public static Settings createProxy() throws Exception {
-        return createProxy(Settings.class);
+    public static Settings getPersistentSettings() throws Exception {
+        return createProxy(Settings.class, Preferences.userRoot().node(ROOT_NODE + Settings.class.getSimpleName()), true);
     }
-
 
     /**
      * Returns the font style based on the bold and italic settings.
@@ -89,7 +90,6 @@ public class Settings extends PersistanceManager {
     public int getFontStyle() {
         return (fontBold ? Font.BOLD : Font.PLAIN) |
                 (fontItalic ? Font.ITALIC : Font.PLAIN);
-
     }
 
     /**

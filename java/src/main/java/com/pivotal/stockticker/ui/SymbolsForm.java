@@ -7,10 +7,13 @@
 package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.Utils;
-import com.pivotal.stockticker.model.Settings;
+import com.pivotal.stockticker.model.SymbolTransaction;
+import com.pivotal.stockticker.model.SymbolsManager;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -20,15 +23,16 @@ import java.awt.event.*;
 @Slf4j
 public class SymbolsForm extends JDialog implements CallbackInterface {
 
-    private final Settings settings;
+    private final SymbolsManager symbolsManager;
     private final CallbackInterface caller;
+    private boolean ignoreChanges = false;
 
     /**
      * Creates new form Symbols
      */
-    public SymbolsForm(CallbackInterface caller, Settings settings) {
+    public SymbolsForm(CallbackInterface caller, SymbolsManager symbolsManager) {
         this.caller = caller;
-        this.settings = settings;
+        this.symbolsManager = symbolsManager;
         initComponents();
         setTitle("Symbols");
         setModal(true);
@@ -36,11 +40,11 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        // Init the settings from storage
-        loadFromSettings(settings);
-
         // Initialize listeners
         initListeners();
+
+        // Init the settings from storage
+        loadFromSettings();
     }
 
 
@@ -75,19 +79,154 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
+        btnAdd.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addNewSymbolTransaction();
+            }
+        });
+
+        btnDelete.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                deleteSymbolTransaction(e);
+            }
+        });
+
+        lstSymbols.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                selectSymbolTransaction(e);
+            }
+        });
+
         // Listen for changes
         Utils.attachChangeListeners(getContentPane(), this);
     }
 
+    /**
+     * Handles the selection of a symbol transaction from the list.
+     * @param e ListSelectionEvent
+     */
+    private void selectSymbolTransaction(ListSelectionEvent e) {
+        if (lstSymbols.getSelectedListItem() != null) {
+            log.debug("selected symbol transaction {}", e);
+            displaySymbolTransaction(lstSymbols.getSelectedListItem());
+        }
+        else {
+            clearDisplay();
+        }
+        btnDelete.setEnabled(lstSymbols.getSelectedKey() != null);
+    }
 
+    /**
+     * Clear the display fields
+     */
+    private void clearDisplay() {
+        ignoreChanges = true;
+        txtSymbol.setText("");
+        chkDisabled.setSelected(false);
+        txtDisplayName.setText("");
+        txtPricePaid.setText("");
+        txtSharesBought.setText("");
+        txtCurrencyCode.setText("");
+        txtCurrencySymbol.setText("");
+
+        chkShowPrice.setSelected(false);
+        chkExcludeFromSummary.setSelected(false);
+        chkShowChange.setSelected(false);
+        chkShowChangePercent.setSelected(false);
+        chlShowUpDown.setSelected(false);
+        chkShowProfitLoss.setSelected(false);
+
+        chkShowDayChangePercent.setSelected(false);
+        chkShowDayChange.setSelected(false);
+        chkShowDayUpDown.setSelected(false);
+
+        pnlAlarmLow.setEnabled(false);
+        chkAlarmLowPercent.setSelected(false);
+        chkAlarmLowPlaySound.setSelected(false);
+        txtAlarmLow.setText("");
+
+        pnlAlarmHigh.setEnabled(false);
+        chkAlarmHighPercent.setSelected(false);
+        chkAlarmHighPlaySound.setSelected(false);
+        txtAlarmHigh.setText("");
+        ignoreChanges = false;
+    }
+
+    /**
+     * Display the selected symbol transaction details in the form fields
+     *
+     * @param symbol SymbolTransaction to display
+     */
+    private void displaySymbolTransaction(SymbolTransaction symbol) {
+        ignoreChanges = true;
+        txtSymbol.setText(symbol.getCode());
+        chkDisabled.setSelected(symbol.isDisabled());
+        txtDisplayName.setText(symbol.getAlias());
+        txtPricePaid.setText(symbol.getPricePaid() + "");
+        txtSharesBought.setText(symbol.getSharesBought() + "");
+        txtCurrencyCode.setText(symbol.getCurrencyCode());
+        txtCurrencySymbol.setText(symbol.getCurrencySymbol());
+
+        chkShowPrice.setSelected(symbol.isShowPrice());
+        chkExcludeFromSummary.setSelected(symbol.isExcludeFromSummary());
+        chkShowChange.setSelected(symbol.isShowChange());
+        chkShowChangePercent.setSelected(symbol.isShowChangePercent());
+        chlShowUpDown.setSelected(symbol.isShowChangeUpDown());
+        chkShowProfitLoss.setSelected(symbol.isShowProfitLoss());
+
+        chkShowDayChangePercent.setSelected(symbol.isShowDayChangePercent());
+        chkShowDayChange.setSelected(symbol.isShowDayChange());
+        chkShowDayUpDown.setSelected(symbol.isShowDayChangeUpDown());
+
+        pnlAlarmLow.setEnabled(symbol.isLowAlarmEnabled());
+        chkAlarmLowPercent.setSelected(symbol.isLowAlarmIsPercent());
+        chkAlarmLowPlaySound.setSelected(symbol.isLowAlarmSoundEnabled());
+        txtAlarmLow.setText(symbol.getLowAlarmValue() + "");
+
+        pnlAlarmHigh.setEnabled(symbol.isHighAlarmEnabled());
+        chkAlarmHighPercent.setSelected(symbol.isHighAlarmIsPercent());
+        chkAlarmHighPlaySound.setSelected(symbol.isHighAlarmSoundEnabled());
+        txtAlarmHigh.setText(symbol.getHighAlarmValue() + "");
+        ignoreChanges = false;
+    }
+
+    /**
+     * Delete the selected symbol transaction from the list
+     * and selects the next one
+     */
+    private void deleteSymbolTransaction(ActionEvent e) {
+        if (lstSymbols.getSelectedListItem() != null) {
+            symbolsManager.markSymbolTransactionAsDeleted(lstSymbols.getSelectedKey());
+            int index = lstSymbols.getSelectedIndex();
+            lstSymbols.removeItem(lstSymbols.getSelectedListItem());
+            if (!lstSymbols.getModel().isEmpty()) {
+                lstSymbols.setSelectedIndex(index < lstSymbols.getModel().size() ? index : lstSymbols.getModel().size() - 1);
+            }
+            btnOk.setEnabled(true);
+            log.debug("Deleted symbol transaction {}", lstSymbols.getSelectedListItem());
+        }
+    }
+
+    /**
+     * Add a new symbol transaction to the list
+     */
+    private void addNewSymbolTransaction() {
+        SymbolTransaction newItem = lstSymbols.addItem(symbolsManager.createNewSymbolTransaction());
+        lstSymbols.setSelectedValue(newItem, true);
+        btnOk.setEnabled(true);
+    }
 
     /**
      * Set-up the display with data from storage
-     *
-     * @param settings Settings object to load data from
      */
-    private void loadFromSettings(Settings settings) {
-
+    private void loadFromSettings() {
+        lstSymbols.clear();
+        for (SymbolTransaction symbolTransaction : symbolsManager.getSymbolTransactions().values()) {
+            lstSymbols.addItem(symbolTransaction);
+        }
+        if (lstSymbols.getModel().getSize() > 0) {
+            lstSymbols.setSelectedIndex(0);
+        }
     }
 
     /**
@@ -113,6 +252,9 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
 
     @Override
     public void changed(Component c) {
+        if (ignoreChanges) {
+            return;
+        }
         btnOk.setEnabled(true);
     }
 
@@ -123,14 +265,13 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
 
     }
 
-
     /**
      * This method is called from within the constructor to initialize the form.
      */
     private void initComponents() {
 
         jScrollPane1 = new JScrollPane();
-        lstSymbols = new JList<>();
+        lstSymbols = new SymbolsList();
         btnAdd = new JButton();
         btnDelete = new JButton();
         btnCancel = new JButton();
@@ -151,7 +292,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         jPanel1 = new JPanel();
         chkShowPrice = new JCheckBox();
         chkShowChange = new JCheckBox();
-        chkHideFromSummary = new JCheckBox();
+        chkExcludeFromSummary = new JCheckBox();
         chkShowChangePercent = new JCheckBox();
         chkShowProfitLoss = new JCheckBox();
         chlShowUpDown = new JCheckBox();
@@ -225,8 +366,8 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         chkShowChange.setText("Change");
         chkShowChange.setToolTipText("The change in value between the current price and the price you paid for this stock");
 
-        chkHideFromSummary.setText("Hide from Summary");
-        chkHideFromSummary.setToolTipText("Get values and display on the ticker bnut exclude from the Summary and Day Summary");
+        chkExcludeFromSummary.setText("Hide from Summary");
+        chkExcludeFromSummary.setToolTipText("Get values and display on the ticker bnut exclude from the Summary and Day Summary");
 
         chkShowChangePercent.setText("Change %");
         chkShowChangePercent.setToolTipText("The change in percent between the current price and the price you paid for this stock");
@@ -262,7 +403,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                             .addComponent(chkShowChangePercent)
-                            .addComponent(chkHideFromSummary)
+                            .addComponent(chkExcludeFromSummary)
                             .addComponent(chkShowProfitLoss))
                         .addGap(56, 56, 56))
                     .addGroup(GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
@@ -281,7 +422,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
                 .addGap(15, 15, 15)
                 .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                     .addComponent(chkShowPrice)
-                    .addComponent(chkHideFromSummary))
+                    .addComponent(chkExcludeFromSummary))
                 .addGap(3, 3, 3)
                 .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                     .addComponent(chkShowChangePercent)
@@ -301,7 +442,6 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        pnlAlarmLow.setEnabled(false);
         chkAlarmLowPercent.setText("Percent");
         chkAlarmLowPercent.setToolTipText("Treat the value as a percentage of the base ");
 
@@ -342,7 +482,6 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        pnlAlarmHigh.setEnabled(false);
         chkAlarmHighPercent.setText("Percent");
         chkAlarmHighPercent.setToolTipText("Treat the value as a percentage of the base ");
 
@@ -360,11 +499,11 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         pnlAlarmHighLayout.setHorizontalGroup(
             pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(GroupLayout.Alignment.TRAILING, pnlAlarmHighLayout.createSequentialGroup()
-                .addContainerGap(23, Short.MAX_VALUE)
+                .addContainerGap(20, Short.MAX_VALUE)
                 .addComponent(jLabel9)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtAlarmHigh, GroupLayout.PREFERRED_SIZE, 93, GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 23, Short.MAX_VALUE)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
                 .addGroup(pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                     .addComponent(chkAlarmHighPercent)
                     .addComponent(chkAlarmHighPlaySound))
@@ -440,12 +579,10 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
                                                 .addComponent(btnCancel))
                                             .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
                                                 .addComponent(pnlAlarmLow, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(pnlAlarmHigh, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                                 .addComponent(jPanel1, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
                                 .addGap(25, 25, 25))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(18, 18, 18)
-                                .addComponent(pnlAlarmHigh, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
+                        ))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -495,10 +632,12 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
                         .addGap(10, 10, 10))))
         );
 
-        pack();
-    }// </editor-fold>                        
+        pnlAlarmLow.setEnabled(false);
+        pnlAlarmHigh.setEnabled(false);
 
-    // Variables declaration - do not modify
+        pack();
+    }
+
     private JButton btnAdd;
     private JButton btnCancel;
     private JButton btnDelete;
@@ -508,7 +647,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
     private JCheckBox chkAlarmLowPercent;
     private JCheckBox chkAlarmLowPlaySound;
     private JCheckBox chkDisabled;
-    private JCheckBox chkHideFromSummary;
+    private JCheckBox chkExcludeFromSummary;
     private JCheckBox chkShowChange;
     private JCheckBox chkShowChangePercent;
     private JCheckBox chkShowDayChange;
@@ -530,7 +669,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
     private CheckBoxFrame pnlAlarmHigh;
     private JScrollPane jScrollPane1;
     private JSeparator jSeparator1;
-    private JList<String> lstSymbols;
+    private SymbolsList lstSymbols;
     private JTextField txtAlarmHigh;
     private JTextField txtAlarmLow;
     private JTextField txtCurrencyCode;

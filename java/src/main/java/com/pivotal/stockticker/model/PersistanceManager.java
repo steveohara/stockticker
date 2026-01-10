@@ -1,5 +1,7 @@
 package com.pivotal.stockticker.model;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.MethodDelegation;
@@ -10,6 +12,7 @@ import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.concurrent.Callable;
@@ -22,10 +25,17 @@ import java.util.prefs.Preferences;
  */
 @Slf4j
 abstract public class PersistanceManager {
+
+    // Root node for all preferences
     public static final String ROOT_NODE = "/stockticker/";
 
-    private final String PREFS_NODE = ROOT_NODE + this.getClass().getSuperclass().getSimpleName();
-    private final Preferences prefs = Preferences.userRoot().node(PREFS_NODE);
+    // Preferences instance
+    private Preferences prefs;
+
+    // Auto-save flag - if true, changes are automatically saved to preferences
+    @Getter
+    @Setter
+    private boolean autoSave = true;
 
     /**
      * Loads the field value from preferences.
@@ -33,38 +43,42 @@ abstract public class PersistanceManager {
      * @param field The field to save.
      */
     private void loadField(Field field) {
+
+        // Ignore non-setable fields
+        if (Modifier.isStatic(field.getModifiers())) {
+            return;
+        }
+
         field.setAccessible(true);
         try {
             Class<?> type = field.getType();
             String key = field.getName();
             Object target = field.getDeclaringClass().cast(this);
 
-            if (keyExists(key)) {
-                if (type == String.class) {
-                    String value = prefs.get(key, null);
+            if (type == String.class) {
+                String value = prefs.get(key, field.get(target) == null ? "" : field.get(target).toString());
+                field.set(target, value);
+            }
+            else if (type == int.class || type == Integer.class) {
+                int value = prefs.getInt(key, field.get(target) == null ? 0 : field.getInt(target));
+                field.set(target, value);
+            }
+            else if (type == long.class || type == Long.class) {
+                long value = prefs.getLong(key, field.get(target) == null ? 0 : field.getLong(target));
+                field.set(target, value);
+            }
+            else if (type == boolean.class || type == Boolean.class) {
+                boolean value = prefs.getBoolean(key, field.get(target) != null && field.getBoolean(target));
+                field.set(target, value);
+            }
+            else if (type == double.class || type == Double.class) {
+                double value = prefs.getDouble(key, field.get(target) == null ? 0.0 : field.getDouble(target));
+                field.set(target, value);
+            }
+            else if (type == Color.class || type == Font.class) {
+                Object value = deserializeObject(prefs.get(key, null));
+                if (value != null) {
                     field.set(target, value);
-                }
-                else if (type == int.class || type == Integer.class) {
-                    int value = prefs.getInt(key, 0);
-                    field.set(target, value);
-                }
-                else if (type == long.class || type == Long.class) {
-                    long value = prefs.getLong(key, 0);
-                    field.set(target, value);
-                }
-                else if (type == boolean.class || type == Boolean.class) {
-                    boolean value = prefs.getBoolean(key, false);
-                    field.set(target, value);
-                }
-                else if (type == double.class || type == Double.class) {
-                    double value = prefs.getDouble(key, 0.0);
-                    field.set(target, value);
-                }
-                else if (type == Color.class || type == Font.class) {
-                    Object value = deserializeObject(prefs.get(key, null));
-                    if (value != null) {
-                        field.set(target, value);
-                    }
                 }
             }
         }
@@ -83,37 +97,38 @@ abstract public class PersistanceManager {
      * @param value Value to save
      */
     protected void saveField(Field field, Object value) {
+
+        // Ignore non-setable fields
+        if (Modifier.isStatic(field.getModifiers())) {
+            return;
+        }
+
         field.setAccessible(true);
         try {
             Class<?> type = field.getType();
             String key = field.getName();
 
-            if (field.get(this) == null) {
+            if (value == null && type != String.class) {
                 prefs.remove(key);
             }
             else if (type == String.class) {
-                prefs.put(key, field.get(this).toString());
+                prefs.put(key, value == null ? "" : field.get(this).toString());
             }
             else if (type == int.class || type == Integer.class) {
-                prefs.putInt(key, field.getInt(this));
+                prefs.putInt(key, (int)value);
             }
             else if (type == long.class || type == Long.class) {
-                prefs.putLong(key, field.getLong(this));
+                prefs.putLong(key, (long)value);
             }
             else if (type == boolean.class || type == Boolean.class) {
-                prefs.putBoolean(key, field.getBoolean(this));
+                prefs.putBoolean(key, (boolean)value);
             }
             else if (type == double.class || type == Double.class) {
-                prefs.putDouble(key, field.getDouble(this));
+                prefs.putDouble(key, (double)value);
             }
             else if (type == Color.class || type == Font.class) {
-                if (field.get(this) == null) {
-                    prefs.remove(key);
-                }
-                else {
-                    String serialized = serializeObject((Serializable) field.get(this));
-                    prefs.put(key, serialized);
-                }
+                String serialized = serializeObject((Serializable) value);
+                prefs.put(key, serialized);
             }
         }
         catch (IllegalAccessException e) {
@@ -172,7 +187,7 @@ abstract public class PersistanceManager {
      * @param key The key to check.
      * @return True if the key exists, false otherwise.
      */
-    private boolean keyExists(String key) {
+    public boolean keyExists(String key) {
         try {
             return Arrays.asList(prefs.keys()).contains(key);
         }
@@ -184,9 +199,13 @@ abstract public class PersistanceManager {
     /**
      * Creates a proxy instance of this class so that we can intercept method calls.
      *
+     * @param clazz The class to create a proxy for.
+     * @param prefs Preferences to save the values to/from.
+     * @param autoSave Indicates whether to load existing values from storage upon creation and enable auto-saving on changes.
+     *
      * @return A proxy instance of this class.
      */
-    static <T> T createProxy(Class<T> clazz) throws Exception {
+    protected static <T> T createProxy(Class<T> clazz, Preferences prefs, boolean autoSave) throws Exception {
         T instance = new ByteBuddy()
                 .subclass(clazz)
                 .method(ElementMatchers.nameStartsWith("set"))
@@ -197,12 +216,27 @@ abstract public class PersistanceManager {
                 .getDeclaredConstructor()
                 .newInstance();
 
-        // Load all the preference values into the instance
+        // Load from storage
+        ((PersistanceManager) instance).prefs = prefs;
+        ((PersistanceManager) instance).setAutoSave(autoSave);
         for (Field field : instance.getClass().getSuperclass().getDeclaredFields()) {
-            ((PersistanceManager)instance).loadField(field);
+            ((PersistanceManager) instance).loadField(field);
         }
-
         return instance;
+    }
+
+    /**
+     * Saves all fields to storage into the current instance.
+     */
+    public void saveToStorage() {
+        for (Field field : getClass().getSuperclass().getDeclaredFields()) {
+            try {
+                this.saveField(field, field.get(this));
+            }
+            catch (IllegalAccessException e) {
+                throw new RuntimeException("Failed to save field: " + field.getName(), e);
+            }
+        }
     }
 
     /**
@@ -214,22 +248,26 @@ abstract public class PersistanceManager {
                                        @Origin Method method,
                                        @AllArguments Object[] args,
                                        @SuperCall Callable<?> zuper) throws Exception {
+
+            // Set the field value first
             Object result = zuper.call();
 
-            if (args != null && method.getName().startsWith("set")) {
-                String fieldName = method.getName().substring(3);
+            // If we are auto-saving, persist the change
+            if (((PersistanceManager) self).isAutoSave()) {
+                if (args != null && method.getName().startsWith("set")) {
+                    String fieldName = method.getName().substring(3);
 
-                // Find the corresponding field name
-                for (Field field : self.getClass().getSuperclass().getDeclaredFields()) {
-                    if (field.getName().equalsIgnoreCase(fieldName)) {
-                        field.setAccessible(true);
-                        ((PersistanceManager) self).saveField(field, args[0]);
-                        break;
+                    // Find the corresponding field name
+                    for (Field field : self.getClass().getSuperclass().getDeclaredFields()) {
+                        if (field.getName().equalsIgnoreCase(fieldName)) {
+                            field.setAccessible(true);
+                            ((PersistanceManager) self).saveField(field, args[0]);
+                            break;
+                        }
                     }
+                    log.debug("Field changed: {}", fieldName);
                 }
-                log.debug("Field changed: {}", fieldName);
             }
-
             return result;
         }
     }

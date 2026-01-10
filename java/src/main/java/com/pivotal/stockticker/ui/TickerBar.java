@@ -4,6 +4,7 @@ import com.pivotal.stockticker.StartupManager;
 import com.pivotal.stockticker.Utils;
 import com.pivotal.stockticker.VersionInfo;
 import com.pivotal.stockticker.model.Settings;
+import com.pivotal.stockticker.model.SymbolsManager;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -15,7 +16,9 @@ import java.net.URI;
 
 @Slf4j
 public class TickerBar extends JFrame implements CallbackInterface {
-    private final Settings settings = Settings.createProxy();
+    private final Settings settings = Settings.getPersistentSettings();
+    private final SymbolsManager symbols = new SymbolsManager();
+
     private JPanel pnlLeftDrag;
     private JPanel pnlRightDrag;
     private ColouredTextPanel pnlStocks;
@@ -360,7 +363,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
      * Displays the symbols dialog.
      */
     private void showSymbolsDialog() {
-        SymbolsForm dialog = new SymbolsForm(this, settings);
+        SymbolsForm dialog = new SymbolsForm(this, symbols);
         dialog.setVisible(true);
     }
 

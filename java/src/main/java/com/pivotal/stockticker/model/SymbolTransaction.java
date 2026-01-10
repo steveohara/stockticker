@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.prefs.Preferences;
 
 /**
  * Represents a stock symbol with all its display and configuration properties.
@@ -13,15 +14,16 @@ import java.time.LocalDateTime;
 @Slf4j
 @Getter
 @Setter
-public class Symbol extends PersistanceManager {
-    private String regKey;
-    private String code;
+public class SymbolTransaction extends PersistanceManager {
+    private String key = String.valueOf(System.currentTimeMillis());
+    private String code = "YAHOO";
     private String alias;
-    private double price;
-    private String currencyName;
-    private String currencySymbol;
-    private double shares;
-    private boolean showPrice;
+    private boolean disabled;
+    private double pricePaid;
+    private String currencyCode = "USD";
+    private String currencySymbol = "$";
+    private double sharesBought;
+    private boolean showPrice = true;
     private boolean showChange;
     private boolean showChangePercent;
     private boolean showChangeUpDown;
@@ -43,25 +45,31 @@ public class Symbol extends PersistanceManager {
     private boolean alarmShowing;
 
     // Live values with defaults from storage
-    private boolean disabled;
     private double currentPrice;
     private double dayStart;
     private double dayChange;
     private double dayHigh;
     private double dayLow;
     private String errorDescription;
-    private LocalDateTime lastUpdate;
-    private String source;
+    private LocalDateTime lastPriceUpdate;
+    private String priceSource;
 
     /**
      * Default constructor initializing default values.
      */
-    public Symbol() {
-        this.regKey = String.valueOf(System.currentTimeMillis());
-        this.currencySymbol = "$";
-        this.currencyName = "USD";
-        this.showPrice = true;
+    public SymbolTransaction() {
+        super();
     }
+
+    /**
+     * Creates a proxy instance of this class loaded from persistent storage.
+     *
+     * @param key Unique key for the symbol transaction.
+     * @return A proxy instance of this class.
+     * @throws Exception if proxy creation fails.
+     */
+    public static SymbolTransaction getSymbolTransaction(String key) throws Exception {
+        return createProxy (SymbolTransaction.class, Preferences.userRoot().node(ROOT_NODE + SymbolTransaction.class.getSimpleName() + '/' + key), false);   }
 
     /**
      * Returns the display name, using alias if available, otherwise the code.
@@ -78,10 +86,10 @@ public class Symbol extends PersistanceManager {
      * @return Percentage change.
      */
     public double getPercentChange() {
-        if (price == 0) {
+        if (pricePaid == 0) {
             return 0;
         }
-        return ((currentPrice - price) * 100) / price;
+        return ((currentPrice - pricePaid) * 100) / pricePaid;
     }
 
     /**
@@ -108,7 +116,7 @@ public class Symbol extends PersistanceManager {
      * @return Formatted total value.
      */
     public String getFormattedTotalValue() {
-        return formatCurrencyValue(currentPrice * shares);
+        return formatCurrencyValue(currentPrice * sharesBought);
     }
 
     /**
@@ -117,7 +125,7 @@ public class Symbol extends PersistanceManager {
      * @return Formatted cost price.
      */
     public String getFormattedCost() {
-        return formatCurrencyValue(price);
+        return formatCurrencyValue(pricePaid);
     }
 
     /**
@@ -126,7 +134,7 @@ public class Symbol extends PersistanceManager {
      * @return Formatted total cost.
      */
     public String getFormattedTotalCost() {
-        return formatCurrencyValue(price * shares);
+        return formatCurrencyValue(pricePaid * sharesBought);
     }
 
     /**
@@ -135,7 +143,7 @@ public class Symbol extends PersistanceManager {
      * @return Profit or loss amount.
      */
     public double getProfitLoss() {
-        return (currentPrice - price) * shares;
+        return (currentPrice - pricePaid) * sharesBought;
     }
 
     /**
@@ -163,7 +171,7 @@ public class Symbol extends PersistanceManager {
      * @return Sort key string.
      */
     public String getSortKey() {
-        return String.format("%-10s%-20s", code, regKey);
+        return String.format("%-10s%-20s", code, key);
     }
 
     /**
@@ -175,4 +183,8 @@ public class Symbol extends PersistanceManager {
         this.code = code != null ? code.trim().toUpperCase() : null;
     }
 
+    @Override
+    public String toString() {
+        return code + '(' + key + ')';
+    }
 }
