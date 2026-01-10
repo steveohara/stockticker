@@ -1,6 +1,7 @@
 package com.pivotal.stockticker;
 
 import com.pivotal.stockticker.ui.CallbackInterface;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -8,6 +9,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.awt.*;
 
+@Slf4j
 public class Utils {
 
     /**
@@ -97,5 +99,43 @@ public class Utils {
         });
     }
 
+    /**
+     * Parses a string to a double, returning a default value if parsing fails.
+     *
+     * @param text The string to parse.
+     * @param i    The default value to return on failure.
+     * @return The parsed double or the default value.
+     */
+    public static double parseDouble(String text, int i) {
+        try {
+            if (text == null || text.isBlank()) {
+                return i;
+            }
+            return Double.parseDouble(text.trim());
+        }
+        catch (NumberFormatException e) {
+            log.debug("Failed to parse double from text '{}', returning default value {}", text, i);
+        }
+        return i;
+    }
 
+    /**
+     * Parses a string to an integer, returning a default value if parsing fails.
+     *
+     * @param text The string to parse.
+     * @param i    The default value to return on failure.
+     * @return The parsed integer or the default value.
+     */
+    public static double parseInt(String text, int i) {
+        try {
+            if (text == null || text.isBlank()) {
+                return i;
+            }
+            return Integer.parseInt(text.trim());
+        }
+        catch (NumberFormatException e) {
+            log.debug("Failed to parse int from text '{}', returning default value {}", text, i);
+        }
+        return i;
+    }
 }

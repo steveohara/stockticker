@@ -233,7 +233,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      * Handles the OK button click event.
      */
     private void onOK() {
-        saveSettings();
+        saveSymbolChanges();
         caller.changed(this);
         dispose();
     }
@@ -256,20 +256,52 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             return;
         }
         btnOk.setEnabled(true);
+        if (lstSymbols.getSelectedListItem() != null) {
+            SymbolTransaction symbol = lstSymbols.getSelectedListItem();
+            symbol.setCode(txtSymbol.getText());
+            symbol.setDisabled(chkDisabled.isSelected());
+            symbol.setAlias(txtDisplayName.getText());
+            symbol.setPricePaid(Utils.parseDouble(txtPricePaid.getText(), 0));
+            symbol.setSharesBought(Utils.parseDouble(txtSharesBought.getText(), 0));
+            symbol.setCurrencyCode(txtCurrencyCode.getText());
+            symbol.setCurrencySymbol(txtCurrencySymbol.getText());
+
+            symbol.setShowPrice(chkShowPrice.isSelected());
+            symbol.setExcludeFromSummary(chkExcludeFromSummary.isSelected());
+            symbol.setShowChange(chkShowChange.isSelected());
+            symbol.setShowChangePercent(chkShowChangePercent.isSelected());
+            symbol.setShowChangeUpDown(chlShowUpDown.isSelected());
+            symbol.setShowProfitLoss(chkShowProfitLoss.isSelected());
+
+            symbol.setShowDayChangePercent(chkShowDayChangePercent.isSelected());
+            symbol.setShowDayChange(chkShowDayChange.isSelected());
+            symbol.setShowDayChangeUpDown(chkShowDayUpDown.isSelected());
+
+            symbol.setLowAlarmEnabled(pnlAlarmHigh.isEnabled());
+            symbol.setLowAlarmIsPercent(chkAlarmLowPercent.isSelected());
+            symbol.setLowAlarmSoundEnabled(chkAlarmLowPlaySound.isSelected());
+            symbol.setLowAlarmValue(Utils.parseDouble(txtAlarmLow.getText(), 0));
+
+            symbol.setHighAlarmEnabled(pnlAlarmHigh.isEnabled());
+            symbol.setHighAlarmIsPercent(chkAlarmHighPercent.isSelected());
+            symbol.setHighAlarmSoundEnabled(chkAlarmHighPlaySound.isSelected());
+            symbol.setHighAlarmValue(Utils.parseDouble(txtAlarmHigh.getText(), 0));
+
+            symbolsManager.markSymbolTransactionAsModified(symbol.getKey());
+        }
     }
 
     /**
      * Saves the current settings from the form to the Settings object.
      */
-    private void saveSettings() {
-
+    private void saveSymbolChanges() {
+        symbolsManager.persistChanges();
     }
 
     /**
      * This method is called from within the constructor to initialize the form.
      */
     private void initComponents() {
-
         jScrollPane1 = new JScrollPane();
         lstSymbols = new SymbolsList();
         btnAdd = new JButton();

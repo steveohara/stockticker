@@ -104,6 +104,7 @@ public class CheckBoxFrame extends JPanel {
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
+        titleCheckbox.setSelected(enabled);
         setEnabledRecursive(contentPanel, enabled);
     }
 

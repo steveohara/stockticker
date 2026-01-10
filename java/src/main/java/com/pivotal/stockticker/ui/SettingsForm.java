@@ -193,18 +193,8 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         settings.setProxyServer(txtProxyServer.getText().trim());
         settings.setCurrencyCode(txtCurrencyCode.getText().trim());
         settings.setCurrencySymbol(txtCurrencySymbol.getText().trim());
-        try {
-            settings.setMargin(Double.parseDouble(txtMargin.getText().trim()));
-        }
-        catch (NumberFormatException ex) {
-            settings.setMargin(0.0);
-        }
-        try {
-            settings.setTotalInvestment(Double.parseDouble(txtTotalInvestment.getText().trim()));
-        }
-        catch (NumberFormatException ex) {
-            settings.setTotalInvestment(0.0);
-        }
+        settings.setMargin(Utils.parseDouble(txtMargin.getText(), 0));
+        settings.setTotalInvestment(Utils.parseDouble(txtTotalInvestment.getText(), 0));
     }
 
     /**

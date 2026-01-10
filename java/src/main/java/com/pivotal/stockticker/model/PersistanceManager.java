@@ -45,7 +45,7 @@ abstract public class PersistanceManager {
     private void loadField(Field field) {
 
         // Ignore non-setable fields
-        if (Modifier.isStatic(field.getModifiers())) {
+        if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
             return;
         }
 
@@ -99,7 +99,7 @@ abstract public class PersistanceManager {
     protected void saveField(Field field, Object value) {
 
         // Ignore non-setable fields
-        if (Modifier.isStatic(field.getModifiers())) {
+        if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
             return;
         }
 
@@ -205,7 +205,7 @@ abstract public class PersistanceManager {
      *
      * @return A proxy instance of this class.
      */
-    protected static <T> T createProxy(Class<T> clazz, Preferences prefs, boolean autoSave) throws Exception {
+    protected static <T> T createProxyInstance(Class<T> clazz, Preferences prefs, boolean autoSave) throws Exception {
         T instance = new ByteBuddy()
                 .subclass(clazz)
                 .method(ElementMatchers.nameStartsWith("set"))
@@ -231,7 +231,10 @@ abstract public class PersistanceManager {
     public void saveToStorage() {
         for (Field field : getClass().getSuperclass().getDeclaredFields()) {
             try {
-                this.saveField(field, field.get(this));
+                // Ignore non-setable fields
+                if (!Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())) {
+                    this.saveField(field, field.get(this));
+                }
             }
             catch (IllegalAccessException e) {
                 throw new RuntimeException("Failed to save field: " + field.getName(), e);

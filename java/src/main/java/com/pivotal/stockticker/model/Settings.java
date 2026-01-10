@@ -80,7 +80,7 @@ public class Settings extends PersistanceManager {
      * @throws Exception if proxy creation fails.
      */
     public static Settings getPersistentSettings() throws Exception {
-        return createProxy(Settings.class, Preferences.userRoot().node(ROOT_NODE + Settings.class.getSimpleName()), true);
+        return createProxyInstance(Settings.class, Preferences.userRoot().node(ROOT_NODE + Settings.class.getSimpleName()), true);
     }
 
     /**

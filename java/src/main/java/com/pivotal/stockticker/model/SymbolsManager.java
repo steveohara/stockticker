@@ -48,7 +48,7 @@ public class SymbolsManager {
             }
         }
         catch (Exception e) {
-            log.error("Error accessing preferences: {}", e.getMessage());
+            log.error("Error accessing storage: {}", e.getMessage());
         }
     }
 
@@ -58,10 +58,16 @@ public class SymbolsManager {
      * @return Newly created SymbolTransaction with defaults
      */
     public SymbolTransaction createNewSymbolTransaction() {
-        SymbolTransaction symbolTransaction = new SymbolTransaction();
-        newSymbolTransactions.put(symbolTransaction.getKey(), symbolTransaction);
-        symbolTransactions.put(symbolTransaction.getKey(), symbolTransaction);
-        return symbolTransaction;
+        try {
+            SymbolTransaction symbolTransaction = SymbolTransaction.getSymbolTransaction();
+            newSymbolTransactions.put(symbolTransaction.getKey(), symbolTransaction);
+            symbolTransactions.put(symbolTransaction.getKey(), symbolTransaction);
+            return symbolTransaction;
+        }
+        catch (Exception e) {
+            log.error("Error creating new symbol: {}", e.getMessage());
+            return null;
+        }
     }
 
     /**

@@ -62,6 +62,17 @@ public class SymbolTransaction extends PersistanceManager {
     }
 
     /**
+     * Creates a new proxy instance of this class loaded from persistent storage.
+     *
+     * @return A proxy instance of this class.
+     * @throws Exception if proxy creation fails.
+     */
+    public static SymbolTransaction getSymbolTransaction() throws Exception {
+        String key = String.valueOf(System.currentTimeMillis());
+        return createProxyInstance(SymbolTransaction.class, Preferences.userRoot().node(ROOT_NODE + SymbolTransaction.class.getSimpleName() + '/' + key), false);
+    }
+
+    /**
      * Creates a proxy instance of this class loaded from persistent storage.
      *
      * @param key Unique key for the symbol transaction.
@@ -69,7 +80,8 @@ public class SymbolTransaction extends PersistanceManager {
      * @throws Exception if proxy creation fails.
      */
     public static SymbolTransaction getSymbolTransaction(String key) throws Exception {
-        return createProxy (SymbolTransaction.class, Preferences.userRoot().node(ROOT_NODE + SymbolTransaction.class.getSimpleName() + '/' + key), false);   }
+        return createProxyInstance(SymbolTransaction.class, Preferences.userRoot().node(ROOT_NODE + SymbolTransaction.class.getSimpleName() + '/' + key), false);
+    }
 
     /**
      * Returns the display name, using alias if available, otherwise the code.
