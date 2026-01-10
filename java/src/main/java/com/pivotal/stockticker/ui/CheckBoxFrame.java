@@ -68,8 +68,7 @@ public class CheckBoxFrame extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g.create();
-        Color shadow = UIManager.getColor("controlShadow");
-        Color highlight = UIManager.getColor("controlHighlight");
+        Color highlight = UIManager.getColor("Component.borderColor");
 
         int w = getWidth() - 1;
         int h = getHeight() - 1;
@@ -77,18 +76,12 @@ public class CheckBoxFrame extends JPanel {
         int y = titleCheckbox.getPreferredSize().height / 2;
         int titleWidth = titleCheckbox.getPreferredSize().width;
 
-        g2.setColor(shadow);
-        g2.drawLine(0, y, TITLE_X - 2, y);
-        g2.drawLine(TITLE_X + titleWidth + 2, y, w, y);
-
+        // Top border
         g2.setColor(highlight);
         g2.drawLine(1, y + 1, TITLE_X - 1, y + 1);
         g2.drawLine(TITLE_X + titleWidth + 3, y + 1, w - 1, y + 1);
 
         // Left / right / bottom borders
-        g2.setColor(shadow);
-        g2.drawRect(0, y, w, h - y);
-
         g2.setColor(highlight);
         g2.drawRect(1, y + 1, w - 2, h - y - 2);
 

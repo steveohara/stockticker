@@ -12,6 +12,8 @@ import com.pivotal.stockticker.model.SymbolsManager;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
@@ -390,10 +392,13 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
 
         txtCurrencySymbol.setToolTipText("e.g. $, £, p, c");
 
-        jPanel1.setBorder(BorderFactory.createLineBorder(null));
+        LineBorder lineBorder = new LineBorder(UIManager.getColor("Component.borderColor"), 1);
+        TitledBorder border = BorderFactory.createTitledBorder(lineBorder, "Show");
+        border.setTitleColor(lineBorder.getLineColor());
+        jPanel1.setBorder(border);
 
         chkShowPrice.setText("Price");
-        chkShowPrice.setToolTipText("Current price that this stock is being tradded at");
+        chkShowPrice.setToolTipText("Current price that this stock is being traded at");
 
         chkShowChange.setText("Change");
         chkShowChange.setToolTipText("The change in value between the current price and the price you paid for this stock");
