@@ -10,11 +10,14 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 import java.awt.*;
 import java.io.*;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -28,6 +31,9 @@ abstract public class PersistanceManager {
 
     // Root node for all preferences
     public static final String ROOT_NODE = "/stockticker/";
+
+    // Cache of constructors that have been created for proxy instances
+    private static final Map<String, Constructor> constructors = new HashMap<>();
 
     // Preferences instance
     private Preferences prefs;
@@ -45,7 +51,9 @@ abstract public class PersistanceManager {
     private void loadField(Field field) {
 
         // Ignore non-setable fields
-        if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
+        if (Modifier.isStatic(field.getModifiers()) ||
+                Modifier.isFinal(field.getModifiers()) ||
+                Modifier.isTransient(field.getModifiers())) {
             return;
         }
 
@@ -99,7 +107,9 @@ abstract public class PersistanceManager {
     protected void saveField(Field field, Object value) {
 
         // Ignore non-setable fields
-        if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
+        if (Modifier.isStatic(field.getModifiers()) ||
+                Modifier.isFinal(field.getModifiers()) ||
+                Modifier.isTransient(field.getModifiers())) {
             return;
         }
 
@@ -115,16 +125,16 @@ abstract public class PersistanceManager {
                 prefs.put(key, value == null ? "" : field.get(this).toString());
             }
             else if (type == int.class || type == Integer.class) {
-                prefs.putInt(key, (int)value);
+                prefs.putInt(key, (int) value);
             }
             else if (type == long.class || type == Long.class) {
-                prefs.putLong(key, (long)value);
+                prefs.putLong(key, (long) value);
             }
             else if (type == boolean.class || type == Boolean.class) {
-                prefs.putBoolean(key, (boolean)value);
+                prefs.putBoolean(key, (boolean) value);
             }
             else if (type == double.class || type == Double.class) {
-                prefs.putDouble(key, (double)value);
+                prefs.putDouble(key, (double) value);
             }
             else if (type == Color.class || type == Font.class) {
                 String serialized = serializeObject((Serializable) value);
@@ -189,7 +199,7 @@ abstract public class PersistanceManager {
      */
     public boolean keyExists(String key) {
         try {
-            return Arrays.asList(prefs.keys()).contains(key);
+            return Arrays.asList(prefs.childrenNames()).contains(key);
         }
         catch (BackingStoreException e) {
             return false;
@@ -199,29 +209,40 @@ abstract public class PersistanceManager {
     /**
      * Creates a proxy instance of this class so that we can intercept method calls.
      *
-     * @param clazz The class to create a proxy for.
-     * @param prefs Preferences to save the values to/from.
+     * @param clazz    The class to create a proxy for.
+     * @param prefs    Preferences to save the values to/from.
      * @param autoSave Indicates whether to load existing values from storage upon creation and enable auto-saving on changes.
-     *
      * @return A proxy instance of this class.
      */
+    @SuppressWarnings("unchecked")
     protected static <T> T createProxyInstance(Class<T> clazz, Preferences prefs, boolean autoSave) throws Exception {
-        T instance = new ByteBuddy()
-                .subclass(clazz)
-                .method(ElementMatchers.nameStartsWith("set"))
-                .intercept(MethodDelegation.to(ChangeTrackingInterceptor.class))
-                .make()
-                .load(clazz.getClassLoader())
-                .getLoaded()
-                .getDeclaredConstructor()
-                .newInstance();
+        log.debug("Getting proxy for {} from cache", clazz.getSimpleName());
+        Constructor<T> constructor;
+        synchronized (constructors) {
+            constructor = constructors.get(clazz.getName());
+            if (constructor == null) {
+                log.debug("Creating proxy for {}", clazz.getSimpleName());
+                constructor = (Constructor<T>) new ByteBuddy()
+                        .subclass(clazz)
+                        .method(ElementMatchers.nameStartsWith("set"))
+                        .intercept(MethodDelegation.to(ChangeTrackingInterceptor.class))
+                        .make()
+                        .load(clazz.getClassLoader())
+                        .getLoaded()
+                        .getDeclaredConstructor();
+                constructors.put(clazz.getName(), constructor);
+            }
+        }
+        T instance = constructor.newInstance();
 
-        // Load from storage
+        // Initialize from storage
+        log.debug("Loading {} instance {} from storage", clazz.getSimpleName(), instance);
         ((PersistanceManager) instance).prefs = prefs;
         ((PersistanceManager) instance).setAutoSave(autoSave);
         for (Field field : instance.getClass().getSuperclass().getDeclaredFields()) {
             ((PersistanceManager) instance).loadField(field);
         }
+        log.debug("Initialised {} instance {} from storage", clazz.getSimpleName(), instance);
         return instance;
     }
 
@@ -232,7 +253,10 @@ abstract public class PersistanceManager {
         for (Field field : getClass().getSuperclass().getDeclaredFields()) {
             try {
                 // Ignore non-setable fields
-                if (!Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())) {
+                if (!Modifier.isStatic(field.getModifiers()) &&
+                        !Modifier.isFinal(field.getModifiers()) &&
+                        !Modifier.isTransient(field.getModifiers())) {
+                    field.setAccessible(true);
                     this.saveField(field, field.get(this));
                 }
             }

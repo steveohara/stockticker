@@ -15,7 +15,6 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -47,55 +46,58 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
 
         // Init the settings from storage
         loadFromSettings();
+        disableForm(this);
+
+        // Show the form and select the first item in the list
+        if (lstSymbols.getModel().getSize() > 0) {
+            lstSymbols.setSelectedIndex(0);
+        }
+        setVisible(true);
     }
 
+    /**
+     * Recursively sets the enabled state of all components within the form.
+     *
+     * @param c The container whose components' enabled state is to be set.
+     */
+    private void disableForm(Container c) {
+        for (Component comp : c.getComponents()) {
+            if (comp != btnAdd && comp != btnOk  && comp != btnCancel && comp != lstSymbols) {
+                comp.setEnabled(lstSymbols.getSelectedListItem() != null);
+            }
+            if (comp instanceof Container) {
+                disableForm((Container) comp);
+            }
+        }
+    }
 
     /**
      * Initializes all listeners for the form components.
      */
     private void initListeners() {
-        getRootPane().setDefaultButton(btnOk);
-        btnOk.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-        btnCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
 
-        // call onCancel() when cross is clicked
+        // Set default buttons, escape to cancel and window close handling
+        getRootPane().setDefaultButton(btnOk);
+        btnOk.addActionListener(e -> onOK());
+        btnCancel.addActionListener(e -> onCancel());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        getRootPane().registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 onCancel();
             }
         });
 
-        // call onCancel() on ESCAPE
-        getRootPane().registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        btnAdd.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                addNewSymbolTransaction();
-            }
-        });
-
-        btnDelete.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                deleteSymbolTransaction(e);
-            }
-        });
-
-        lstSymbols.addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                selectSymbolTransaction(e);
+        // Handle the symbols
+        btnAdd.addActionListener(e -> addNewSymbolTransaction());
+        btnDelete.addActionListener(this::deleteSymbolTransaction);
+        lstSymbols.addListSelectionListener(this::selectSymbolTransaction);
+        lstSymbols.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+                    deleteSymbolTransaction(null);
+                }
             }
         });
 
@@ -105,6 +107,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
 
     /**
      * Handles the selection of a symbol transaction from the list.
+     *
      * @param e ListSelectionEvent
      */
     private void selectSymbolTransaction(ListSelectionEvent e) {
@@ -116,7 +119,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             else {
                 clearDisplay();
             }
-            btnDelete.setEnabled(lstSymbols.getSelectedKey() != null);
+            disableForm(this);
         }
     }
 
@@ -144,12 +147,12 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         chkShowDayChange.setSelected(false);
         chkShowDayUpDown.setSelected(false);
 
-        pnlAlarmLow.setEnabled(false);
+        pnlAlarmLow.setSelected(false);
         chkAlarmLowPercent.setSelected(false);
         chkAlarmLowPlaySound.setSelected(false);
         txtAlarmLow.setText("");
 
-        pnlAlarmHigh.setEnabled(false);
+        pnlAlarmHigh.setSelected(false);
         chkAlarmHighPercent.setSelected(false);
         chkAlarmHighPlaySound.setSelected(false);
         txtAlarmHigh.setText("");
@@ -182,12 +185,12 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         chkShowDayChange.setSelected(symbol.isShowDayChange());
         chkShowDayUpDown.setSelected(symbol.isShowDayChangeUpDown());
 
-        pnlAlarmLow.setEnabled(symbol.isLowAlarmEnabled());
+        pnlAlarmLow.setSelected(symbol.isLowAlarmEnabled());
         chkAlarmLowPercent.setSelected(symbol.isLowAlarmIsPercent());
         chkAlarmLowPlaySound.setSelected(symbol.isLowAlarmSoundEnabled());
         txtAlarmLow.setText(symbol.getLowAlarmValue());
 
-        pnlAlarmHigh.setEnabled(symbol.isHighAlarmEnabled());
+        pnlAlarmHigh.setSelected(symbol.isHighAlarmEnabled());
         chkAlarmHighPercent.setSelected(symbol.isHighAlarmIsPercent());
         chkAlarmHighPlaySound.setSelected(symbol.isHighAlarmSoundEnabled());
         txtAlarmHigh.setText(symbol.getHighAlarmValue());
@@ -200,7 +203,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      */
     private void deleteSymbolTransaction(ActionEvent e) {
         if (lstSymbols.getSelectedListItem() != null) {
-            symbolsManager.markSymbolTransactionAsDeleted(lstSymbols.getSelectedKey());
+            symbolsManager.markSymbolTransactionAsDeleted(lstSymbols.getSelectedListItem());
             int index = lstSymbols.getSelectedIndex();
             lstSymbols.removeItem(lstSymbols.getSelectedListItem());
             if (!lstSymbols.getModel().isEmpty()) {
@@ -218,6 +221,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         SymbolTransaction newItem = lstSymbols.addItem(symbolsManager.createNewSymbolTransaction());
         lstSymbols.setSelectedValue(newItem, true);
         btnOk.setEnabled(true);
+        txtSymbol.requestFocus();
     }
 
     /**
@@ -225,7 +229,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      */
     private void loadFromSettings() {
         lstSymbols.clear();
-        for (SymbolTransaction symbolTransaction : symbolsManager.getSymbolTransactions().values()) {
+        for (SymbolTransaction symbolTransaction : symbolsManager.getSymbolTransactions()) {
             lstSymbols.addItem(symbolTransaction);
         }
         if (lstSymbols.getModel().getSize() > 0) {
@@ -291,7 +295,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             symbol.setHighAlarmSoundEnabled(chkAlarmHighPlaySound.isSelected());
             symbol.setHighAlarmValue(txtAlarmHigh.getValue());
 
-            symbolsManager.markSymbolTransactionAsModified(symbol.getKey());
+            symbolsManager.markSymbolTransactionAsModified(symbol);
         }
     }
 
@@ -306,6 +310,8 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      * This method is called from within the constructor to initialize the form.
      */
     private void initComponents() {
+        LineBorder lineBorder = new LineBorder(UIManager.getColor("Component.borderColor"), 1);
+
         jScrollPane1 = new JScrollPane();
         lstSymbols = new SymbolsList();
         btnAdd = new JButton();
@@ -341,7 +347,8 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         chkAlarmLowPlaySound = new JCheckBox();
         txtAlarmLow = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
         jLabel7 = new JLabel();
-        pnlAlarmHigh = new CheckBoxFrame("Enable High Alarm");;
+        pnlAlarmHigh = new CheckBoxFrame("Enable High Alarm");
+        ;
         chkAlarmHighPercent = new JCheckBox();
         chkAlarmHighPlaySound = new JCheckBox();
         txtAlarmHigh = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
@@ -349,7 +356,8 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        lstSymbols.setBorder(BorderFactory.createLineBorder(null));
+        lstSymbols.setBorder(null);
+        jScrollPane1.setBorder(lineBorder);
         jScrollPane1.setViewportView(lstSymbols);
 
         btnAdd.setText("Add");
@@ -394,7 +402,6 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
 
         txtCurrencySymbol.setToolTipText("e.g. $, £, p, c");
 
-        LineBorder lineBorder = new LineBorder(UIManager.getColor("Component.borderColor"), 1);
         TitledBorder border = BorderFactory.createTitledBorder(lineBorder, "Show");
         border.setTitleColor(lineBorder.getLineColor());
         jPanel1.setBorder(border);
@@ -430,55 +437,55 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         GroupLayout jPanel1Layout = new GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                            .addComponent(chkShowChange)
-                            .addComponent(chkShowPrice)
-                            .addComponent(chlShowUpDown))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                            .addComponent(chkShowChangePercent)
-                            .addComponent(chkExcludeFromSummary)
-                            .addComponent(chkShowProfitLoss))
-                        .addGap(56, 56, 56))
-                    .addGroup(GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                            .addGroup(GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(chkShowDayChange)
-                                .addGap(66, 66, 66)
-                                .addComponent(chkShowDayChangePercent))
-                            .addComponent(chkShowDayUpDown, GroupLayout.Alignment.LEADING)
-                            .addComponent(jSeparator1, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 296, GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(10, 10, 10)
+                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                        .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                        .addComponent(chkShowChange)
+                                                        .addComponent(chkShowPrice)
+                                                        .addComponent(chlShowUpDown))
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                        .addComponent(chkShowChangePercent)
+                                                        .addComponent(chkExcludeFromSummary)
+                                                        .addComponent(chkShowProfitLoss))
+                                                .addGap(56, 56, 56))
+                                        .addGroup(GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                                        .addGroup(GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                                                .addComponent(chkShowDayChange)
+                                                                .addGap(66, 66, 66)
+                                                                .addComponent(chkShowDayChangePercent))
+                                                        .addComponent(chkShowDayUpDown, GroupLayout.Alignment.LEADING)
+                                                        .addComponent(jSeparator1, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 296, GroupLayout.PREFERRED_SIZE))
+                                                .addGap(0, 0, Short.MAX_VALUE))))
         );
         jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkShowPrice)
-                    .addComponent(chkExcludeFromSummary))
-                .addGap(3, 3, 3)
-                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(chkShowChangePercent)
-                    .addComponent(chkShowChange))
-                .addGap(3, 3, 3)
-                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(chkShowProfitLoss)
-                    .addComponent(chlShowUpDown))
-                .addGap(6, 6, 6)
-                .addComponent(jSeparator1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                .addGap(6, 6, 6)
-                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkShowDayChangePercent)
-                    .addComponent(chkShowDayChange))
-                .addGap(3, 3, 3)
-                .addComponent(chkShowDayUpDown)
-                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(15, 15, 15)
+                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(chkShowPrice)
+                                        .addComponent(chkExcludeFromSummary))
+                                .addGap(3, 3, 3)
+                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(chkShowChangePercent)
+                                        .addComponent(chkShowChange))
+                                .addGap(3, 3, 3)
+                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(chkShowProfitLoss)
+                                        .addComponent(chlShowUpDown))
+                                .addGap(6, 6, 6)
+                                .addComponent(jSeparator1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addGap(6, 6, 6)
+                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(chkShowDayChangePercent)
+                                        .addComponent(chkShowDayChange))
+                                .addGap(3, 3, 3)
+                                .addComponent(chkShowDayUpDown)
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         chkAlarmLowPercent.setText("Percent");
@@ -496,29 +503,29 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         GroupLayout pnlAlarmLowLayout = new GroupLayout(pnlAlarmLow.getContentPanel());
         pnlAlarmLow.getContentPanel().setLayout(pnlAlarmLowLayout);
         pnlAlarmLowLayout.setHorizontalGroup(
-            pnlAlarmLowLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(GroupLayout.Alignment.TRAILING, pnlAlarmLowLayout.createSequentialGroup()
-                .addContainerGap(20, Short.MAX_VALUE)
-                .addComponent(jLabel7)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtAlarmLow, GroupLayout.PREFERRED_SIZE, 93, GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
-                .addGroup(pnlAlarmLowLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(chkAlarmLowPercent)
-                    .addComponent(chkAlarmLowPlaySound))
-                .addGap(40, 40, 40))
+                pnlAlarmLowLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(GroupLayout.Alignment.TRAILING, pnlAlarmLowLayout.createSequentialGroup()
+                                .addContainerGap(20, Short.MAX_VALUE)
+                                .addComponent(jLabel7)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtAlarmLow, GroupLayout.PREFERRED_SIZE, 93, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
+                                .addGroup(pnlAlarmLowLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(chkAlarmLowPercent)
+                                        .addComponent(chkAlarmLowPlaySound))
+                                .addGap(40, 40, 40))
         );
         pnlAlarmLowLayout.setVerticalGroup(
-            pnlAlarmLowLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAlarmLowLayout.createSequentialGroup()
-                .addGap(19, 19, 19)
-                .addGroup(pnlAlarmLowLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkAlarmLowPercent)
-                    .addComponent(jLabel7)
-                    .addComponent(txtAlarmLow, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                .addGap(3, 3, 3)
-                .addComponent(chkAlarmLowPlaySound)
-                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                pnlAlarmLowLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(pnlAlarmLowLayout.createSequentialGroup()
+                                .addGap(19, 19, 19)
+                                .addGroup(pnlAlarmLowLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(chkAlarmLowPercent)
+                                        .addComponent(jLabel7)
+                                        .addComponent(txtAlarmLow, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addGap(3, 3, 3)
+                                .addComponent(chkAlarmLowPlaySound)
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         chkAlarmHighPercent.setText("Percent");
@@ -536,143 +543,143 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         GroupLayout pnlAlarmHighLayout = new GroupLayout(pnlAlarmHigh.getContentPanel());
         pnlAlarmHigh.getContentPanel().setLayout(pnlAlarmHighLayout);
         pnlAlarmHighLayout.setHorizontalGroup(
-            pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(GroupLayout.Alignment.TRAILING, pnlAlarmHighLayout.createSequentialGroup()
-                .addContainerGap(20, Short.MAX_VALUE)
-                .addComponent(jLabel9)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtAlarmHigh, GroupLayout.PREFERRED_SIZE, 93, GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
-                .addGroup(pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(chkAlarmHighPercent)
-                    .addComponent(chkAlarmHighPlaySound))
-                .addGap(40, 40, 40))
+                pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(GroupLayout.Alignment.TRAILING, pnlAlarmHighLayout.createSequentialGroup()
+                                .addContainerGap(20, Short.MAX_VALUE)
+                                .addComponent(jLabel9)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtAlarmHigh, GroupLayout.PREFERRED_SIZE, 93, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
+                                .addGroup(pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(chkAlarmHighPercent)
+                                        .addComponent(chkAlarmHighPlaySound))
+                                .addGap(40, 40, 40))
         );
         pnlAlarmHighLayout.setVerticalGroup(
-            pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAlarmHighLayout.createSequentialGroup()
-                .addGap(19, 19, 19)
-                .addGroup(pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkAlarmHighPercent)
-                    .addComponent(jLabel9)
-                    .addComponent(txtAlarmHigh, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                .addGap(3, 3, 3)
-                .addComponent(chkAlarmHighPlaySound)
-                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(pnlAlarmHighLayout.createSequentialGroup()
+                                .addGap(19, 19, 19)
+                                .addGroup(pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(chkAlarmHighPercent)
+                                        .addComponent(jLabel9)
+                                        .addComponent(txtAlarmHigh, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addGap(3, 3, 3)
+                                .addComponent(chkAlarmHighPlaySound)
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnAdd)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDelete, GroupLayout.PREFERRED_SIZE, 64, GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 145, GroupLayout.PREFERRED_SIZE)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addGap(26, 26, 26)
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                                    .addComponent(jLabel2, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                    .addComponent(jLabel1, GroupLayout.PREFERRED_SIZE, 73, GroupLayout.PREFERRED_SIZE)))
-                                            .addComponent(jLabel3, GroupLayout.Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, 63, GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(jLabel5, GroupLayout.Alignment.TRAILING))
-                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                                    .addComponent(txtPricePaid)
-                                                    .addComponent(txtCurrencyCode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                    .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                                        .addComponent(jLabel4, GroupLayout.PREFERRED_SIZE, 115, GroupLayout.PREFERRED_SIZE)
-                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                        .addComponent(txtSharesBought, GroupLayout.PREFERRED_SIZE, 49, GroupLayout.PREFERRED_SIZE))
-                                                    .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                                        .addComponent(jLabel6)
-                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                        .addComponent(txtCurrencySymbol, GroupLayout.PREFERRED_SIZE, 27, GroupLayout.PREFERRED_SIZE)
-                                                        .addGap(22, 22, 22))))
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(txtSymbol, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(chkDisabled))
-                                            .addComponent(txtDisplayName)))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(btnOk)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(btnAdd)
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(btnCancel))
-                                            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
-                                                .addComponent(pnlAlarmLow, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(pnlAlarmHigh, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(jPanel1, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
-                                .addGap(25, 25, 25))
-                        ))))
+                                                .addComponent(btnDelete, GroupLayout.PREFERRED_SIZE, 64, GroupLayout.PREFERRED_SIZE)
+                                                .addGap(0, 0, Short.MAX_VALUE))
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 145, GroupLayout.PREFERRED_SIZE)
+                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                        .addGroup(layout.createSequentialGroup()
+                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                                        .addGroup(layout.createSequentialGroup()
+                                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                                                        .addGroup(layout.createSequentialGroup()
+                                                                                                .addGap(26, 26, 26)
+                                                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
+                                                                                                        .addComponent(jLabel2, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                                                        .addComponent(jLabel1, GroupLayout.PREFERRED_SIZE, 73, GroupLayout.PREFERRED_SIZE)))
+                                                                                        .addComponent(jLabel3, GroupLayout.Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, 63, GroupLayout.PREFERRED_SIZE)
+                                                                                        .addComponent(jLabel5, GroupLayout.Alignment.TRAILING))
+                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                                                        .addGroup(layout.createSequentialGroup()
+                                                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
+                                                                                                        .addComponent(txtPricePaid)
+                                                                                                        .addComponent(txtCurrencyCode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
+                                                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                                                                        .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                                                                                .addComponent(jLabel4, GroupLayout.PREFERRED_SIZE, 115, GroupLayout.PREFERRED_SIZE)
+                                                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                                                                                .addComponent(txtSharesBought, GroupLayout.PREFERRED_SIZE, 49, GroupLayout.PREFERRED_SIZE))
+                                                                                                        .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                                                                                .addComponent(jLabel6)
+                                                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                                                                                .addComponent(txtCurrencySymbol, GroupLayout.PREFERRED_SIZE, 27, GroupLayout.PREFERRED_SIZE)
+                                                                                                                .addGap(22, 22, 22))))
+                                                                                        .addGroup(layout.createSequentialGroup()
+                                                                                                .addComponent(txtSymbol, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                                                .addComponent(chkDisabled))
+                                                                                        .addComponent(txtDisplayName)))
+                                                                        .addGroup(layout.createSequentialGroup()
+                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                                                                        .addGroup(layout.createSequentialGroup()
+                                                                                                .addComponent(btnOk)
+                                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                                                                .addComponent(btnCancel))
+                                                                                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
+                                                                                                .addComponent(pnlAlarmLow, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                                                .addComponent(pnlAlarmHigh, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                                                .addComponent(jPanel1, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
+                                                                .addGap(25, 25, 25))
+                                                ))))
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
-                            .addComponent(txtSymbol, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(chkDisabled))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel2)
-                            .addComponent(txtDisplayName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel3)
-                            .addComponent(txtPricePaid, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4)
-                            .addComponent(txtSharesBought, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel5)
-                            .addComponent(txtCurrencyCode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel6)
-                            .addComponent(txtCurrencySymbol, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(pnlAlarmLow, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(pnlAlarmHigh, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1))
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnAdd)
-                            .addComponent(btnDelete))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnOk)
-                            .addComponent(btnCancel))
-                        .addGap(10, 10, 10))))
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(jLabel1)
+                                                        .addComponent(txtSymbol, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(chkDisabled))
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(jLabel2)
+                                                        .addComponent(txtDisplayName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(jLabel3)
+                                                        .addComponent(txtPricePaid, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(jLabel4)
+                                                        .addComponent(txtSharesBought, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(jLabel5)
+                                                        .addComponent(txtCurrencyCode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(jLabel6)
+                                                        .addComponent(txtCurrencySymbol, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(jPanel1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(pnlAlarmLow, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(pnlAlarmHigh, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(jScrollPane1))
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(btnAdd)
+                                                        .addComponent(btnDelete))
+                                                .addGap(0, 0, Short.MAX_VALUE))
+                                        .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(btnOk)
+                                                        .addComponent(btnCancel))
+                                                .addGap(10, 10, 10))))
         );
 
-        pnlAlarmLow.setEnabled(false);
-        pnlAlarmHigh.setEnabled(false);
+        pnlAlarmLow.setSelected(false);
+        pnlAlarmHigh.setSelected(false);
 
         pack();
     }

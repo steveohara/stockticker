@@ -9,7 +9,12 @@ package com.pivotal.stockticker.model;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 /**
@@ -18,14 +23,14 @@ import java.util.prefs.Preferences;
 @Slf4j
 public class SymbolsManager {
 
-    private static final String SYMBOLS_ROOT = PersistanceManager.ROOT_NODE + SymbolsManager.class.getSimpleName();
+    private static final String SYMBOLS_ROOT = PersistanceManager.ROOT_NODE + SymbolTransaction.class.getSimpleName();
     private final Preferences prefs = Preferences.userRoot().node(SYMBOLS_ROOT);
 
     @Getter
-    private final Map<String, SymbolTransaction> symbolTransactions = new LinkedHashMap<>();
-    private final Map<String, SymbolTransaction> newSymbolTransactions = new LinkedHashMap<>();
-    private final Set<String> modifiedSymbolTransactions = new LinkedHashSet<>();
-    private final Set<String> deletedSymbolTransactions = new LinkedHashSet<>();
+    private final Set<SymbolTransaction> symbolTransactions = new LinkedHashSet<>();
+    private final Set<SymbolTransaction> newSymbolTransactions = new LinkedHashSet<>();
+    private final Set<SymbolTransaction> modifiedSymbolTransactions = new LinkedHashSet<>();
+    private final Set<SymbolTransaction> deletedSymbolTransactions = new LinkedHashSet<>();
 
     /**
      * Constructor - loads all symbols from persistent storage
@@ -41,15 +46,24 @@ public class SymbolsManager {
 
         // Load all the symbols from the persistent storage
         try {
-            for (String timestamp : prefs.keys()) {
-                SymbolTransaction symbolTransaction = SymbolTransaction.getSymbolTransaction(timestamp);
-                log.debug("Found symbol: {} with timestamp: {}", symbolTransaction.getCurrencySymbol(), timestamp);
-                symbolTransactions.put(timestamp, symbolTransaction);
+            ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+            for (String timestamp : prefs.childrenNames()) {
+                executor.submit(() -> {
+                    try {
+                        symbolTransactions.add(SymbolTransaction.getSymbolTransaction(timestamp));
+                    }
+                    catch (Exception e) {
+                        log.error("Failed to load symbol transaction", e);
+                    }
+                });
             }
+            // Wait for all the tasks to complete
+            executor.close();
         }
         catch (Exception e) {
             log.error("Error accessing storage: {}", e.getMessage());
         }
+        log.info("Loaded {} symbol transactions", symbolTransactions.size());
     }
 
     /**
@@ -60,8 +74,9 @@ public class SymbolsManager {
     public SymbolTransaction createNewSymbolTransaction() {
         try {
             SymbolTransaction symbolTransaction = SymbolTransaction.getSymbolTransaction();
-            newSymbolTransactions.put(symbolTransaction.getKey(), symbolTransaction);
-            symbolTransactions.put(symbolTransaction.getKey(), symbolTransaction);
+            newSymbolTransactions.add(symbolTransaction);
+            symbolTransactions.add(symbolTransaction);
+            symbolTransaction.setAdded(true);
             return symbolTransaction;
         }
         catch (Exception e) {
@@ -73,19 +88,21 @@ public class SymbolsManager {
     /**
      * Mark a symbol as modified
      *
-     * @param symbolKey Key of the symbol to mark as modified
+     * @param symbol Symbol that has been changed
      */
-    public void markSymbolTransactionAsModified(String symbolKey) {
-        modifiedSymbolTransactions.add(symbolKey);
+    public void markSymbolTransactionAsModified(SymbolTransaction symbol) {
+        modifiedSymbolTransactions.add(symbol);
+        symbol.setEdited(true);
     }
 
     /**
      * Mark a symbol as deleted
      *
-     * @param symbolKey Key of the symbol to mark as deleted
+     * @param symbolTransaction The symbol to mark as deleted
      */
-    public void markSymbolTransactionAsDeleted(String symbolKey) {
-        deletedSymbolTransactions.add(symbolKey);
+    public void markSymbolTransactionAsDeleted(SymbolTransaction symbolTransaction) {
+        symbolTransactions.remove(symbolTransaction);
+        deletedSymbolTransactions.add(symbolTransaction);
     }
 
     /**
@@ -94,24 +111,38 @@ public class SymbolsManager {
     public void persistChanges() {
 
         // Persist new symbols
-        for (SymbolTransaction symbolTransaction : newSymbolTransactions.values()) {
+        for (SymbolTransaction symbolTransaction : newSymbolTransactions) {
             symbolTransaction.saveToStorage();
+            symbolTransaction.setEdited(false);
+            symbolTransaction.setAdded(false);
         }
         newSymbolTransactions.clear();
 
         // Persist modified symbols
-        for (String symbolKey : modifiedSymbolTransactions) {
-            SymbolTransaction symbolTransaction = symbolTransactions.get(symbolKey);
-            if (symbolTransaction != null) {
-                symbolTransaction.saveToStorage();
-            }
+        for (SymbolTransaction symbolTransaction : modifiedSymbolTransactions) {
+            symbolTransaction.saveToStorage();
+            symbolTransaction.setEdited(false);
+            symbolTransaction.setAdded(false);
         }
         modifiedSymbolTransactions.clear();
 
         // Remove deleted symbols
-        for (String symbolKey : deletedSymbolTransactions) {
-            symbolTransactions.remove(symbolKey);
-            prefs.remove(symbolKey);
+        for (SymbolTransaction symbolTransaction : deletedSymbolTransactions) {
+            symbolTransaction.setEdited(false);
+            symbolTransaction.setAdded(false);
+            symbolTransactions.remove(symbolTransaction);
+
+            // Remove the values from storage
+            try {
+                Preferences node = prefs.node(symbolTransaction.getKey());
+                if (node != null) {
+                    node.removeNode();
+                    prefs.flush();
+                }
+            }
+            catch (BackingStoreException e) {
+                log.error("Error removing symbol transaction: {}", e.getMessage());
+            }
         }
         deletedSymbolTransactions.clear();
     }
@@ -123,7 +154,7 @@ public class SymbolsManager {
      */
     public Set<String> getAllSymbolCodes() {
         Set<String> symbols = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        for (SymbolTransaction transaction : symbolTransactions.values()) {
+        for (SymbolTransaction transaction : symbolTransactions) {
             symbols.add(transaction.getCode());
         }
         return symbols;
@@ -136,7 +167,7 @@ public class SymbolsManager {
      */
     public Set<String> getAllCurrencyCodes() {
         Set<String> symbols = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        for (SymbolTransaction transaction : symbolTransactions.values()) {
+        for (SymbolTransaction transaction : symbolTransactions) {
             symbols.add(transaction.getCurrencySymbol());
         }
         return symbols;

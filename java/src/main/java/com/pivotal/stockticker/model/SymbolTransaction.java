@@ -4,7 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.prefs.Preferences;
 
 /**
@@ -54,6 +56,10 @@ public class SymbolTransaction extends PersistanceManager {
     private LocalDateTime lastPriceUpdate;
     private String priceSource;
 
+    // Transient properties (not persisted)
+    private transient boolean edited = false;
+    private transient boolean added = false;
+
     /**
      * Default constructor initializing default values.
      */
@@ -80,7 +86,9 @@ public class SymbolTransaction extends PersistanceManager {
      * @throws Exception if proxy creation fails.
      */
     public static SymbolTransaction getSymbolTransaction(String key) throws Exception {
-        return createProxyInstance(SymbolTransaction.class, Preferences.userRoot().node(ROOT_NODE + SymbolTransaction.class.getSimpleName() + '/' + key), false);
+        SymbolTransaction symbol = createProxyInstance(SymbolTransaction.class, Preferences.userRoot().node(ROOT_NODE + SymbolTransaction.class.getSimpleName() + '/' + key), false);
+        symbol.setKey(key);
+        return symbol;
     }
 
     /**
@@ -174,7 +182,7 @@ public class SymbolTransaction extends PersistanceManager {
      * @return Formatted currency string.
      */
     private String formatCurrencyValue(double value) {
-        return String.format("%s%.2f", currencySymbol, Math.abs(value));
+        return String.format("%s%.4f", currencySymbol, Math.abs(value));
     }
 
     /**
@@ -183,7 +191,7 @@ public class SymbolTransaction extends PersistanceManager {
      * @return Sort key string.
      */
     public String getSortKey() {
-        return String.format("%-10s%-20s", code, key);
+        return String.format("%-20s%-20s", code, key);
     }
 
     /**
@@ -198,5 +206,16 @@ public class SymbolTransaction extends PersistanceManager {
     @Override
     public String toString() {
         return code + '(' + key + ')';
+    }
+
+    /**
+     * Returns a human-readable timestamp derived from the key.
+     *
+     * @return Formatted timestamp string.
+     */
+    public String getDisplayTimestamp() {
+        Instant instant = Instant.ofEpochMilli(Long.parseLong(key));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        return formatter.format(LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault()));
     }
 }

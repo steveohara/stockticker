@@ -99,9 +99,11 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
     @Override
     public void changed(Component c) {
+        if (c instanceof SettingsForm) {
+            setFontSize(settings.getFontSize());
+            setTicketSpeed(settings.getTickerSpeed());
+        }
         initializeUI();
-        setFontSize(settings.getFontSize());
-        setTicketSpeed(settings.getTickerSpeed());
     }
 
     /**
@@ -363,16 +365,18 @@ public class TickerBar extends JFrame implements CallbackInterface {
      * Displays the symbols dialog.
      */
     private void showSymbolsDialog() {
-        SymbolsForm dialog = new SymbolsForm(this, symbols);
-        dialog.setVisible(true);
+        SwingUtilities.invokeLater(() -> {
+            new SymbolsForm(this, symbols);
+        });
     }
 
     /**
      * Displays the settings dialog.
      */
     private void showSettingsDialog() {
-        SettingsForm dialog = new SettingsForm(this, settings);
-        dialog.setVisible(true);
+        SwingUtilities.invokeLater(() -> {
+            new SettingsForm(this, settings);
+        });
     }
 
     /**

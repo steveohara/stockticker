@@ -45,7 +45,7 @@ public class CheckBoxFrame extends JPanel {
 
         // Listen to the checkbox to enable/disable contents
         titleCheckbox.addActionListener(e -> {
-            setEnabled(titleCheckbox.isSelected());
+            setSelected(titleCheckbox.isSelected());
         });
     }
 
@@ -94,14 +94,19 @@ public class CheckBoxFrame extends JPanel {
         contentPanel.setBounds(in.left, in.top, getWidth() - in.left - in.right, getHeight() - in.top - in.bottom);
     }
 
-    @Override
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
-        titleCheckbox.setSelected(enabled);
-        setEnabledRecursive(contentPanel, enabled);
+    /**
+     * Sets the selected state of the checkbox and enables/disables the content panel accordingly.
+     *
+     * @param selected True to select the checkbox and enable content, false to deselect and disable.
+     */
+    public void setSelected(boolean selected) {
+        super.setEnabled(selected);
+        titleCheckbox.setSelected(selected);
+        setEnabledRecursive(contentPanel, selected);
     }
 
-    /** Recursively sets the enabled state of all components within a container.
+    /**
+     * Recursively sets the enabled state of all components within a container.
      *
      * @param c       The container whose components' enabled state is to be set.
      * @param enabled The enabled state to set.

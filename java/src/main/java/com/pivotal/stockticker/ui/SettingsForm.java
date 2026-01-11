@@ -36,6 +36,11 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
         // Initialize listeners
         initListeners();
+
+        // Show the form and select the first button
+        setVisible(true);
+        btnBackground.requestFocusInWindow();
+
     }
 
     /**
@@ -413,7 +418,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
                                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                                 .addComponent(btnUpArrowColour, GroupLayout.PREFERRED_SIZE, 24, GroupLayout.PREFERRED_SIZE))
                                                         .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                .addComponent(jLabel26)
+                                                                .addComponent(jLabel26, GroupLayout.PREFERRED_SIZE, 111, GroupLayout.PREFERRED_SIZE)
                                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                                 .addComponent(btnDownArrowColour, GroupLayout.PREFERRED_SIZE, 24, GroupLayout.PREFERRED_SIZE)))))
                                 .addGap(0, 26, Short.MAX_VALUE))
@@ -429,7 +434,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
                                                         .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                                                 .addComponent(jLabel5)
                                                                 .addComponent(jLabel4)
-                                                                .addComponent(btnBackground, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE)))
+                                                                .addComponent(btnBackground, GroupLayout.PREFERRED_SIZE, 17, GroupLayout.PREFERRED_SIZE)))
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                 .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                         .addComponent(jLabel8)
