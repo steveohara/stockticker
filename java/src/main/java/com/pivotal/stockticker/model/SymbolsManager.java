@@ -6,12 +6,9 @@
  */
 package com.pivotal.stockticker.model;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.BackingStoreException;
@@ -26,7 +23,6 @@ public class SymbolsManager {
     private static final String SYMBOLS_ROOT = PersistanceManager.ROOT_NODE + SymbolTransaction.class.getSimpleName();
     private final Preferences prefs = Preferences.userRoot().node(SYMBOLS_ROOT);
 
-    @Getter
     private final Set<SymbolTransaction> symbolTransactions = new LinkedHashSet<>();
     private final Set<SymbolTransaction> newSymbolTransactions = new LinkedHashSet<>();
     private final Set<SymbolTransaction> modifiedSymbolTransactions = new LinkedHashSet<>();
@@ -46,11 +42,12 @@ public class SymbolsManager {
 
         // Load all the symbols from the persistent storage
         try {
+            List<SymbolTransaction> symbols = new ArrayList<>();
             ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
             for (String timestamp : prefs.childrenNames()) {
                 executor.submit(() -> {
                     try {
-                        symbolTransactions.add(SymbolTransaction.getSymbolTransaction(timestamp));
+                        symbols.add(SymbolTransaction.getSymbolTransaction(timestamp));
                     }
                     catch (Exception e) {
                         log.error("Failed to load symbol transaction", e);
@@ -59,6 +56,11 @@ public class SymbolsManager {
             }
             // Wait for all the tasks to complete
             executor.close();
+
+            // Sort the symbols by code
+            symbols.sort(Comparator.comparing(SymbolTransaction::getSortKey, String.CASE_INSENSITIVE_ORDER));
+            symbolTransactions.clear();
+            symbolTransactions.addAll(symbols);
         }
         catch (Exception e) {
             log.error("Error accessing storage: {}", e.getMessage());
@@ -173,4 +175,14 @@ public class SymbolsManager {
         return symbols;
     }
 
+    /**
+     * Returns a sorted list of all symbol transactions
+     *
+     * @return List of SymbolTransaction objects
+     */
+    public List<SymbolTransaction> getSymbolTransactions() {
+        List<SymbolTransaction> symbols = new ArrayList<>(symbolTransactions);
+        symbols.sort(Comparator.comparing(SymbolTransaction::getSortKey, String.CASE_INSENSITIVE_ORDER));
+        return symbols;
+    }
 }

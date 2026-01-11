@@ -100,9 +100,23 @@ public class CheckBoxFrame extends JPanel {
      * @param selected True to select the checkbox and enable content, false to deselect and disable.
      */
     public void setSelected(boolean selected) {
-        super.setEnabled(selected);
-        titleCheckbox.setSelected(selected);
-        setEnabledRecursive(contentPanel, selected);
+        if (SwingUtilities.isEventDispatchThread()) {
+            super.setEnabled(selected);
+            titleCheckbox.setSelected(selected);
+            setEnabledRecursive(contentPanel, selected);
+        }
+        else {
+            SwingUtilities.invokeLater(() -> setSelected(selected));
+        }
+    }
+
+    /**
+     * Returns the selected state of the checkbox.
+     *
+     * @return True if the checkbox is selected, false otherwise.
+     */
+    public boolean isSelected() {
+        return titleCheckbox.isSelected();
     }
 
     /**

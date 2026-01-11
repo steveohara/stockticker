@@ -45,7 +45,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         initListeners();
 
         // Init the settings from storage
-        loadFromSettings();
+        loadFromStorage();
         disableForm(this);
 
         // Show the form and select the first item in the list
@@ -62,7 +62,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      */
     private void disableForm(Container c) {
         for (Component comp : c.getComponents()) {
-            if (comp != btnAdd && comp != btnOk  && comp != btnCancel && comp != lstSymbols) {
+            if (comp != btnAdd && comp != btnOk && comp != btnCancel && comp != lstSymbols) {
                 comp.setEnabled(lstSymbols.getSelectedListItem() != null);
             }
             if (comp instanceof Container) {
@@ -112,14 +112,17 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      */
     private void selectSymbolTransaction(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
-            if (lstSymbols.getSelectedListItem() != null) {
-                log.debug("selected symbol transaction {}", e);
-                displaySymbolTransaction(lstSymbols.getSelectedListItem());
+            SymbolTransaction symbol = lstSymbols.getSelectedListItem();
+            if (symbol != null) {
+                SwingUtilities.invokeLater(() -> {
+                    disableForm(this);
+                    displaySymbolTransaction(symbol);
+                });
             }
             else {
-                clearDisplay();
+                disableForm(this);
             }
-            disableForm(this);
+            clearDisplay();
         }
     }
 
@@ -202,10 +205,11 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      * and selects the next one
      */
     private void deleteSymbolTransaction(ActionEvent e) {
-        if (lstSymbols.getSelectedListItem() != null) {
-            symbolsManager.markSymbolTransactionAsDeleted(lstSymbols.getSelectedListItem());
+        SymbolTransaction symbol = lstSymbols.getSelectedListItem();
+        if (symbol != null) {
+            symbolsManager.markSymbolTransactionAsDeleted(symbol);
             int index = lstSymbols.getSelectedIndex();
-            lstSymbols.removeItem(lstSymbols.getSelectedListItem());
+            lstSymbols.removeItem(symbol);
             if (!lstSymbols.getModel().isEmpty()) {
                 lstSymbols.setSelectedIndex(index < lstSymbols.getModel().size() ? index : lstSymbols.getModel().size() - 1);
             }
@@ -227,7 +231,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
     /**
      * Set-up the display with data from storage
      */
-    private void loadFromSettings() {
+    private void loadFromStorage() {
         lstSymbols.clear();
         for (SymbolTransaction symbolTransaction : symbolsManager.getSymbolTransactions()) {
             lstSymbols.addItem(symbolTransaction);
@@ -285,12 +289,12 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             symbol.setShowDayChange(chkShowDayChange.isSelected());
             symbol.setShowDayChangeUpDown(chkShowDayUpDown.isSelected());
 
-            symbol.setLowAlarmEnabled(pnlAlarmHigh.isEnabled());
+            symbol.setLowAlarmEnabled(pnlAlarmLow.isSelected());
             symbol.setLowAlarmIsPercent(chkAlarmLowPercent.isSelected());
             symbol.setLowAlarmSoundEnabled(chkAlarmLowPlaySound.isSelected());
             symbol.setLowAlarmValue(txtAlarmLow.getValue());
 
-            symbol.setHighAlarmEnabled(pnlAlarmHigh.isEnabled());
+            symbol.setHighAlarmEnabled(pnlAlarmHigh.isSelected());
             symbol.setHighAlarmIsPercent(chkAlarmHighPercent.isSelected());
             symbol.setHighAlarmSoundEnabled(chkAlarmHighPlaySound.isSelected());
             symbol.setHighAlarmValue(txtAlarmHigh.getValue());
@@ -456,7 +460,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
                                                 .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                                         .addGroup(GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                                                 .addComponent(chkShowDayChange)
-                                                                .addGap(66, 66, 66)
+                                                                .addGap(58, 58, 58)
                                                                 .addComponent(chkShowDayChangePercent))
                                                         .addComponent(chkShowDayUpDown, GroupLayout.Alignment.LEADING)
                                                         .addComponent(jSeparator1, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 296, GroupLayout.PREFERRED_SIZE))

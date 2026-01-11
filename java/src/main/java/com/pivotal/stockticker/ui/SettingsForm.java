@@ -40,7 +40,6 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         // Show the form and select the first button
         setVisible(true);
         btnBackground.requestFocusInWindow();
-
     }
 
     /**
