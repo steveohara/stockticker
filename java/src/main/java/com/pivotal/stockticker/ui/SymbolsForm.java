@@ -108,14 +108,16 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      * @param e ListSelectionEvent
      */
     private void selectSymbolTransaction(ListSelectionEvent e) {
-        if (lstSymbols.getSelectedListItem() != null) {
-            log.debug("selected symbol transaction {}", e);
-            displaySymbolTransaction(lstSymbols.getSelectedListItem());
+        if (!e.getValueIsAdjusting()) {
+            if (lstSymbols.getSelectedListItem() != null) {
+                log.debug("selected symbol transaction {}", e);
+                displaySymbolTransaction(lstSymbols.getSelectedListItem());
+            }
+            else {
+                clearDisplay();
+            }
+            btnDelete.setEnabled(lstSymbols.getSelectedKey() != null);
         }
-        else {
-            clearDisplay();
-        }
-        btnDelete.setEnabled(lstSymbols.getSelectedKey() != null);
     }
 
     /**
@@ -164,8 +166,8 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         txtSymbol.setText(symbol.getCode());
         chkDisabled.setSelected(symbol.isDisabled());
         txtDisplayName.setText(symbol.getAlias());
-        txtPricePaid.setText(symbol.getPricePaid() + "");
-        txtSharesBought.setText(symbol.getSharesBought() + "");
+        txtPricePaid.setText(symbol.getPricePaid());
+        txtSharesBought.setText(symbol.getSharesBought());
         txtCurrencyCode.setText(symbol.getCurrencyCode());
         txtCurrencySymbol.setText(symbol.getCurrencySymbol());
 
@@ -183,12 +185,12 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         pnlAlarmLow.setEnabled(symbol.isLowAlarmEnabled());
         chkAlarmLowPercent.setSelected(symbol.isLowAlarmIsPercent());
         chkAlarmLowPlaySound.setSelected(symbol.isLowAlarmSoundEnabled());
-        txtAlarmLow.setText(symbol.getLowAlarmValue() + "");
+        txtAlarmLow.setText(symbol.getLowAlarmValue());
 
         pnlAlarmHigh.setEnabled(symbol.isHighAlarmEnabled());
         chkAlarmHighPercent.setSelected(symbol.isHighAlarmIsPercent());
         chkAlarmHighPlaySound.setSelected(symbol.isHighAlarmSoundEnabled());
-        txtAlarmHigh.setText(symbol.getHighAlarmValue() + "");
+        txtAlarmHigh.setText(symbol.getHighAlarmValue());
         ignoreChanges = false;
     }
 
@@ -263,8 +265,8 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             symbol.setCode(txtSymbol.getText());
             symbol.setDisabled(chkDisabled.isSelected());
             symbol.setAlias(txtDisplayName.getText());
-            symbol.setPricePaid(Utils.parseDouble(txtPricePaid.getText(), 0));
-            symbol.setSharesBought(Utils.parseDouble(txtSharesBought.getText(), 0));
+            symbol.setPricePaid(txtPricePaid.getValue());
+            symbol.setSharesBought(txtSharesBought.getValue());
             symbol.setCurrencyCode(txtCurrencyCode.getText());
             symbol.setCurrencySymbol(txtCurrencySymbol.getText());
 
@@ -282,12 +284,12 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             symbol.setLowAlarmEnabled(pnlAlarmHigh.isEnabled());
             symbol.setLowAlarmIsPercent(chkAlarmLowPercent.isSelected());
             symbol.setLowAlarmSoundEnabled(chkAlarmLowPlaySound.isSelected());
-            symbol.setLowAlarmValue(Utils.parseDouble(txtAlarmLow.getText(), 0));
+            symbol.setLowAlarmValue(txtAlarmLow.getValue());
 
             symbol.setHighAlarmEnabled(pnlAlarmHigh.isEnabled());
             symbol.setHighAlarmIsPercent(chkAlarmHighPercent.isSelected());
             symbol.setHighAlarmSoundEnabled(chkAlarmHighPlaySound.isSelected());
-            symbol.setHighAlarmValue(Utils.parseDouble(txtAlarmHigh.getText(), 0));
+            symbol.setHighAlarmValue(txtAlarmHigh.getValue());
 
             symbolsManager.markSymbolTransactionAsModified(symbol.getKey());
         }
@@ -311,16 +313,16 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         btnCancel = new JButton();
         btnOk = new JButton();
         jLabel1 = new JLabel();
-        txtSymbol = new JTextField();
+        txtSymbol = new CapableTextField(CapableTextField.CONVERSION_TYPE.UPPER);
         chkDisabled = new JCheckBox();
         jLabel2 = new JLabel();
         txtDisplayName = new JTextField();
         jLabel3 = new JLabel();
-        txtPricePaid = new JTextField();
+        txtPricePaid = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
         jLabel4 = new JLabel();
-        txtSharesBought = new JTextField();
+        txtSharesBought = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
         jLabel5 = new JLabel();
-        txtCurrencyCode = new JTextField();
+        txtCurrencyCode = new CapableTextField(CapableTextField.CONVERSION_TYPE.UPPER);
         jLabel6 = new JLabel();
         txtCurrencySymbol = new JTextField();
         jPanel1 = new JPanel();
@@ -337,12 +339,12 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         pnlAlarmLow = new CheckBoxFrame("Enable Low Alarm");
         chkAlarmLowPercent = new JCheckBox();
         chkAlarmLowPlaySound = new JCheckBox();
-        txtAlarmLow = new JTextField();
+        txtAlarmLow = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
         jLabel7 = new JLabel();
         pnlAlarmHigh = new CheckBoxFrame("Enable High Alarm");;
         chkAlarmHighPercent = new JCheckBox();
         chkAlarmHighPlaySound = new JCheckBox();
-        txtAlarmHigh = new JTextField();
+        txtAlarmHigh = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
         jLabel9 = new JLabel();
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -707,13 +709,13 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
     private JScrollPane jScrollPane1;
     private JSeparator jSeparator1;
     private SymbolsList lstSymbols;
-    private JTextField txtAlarmHigh;
-    private JTextField txtAlarmLow;
-    private JTextField txtCurrencyCode;
+    private CapableTextField txtAlarmHigh;
+    private CapableTextField txtAlarmLow;
+    private CapableTextField txtCurrencyCode;
     private JTextField txtCurrencySymbol;
     private JTextField txtDisplayName;
-    private JTextField txtPricePaid;
-    private JTextField txtSharesBought;
-    private JTextField txtSymbol;
+    private CapableTextField txtPricePaid;
+    private CapableTextField txtSharesBought;
+    private CapableTextField txtSymbol;
 
 }

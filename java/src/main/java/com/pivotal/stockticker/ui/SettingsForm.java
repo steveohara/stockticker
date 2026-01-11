@@ -146,8 +146,8 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         txtProxyServer.setText(settings.getProxyServer());
         txtCurrencyCode.setText(settings.getCurrencyCode());
         txtCurrencySymbol.setText(settings.getCurrencySymbol());
-        txtTotalInvestment.setText(String.valueOf(settings.getTotalInvestment()));
-        txtMargin.setText(String.valueOf(settings.getMargin()));
+        txtTotalInvestment.setText(settings.getTotalInvestment());
+        txtMargin.setText(settings.getMargin());
     }
 
     /**
@@ -193,8 +193,8 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         settings.setProxyServer(txtProxyServer.getText().trim());
         settings.setCurrencyCode(txtCurrencyCode.getText().trim());
         settings.setCurrencySymbol(txtCurrencySymbol.getText().trim());
-        settings.setMargin(Utils.parseDouble(txtMargin.getText(), 0));
-        settings.setTotalInvestment(Utils.parseDouble(txtTotalInvestment.getText(), 0));
+        settings.setMargin(txtMargin.getValue());
+        settings.setTotalInvestment(txtTotalInvestment.getValue());
     }
 
     /**
@@ -284,10 +284,10 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         jLabel14 = new JLabel();
         jLabel22 = new JLabel();
         txtCurrencySymbol = new JTextField();
-        txtCurrencyCode = new JTextField();
+        txtCurrencyCode = new CapableTextField(CapableTextField.CONVERSION_TYPE.UPPER);
         jLabel23 = new JLabel();
-        txtMargin = new JTextField();
-        txtTotalInvestment = new JTextField();
+        txtMargin = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
+        txtTotalInvestment = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
         jLabel24 = new JLabel();
         jLabel25 = new JLabel();
         jSeparator1 = new JSeparator();
@@ -771,10 +771,6 @@ public class SettingsForm extends JDialog implements CallbackInterface {
                                 .addContainerGap(14, Short.MAX_VALUE))
         );
         pack();
-
-        // Make numeric text fields only accept numbers
-        Utils.makeTextFieldNumeric(txtTotalInvestment);
-        Utils.makeTextFieldNumeric(txtMargin);
     }
 
     private JButton btnBackground;
@@ -833,18 +829,18 @@ public class SettingsForm extends JDialog implements CallbackInterface {
     private JLabel jLabel26;
     private JSpinner spnTickerUpdate;
     private JTextField txtAlphaVantagToken;
-    private JTextField txtCurrencyCode;
+    private CapableTextField txtCurrencyCode;
     private JTextField txtCurrencySymbol;
     private JTextField txtFinHubToken;
     private JTextField txtFreeCurrencyToken;
     private JTextField txtHighAlarm;
     private JTextField txtIexToken;
     private JTextField txtLowAlarm;
-    private JTextField txtMargin;
+    private CapableTextField txtMargin;
     private JTextField txtMarketStackToken;
     private JTextField txtProxyServer;
     private JTextField txtTiingoToken;
-    private JTextField txtTotalInvestment;
+    private CapableTextField txtTotalInvestment;
     private JTextField txtTwelveDataToken;
 
 }

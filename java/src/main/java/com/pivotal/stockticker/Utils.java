@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.*;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 
 @Slf4j
@@ -72,31 +72,6 @@ public class Utils {
                 attachChangeListeners(child, callback);
             }
         }
-    }
-
-    /**
-     * Configures a JTextComponent to accept only numeric input.
-     *
-     * @param textComponent The text component to configure.
-     */
-    public static void makeTextFieldNumeric(JTextComponent textComponent) {
-        ((AbstractDocument) textComponent.getDocument()).setDocumentFilter(new DocumentFilter() {
-            @Override
-            public void insertString(FilterBypass fb, int offset, String text, AttributeSet attr) throws BadLocationException {
-                String content = fb.getDocument().getText(0, fb.getDocument().getLength());
-                if (text.matches("[\\d*.]|\\.") && (!text.contains(".") || !content.contains("."))) { // allow only digits
-                    super.insertString(fb, offset, text, attr);
-                }
-            }
-
-            @Override
-            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-                String content = fb.getDocument().getText(0, fb.getDocument().getLength());
-                if (text.matches("[\\d.]*|\\.") && (!text.contains(".") || !content.contains("."))) { // allow only digits
-                    super.replace(fb, offset, length, text, attrs);
-                }
-            }
-        });
     }
 
     /**

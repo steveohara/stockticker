@@ -279,7 +279,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         JMenuItem symbolsItem = new JMenuItem("Edit Symbols...");
         symbolsItem.addActionListener(e -> showSymbolsDialog());
         contextMenu.add(symbolsItem);
-        JMenuItem settingsItem = new JMenuItem("Settings...");
+        JMenuItem settingsItem = new JMenuItem("Edit Settings...");
         settingsItem.addActionListener(e -> showSettingsDialog());
         contextMenu.add(settingsItem);
         contextMenu.addSeparator();
