@@ -3,6 +3,7 @@ package com.pivotal.stockticker.ui;
 import com.pivotal.stockticker.StartupManager;
 import com.pivotal.stockticker.Utils;
 import com.pivotal.stockticker.VersionInfo;
+import com.pivotal.stockticker.model.PricesManager;
 import com.pivotal.stockticker.model.Settings;
 import com.pivotal.stockticker.model.SymbolsManager;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +17,10 @@ import java.net.URI;
 
 @Slf4j
 public class TickerBar extends JFrame implements CallbackInterface {
+
     private final Settings settings = Settings.getPersistentSettings();
     private final SymbolsManager symbols = new SymbolsManager();
+    private final PricesManager prices = new PricesManager(settings);
 
     private JPanel pnlLeftDrag;
     private JPanel pnlRightDrag;
@@ -50,6 +53,9 @@ public class TickerBar extends JFrame implements CallbackInterface {
         setupContextMenu();
         initializeUI();
         setupDragging();
+
+        // Add all the symbols to the prices manager
+        prices.replacePrices(symbols.getAllSymbolCodes());
 
         drawTickerContent();
 
@@ -98,10 +104,19 @@ public class TickerBar extends JFrame implements CallbackInterface {
     }
 
     @Override
-    public void changed(Component c) {
-        if (c instanceof SettingsForm) {
+    public void changed(Component sourceForm) {
+
+        // If the settings form was the source, update settings
+        if (sourceForm instanceof SettingsForm) {
             setFontSize(settings.getFontSize());
             setTicketSpeed(settings.getTickerSpeed());
+        }
+
+        // If the symbols form was the source, update the prices and redraw
+        else if (sourceForm instanceof SymbolsForm) {
+            prices.replacePrices(symbols.getAllSymbolCodes());
+            prices.updateSettings();
+            drawTickerContent();
         }
         initializeUI();
     }

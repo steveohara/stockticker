@@ -15,7 +15,7 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 /**
- *
+ * Manages symbol transactions including loading from storage, tracking changes, and persisting updates
  */
 @Slf4j
 public class SymbolsManager {
