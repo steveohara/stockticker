@@ -1,5 +1,6 @@
 package com.pivotal.stockticker.model;
 
+import com.pivotal.stockticker.Utils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -46,16 +47,6 @@ public class SymbolTransaction extends PersistanceManager {
     private boolean highAlarmSoundEnabled;
     private boolean alarmShowing;
 
-    // Live values with defaults from storage
-    private double currentPrice;
-    private double dayStart;
-    private double dayChange;
-    private double dayHigh;
-    private double dayLow;
-    private String errorDescription;
-    private LocalDateTime lastPriceUpdate;
-    private String priceSource;
-
     // Transient properties (not persisted)
     private transient boolean edited = false;
     private transient boolean added = false;
@@ -101,51 +92,12 @@ public class SymbolTransaction extends PersistanceManager {
     }
 
     /**
-     * Calculates the percentage change from the original price to the current price.
-     *
-     * @return Percentage change.
-     */
-    public double getPercentChange() {
-        if (pricePaid == 0) {
-            return 0;
-        }
-        return ((currentPrice - pricePaid) * 100) / pricePaid;
-    }
-
-    /**
-     * Returns the formatted percentage change as a string with two decimal places.
-     *
-     * @return Formatted percentage change.
-     */
-    public String getFormattedPercentChange() {
-        return String.format("%.2f%%", getPercentChange());
-    }
-
-    /**
-     * Returns the formatted current price as a currency string.
-     *
-     * @return Formatted current price.
-     */
-    public String getFormattedValue() {
-        return formatCurrencyValue(currentPrice);
-    }
-
-    /**
-     * Returns the formatted total value (current price * shares) as a currency string.
-     *
-     * @return Formatted total value.
-     */
-    public String getFormattedTotalValue() {
-        return formatCurrencyValue(currentPrice * sharesBought);
-    }
-
-    /**
      * Returns the formatted cost price as a currency string.
      *
      * @return Formatted cost price.
      */
     public String getFormattedCost() {
-        return formatCurrencyValue(pricePaid);
+        return Utils.formatCurrencyValue(pricePaid, currencyCode);
     }
 
     /**
@@ -154,35 +106,7 @@ public class SymbolTransaction extends PersistanceManager {
      * @return Formatted total cost.
      */
     public String getFormattedTotalCost() {
-        return formatCurrencyValue(pricePaid * sharesBought);
-    }
-
-    /**
-     * Calculates the profit or loss based on current price and original price.
-     *
-     * @return Profit or loss amount.
-     */
-    public double getProfitLoss() {
-        return (currentPrice - pricePaid) * sharesBought;
-    }
-
-    /**
-     * Returns the formatted profit or loss as a currency string.
-     *
-     * @return Formatted profit or loss.
-     */
-    public String getFormattedProfitLoss() {
-        return formatCurrencyValue(getProfitLoss());
-    }
-
-    /**
-     * Formats a given value as a currency string with the appropriate currency symbol.
-     *
-     * @param value Value to format.
-     * @return Formatted currency string.
-     */
-    private String formatCurrencyValue(double value) {
-        return String.format("%s%.4f", currencySymbol, Math.abs(value));
+        return Utils.formatCurrencyValue(pricePaid * sharesBought, currencyCode);
     }
 
     /**

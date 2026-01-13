@@ -113,4 +113,17 @@ public class Utils {
         }
         return i;
     }
+
+    /**
+     * Formats a given value as a currency string with the appropriate currency symbol.
+     *
+     * @param value Value to format.
+     * @param currencySymbol  Currency symbol to prepend.
+     * @return Formatted currency string.
+     */
+    public static String formatCurrencyValue(double value, String currencySymbol) {
+        return String.format("%s%.4f", currencySymbol, Math.abs(value));
+    }
+
+
 }

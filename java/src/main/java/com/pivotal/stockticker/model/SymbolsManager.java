@@ -152,11 +152,15 @@ public class SymbolsManager {
     /**
      * Get a set of all unique symbol codes (case insensitive)
      *
+     * @param includeDisabled Whether to include disabled symbols
      * @return Set of unique symbol codes
      */
-    public Set<String> getAllSymbolCodes() {
+    public Set<String> getAllSymbolCodes(boolean includeDisabled) {
         Set<String> symbols = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         for (SymbolTransaction transaction : symbolTransactions) {
+            if (!includeDisabled && transaction.isDisabled()) {
+                continue;
+            }
             symbols.add(transaction.getCode());
         }
         return symbols;
@@ -165,12 +169,16 @@ public class SymbolsManager {
     /**
      * Get a set of all unique currency codes (case insensitive)
      *
+     * @param includeDisabled Whether to include disabled symbols
      * @return Set of unique currency codes
      */
-    public Set<String> getAllCurrencyCodes() {
+    public Set<String> getAllCurrencyCodes(boolean includeDisabled) {
         Set<String> symbols = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         for (SymbolTransaction transaction : symbolTransactions) {
-            symbols.add(transaction.getCurrencySymbol());
+            if (!includeDisabled && transaction.isDisabled()) {
+                continue;
+            }
+            symbols.add(transaction.getCurrencyCode());
         }
         return symbols;
     }
@@ -181,8 +189,41 @@ public class SymbolsManager {
      * @return List of SymbolTransaction objects
      */
     public List<SymbolTransaction> getSymbolTransactions() {
-        List<SymbolTransaction> symbols = new ArrayList<>(symbolTransactions);
+        return getSymbolTransactions(null, true);
+    }
+
+    /**
+     * Returns a sorted list of all symbol transactions
+     *
+     * @param symbolCode Filter by symbol code (case insensitive), or null for all symbols
+     * @param includeDisabled Whether to include disabled symbols
+     * @return List of SymbolTransaction objects
+     */
+    public List<SymbolTransaction> getSymbolTransactions(String symbolCode, boolean includeDisabled) {
+        List<SymbolTransaction> symbols = new ArrayList<>();
+        for (SymbolTransaction transaction : symbolTransactions) {
+            if ((symbolCode == null || transaction.getCode().equalsIgnoreCase(symbolCode))
+                    && (includeDisabled || !transaction.isDisabled())) {
+                symbols.add(transaction);
+            }
+        }
         symbols.sort(Comparator.comparing(SymbolTransaction::getSortKey, String.CASE_INSENSITIVE_ORDER));
         return symbols;
+    }
+
+    /**
+     * Get the first symbol transaction matching the given symbol code (case insensitive)
+     *
+     * @param symbol Symbol code to search for
+     * @return Matching SymbolTransaction or null if not found
+     */
+    public SymbolTransaction getFirst(String symbol) {
+        for (SymbolTransaction transaction : symbolTransactions) {
+            if (transaction.getCode().equalsIgnoreCase(symbol)) {
+                return transaction;
+            }
+        }
+        return null;
+
     }
 }

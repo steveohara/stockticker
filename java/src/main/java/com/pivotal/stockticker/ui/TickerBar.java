@@ -3,6 +3,7 @@ package com.pivotal.stockticker.ui;
 import com.pivotal.stockticker.StartupManager;
 import com.pivotal.stockticker.Utils;
 import com.pivotal.stockticker.VersionInfo;
+import com.pivotal.stockticker.model.ExchangeRatesManager;
 import com.pivotal.stockticker.model.PricesManager;
 import com.pivotal.stockticker.model.Settings;
 import com.pivotal.stockticker.model.SymbolsManager;
@@ -21,6 +22,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private final Settings settings = Settings.getPersistentSettings();
     private final SymbolsManager symbols = new SymbolsManager();
     private final PricesManager prices = new PricesManager(settings);
+    private final ExchangeRatesManager rates = new ExchangeRatesManager(settings);
 
     private JPanel pnlLeftDrag;
     private JPanel pnlRightDrag;
@@ -55,7 +57,10 @@ public class TickerBar extends JFrame implements CallbackInterface {
         setupDragging();
 
         // Add all the symbols to the prices manager
-        prices.replacePrices(symbols.getAllSymbolCodes());
+        prices.replacePrices(symbols.getAllSymbolCodes(false));
+
+        // Add all the currencies to the exchange rates manager
+        rates.replaceExchangeRates(symbols.getAllCurrencyCodes(false));
 
         drawTickerContent();
 
@@ -114,8 +119,11 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
         // If the symbols form was the source, update the prices and redraw
         else if (sourceForm instanceof SymbolsForm) {
-            prices.replacePrices(symbols.getAllSymbolCodes());
+            prices.replacePrices(symbols.getAllSymbolCodes(false));
             prices.updateSettings();
+
+            rates.replaceExchangeRates(symbols.getAllCurrencyCodes(false));
+            rates.updateSettings();
             drawTickerContent();
         }
         initializeUI();

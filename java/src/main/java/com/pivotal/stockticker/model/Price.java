@@ -37,5 +37,4 @@ public class Price extends PersistanceManager {
         return price;
     }
 
-
 }

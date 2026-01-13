@@ -28,6 +28,7 @@ public class Settings extends PersistanceManager {
     private String proxyServer = null;
     @Setter(AccessLevel.NONE)
     private int frequency = 60;
+    private int exchangeRateFrequency = 3600;
     private String currencyCode = null;
     private String currencySymbol = null;
     private double totalInvestment = 0.0;
