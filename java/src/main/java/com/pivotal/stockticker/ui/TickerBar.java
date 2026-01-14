@@ -20,9 +20,9 @@ import java.util.ArrayList;
 @Slf4j
 public class TickerBar extends JFrame implements CallbackInterface {
 
-    public static final int STOCK_SEPARATION = 11;
+    public static final int STOCK_SEPARATION = 10;
     public static final int VALUE_SEPARATION = 5;
-    public static final int UP_DOWN_SEPARATION = 3;
+    public static final int UP_DOWN_SEPARATION = 0;
 
     private final Settings settings = Settings.getPersistentSettings();
     private final SymbolsManager symbols = new SymbolsManager();
@@ -154,7 +154,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             // Show the Day up/down arrows
             if (symbol.isShowDayChangeUpDown()) {
                 pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.UP_DOWN_SEPARATION);
-                pnlStocks.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : livePrice.isDownToday() ? settings.getDownColor() : settings.getNormalTextColor());
+                pnlStocks.setFontColor(livePrice.isUpToday() ? settings.getUpArrowColor() : livePrice.isDownToday() ? settings.getDownArrowColor() : settings.getNormalTextColor());
                 pnlStocks.print(livePrice.isUpToday() ? "↑" : livePrice.isDownToday() ? "↓" : "↕");
             }
             if (showBraces) {
@@ -210,7 +210,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             // Show the up/down arrows
             if (symbol.isShowChangeUpDown()) {
                 pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.UP_DOWN_SEPARATION);
-                pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpColor() : livePrice.isDown() ? settings.getDownColor() : settings.getNormalTextColor());
+                pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpArrowColor() : livePrice.isDown() ? settings.getDownArrowColor() : settings.getNormalTextColor());
                 pnlStocks.print(livePrice.isUp() ? "↑" : livePrice.isDown() ? "↓" : "↕");
             }
         }
@@ -609,8 +609,8 @@ public class TickerBar extends JFrame implements CallbackInterface {
         settings.setTickerSpeed(speed);
         pnlStocks.setScrollSpeed(speed);
         scrollItemSlow.setSelected(speed == Settings.SCROLL_SPEED_SLOW);
-        scrollItemNormal.setSelected(speed == Settings.FONT_SIZE_MEDIUM);
-        scrollItemFast.setSelected(speed == Settings.FONT_SIZE_LARGE);
+        scrollItemNormal.setSelected(speed == Settings.SCROLL_SPEED_MEDIUM);
+        scrollItemFast.setSelected(speed == Settings.SCROLL_SPEED_FAST);
     }
 
     /**

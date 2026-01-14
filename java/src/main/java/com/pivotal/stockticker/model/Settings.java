@@ -63,6 +63,10 @@ public class Settings extends PersistanceManager {
     private int windowX = 100;
     private int windowY = 100;
     private int windowWidth = 800;
+    private String summarySortColumn = "Code";
+    private String summarySortOrder = "ascending";
+    private String daySortColumn = "Code";
+    private String daySortOrder = "ascending";
 
     /**
      * Sets the update frequency, ensuring it is within valid bounds (1 to 600 seconds).

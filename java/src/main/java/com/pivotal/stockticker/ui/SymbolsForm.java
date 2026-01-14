@@ -616,7 +616,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
                                                                                                                 .addComponent(txtCurrencySymbol, GroupLayout.PREFERRED_SIZE, 27, GroupLayout.PREFERRED_SIZE)
                                                                                                                 .addGap(22, 22, 22))))
                                                                                         .addGroup(layout.createSequentialGroup()
-                                                                                                .addComponent(txtSymbol, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                                                                .addComponent(txtSymbol, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE)
                                                                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                                                                                 .addComponent(chkDisabled))
                                                                                         .addComponent(txtDisplayName)))
