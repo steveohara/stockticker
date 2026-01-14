@@ -122,8 +122,7 @@ public class Utils {
      * @return Formatted currency string.
      */
     public static String formatCurrencyValue(double value, String currencySymbol) {
-        return String.format("%s%.4f", currencySymbol, Math.abs(value));
+        return String.format("%s%.2f", currencySymbol, Math.abs(value));
     }
-
 
 }

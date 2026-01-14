@@ -1,5 +1,6 @@
 package com.pivotal.stockticker.model;
 
+import com.pivotal.stockticker.Utils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -8,18 +9,22 @@ import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.implementation.bind.annotation.*;
 import net.bytebuddy.matcher.ElementMatchers;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.prefs.BackingStoreException;
+import java.util.prefs.InvalidPreferencesFormatException;
 import java.util.prefs.Preferences;
 
 /**
@@ -30,13 +35,17 @@ import java.util.prefs.Preferences;
 abstract public class PersistanceManager {
 
     // Root node for all preferences
-    public static final String ROOT_NODE = "/stockticker/";
+    public static final String ROOT_NODE_NAME = "/stockticker";
+    public static final String ROOT_NODE = ROOT_NODE_NAME + '/';
 
     // Cache of constructors that have been created for proxy instances
     private static final Map<String, Constructor> constructors = new HashMap<>();
 
     // Preferences instance
     private Preferences prefs;
+
+    // File chooser for backup/restore operations
+    private static final OverwritePromptChooser chooser = new OverwritePromptChooser();
 
     // Auto-save flag - if true, changes are automatically saved to preferences
     @Getter
@@ -267,6 +276,89 @@ abstract public class PersistanceManager {
     }
 
     /**
+     * Loads all fields from storage into the current instance.
+     */
+    void loadFromStorage(Preferences prefs) {
+        this.prefs = prefs;
+        for (Field field : getClass().getSuperclass().getDeclaredFields()) {
+            this.loadField(field);
+        }
+    }
+
+    /**
+     * Backs up the given Preferences subtree to a user-selected file.
+     */
+    public static void backupPreferences() {
+
+        // Use JFileChooser to let user pick the file location
+        chooser.setChooserType(OverwritePromptChooser.CHOOSER_TYPE.SAVE);
+        chooser.setDialogTitle("Backup Settings");
+        chooser.setApproveButtonText("Save");
+        chooser.setFileFilter(new FileNameExtensionFilter("Backup Files (*.bck)", "bck"));
+        int userSelection = chooser.showSaveDialog(null);
+
+        // If user approved, export the preferences to the selected file
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+
+            // Get the file and make sure it has an extension
+            File selectedFile = chooser.getSelectedFile();
+            if (!selectedFile.getName().toLowerCase().endsWith(".bck")) {
+                selectedFile = new File(selectedFile.getAbsolutePath() + ".bck");
+            }
+
+            // Get the file from the chooser and export the preferences
+            try (OutputStream os = Files.newOutputStream(selectedFile.toPath())) {
+                Preferences prefs = Preferences.userRoot().node(ROOT_NODE_NAME);
+                prefs.exportSubtree(os);
+                Utils.showTopmostMessage("Settings backed up successfully!", "Backup Successful", JOptionPane.INFORMATION_MESSAGE);
+                log.info("Preferences backed up to {}", chooser.getSelectedFile());
+            }
+            catch (IOException | BackingStoreException ex) {
+                Utils.showTopmostMessage("Export failed: " + ex.getMessage(), "Backup Failed", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Restores Preferences subtree from a user-selected file.
+     * @return true if restore was successful, false otherwise.
+     */
+    public static boolean restorePreferences() {
+
+        // Use JFileChooser to let user pick the file location
+        chooser.setChooserType(OverwritePromptChooser.CHOOSER_TYPE.OPEN);
+        chooser.setDialogTitle("Restore Settings");
+        chooser.setApproveButtonText("Open");
+        chooser.setFileFilter(new FileNameExtensionFilter("Backup Files (*.bck)", "bck"));
+        int userSelection = chooser.showSaveDialog(null);
+
+        // If user approved, import the preferences from the selected file
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+
+            // Get the file and make sure it has an extension
+            File selectedFile = chooser.getSelectedFile();
+            if (selectedFile == null || !selectedFile.exists()) {
+                Utils.showTopmostMessage("Selected file does not exist.", "Restore Failed", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+
+            // Get the file from the chooser and export the preferences
+            try (InputStream is = Files.newInputStream(selectedFile.toPath())) {
+                Preferences prefs = Preferences.userRoot().node(ROOT_NODE_NAME);
+                prefs.removeNode();
+                Preferences.importPreferences(is);
+                Utils.showTopmostMessage("Settings restored successfully!", "Restore Successful", JOptionPane.INFORMATION_MESSAGE);
+                log.info("Preferences restored from {}", chooser.getSelectedFile());
+                return true;
+            }
+            catch (IOException | BackingStoreException | InvalidPreferencesFormatException ex) {
+                Utils.showTopmostMessage("Restore failed: " + ex.getMessage(), "Restore Failed", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        return false;
+    }
+
+    /**
      * SettingsManager class to handle persisting settings changes
      */
     public static class ChangeTrackingInterceptor {
@@ -299,4 +391,50 @@ abstract public class PersistanceManager {
         }
     }
 
+    /**
+     * Custom JFileChooser that prompts for overwrite confirmation
+     */
+    @Getter
+    @Setter
+    private static class OverwritePromptChooser extends JFileChooser {
+        public enum CHOOSER_TYPE {
+            OPEN,
+            SAVE
+        }
+        private CHOOSER_TYPE chooserType = CHOOSER_TYPE.OPEN;
+
+        @Override
+        public void approveSelection() {
+            File file = getSelectedFile();
+
+            // If we are saving, check if the file exists
+            if (chooserType == CHOOSER_TYPE.SAVE) {
+                if (file != null && file.exists()) {
+                    int answer = JOptionPane.showConfirmDialog(
+                            this,
+                            "File \"" + file.getName() + "\" already exists.\nOverwrite?",
+                            "Confirm Overwrite",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.QUESTION_MESSAGE);
+                    if (answer != JOptionPane.YES_OPTION) {
+                        return;
+                    }
+                }
+            }
+
+            // If we are loading, then confirm overwrite of settings
+            else {
+                int answer = JOptionPane.showConfirmDialog(
+                        this,
+                        "You are about to overwrite your settings from \"" + file.getName() + "\".\nAre you sure?",
+                        "Confirm Overwrite",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+                if (answer != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+            super.approveSelection();
+        }
+    }
 }

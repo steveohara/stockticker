@@ -29,7 +29,7 @@ public class ExchangeRate extends PersistanceManager {
      * @throws Exception if proxy creation fails.
      */
     public static ExchangeRate getExchangeRate(String sourceCurrencyCode) throws Exception {
-        ExchangeRate rate = createProxyInstance(ExchangeRate.class, Preferences.userRoot().node(ROOT_NODE + ExchangeRate.class.getSimpleName() + '/' + sourceCurrencyCode), true);
+        ExchangeRate rate = createProxyInstance(ExchangeRate.class, Preferences.userRoot().node(ROOT_NODE +  ExchangeRate.class.getSimpleName() + '/' + sourceCurrencyCode), true);
         rate.setSourceCurrencyCode(sourceCurrencyCode);
         return rate;
     }

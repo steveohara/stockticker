@@ -1,6 +1,7 @@
 package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.Utils;
+import com.pivotal.stockticker.model.PersistanceManager;
 import com.pivotal.stockticker.model.Settings;
 
 import javax.swing.*;
@@ -93,6 +94,21 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         btnDownColour.addActionListener(this::colourButtonClicked);
         btnUpArrowColour.addActionListener(this::colourButtonClicked);
         btnDownArrowColour.addActionListener(this::colourButtonClicked);
+
+        btnBackup.addActionListener(e -> {
+            setAlwaysOnTop(false);
+            PersistanceManager.backupPreferences();
+            setAlwaysOnTop(true);
+        });
+        btnRestore.addActionListener(e -> {
+            setAlwaysOnTop(false);
+            if (PersistanceManager.restorePreferences()) {
+                caller.changed(null);
+                loadFromSettings(settings);
+                btnOk.setEnabled(false);
+            }
+            setAlwaysOnTop(true);
+        });
 
         // Listen for changes
         Utils.attachChangeListeners(getContentPane(), this);

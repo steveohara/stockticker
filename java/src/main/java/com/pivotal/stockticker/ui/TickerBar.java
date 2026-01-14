@@ -3,10 +3,7 @@ package com.pivotal.stockticker.ui;
 import com.pivotal.stockticker.StartupManager;
 import com.pivotal.stockticker.Utils;
 import com.pivotal.stockticker.VersionInfo;
-import com.pivotal.stockticker.model.ExchangeRatesManager;
-import com.pivotal.stockticker.model.PricesManager;
-import com.pivotal.stockticker.model.Settings;
-import com.pivotal.stockticker.model.SymbolsManager;
+import com.pivotal.stockticker.model.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -15,14 +12,23 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.net.URI;
+import java.util.ArrayList;
 
+/**
+ * The main ticker bar UI class that displays stock prices and related information.
+ */
 @Slf4j
 public class TickerBar extends JFrame implements CallbackInterface {
+
+    public static final int STOCK_SEPARATION = 11;
+    public static final int VALUE_SEPARATION = 5;
+    public static final int UP_DOWN_SEPARATION = 3;
 
     private final Settings settings = Settings.getPersistentSettings();
     private final SymbolsManager symbols = new SymbolsManager();
     private final PricesManager prices = new PricesManager(settings);
     private final ExchangeRatesManager rates = new ExchangeRatesManager(settings);
+    private final ArrayList<LivePrice> livePrices = new ArrayList<>();
 
     private JPanel pnlLeftDrag;
     private JPanel pnlRightDrag;
@@ -62,71 +68,200 @@ public class TickerBar extends JFrame implements CallbackInterface {
         // Add all the currencies to the exchange rates manager
         rates.replaceExchangeRates(symbols.getAllCurrencyCodes(false));
 
+        // Draw the ticker content
         drawTickerContent();
-
     }
 
     /**
      * Draw the content of the ticker
      */
-    private void drawTickerContent() {
-        pnlSummary.cls();
-        pnlSummary.setFontColor(settings.getNormalTextColor());
-        pnlSummary.setCurrentX(4);
-        pnlSummary.print("this is to show the");
-        pnlSummary.setFontBold(true);
-        pnlSummary.setFontColor(settings.getUpColor());
-        pnlSummary.print(" ↕ ");
-        pnlSummary.setFontBold(false);
-        pnlSummary.setFontColor(settings.getUpArrowColor());
-        pnlSummary.print("summary panel is");
-        pnlSummary.setFontColor(settings.getNormalTextColor());
-        pnlSummary.setFontBold(true);
-        pnlSummary.print(" ↓ ");
-        pnlSummary.setFontBold(false);
-        pnlSummary.setFontColor(settings.getDownColor());
-        pnlSummary.print("growing");
-        pnlSummary.setFontColor(settings.getNormalTextColor());
-        pnlSummary.setFontBold(true);
-        pnlSummary.print(" ↑");
+    synchronized private void drawTickerContent() {
 
-        pnlDaySummary.cls();
-        pnlDaySummary.setFontColor(settings.getNormalTextColor());
-        pnlDaySummary.setCurrentX(10);
-        pnlDaySummary.print("summary panel is growing ");
-
+        // Get a fresh list of live prices to work with
         pnlStocks.cls();
-        pnlStocks.setFontColor(settings.getNormalTextColor());
-        pnlStocks.setCurrentX(10);
-        pnlStocks.print("hello");
-        pnlStocks.setFontBold(true);
-        pnlStocks.print(" steve");
-        pnlStocks.setFontColor(settings.getUpColor());
-        pnlStocks.setFontBold(false);
-        pnlStocks.setCurrentX(pnlStocks.getCurrentX() + 25);
-        pnlStocks.print("hello steve again");
-        pnlStocks.paintImmediately(pnlStocks.getBounds());
+        pnlStocks.setBackground(settings.getBackgroundColor());
+        livePrices.clear();
+        livePrices.addAll(LivePrice.getLivePrices(symbols, prices, rates, settings));
+
+        // Draw these on the ticker panel
+        int x = 0;
+        for (LivePrice livePrice : livePrices) {
+
+            // Set the starting point of the next stock
+            pnlStocks.setCurrentX(pnlStocks.getCurrentX() + STOCK_SEPARATION);
+
+            // Draw the stock data
+            drawLivePrice(livePrice);
+
+            // Set the bounds for this live price
+            livePrice.setBounds(new Rectangle(x, 0, pnlStocks.getCurrentX() - x, pnlStocks.getHeight()));
+            x = pnlStocks.getCurrentX();
+        }
+    }
+
+    /**
+     * Draws a live price on the ticker.
+     *
+     * @param livePrice The live price data to draw.
+     */
+    private void drawLivePrice(LivePrice livePrice) {
+
+        // Draw the price and other data
+        boolean bShownOtherData = drawSymbolPrice(livePrice);
+
+        // Draw the day changes
+        drawSymbolDayChanges(livePrice, bShownOtherData);
+    }
+
+    /**
+     * Draws the day changes for a symbol on the ticker.
+     *
+     * @param livePrice     The live price data for the symbol.
+     * @param bShownOtherData Indicates if other data has already been shown for this symbol.
+     */
+    private void drawSymbolDayChanges(LivePrice livePrice, boolean bShownOtherData) {
+
+        // Check if we need to show day changes
+        SymbolTransaction symbol = livePrice.getSymbolTransaction();
+        if ((symbol.isShowDayChange() || symbol.isShowDayChangePercent() || symbol.isShowDayChangeUpDown())) {
+            boolean shownDayData = false;
+            boolean showBraces = (bShownOtherData && (symbol.isShowDayChange() || symbol.isShowDayChangePercent())) || (symbol.isShowChangeUpDown() && symbol.isShowDayChangeUpDown());
+            pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.VALUE_SEPARATION);
+            pnlStocks.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : livePrice.isDownToday() ? settings.getDownColor() : settings.getNormalTextColor());
+            if (showBraces) {
+                pnlStocks.print("(");
+            }
+
+            // Show the Day price difference
+            if (symbol.isShowDayChange()) {
+                pnlStocks.print(livePrice.getFormattedDayChange());
+                shownDayData = true;
+            }
+
+            // Show the Day change in percent
+            if (symbol.isShowDayChangePercent()) {
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + (shownDayData ? TickerBar.VALUE_SEPARATION : 0));
+                pnlStocks.print(livePrice.getFormattedPercentDayChange());
+                shownDayData = true;
+            }
+
+            // Show the day profit/loss
+            if (symbol.isShowProfitLoss() && symbol.isShowDayChange()) {
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.VALUE_SEPARATION);
+                pnlStocks.print(livePrice.getFormattedDayProfitLoss());
+            }
+
+            // Show the Day up/down arrows
+            if (symbol.isShowDayChangeUpDown()) {
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.UP_DOWN_SEPARATION);
+                pnlStocks.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : livePrice.isDownToday() ? settings.getDownColor() : settings.getNormalTextColor());
+                pnlStocks.print(livePrice.isUpToday() ? "↑" : livePrice.isDownToday() ? "↓" : "↕");
+            }
+            if (showBraces) {
+                pnlStocks.print(")");
+            }
+        }
+    }
+
+    /**
+     * Draws the symbol price and related information on the ticker.
+     *
+     * @param livePrice The live price data for the symbol.
+     * @return True if other data was shown, false otherwise.
+     */
+    private boolean drawSymbolPrice(LivePrice livePrice) {
+
+        // Show the symbol
+        SymbolTransaction symbol = livePrice.getSymbolTransaction();
+        pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpColor() : livePrice.isDown() ? settings.getDownColor() : settings.getNormalTextColor());
+        pnlStocks.print(livePrice.getSymbolTransaction().getDisplayName());
+
+        // Show the price and other data
+        boolean bShownOtherData = false;
+        if (symbol.isShowPrice() || symbol.isShowChangeUpDown() || symbol.isShowChange() || symbol.isShowChangePercent() || symbol.isShowProfitLoss()) {
+
+            // Show the price
+            if (symbol.isShowPrice()) {
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.VALUE_SEPARATION);
+                pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpColor() : livePrice.isDown() ? settings.getDownColor() : settings.getNormalTextColor());
+                pnlStocks.print(livePrice.getFormattedPrice());
+            }
+
+            // Show the price difference
+            if (symbol.isShowChange()) {
+                bShownOtherData = true;
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.VALUE_SEPARATION);
+                pnlStocks.print(livePrice.getFormattedChange());
+            }
+
+            // Show the change in percent
+            if (symbol.isShowChangePercent()) {
+                bShownOtherData = true;
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.VALUE_SEPARATION);
+                pnlStocks.print(livePrice.getFormattedPercentChange());
+            }
+
+            // Show the profit/loss
+            if (symbol.isShowProfitLoss()) {
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.VALUE_SEPARATION);
+                pnlStocks.print(livePrice.getFormattedProfitLoss());
+            }
+
+            // Show the up/down arrows
+            if (symbol.isShowChangeUpDown()) {
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.UP_DOWN_SEPARATION);
+                pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpColor() : livePrice.isDown() ? settings.getDownColor() : settings.getNormalTextColor());
+                pnlStocks.print(livePrice.isUp() ? "↑" : livePrice.isDown() ? "↓" : "↕");
+            }
+        }
+        return bShownOtherData;
     }
 
     @Override
     public void changed(Component sourceForm) {
 
-        // If the settings form was the source, update settings
-        if (sourceForm instanceof SettingsForm) {
-            setFontSize(settings.getFontSize());
-            setTicketSpeed(settings.getTickerSpeed());
-        }
+        // If there is no component, then this is a complete initialization
+        switch (sourceForm) {
+            case null -> {
 
-        // If the symbols form was the source, update the prices and redraw
-        else if (sourceForm instanceof SymbolsForm) {
-            prices.replacePrices(symbols.getAllSymbolCodes(false));
-            prices.updateSettings();
+                // Load all the changed settings from storage
+                settings.loadFromStorage();
+                setFontSize(settings.getFontSize());
+                setTicketSpeed(settings.getTickerSpeed());
+                initializeUI();
 
-            rates.replaceExchangeRates(symbols.getAllCurrencyCodes(false));
-            rates.updateSettings();
-            drawTickerContent();
+                // Load all symbols, prices and exchange rates from storage
+                symbols.loadFromStorage();
+                prices.loadFromStorage();
+                rates.loadFromStorage();
+
+                // Reset the schedulers to pick up any changes
+                prices.resetScheduler();
+                rates.resetScheduler();
+
+                // Draw the ticker content
+                drawTickerContent();
+            }
+
+            // If the settings form was the source, update settings
+            case SettingsForm settingsForm -> {
+                setFontSize(settings.getFontSize());
+                setTicketSpeed(settings.getTickerSpeed());
+                initializeUI();
+            }
+
+            // If the symbols form was the source, update the prices and redraw
+            case SymbolsForm symbolsForm -> {
+                prices.replacePrices(symbols.getAllSymbolCodes(false));
+                prices.resetScheduler();
+
+                rates.replaceExchangeRates(symbols.getAllCurrencyCodes(false));
+                rates.resetScheduler();
+                drawTickerContent();
+            }
+            default -> {
+            }
         }
-        initializeUI();
     }
 
     /**
@@ -205,6 +340,14 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 }
             }
         });
+
+        // Set a timer to keep track of the mouse position for tooltips
+        Timer timer = new Timer(500, e -> {
+            Point mousePos = MouseInfo.getPointerInfo().getLocation();
+            LivePrice price = getLivePriceAtPoint(mousePos);
+            pnlTicker.setToolTipText(price != null ? price.getSymbolTransaction().getDisplayName() + " " + price.getSymbolTransaction().getDisplayTimestamp() : null);
+        });
+        timer.start();
 
         // Set up the resize cursors
         pnlLeftDrag.setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
@@ -297,6 +440,26 @@ public class TickerBar extends JFrame implements CallbackInterface {
     }
 
     /**
+     * Retrieves the live price at a given point.
+     *
+     * @param point The point to check.
+     * @return The LivePrice at the point, or null if none found.
+     */
+    private LivePrice getLivePriceAtPoint(Point point) {
+        Point panelOnScreen = pnlStocks.getLocationOnScreen();
+        point.x -= panelOnScreen.x;
+        point.y -= panelOnScreen.y;
+        for (LivePrice livePrice : livePrices) {
+            Rectangle bounds = livePrice.getBounds();
+            if (bounds != null && bounds.contains(point)) {
+                log.debug("Found live price at point {}: {}", point, livePrice.getSymbolTransaction().getCode());
+                return livePrice;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Sets up the context menu for the ticker panel.
      */
     private void setupContextMenu() {
@@ -336,6 +499,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         contextMenu.addSeparator();
 
         JMenuItem refresh = new JMenuItem("Refresh");
+        refresh.addActionListener(e -> drawTickerContent());
         contextMenu.add(refresh);
         contextMenu.addSeparator();
 
@@ -428,10 +592,12 @@ public class TickerBar extends JFrame implements CallbackInterface {
         pnlTicker.setPreferredSize(new Dimension(getWidth(), getFontMetrics(newFont).getHeight() + 2));
         setSize(new Dimension(getWidth(), getFontMetrics(newFont).getHeight() + 2));
         settings.setFontSize(size);
-        drawTickerContent();
         fontSizeItemSmall.setSelected(size == Settings.FONT_SIZE_SMALL);
         fontSizeItemMedium.setSelected(size == Settings.FONT_SIZE_MEDIUM);
         fontSizeItemLarge.setSelected(size == Settings.FONT_SIZE_LARGE);
+
+        // Redraw all the ticker content
+        drawTickerContent();
     }
 
     /**

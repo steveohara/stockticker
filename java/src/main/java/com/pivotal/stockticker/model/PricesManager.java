@@ -16,8 +16,8 @@ import java.util.prefs.Preferences;
 @Slf4j
 public class PricesManager {
 
-    private static final String SYMBOLS_ROOT = PersistanceManager.ROOT_NODE + Price.class.getSimpleName();
-    private final Preferences prefs = Preferences.userRoot().node(SYMBOLS_ROOT);
+    private static final String PRICES_ROOT = PersistanceManager.ROOT_NODE + Price.class.getSimpleName();
+    private Preferences prefs = Preferences.userRoot().node(PRICES_ROOT);
 
     private final Map<String, Price> currentPrices = new TreeMap<>(String::compareToIgnoreCase);
 
@@ -33,7 +33,7 @@ public class PricesManager {
         this.settings = settings;
 
         // Load all the saved prices values from persistent storage
-        loadPricesFromStorage();
+        loadFromStorage();
 
         // Schedule the task to run every X seconds with an initial delay of 0 seconds
         scheduler = new PriceCurrencyUpdateTask(settings, currentPrices);
@@ -43,8 +43,9 @@ public class PricesManager {
     /**
      * Load all symbols from persistent storage into memory
      */
-    private void loadPricesFromStorage() {
+    public void loadFromStorage() {
         // Load all the prices from the persistent storage
+        prefs = Preferences.userRoot().node(PRICES_ROOT);
         try {
             for (String code : prefs.childrenNames()) {
                 currentPrices.put(code, Price.getPrice(code));
@@ -53,7 +54,7 @@ public class PricesManager {
         catch (Exception e) {
             log.error("Error accessing storage: {}", e.getMessage());
         }
-        log.debug("Loaded {} prices", currentPrices.size());
+        log.info("Loaded {} prices", currentPrices.size());
     }
 
     /**
@@ -138,7 +139,7 @@ public class PricesManager {
     /**
      * Update settings from the application
      */
-    public void updateSettings() {
+    public void resetScheduler() {
         if (settings.getFrequency() != scheduler.getPeriodSeconds()) {
             scheduler.start(settings.getFrequency());
         }

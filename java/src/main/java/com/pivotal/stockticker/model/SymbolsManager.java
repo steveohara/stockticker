@@ -9,8 +9,6 @@ package com.pivotal.stockticker.model;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -21,7 +19,7 @@ import java.util.prefs.Preferences;
 public class SymbolsManager {
 
     private static final String SYMBOLS_ROOT = PersistanceManager.ROOT_NODE + SymbolTransaction.class.getSimpleName();
-    private final Preferences prefs = Preferences.userRoot().node(SYMBOLS_ROOT);
+    private Preferences prefs = Preferences.userRoot().node(SYMBOLS_ROOT);
 
     private final Set<SymbolTransaction> symbolTransactions = new LinkedHashSet<>();
     private final Set<SymbolTransaction> newSymbolTransactions = new LinkedHashSet<>();
@@ -32,30 +30,26 @@ public class SymbolsManager {
      * Constructor - loads all symbols from persistent storage
      */
     public SymbolsManager() {
-        loadSymbolsFromStorage();
+        loadFromStorage();
     }
 
     /**
      * Load all symbols from persistent storage into memory
      */
-    private void loadSymbolsFromStorage() {
+    public void loadFromStorage() {
 
         // Load all the symbols from the persistent storage
+        prefs = Preferences.userRoot().node(SYMBOLS_ROOT);
         try {
             List<SymbolTransaction> symbols = new ArrayList<>();
-            ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
             for (String timestamp : prefs.childrenNames()) {
-                executor.submit(() -> {
-                    try {
-                        symbols.add(SymbolTransaction.getSymbolTransaction(timestamp));
-                    }
-                    catch (Exception e) {
-                        log.error("Failed to load symbol transaction", e);
-                    }
-                });
+                try {
+                    symbols.add(SymbolTransaction.getSymbolTransaction(timestamp));
+                }
+                catch (Exception e) {
+                    log.error("Failed to load symbol transaction", e);
+                }
             }
-            // Wait for all the tasks to complete
-            executor.close();
 
             // Sort the symbols by code
             symbols.sort(Comparator.comparing(SymbolTransaction::getSortKey, String.CASE_INSENSITIVE_ORDER));
@@ -189,41 +183,36 @@ public class SymbolsManager {
      * @return List of SymbolTransaction objects
      */
     public List<SymbolTransaction> getSymbolTransactions() {
-        return getSymbolTransactions(null, true);
+        return getSymbolTransactions(true, false, null);
     }
 
     /**
      * Returns a sorted list of all symbol transactions
      *
-     * @param symbolCode Filter by symbol code (case insensitive), or null for all symbols
      * @param includeDisabled Whether to include disabled symbols
+     * @param uniqueOnly     Whether to include only unique symbols (first occurrence)
+     * @param symbolCode Filter by symbol code (case insensitive), or null for all symbols
      * @return List of SymbolTransaction objects
      */
-    public List<SymbolTransaction> getSymbolTransactions(String symbolCode, boolean includeDisabled) {
-        List<SymbolTransaction> symbols = new ArrayList<>();
+    public List<SymbolTransaction> getSymbolTransactions(boolean includeDisabled, boolean uniqueOnly, String symbolCode) {
+        Map<String, SymbolTransaction> symbols = new TreeMap<>(String::compareToIgnoreCase);
+
+        // Loop round all the symbol transactions
         for (SymbolTransaction transaction : symbolTransactions) {
-            if ((symbolCode == null || transaction.getCode().equalsIgnoreCase(symbolCode))
-                    && (includeDisabled || !transaction.isDisabled())) {
-                symbols.add(transaction);
+
+            // If only unique symbols are requested, skip if already added
+            String code = transaction.getCode();
+            if (!uniqueOnly || !symbols.containsKey(code)) {
+
+                // Check if symbol code matches filter and if disabled symbols are included
+                if ((symbolCode == null || transaction.getCode().equalsIgnoreCase(symbolCode))
+                        && (includeDisabled || !transaction.isDisabled())) {
+                    symbols.put(uniqueOnly ? transaction.getCode() : transaction.getKey(), transaction);
+                }
             }
         }
-        symbols.sort(Comparator.comparing(SymbolTransaction::getSortKey, String.CASE_INSENSITIVE_ORDER));
-        return symbols;
-    }
-
-    /**
-     * Get the first symbol transaction matching the given symbol code (case insensitive)
-     *
-     * @param symbol Symbol code to search for
-     * @return Matching SymbolTransaction or null if not found
-     */
-    public SymbolTransaction getFirst(String symbol) {
-        for (SymbolTransaction transaction : symbolTransactions) {
-            if (transaction.getCode().equalsIgnoreCase(symbol)) {
-                return transaction;
-            }
-        }
-        return null;
-
+        List<SymbolTransaction> list = new ArrayList<>(symbols.values());
+        list.sort(Comparator.comparing(SymbolTransaction::getSortKey, String.CASE_INSENSITIVE_ORDER));
+        return list;
     }
 }

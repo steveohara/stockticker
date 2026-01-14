@@ -104,4 +104,11 @@ public class Settings extends PersistanceManager {
                showTotalCost ||
                showTotalValue;
     }
+
+    /**
+     * Reloads the settings from persistent storage.
+     */
+    public void loadFromStorage() {
+        loadFromStorage(Preferences.userRoot().node(PersistanceManager.ROOT_NODE + Settings.class.getSimpleName()));
+    }
 }

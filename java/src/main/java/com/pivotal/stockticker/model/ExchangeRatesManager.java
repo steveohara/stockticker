@@ -16,8 +16,8 @@ import java.util.prefs.Preferences;
 @Slf4j
 public class ExchangeRatesManager {
 
-    private static final String SYMBOLS_ROOT = PersistanceManager.ROOT_NODE + ExchangeRate.class.getSimpleName();
-    private final Preferences prefs = Preferences.userRoot().node(SYMBOLS_ROOT);
+    private static final String EXCHANGE_RATES_ROOT = PersistanceManager.ROOT_NODE + ExchangeRate.class.getSimpleName();
+    private Preferences prefs = Preferences.userRoot().node(EXCHANGE_RATES_ROOT);
 
     private final Map<String, ExchangeRate> currentRates = new TreeMap<>(String::compareToIgnoreCase);
 
@@ -43,8 +43,9 @@ public class ExchangeRatesManager {
     /**
      * Load all symbols from persistent storage into memory
      */
-    private void loadFromStorage() {
+    public void loadFromStorage() {
         // Load all the prices from the persistent storage
+        prefs = Preferences.userRoot().node(EXCHANGE_RATES_ROOT);
         try {
             for (String code : prefs.childrenNames()) {
                 currentRates.put(code, ExchangeRate.getExchangeRate(code));
@@ -53,7 +54,7 @@ public class ExchangeRatesManager {
         catch (Exception e) {
             log.error("Error accessing storage: {}", e.getMessage());
         }
-        log.debug("Loaded {} prices", currentRates.size());
+        log.info("Loaded {} exchange rates", currentRates.size());
     }
 
     /**
@@ -138,7 +139,7 @@ public class ExchangeRatesManager {
     /**
      * Update settings from the application
      */
-    public void updateSettings() {
+    public void resetScheduler() {
         if (settings.getExchangeRateFrequency() != scheduler.getPeriodSeconds()) {
             scheduler.start(settings.getExchangeRateFrequency());
         }

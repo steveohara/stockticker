@@ -158,7 +158,7 @@ public class ColouredTextPanel extends JPanel {
     public Dimension getPreferredSize() {
         return displayStyle == DISPLAY_STYLE.FIT
                 ? new Dimension(totalTextWidth, totalTextHeight)
-                : new Dimension(super.getPreferredSize().width, totalTextHeight);
+                : new Dimension(super.getPreferredSize().width, super.getPreferredSize().height);
     }
 
     /**
@@ -175,7 +175,7 @@ public class ColouredTextPanel extends JPanel {
     public Dimension getMaximumSize() {
         return displayStyle == DISPLAY_STYLE.FIT
                 ? new Dimension(totalTextWidth, totalTextHeight)
-                : new Dimension(super.getMaximumSize().width, totalTextHeight);
+                : new Dimension(super.getMaximumSize().width, super.getMaximumSize().height);
     }
 
     /**
@@ -192,7 +192,7 @@ public class ColouredTextPanel extends JPanel {
     public Dimension getMinimumSize() {
         return displayStyle == DISPLAY_STYLE.FIT
                 ? new Dimension(totalTextWidth, totalTextHeight)
-                : new Dimension(super.getMinimumSize().width, totalTextHeight);
+                : new Dimension(super.getMinimumSize().width, super.getMinimumSize().height);
     }
 
     /**
