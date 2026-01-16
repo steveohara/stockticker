@@ -24,6 +24,13 @@ import java.awt.event.*;
 @Slf4j
 public class SymbolsForm extends JDialog implements CallbackInterface {
 
+    private JButton btnAdd, btnCancel, btnDelete, btnOk;
+    private JCheckBox chkAlarmHighPercent, chkAlarmHighPlaySound, chkAlarmLowPercent, chkAlarmLowPlaySound, chkDisabled, chkExcludeFromSummary, chkShowChange, chkShowChangePercent, chkShowDayChange, chkShowDayChangePercent, chkShowDayUpDown, chkShowPrice, chkShowProfitLoss, chlShowUpDown;
+    private CheckBoxFrame pnlAlarmLow, pnlAlarmHigh;
+    private SymbolsList lstSymbols;
+    private CapableTextField txtAlarmHigh, txtAlarmLow, txtCurrencyCode, txtPricePaid, txtSharesBought, txtSymbol;
+    private JTextField txtCurrencySymbol, txtDisplayName;
+
     private final SymbolsManager symbolsManager;
     private final CallbackInterface caller;
     private boolean ignoreChanges = false;
@@ -314,419 +321,226 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      * This method is called from within the constructor to initialize the form.
      */
     private void initComponents() {
+
+        int vGap = 10;
+        int hGap = 10;
+        int lblGap = 5;
+        int stdWidth = 100;
+        int stdHeight = 20;
+        int width = 600;
+
+        // Set the dialog size and use null layout
+        setResizable(false);
+        getContentPane().setLayout(null);
+
         LineBorder lineBorder = new LineBorder(UIManager.getColor("Component.borderColor"), 1);
 
-        jScrollPane1 = new JScrollPane();
+        // List of Symbols
+        JScrollPane jScrollPane1 = new JScrollPane();
         lstSymbols = new SymbolsList();
-        btnAdd = new JButton();
-        btnDelete = new JButton();
-        btnCancel = new JButton();
-        btnOk = new JButton();
-        jLabel1 = new JLabel();
-        txtSymbol = new CapableTextField(CapableTextField.CONVERSION_TYPE.UPPER);
-        chkDisabled = new JCheckBox();
-        jLabel2 = new JLabel();
-        txtDisplayName = new JTextField();
-        jLabel3 = new JLabel();
-        txtPricePaid = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
-        jLabel4 = new JLabel();
-        txtSharesBought = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
-        jLabel5 = new JLabel();
-        txtCurrencyCode = new CapableTextField(CapableTextField.CONVERSION_TYPE.UPPER);
-        jLabel6 = new JLabel();
-        txtCurrencySymbol = new JTextField();
-        jPanel1 = new JPanel();
-        chkShowPrice = new JCheckBox();
-        chkShowChange = new JCheckBox();
-        chkExcludeFromSummary = new JCheckBox();
-        chkShowChangePercent = new JCheckBox();
-        chkShowProfitLoss = new JCheckBox();
-        chlShowUpDown = new JCheckBox();
-        chkShowDayChangePercent = new JCheckBox();
-        chkShowDayChange = new JCheckBox();
-        chkShowDayUpDown = new JCheckBox();
-        jSeparator1 = new JSeparator();
-        pnlAlarmLow = new CheckBoxFrame("Enable Low Alarm");
-        chkAlarmLowPercent = new JCheckBox();
-        chkAlarmLowPlaySound = new JCheckBox();
-        txtAlarmLow = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
-        jLabel7 = new JLabel();
-        pnlAlarmHigh = new CheckBoxFrame("Enable High Alarm");
-        ;
-        chkAlarmHighPercent = new JCheckBox();
-        chkAlarmHighPlaySound = new JCheckBox();
-        txtAlarmHigh = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
-        jLabel9 = new JLabel();
-
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
         lstSymbols.setBorder(null);
         jScrollPane1.setBorder(lineBorder);
         jScrollPane1.setViewportView(lstSymbols);
+        jScrollPane1.setBounds(hGap, vGap, 150, 400);
+        getContentPane().add(jScrollPane1);
 
-        btnAdd.setText("Add");
+        int left = jScrollPane1.getX() + jScrollPane1.getWidth() + hGap;
 
-        btnDelete.setText("Delete");
-
-        btnCancel.setText("Cancel");
-
-        btnOk.setText("OK");
-        btnOk.setEnabled(false);
-
+        // Symbol & Details Labels/Fields
+        JLabel jLabel1 = new JLabel("Symbol");
         jLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel1.setLabelFor(txtSymbol);
-        jLabel1.setText("Symbol");
+        jLabel1.setBounds(left, hGap, stdWidth, stdHeight);
+        getContentPane().add(jLabel1);
 
-        chkDisabled.setText("Disabled");
+        txtSymbol = new CapableTextField(CapableTextField.CONVERSION_TYPE.UPPER);
+        txtSymbol.setBounds(jLabel1.getX() + jLabel1.getWidth() + lblGap, jLabel1.getY(), 100, stdHeight);
+        getContentPane().add(txtSymbol);
+
+        chkDisabled = new JCheckBox("Disabled");
         chkDisabled.setToolTipText("Do not use this symbol");
+        chkDisabled.setBounds(width - stdWidth - hGap, txtSymbol.getY(), stdWidth, stdHeight);
+        getContentPane().add(chkDisabled);
 
+        // Display Name
+        JLabel jLabel2 = new JLabel("Display Name");
         jLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel2.setLabelFor(txtDisplayName);
-        jLabel2.setText("Display Name");
+        jLabel2.setBounds(left, jLabel1.getY() + jLabel1.getHeight() + vGap, stdWidth, stdHeight);
+        getContentPane().add(jLabel2);
 
-        txtDisplayName.setToolTipText("The name you want to appear on the ticker for this stock instead of the symbol");
+        txtDisplayName = new JTextField();
+        txtDisplayName.setToolTipText("Name you want to appear instead of symbol");
+        txtDisplayName.setBounds(jLabel2.getX() + jLabel2.getWidth() + lblGap, jLabel2.getY(), 300, stdHeight);
+        getContentPane().add(txtDisplayName);
 
+        // Price Paid & Shares Bought
+        JLabel jLabel3 = new JLabel("Price Paid");
         jLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel3.setLabelFor(txtPricePaid);
-        jLabel3.setText("Price Paid");
+        jLabel3.setBounds(left, jLabel2.getY() + jLabel2.getHeight() + vGap, stdWidth, stdHeight);
+        getContentPane().add(jLabel3);
 
+        txtPricePaid = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
+        txtPricePaid.setBounds(jLabel3.getX() + jLabel3.getWidth() + lblGap, jLabel3.getY(), 70, stdHeight);
+        getContentPane().add(txtPricePaid);
+
+        txtSharesBought = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
+        txtSharesBought.setBounds(txtDisplayName.getX() + txtDisplayName.getWidth() - 70, txtPricePaid.getY(), 70, stdHeight);
+        getContentPane().add(txtSharesBought);
+
+        JLabel jLabel4 = new JLabel("No. of Shares Bought");
         jLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel4.setLabelFor(txtSharesBought);
-        jLabel4.setText("No. of Shares Bought");
+        jLabel4.setBounds(txtSharesBought.getX() - 146 - lblGap, txtSharesBought.getY(), 146, stdHeight);
+        getContentPane().add(jLabel4);
 
+        // Currency
+        JLabel jLabel5 = new JLabel("Currency Code");
         jLabel5.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel5.setLabelFor(txtCurrencyCode);
-        jLabel5.setText("Currency Code");
+        jLabel5.setBounds(left, jLabel4.getY() + jLabel4.getHeight() + vGap, stdWidth, stdHeight);
+        getContentPane().add(jLabel5);
 
-        txtCurrencyCode.setToolTipText("e.g. GBP, USD etc.");
+        txtCurrencyCode = new CapableTextField(CapableTextField.CONVERSION_TYPE.UPPER);
+        txtCurrencyCode.setToolTipText("e.g. GBP, USD");
+        txtCurrencyCode.setBounds(jLabel5.getX() + jLabel5.getWidth() + lblGap, jLabel5.getY(), 70, stdHeight);
+        getContentPane().add(txtCurrencyCode);
 
+        JLabel jLabel6 = new JLabel("Currency Symbol");
         jLabel6.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel6.setLabelFor(txtCurrencySymbol);
-        jLabel6.setText("Currency Symbol");
+        jLabel6.setBounds(jLabel4.getX(), jLabel4.getY() + jLabel4.getHeight() + vGap, jLabel4.getWidth(), stdHeight);
+        getContentPane().add(jLabel6);
 
+        txtCurrencySymbol = new JTextField();
         txtCurrencySymbol.setToolTipText("e.g. $, £, p, c");
+        txtCurrencySymbol.setBounds(txtSharesBought.getX(), jLabel6.getY(), txtSharesBought.getWidth(), stdHeight);
+        getContentPane().add(txtCurrencySymbol);
 
+        // "Show" Panel (manual border and grouping)
+        JPanel jPanel1 = new JPanel(null);
         TitledBorder border = BorderFactory.createTitledBorder(lineBorder, "Show");
         border.setTitleColor(lineBorder.getLineColor());
         jPanel1.setBorder(border);
+        jPanel1.setBounds(left, txtCurrencyCode.getY() + txtCurrencyCode.getHeight() + vGap, txtCurrencySymbol.getX() + txtCurrencySymbol.getWidth() - left, 300);
+        getContentPane().add(jPanel1);
 
-        chkShowPrice.setText("Price");
-        chkShowPrice.setToolTipText("Current price that this stock is being traded at");
+        // Show-panel checkboxes
+        // Left column
+        chkShowPrice = new JCheckBox("Price");
+        chkShowPrice.setBounds(30, 20, stdWidth, stdHeight);
+        jPanel1.add(chkShowPrice);
 
-        chkShowChange.setText("Change");
-        chkShowChange.setToolTipText("The change in value between the current price and the price you paid for this stock");
+        chkShowChange = new JCheckBox("Change");
+        chkShowChange.setBounds(chkShowPrice.getX(), chkShowPrice.getY() + chkShowPrice.getHeight() + vGap / 2, stdWidth, stdHeight);
+        jPanel1.add(chkShowChange);
 
-        chkExcludeFromSummary.setText("Hide from Summary");
-        chkExcludeFromSummary.setToolTipText("Get values and display on the ticker bnut exclude from the Summary and Day Summary");
+        chlShowUpDown = new JCheckBox("Up/Down");
+        chlShowUpDown.setBounds(chkShowChange.getX(), chkShowChange.getY() + chkShowChange.getHeight() + vGap / 2, stdWidth, stdHeight);
+        jPanel1.add(chlShowUpDown);
 
-        chkShowChangePercent.setText("Change %");
-        chkShowChangePercent.setToolTipText("The change in percent between the current price and the price you paid for this stock");
+        // Right column
+        chkExcludeFromSummary = new JCheckBox("Hide from Summary");
+        chkExcludeFromSummary.setBounds(200, chkShowPrice.getY(), stdWidth * 2, stdHeight);
+        jPanel1.add(chkExcludeFromSummary);
 
-        chkShowProfitLoss.setText("Profit & Loss");
-        chkShowProfitLoss.setToolTipText("Show the amount of money you are up or down on the stock");
+        chkShowChangePercent = new JCheckBox("Change %");
+        chkShowChangePercent.setBounds(chkExcludeFromSummary.getX(), chkShowChange.getY(), stdWidth, stdHeight);
+        jPanel1.add(chkShowChangePercent);
 
-        chlShowUpDown.setText("Up/Down");
-        chlShowUpDown.setToolTipText("Show a symbol to indicate if the current price is higher or lower the price you bought at");
+        chkShowProfitLoss = new JCheckBox("Profit & Loss");
+        chkShowProfitLoss.setBounds(chkShowChangePercent.getX(), chlShowUpDown.getY(), stdWidth, stdHeight);
+        jPanel1.add(chkShowProfitLoss);
 
-        chkShowDayChangePercent.setText("Day Change %");
-        chkShowDayChangePercent.setToolTipText("Show the change in percent between the current price and days starting price for this stock");
+        // Day Change
+        // Left column
+        chkShowDayChange = new JCheckBox("Day Change");
+        chkShowDayChange.setBounds(chkShowPrice.getX(), chlShowUpDown.getY() + chlShowUpDown.getHeight() + vGap, stdWidth, stdHeight);
+        jPanel1.add(chkShowDayChange);
 
-        chkShowDayChange.setText("Day Change");
-        chkShowDayChange.setToolTipText("Show the change in value between the current price and days starting price for this stock");
+        chkShowDayChangePercent = new JCheckBox("Day Change %");
+        chkShowDayChangePercent.setBounds(chkShowDayChange.getX(), chkShowDayChange.getY() + chkShowDayChange.getHeight() + vGap / 2, stdWidth * 2, stdHeight);
+        jPanel1.add(chkShowDayChangePercent);
 
-        chkShowDayUpDown.setText("Day Up/Down");
-        chkShowDayUpDown.setToolTipText("Show show a symbol to indicate if the current price is higher or lower the days starting price");
-        chkShowDayUpDown.setAlignmentY(0.0F);
+        // Right column
+        chkShowDayUpDown = new JCheckBox("Day Up/Down");
+        chkShowDayUpDown.setBounds(chkExcludeFromSummary.getX(), chkShowDayChange.getY(), stdWidth * 2, stdHeight);
+        jPanel1.add(chkShowDayUpDown);
 
-        GroupLayout jPanel1Layout = new GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-                jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(10, 10, 10)
-                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                        .addComponent(chkShowChange)
-                                                        .addComponent(chkShowPrice)
-                                                        .addComponent(chlShowUpDown))
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                        .addComponent(chkShowChangePercent)
-                                                        .addComponent(chkExcludeFromSummary)
-                                                        .addComponent(chkShowProfitLoss))
-                                                .addGap(56, 56, 56))
-                                        .addGroup(GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                                        .addGroup(GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                                                .addComponent(chkShowDayChange)
-                                                                .addGap(58, 58, 58)
-                                                                .addComponent(chkShowDayChangePercent))
-                                                        .addComponent(chkShowDayUpDown, GroupLayout.Alignment.LEADING)
-                                                        .addComponent(jSeparator1, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 296, GroupLayout.PREFERRED_SIZE))
-                                                .addGap(0, 0, Short.MAX_VALUE))))
-        );
-        jPanel1Layout.setVerticalGroup(
-                jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(15, 15, 15)
-                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(chkShowPrice)
-                                        .addComponent(chkExcludeFromSummary))
-                                .addGap(3, 3, 3)
-                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(chkShowChangePercent)
-                                        .addComponent(chkShowChange))
-                                .addGap(3, 3, 3)
-                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(chkShowProfitLoss)
-                                        .addComponent(chlShowUpDown))
-                                .addGap(6, 6, 6)
-                                .addComponent(jSeparator1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addGap(6, 6, 6)
-                                .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(chkShowDayChangePercent)
-                                        .addComponent(chkShowDayChange))
-                                .addGap(3, 3, 3)
-                                .addComponent(chkShowDayUpDown)
-                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+        jPanel1.setBounds(left, jPanel1.getY(), jPanel1.getWidth(), chkShowDayChangePercent.getY() + chkShowDayChangePercent.getHeight() + vGap);
 
-        chkAlarmLowPercent.setText("Percent");
-        chkAlarmLowPercent.setToolTipText("Treat the value as a percentage of the base ");
+        // Low Alarm Panel
+        pnlAlarmLow = new CheckBoxFrame("Enable Low Alarm");
+        pnlAlarmLow.setBounds(left, jPanel1.getY() + jPanel1.getHeight() + vGap, jPanel1.getWidth(), 100);
+        getContentPane().add(pnlAlarmLow);
 
-        chkAlarmLowPlaySound.setText("Sound Alarm");
-        chkAlarmLowPlaySound.setToolTipText("Sound an audible alert when the alarm is triggered");
-
-        txtAlarmLow.setToolTipText("The threshold at which a dropping price will trigger the low alarm");
-
+        JLabel jLabel7 = new JLabel("Prices Drops to");
         jLabel7.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel7.setLabelFor(txtAlarmLow);
-        jLabel7.setText("Prices Drops to");
+        jLabel7.setBounds(20, 20, stdWidth, stdHeight);
+        pnlAlarmLow.getContentPanel().setLayout(null);
+        pnlAlarmLow.getContentPanel().add(jLabel7);
 
-        GroupLayout pnlAlarmLowLayout = new GroupLayout(pnlAlarmLow.getContentPanel());
-        pnlAlarmLow.getContentPanel().setLayout(pnlAlarmLowLayout);
-        pnlAlarmLowLayout.setHorizontalGroup(
-                pnlAlarmLowLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(GroupLayout.Alignment.TRAILING, pnlAlarmLowLayout.createSequentialGroup()
-                                .addContainerGap(20, Short.MAX_VALUE)
-                                .addComponent(jLabel7)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtAlarmLow, GroupLayout.PREFERRED_SIZE, 93, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
-                                .addGroup(pnlAlarmLowLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(chkAlarmLowPercent)
-                                        .addComponent(chkAlarmLowPlaySound))
-                                .addGap(40, 40, 40))
-        );
-        pnlAlarmLowLayout.setVerticalGroup(
-                pnlAlarmLowLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(pnlAlarmLowLayout.createSequentialGroup()
-                                .addGap(19, 19, 19)
-                                .addGroup(pnlAlarmLowLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(chkAlarmLowPercent)
-                                        .addComponent(jLabel7)
-                                        .addComponent(txtAlarmLow, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGap(3, 3, 3)
-                                .addComponent(chkAlarmLowPlaySound)
-                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+        txtAlarmLow = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
+        txtAlarmLow.setToolTipText("Threshold for low alarm");
+        txtAlarmLow.setBounds(jLabel7.getX() + jLabel7.getWidth() + lblGap, jLabel7.getY(), txtPricePaid.getWidth(), stdHeight);
+        pnlAlarmLow.getContentPanel().add(txtAlarmLow);
 
-        chkAlarmHighPercent.setText("Percent");
-        chkAlarmHighPercent.setToolTipText("Treat the value as a percentage of the base ");
+        chkAlarmLowPercent = new JCheckBox("Percent");
+        chkAlarmLowPercent.setBounds(250, txtAlarmLow.getY(), stdWidth, stdHeight);
+        pnlAlarmLow.getContentPanel().add(chkAlarmLowPercent);
 
-        chkAlarmHighPlaySound.setText("Sound Alarm");
-        chkAlarmHighPlaySound.setToolTipText("Sound an audible alert when the alarm is triggered");
+        chkAlarmLowPlaySound = new JCheckBox("Sound Alarm");
+        chkAlarmLowPlaySound.setBounds(chkAlarmLowPercent.getX(), chkAlarmLowPercent.getY() + chkAlarmLowPercent.getHeight() + vGap / 2, stdWidth, stdHeight);
+        pnlAlarmLow.getContentPanel().add(chkAlarmLowPlaySound);
 
-        txtAlarmHigh.setToolTipText("The threshold at which a rising price will trigger the low alarm");
+        pnlAlarmLow.setBounds(left, pnlAlarmLow.getY(), pnlAlarmLow.getWidth(), chkAlarmLowPlaySound.getY() + chkAlarmLowPlaySound.getHeight() + vGap * 2);
 
-        jLabel9.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel9.setLabelFor(txtAlarmHigh);
-        jLabel9.setText("Prices Rises to");
+        // High Alarm Panel
+        pnlAlarmHigh = new CheckBoxFrame("Enable High Alarm");
+        pnlAlarmHigh.setBounds(left, pnlAlarmLow.getY() + pnlAlarmLow.getHeight() + vGap, pnlAlarmLow.getWidth(), 100);
+        getContentPane().add(pnlAlarmHigh);
 
-        GroupLayout pnlAlarmHighLayout = new GroupLayout(pnlAlarmHigh.getContentPanel());
-        pnlAlarmHigh.getContentPanel().setLayout(pnlAlarmHighLayout);
-        pnlAlarmHighLayout.setHorizontalGroup(
-                pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(GroupLayout.Alignment.TRAILING, pnlAlarmHighLayout.createSequentialGroup()
-                                .addContainerGap(20, Short.MAX_VALUE)
-                                .addComponent(jLabel9)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtAlarmHigh, GroupLayout.PREFERRED_SIZE, 93, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
-                                .addGroup(pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(chkAlarmHighPercent)
-                                        .addComponent(chkAlarmHighPlaySound))
-                                .addGap(40, 40, 40))
-        );
-        pnlAlarmHighLayout.setVerticalGroup(
-                pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(pnlAlarmHighLayout.createSequentialGroup()
-                                .addGap(19, 19, 19)
-                                .addGroup(pnlAlarmHighLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(chkAlarmHighPercent)
-                                        .addComponent(jLabel9)
-                                        .addComponent(txtAlarmHigh, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGap(3, 3, 3)
-                                .addComponent(chkAlarmHighPlaySound)
-                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+        JLabel jLabel8 = new JLabel("Prices Drops to");
+        jLabel8.setHorizontalAlignment(SwingConstants.RIGHT);
+        jLabel8.setBounds(20, 20, stdWidth, stdHeight);
+        pnlAlarmHigh.getContentPanel().setLayout(null);
+        pnlAlarmHigh.getContentPanel().add(jLabel8);
 
-        GroupLayout layout = new GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addComponent(btnAdd)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(btnDelete, GroupLayout.PREFERRED_SIZE, 64, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(0, 0, Short.MAX_VALUE))
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 145, GroupLayout.PREFERRED_SIZE)
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                        .addGroup(layout.createSequentialGroup()
-                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                                        .addGroup(layout.createSequentialGroup()
-                                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                                                        .addGroup(layout.createSequentialGroup()
-                                                                                                .addGap(26, 26, 26)
-                                                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                                                                                        .addComponent(jLabel2, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                                                                        .addComponent(jLabel1, GroupLayout.PREFERRED_SIZE, 73, GroupLayout.PREFERRED_SIZE)))
-                                                                                        .addComponent(jLabel3, GroupLayout.Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, 63, GroupLayout.PREFERRED_SIZE)
-                                                                                        .addComponent(jLabel5, GroupLayout.Alignment.TRAILING))
-                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                                                        .addGroup(layout.createSequentialGroup()
-                                                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                                                                                        .addComponent(txtPricePaid)
-                                                                                                        .addComponent(txtCurrencyCode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
-                                                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                                                                        .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                                                                                                .addComponent(jLabel4, GroupLayout.PREFERRED_SIZE, 115, GroupLayout.PREFERRED_SIZE)
-                                                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                                                                                .addComponent(txtSharesBought, GroupLayout.PREFERRED_SIZE, 49, GroupLayout.PREFERRED_SIZE))
-                                                                                                        .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                                                                                                .addComponent(jLabel6)
-                                                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                                                                                .addComponent(txtCurrencySymbol, GroupLayout.PREFERRED_SIZE, 27, GroupLayout.PREFERRED_SIZE)
-                                                                                                                .addGap(22, 22, 22))))
-                                                                                        .addGroup(layout.createSequentialGroup()
-                                                                                                .addComponent(txtSymbol, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE)
-                                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                                                                .addComponent(chkDisabled))
-                                                                                        .addComponent(txtDisplayName)))
-                                                                        .addGroup(layout.createSequentialGroup()
-                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                                                                        .addGroup(layout.createSequentialGroup()
-                                                                                                .addComponent(btnOk)
-                                                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                                                                .addComponent(btnCancel))
-                                                                                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
-                                                                                                .addComponent(pnlAlarmLow, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                                                                .addComponent(pnlAlarmHigh, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                                                                .addComponent(jPanel1, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
-                                                                .addGap(25, 25, 25))
-                                                ))))
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(jLabel1)
-                                                        .addComponent(txtSymbol, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(chkDisabled))
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(jLabel2)
-                                                        .addComponent(txtDisplayName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(jLabel3)
-                                                        .addComponent(txtPricePaid, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(jLabel4)
-                                                        .addComponent(txtSharesBought, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(jLabel5)
-                                                        .addComponent(txtCurrencyCode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(jLabel6)
-                                                        .addComponent(txtCurrencySymbol, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(jPanel1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(pnlAlarmLow, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(pnlAlarmHigh, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                        .addComponent(jScrollPane1))
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(btnAdd)
-                                                        .addComponent(btnDelete))
-                                                .addGap(0, 0, Short.MAX_VALUE))
-                                        .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(btnOk)
-                                                        .addComponent(btnCancel))
-                                                .addGap(10, 10, 10))))
-        );
+        txtAlarmHigh = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
+        txtAlarmHigh.setToolTipText("Threshold for high alarm");
+        txtAlarmHigh.setBounds(jLabel8.getX() + jLabel8.getWidth() + lblGap, jLabel8.getY(), txtPricePaid.getWidth(), stdHeight);
+        pnlAlarmHigh.getContentPanel().add(txtAlarmHigh);
 
-        pnlAlarmLow.setSelected(false);
-        pnlAlarmHigh.setSelected(false);
+        chkAlarmHighPercent = new JCheckBox("Percent");
+        chkAlarmHighPercent.setBounds(250, txtAlarmHigh.getY(), stdWidth, stdHeight);
+        pnlAlarmHigh.getContentPanel().add(chkAlarmHighPercent);
 
-        pack();
+        chkAlarmHighPlaySound = new JCheckBox("Sound Alarm");
+        chkAlarmHighPlaySound.setBounds(chkAlarmHighPercent.getX(), chkAlarmHighPercent.getY() + chkAlarmHighPercent.getHeight() + vGap / 2, stdWidth, stdHeight);
+        pnlAlarmHigh.getContentPanel().add(chkAlarmHighPlaySound);
+
+        pnlAlarmHigh.setBounds(left, pnlAlarmHigh.getY(), pnlAlarmHigh.getWidth(), chkAlarmHighPlaySound.getY() + chkAlarmHighPlaySound.getHeight() + vGap * 2);
+
+        // OK and Cancel Buttons
+        btnCancel = new JButton("Cancel");
+        btnCancel.setBounds(pnlAlarmHigh.getX() + pnlAlarmHigh.getWidth() - 75, pnlAlarmHigh.getY() + pnlAlarmHigh.getHeight() + vGap, 75, 30);
+        getContentPane().add(btnCancel);
+
+        btnOk = new JButton("OK");
+        btnOk.setEnabled(false);
+        btnOk.setBounds(btnCancel.getX() - btnCancel.getWidth() - vGap, btnCancel.getY(), btnCancel.getWidth(), btnCancel.getHeight());
+        getContentPane().add(btnOk);
+
+        // Add & Delete Buttons
+        jScrollPane1.setBounds(jScrollPane1.getX(), jScrollPane1.getY(), jScrollPane1.getWidth(), pnlAlarmHigh.getY() + pnlAlarmHigh.getHeight() - jScrollPane1.getY());
+        btnAdd = new JButton("Add");
+        btnAdd.setBounds(jScrollPane1.getX(), jScrollPane1.getY() + jScrollPane1.getHeight() + vGap, 70, 20);
+        getContentPane().add(btnAdd);
+
+        btnDelete = new JButton("Delete");
+        btnDelete.setBounds(jScrollPane1.getX() + jScrollPane1.getWidth() - 70, btnAdd.getY(), btnAdd.getWidth(), btnAdd.getHeight());
+        getContentPane().add(btnDelete);
+
+        // Size the dialog
+        setSize(width, btnCancel.getY() + btnCancel.getHeight() + 40);
+        setPreferredSize(getSize());
+        setMinimumSize(getSize());
+        setMaximumSize(getSize());
     }
-
-    private JButton btnAdd;
-    private JButton btnCancel;
-    private JButton btnDelete;
-    private JButton btnOk;
-    private JCheckBox chkAlarmHighPercent;
-    private JCheckBox chkAlarmHighPlaySound;
-    private JCheckBox chkAlarmLowPercent;
-    private JCheckBox chkAlarmLowPlaySound;
-    private JCheckBox chkDisabled;
-    private JCheckBox chkExcludeFromSummary;
-    private JCheckBox chkShowChange;
-    private JCheckBox chkShowChangePercent;
-    private JCheckBox chkShowDayChange;
-    private JCheckBox chkShowDayChangePercent;
-    private JCheckBox chkShowDayUpDown;
-    private JCheckBox chkShowPrice;
-    private JCheckBox chkShowProfitLoss;
-    private JCheckBox chlShowUpDown;
-    private JLabel jLabel1;
-    private JLabel jLabel2;
-    private JLabel jLabel3;
-    private JLabel jLabel4;
-    private JLabel jLabel5;
-    private JLabel jLabel6;
-    private JLabel jLabel7;
-    private JLabel jLabel9;
-    private JPanel jPanel1;
-    private CheckBoxFrame pnlAlarmLow;
-    private CheckBoxFrame pnlAlarmHigh;
-    private JScrollPane jScrollPane1;
-    private JSeparator jSeparator1;
-    private SymbolsList lstSymbols;
-    private CapableTextField txtAlarmHigh;
-    private CapableTextField txtAlarmLow;
-    private CapableTextField txtCurrencyCode;
-    private JTextField txtCurrencySymbol;
-    private JTextField txtDisplayName;
-    private CapableTextField txtPricePaid;
-    private CapableTextField txtSharesBought;
-    private CapableTextField txtSymbol;
 
 }
