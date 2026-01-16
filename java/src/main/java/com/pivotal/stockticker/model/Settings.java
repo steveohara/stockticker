@@ -17,6 +17,8 @@ import java.util.prefs.Preferences;
 @Setter
 public class Settings extends PersistanceManager {
 
+    public static String BROWSER_STOCK_LAUNCH_URL = "https://finance.yahoo.com/quote";
+
     public static final int FONT_SIZE_SMALL = 11;
     public static final int FONT_SIZE_MEDIUM = 13;
     public static final int FONT_SIZE_LARGE = 16;

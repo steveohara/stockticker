@@ -308,7 +308,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
      */
     private void setupDragging() {
 
-        // Add mouse listeners for dragging the ticker
+        // Add mouse listeners for dragging the ticker and double clicking
         pnlTicker.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -320,6 +320,12 @@ public class TickerBar extends JFrame implements CallbackInterface {
                     settings.setWindowX(getX());
                     settings.setWindowY(getY());
                     dragStart = null;
+                }
+            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    showSymbolInBrowser();
                 }
             }
         });
@@ -437,6 +443,24 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 }
             }
         });
+    }
+
+    /**
+     * Opens the symbol under the mouse cursor in the default web browser.
+     */
+    private void showSymbolInBrowser() {
+        Point mousePos = MouseInfo.getPointerInfo().getLocation();
+        LivePrice price = getLivePriceAtPoint(mousePos);
+        if (price != null) {
+            try {
+                String url = String.format("%s/%s?p=%s", Settings.BROWSER_STOCK_LAUNCH_URL, price.getSymbol(), price.getSymbol());
+                Desktop desktop = Desktop.getDesktop();
+                desktop.browse(new URI(url));
+            }
+            catch (Exception ex) {
+                log.error("Failed to open Browser URL", ex);
+            }
+        }
     }
 
     /**
