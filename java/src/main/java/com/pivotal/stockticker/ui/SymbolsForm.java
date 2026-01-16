@@ -32,6 +32,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
     private SymbolsList lstSymbols;
     private CapableTextField txtAlarmHigh, txtAlarmLow, txtCurrencyCode, txtPricePaid, txtSharesBought, txtSymbol;
     private JTextField txtCurrencySymbol, txtDisplayName;
+    private JLabel lblTransactionTimestamp;
 
     private final Settings settings;
     private final SymbolsManager symbolsManager;
@@ -73,7 +74,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      */
     private void disableForm(Container c) {
         for (Component comp : c.getComponents()) {
-            if (comp != btnAdd && comp != btnOk && comp != btnCancel && comp != lstSymbols) {
+            if (comp != btnAdd && comp != btnOk && comp != btnCancel && comp != lstSymbols && comp != chkHideDisabled) {
                 comp.setEnabled(lstSymbols.getSelectedListItem() != null);
             }
             if (comp instanceof Container) {
@@ -112,9 +113,23 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             }
         });
 
+        // Handle hide disabled symbols
         chkHideDisabled.addActionListener( e -> {
             settings.setHideDisabledSymbols(chkHideDisabled.isSelected());
-            loadFromStorage();
+            lstSymbols.hideDisabled(chkHideDisabled.isSelected());
+        });
+        chkDisabled.addActionListener( e -> {
+            int index = lstSymbols.getSelectedIndex();
+            lstSymbols.hideDisabled(lstSymbols.isHideDisabled());
+//            if (lstSymbols.isHideDisabled() && chkDisabled.isSelected()) {
+//                if (!lstSymbols.getModel().isEmpty()) {
+//                    lstSymbols.clearSelection();
+//                    lstSymbols.setSelectedIndex(30);
+////                    SwingUtilities.invokeLater( () -> {
+////                        lstSymbols.setSelectedIndex(index < lstSymbols.getModel().getSize() ? index : lstSymbols.getModel().getSize() - 1);
+////                    });
+//                }
+//            }
         });
 
         // Listen for changes
@@ -175,6 +190,8 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         chkAlarmHighPercent.setSelected(false);
         chkAlarmHighPlaySound.setSelected(false);
         txtAlarmHigh.setText("");
+        lblTransactionTimestamp.setText("");
+        lblTransactionTimestamp.setToolTipText("");
         ignoreChanges = false;
     }
 
@@ -213,6 +230,8 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         chkAlarmHighPercent.setSelected(symbol.isHighAlarmIsPercent());
         chkAlarmHighPlaySound.setSelected(symbol.isHighAlarmSoundEnabled());
         txtAlarmHigh.setText(symbol.getHighAlarmValue());
+        lblTransactionTimestamp.setText(String.format("<html><p style='color:#c0c0c0;font-size:0.9em'>%s</p></html>", symbol.getDisplayTimestamp()));
+        lblTransactionTimestamp.setToolTipText(String.format("<html><b>Added: </b>%s</html>", symbol.getFullDisplayTimestamp()));
         ignoreChanges = false;
     }
 
@@ -227,7 +246,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             int index = lstSymbols.getSelectedIndex();
             lstSymbols.removeItem(symbol);
             if (!lstSymbols.getModel().isEmpty()) {
-                lstSymbols.setSelectedIndex(index < lstSymbols.getModel().size() ? index : lstSymbols.getModel().size() - 1);
+                lstSymbols.setSelectedIndex(index < lstSymbols.getModel().getSize() ? index : lstSymbols.getModel().getSize() - 1);
             }
             btnOk.setEnabled(true);
             log.debug("Deleted symbol transaction {}", lstSymbols.getSelectedListItem());
@@ -249,7 +268,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      */
     private void loadFromStorage() {
         lstSymbols.clear();
-        for (SymbolTransaction symbolTransaction : symbolsManager.getSymbolTransactions(!settings.isHideDisabledSymbols(), false, null)) {
+        for (SymbolTransaction symbolTransaction : symbolsManager.getSymbolTransactions()) {
             lstSymbols.addItem(symbolTransaction);
         }
         if (lstSymbols.getModel().getSize() > 0) {
@@ -275,6 +294,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
                 return;
             }
         }
+        symbolsManager.clearChanges();
         dispose();
     }
 
@@ -353,6 +373,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         JScrollPane jScrollPane1 = new JScrollPane();
         lstSymbols = new SymbolsList();
         lstSymbols.setBorder(null);
+        lstSymbols.hideDisabled(settings.isHideDisabledSymbols());
         jScrollPane1.setBorder(lineBorder);
         jScrollPane1.setViewportView(lstSymbols);
         jScrollPane1.setBounds(hGap, chkHideDisabled.getX() + chkHideDisabled.getHeight() + vGap / 2, 150, 400);
@@ -374,6 +395,11 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         chkDisabled.setToolTipText("Do not use this symbol");
         chkDisabled.setBounds(width - stdWidth - hGap, txtSymbol.getY(), stdWidth, stdHeight);
         getContentPane().add(chkDisabled);
+
+        lblTransactionTimestamp = new JLabel();
+        lblTransactionTimestamp.setHorizontalAlignment(SwingConstants.CENTER);
+        lblTransactionTimestamp.setBounds(txtSymbol.getX() + txtSymbol.getWidth(), txtSymbol.getY(), chkDisabled.getX() - txtSymbol.getX() - txtSymbol.getWidth(), stdHeight);
+        getContentPane().add(lblTransactionTimestamp);
 
         // Display Name
         JLabel jLabel2 = new JLabel("Display Name");

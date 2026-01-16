@@ -68,8 +68,18 @@ public class SymbolsManager {
      * @return Newly created SymbolTransaction with defaults
      */
     public SymbolTransaction createNewSymbolTransaction() {
+        return createNewSymbolTransaction(null);
+    }
+
+    /**
+     * Create a new symbol transaction using a key
+     *
+     * @param key Key to use for the new symbol transaction
+     * @return Newly created SymbolTransaction with defaults
+     */
+    public SymbolTransaction createNewSymbolTransaction(String key) {
         try {
-            SymbolTransaction symbolTransaction = SymbolTransaction.getSymbolTransaction();
+            SymbolTransaction symbolTransaction = SymbolTransaction.getSymbolTransaction(key);
             newSymbolTransactions.add(symbolTransaction);
             symbolTransactions.add(symbolTransaction);
             symbolTransaction.setAdded(true);
@@ -99,6 +109,17 @@ public class SymbolsManager {
     public void markSymbolTransactionAsDeleted(SymbolTransaction symbolTransaction) {
         symbolTransactions.remove(symbolTransaction);
         deletedSymbolTransactions.add(symbolTransaction);
+    }
+
+
+    /**
+     * Clear all tracked changes
+     */
+    public void clearChanges() {
+        newSymbolTransactions.clear();
+        modifiedSymbolTransactions.clear();
+        deletedSymbolTransactions.clear();
+        loadFromStorage();
     }
 
     /**
@@ -140,6 +161,8 @@ public class SymbolsManager {
                 log.error("Error removing symbol transaction: {}", e.getMessage());
             }
         }
+
+        // Clear everything
         deletedSymbolTransactions.clear();
     }
 

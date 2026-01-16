@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Custom JList to display SymbolTransaction objects with specific rendering based on their state.
@@ -20,7 +22,7 @@ import java.awt.*;
 @Slf4j
 public class SymbolsList extends JList<SymbolTransaction> {
 
-    private final DefaultListModel<SymbolTransaction> model = new DefaultListModel<>();
+    private final FilterableStockListModel model = new FilterableStockListModel(this);
 
     /**
      * Constructor
@@ -101,9 +103,10 @@ public class SymbolsList extends JList<SymbolTransaction> {
     // Helper to prevent HTML injection (if data could contain <, >)
     private String escapeHtml(String s) {
         return s == null ? "" : s.replace("&", "&amp;")
-                                 .replace("<", "&lt;")
-                                 .replace(">", "&gt;");
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
     }
+
     /**
      * Add a SymbolTransaction item to the list
      *
@@ -151,6 +154,24 @@ public class SymbolsList extends JList<SymbolTransaction> {
     }
 
     /**
+     * Set whether to hide disabled SymbolTransaction items
+     *
+     * @param hideDisabled true to hide disabled items, false to show all
+     */
+    public void hideDisabled(boolean hideDisabled) {
+        model.hideDisabled(hideDisabled);
+    }
+
+    /**
+     * Check if disabled SymbolTransaction items are hidden
+     *
+     * @return true if disabled items are hidden, false otherwise
+     */
+    public boolean isHideDisabled() {
+        return model.isHideDisabled();
+    }
+
+    /**
      * Custom cell renderer to enable anti-aliased text rendering
      */
     private static class SymbolsListCellRenderer extends DefaultListCellRenderer {
@@ -160,6 +181,115 @@ public class SymbolsList extends JList<SymbolTransaction> {
             g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             super.paintComponent(g2);
             g2.dispose();
+        }
+    }
+
+    /**
+     * Custom ListModel that supports filtering of disabled SymbolTransaction items.
+     */
+    @Getter
+    public static class FilterableStockListModel extends AbstractListModel<SymbolTransaction> {
+        private final ArrayList<SymbolTransaction> backingList;
+        private ArrayList<SymbolTransaction> filteredList;
+        private boolean hideDisabled = false;
+        private final JList<SymbolTransaction> jList;
+
+        /**
+         * Constructor
+         */
+        public FilterableStockListModel(JList<SymbolTransaction> jList) {
+            this.jList = jList;
+            backingList = new ArrayList<>();
+            filteredList = new ArrayList<>();
+        }
+
+        /**
+         * Set whether to hide disabled SymbolTransaction items
+         *
+         * @param hideDisabled true to hide disabled items, false to show all
+         */
+        public void hideDisabled(boolean hideDisabled) {
+            this.hideDisabled = hideDisabled;
+            updateFilter();
+        }
+
+        /**
+         * Update the filtered list based on the hideDisabled flag
+         */
+        private void updateFilter() {
+            SymbolTransaction selectedItem = jList.getSelectedValue();
+            int selectedIndex = jList.getSelectedIndex();
+
+            int oldSize = filteredList.size();
+            if (hideDisabled) {
+                filteredList = backingList.stream()
+                        .filter(stock -> !stock.isDisabled())
+                        .collect(Collectors.toCollection(ArrayList::new));
+            }
+            else {
+                filteredList = new ArrayList<>(backingList);
+            }
+
+            // Notify listeners of the change
+            fireContentsChanged(this, 0, Math.max(oldSize, filteredList.size()) - 1);
+
+            // Restore selection if item still visible
+            if (selectedItem != null) {
+                int newIndex = filteredList.indexOf(selectedItem);
+                if (newIndex < 0) {
+                    jList.clearSelection();
+                    if (selectedIndex >= 0 && !filteredList.isEmpty()) {
+                        jList.setSelectedIndex(selectedIndex >= filteredList.size() ? filteredList.size() - 1 : selectedIndex);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Add a SymbolTransaction item to the backing list
+         *
+         * @param item SymbolTransaction to add
+         */
+        private void addElement(SymbolTransaction item) {
+            backingList.add(item);
+            updateFilter();
+        }
+
+        /**
+         * Remove a SymbolTransaction item from the backing list
+         *
+         * @param item SymbolTransaction to remove
+         */
+        private void removeElement(SymbolTransaction item) {
+            backingList.remove(item);
+            updateFilter();
+        }
+
+        /**
+         * Clear all items from the backing list
+         */
+        private void clear() {
+            backingList.clear();
+            updateFilter();
+        }
+
+        /**
+         * Check if the filtered list is empty
+         *
+         * @return true if the filtered list is empty, false otherwise
+         */
+        public boolean isEmpty() {
+            return filteredList.isEmpty();
+        }
+
+        @Override
+        public int getSize() {
+            return filteredList.size();
+        }
+
+        @Override
+        public SymbolTransaction getElementAt(int index) {
+            return filteredList.get(index);
         }
     }
 }

@@ -633,8 +633,12 @@ abstract public class PersistanceManager {
     private static int loadSymbolFromRegistryLines(SymbolsManager symbolsManager, PricesManager pricesManager, ExchangeRatesManager ratesManager, String[] lines, int line) {
 
         // Create a new symbol instance
-        SymbolTransaction symbol = symbolsManager.createNewSymbolTransaction();
-        symbol.setKey(lines[line].replaceAll("(^.+\\\\)|(])", ""));
+        String timestamp = lines[line].replaceAll("(^.+\\\\)|(])", "");
+
+        // We need to convert this timestamp to a unix version for the key
+        // this timestamp is actually the number of seconds since 1st Jan 2008
+        timestamp = (Long.parseLong(timestamp) + 1199145600L) * 1000 + ""; // Convert to milliseconds
+        SymbolTransaction symbol = symbolsManager.createNewSymbolTransaction(timestamp);
 
         // Loop through all the lines until we hit another section
         int row;

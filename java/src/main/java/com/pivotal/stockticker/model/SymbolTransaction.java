@@ -18,7 +18,7 @@ import java.util.prefs.Preferences;
 @Getter
 @Setter
 public class SymbolTransaction extends PersistanceManager {
-    private String key = String.valueOf(System.currentTimeMillis());
+    private String key;
     private String code = "YAHOO";
     private String alias;
     private boolean disabled;
@@ -52,9 +52,9 @@ public class SymbolTransaction extends PersistanceManager {
     private transient boolean added = false;
 
     /**
-     * Default constructor initializing default values.
+     * Default constructor to prevent instantiation without using factory methods.
      */
-    public SymbolTransaction() {
+    protected SymbolTransaction() {
         super();
     }
 
@@ -65,8 +65,7 @@ public class SymbolTransaction extends PersistanceManager {
      * @throws Exception if proxy creation fails.
      */
     public static SymbolTransaction getSymbolTransaction() throws Exception {
-        String key = String.valueOf(System.currentTimeMillis());
-        return createProxyInstance(SymbolTransaction.class, Preferences.userRoot().node(ROOT_NODE + SymbolTransaction.class.getSimpleName() + '/' + key), false);
+        return getSymbolTransaction(null);
     }
 
     /**
@@ -77,9 +76,15 @@ public class SymbolTransaction extends PersistanceManager {
      * @throws Exception if proxy creation fails.
      */
     public static SymbolTransaction getSymbolTransaction(String key) throws Exception {
-        SymbolTransaction symbol = createProxyInstance(SymbolTransaction.class, Preferences.userRoot().node(ROOT_NODE + SymbolTransaction.class.getSimpleName() + '/' + key), false);
-        symbol.setKey(key);
-        return symbol;
+        if (key == null || key.isEmpty()) {
+            key = String.valueOf(System.currentTimeMillis());
+            return createProxyInstance(SymbolTransaction.class, Preferences.userRoot().node(ROOT_NODE + SymbolTransaction.class.getSimpleName() + '/' + key), false);
+        }
+        else {
+            SymbolTransaction symbol = createProxyInstance(SymbolTransaction.class, Preferences.userRoot().node(ROOT_NODE + SymbolTransaction.class.getSimpleName() + '/' + key), false);
+            symbol.setKey(key);
+            return symbol;
+        }
     }
 
     /**
@@ -129,7 +134,7 @@ public class SymbolTransaction extends PersistanceManager {
 
     @Override
     public String toString() {
-        return code + '(' + key + ')';
+        return code + " (" + key + ')';
     }
 
     /**
@@ -140,6 +145,17 @@ public class SymbolTransaction extends PersistanceManager {
     public String getDisplayTimestamp() {
         Instant instant = Instant.ofEpochMilli(Long.parseLong(key));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        return formatter.format(LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault()));
+    }
+
+    /**
+     * Returns a human-readable timestamp derived from the key.
+     *
+     * @return Formatted timestamp string.
+     */
+    public String getFullDisplayTimestamp() {
+        Instant instant = Instant.ofEpochMilli(Long.parseLong(key));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE d MMM yyyy h:mm a");
         return formatter.format(LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault()));
     }
 }
