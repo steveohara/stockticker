@@ -97,7 +97,7 @@ public class SymbolTransaction extends PersistanceManager {
      * @return Formatted cost price.
      */
     public String getFormattedCost() {
-        return Utils.formatCurrencyValue(pricePaid, currencyCode);
+        return Utils.formatCurrencyValue(pricePaid, currencySymbol);
     }
 
     /**
@@ -106,7 +106,7 @@ public class SymbolTransaction extends PersistanceManager {
      * @return Formatted total cost.
      */
     public String getFormattedTotalCost() {
-        return Utils.formatCurrencyValue(pricePaid * sharesBought, currencyCode);
+        return Utils.formatCurrencyValue(pricePaid * sharesBought, currencySymbol);
     }
 
     /**

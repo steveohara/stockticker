@@ -6,6 +6,7 @@
  */
 package com.pivotal.stockticker.ui;
 
+import com.pivotal.stockticker.StartupManager;
 import com.pivotal.stockticker.Utils;
 import com.pivotal.stockticker.model.Settings;
 import com.pivotal.stockticker.model.SymbolTransaction;
@@ -334,7 +335,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         int lblGap = 5;
         int stdWidth = 100;
         int stdHeight = 20;
-        int width = 600;
+        int width = StartupManager.isWindows() ? 610 :  600;
 
         // Set the dialog size and use null layout
         setResizable(false);
@@ -550,7 +551,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         getContentPane().add(btnDelete);
 
         // Size the dialog
-        setSize(width, btnCancel.getY() + btnCancel.getHeight() + 40);
+        setSize(width, btnCancel.getY() + btnCancel.getHeight() + (StartupManager.isWindows() ? 50 :  40));
         setPreferredSize(getSize());
         setMinimumSize(getSize());
         setMaximumSize(getSize());

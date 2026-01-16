@@ -22,22 +22,40 @@ public class StartupManager {
     private static final String OS = System.getProperty("os.name").toLowerCase();
 
     /**
+     * Checks if the current OS is Windows.
+     *
+     * @return true if Windows, false otherwise.
+     */
+    public static boolean isWindows() {
+        return OS.contains("win");
+    }
+
+    /**
+     * Checks if the current OS is Mac.
+     *
+     * @return true if Mac, false otherwise.
+     */
+    public static boolean isMac() {
+        return OS.contains("mac");
+    }
+
+    /**
      * Enables startup for the application on the current OS.
      */
     public static void enableStartup(boolean enable) {
         if (enable) {
-            if (OS.contains("win")) {
+            if (isWindows()) {
                 enableWindowsStartup();
             }
-            else if (OS.contains("mac")) {
+            else if (isMac()) {
                 enableMacStartup();
             }
         }
         else {
-            if (OS.contains("win")) {
+            if (isWindows()) {
                 disableWindowsStartup();
             }
-            else if (OS.contains("mac")) {
+            else if (isMac()) {
                 disableMacStartup();
             }
         }
