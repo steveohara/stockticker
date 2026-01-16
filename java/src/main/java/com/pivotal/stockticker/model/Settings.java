@@ -51,6 +51,7 @@ public class Settings extends PersistanceManager {
     private boolean showDailyChange = true;
     private boolean showUniqueSymbols = true;
     private boolean alwaysOnTop = true;
+    private boolean hideDisabledSymbols = false;
     private String highAlarmWaveFile = null;
     private String lowAlarmWaveFile = null;
     private String iexToken = null;

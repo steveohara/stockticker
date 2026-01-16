@@ -8,6 +8,9 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @Slf4j
 public class Utils {
@@ -30,12 +33,16 @@ public class Utils {
     /**
      * Attaches change listeners to various Swing components within a container.
      *
-     * @param container The container holding the components.
-     * @param callback  The callback interface to invoke on changes.
+     * @param container        The container holding the components.
+     * @param callback         The callback interface to invoke on changes.
+     * @param ignoreComponents Components to ignore when attaching listeners.
      */
-    public static void attachChangeListeners(Container container, CallbackInterface callback) {
+    public static void attachChangeListeners(Container container, CallbackInterface callback, Component... ignoreComponents) {
+        Set<Component> ignoreComponentSet = new HashSet<>(Arrays.asList(ignoreComponents));
         for (Component c : container.getComponents()) {
-
+            if (ignoreComponentSet.contains(c)) {
+                continue;
+            }
             if (c instanceof JTextComponent text) {
                 text.getDocument().addDocumentListener(new DocumentListener() {
                     public void insertUpdate(DocumentEvent e) {
@@ -117,8 +124,8 @@ public class Utils {
     /**
      * Formats a given value as a currency string with the appropriate currency symbol.
      *
-     * @param value Value to format.
-     * @param currencySymbol  Currency symbol to prepend.
+     * @param value          Value to format.
+     * @param currencySymbol Currency symbol to prepend.
      * @return Formatted currency string.
      */
     public static String formatCurrencyValue(double value, String currencySymbol) {

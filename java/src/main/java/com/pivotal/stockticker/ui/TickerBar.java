@@ -553,7 +553,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
      */
     private void showSymbolsDialog() {
         SwingUtilities.invokeLater(() -> {
-            new SymbolsForm(this, symbols);
+            new SymbolsForm(settings, this, symbols);
         });
     }
 

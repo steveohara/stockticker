@@ -7,6 +7,7 @@
 package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.Utils;
+import com.pivotal.stockticker.model.Settings;
 import com.pivotal.stockticker.model.SymbolTransaction;
 import com.pivotal.stockticker.model.SymbolsManager;
 import lombok.extern.slf4j.Slf4j;
@@ -25,12 +26,13 @@ import java.awt.event.*;
 public class SymbolsForm extends JDialog implements CallbackInterface {
 
     private JButton btnAdd, btnCancel, btnDelete, btnOk;
-    private JCheckBox chkAlarmHighPercent, chkAlarmHighPlaySound, chkAlarmLowPercent, chkAlarmLowPlaySound, chkDisabled, chkExcludeFromSummary, chkShowChange, chkShowChangePercent, chkShowDayChange, chkShowDayChangePercent, chkShowDayUpDown, chkShowPrice, chkShowProfitLoss, chlShowUpDown;
+    private JCheckBox chkHideDisabled, chkAlarmHighPercent, chkAlarmHighPlaySound, chkAlarmLowPercent, chkAlarmLowPlaySound, chkDisabled, chkExcludeFromSummary, chkShowChange, chkShowChangePercent, chkShowDayChange, chkShowDayChangePercent, chkShowDayUpDown, chkShowPrice, chkShowProfitLoss, chlShowUpDown;
     private CheckBoxFrame pnlAlarmLow, pnlAlarmHigh;
     private SymbolsList lstSymbols;
     private CapableTextField txtAlarmHigh, txtAlarmLow, txtCurrencyCode, txtPricePaid, txtSharesBought, txtSymbol;
     private JTextField txtCurrencySymbol, txtDisplayName;
 
+    private final Settings settings;
     private final SymbolsManager symbolsManager;
     private final CallbackInterface caller;
     private boolean ignoreChanges = false;
@@ -38,7 +40,8 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
     /**
      * Creates new form Symbols
      */
-    public SymbolsForm(CallbackInterface caller, SymbolsManager symbolsManager) {
+    public SymbolsForm(Settings settings, CallbackInterface caller, SymbolsManager symbolsManager) {
+        this.settings = settings;
         this.caller = caller;
         this.symbolsManager = symbolsManager;
         initComponents();
@@ -108,8 +111,13 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             }
         });
 
+        chkHideDisabled.addActionListener( e -> {
+            settings.setHideDisabledSymbols(chkHideDisabled.isSelected());
+            loadFromStorage();
+        });
+
         // Listen for changes
-        Utils.attachChangeListeners(getContentPane(), this);
+        Utils.attachChangeListeners(getContentPane(), this, chkHideDisabled);
     }
 
     /**
@@ -240,7 +248,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      */
     private void loadFromStorage() {
         lstSymbols.clear();
-        for (SymbolTransaction symbolTransaction : symbolsManager.getSymbolTransactions()) {
+        for (SymbolTransaction symbolTransaction : symbolsManager.getSymbolTransactions(!settings.isHideDisabledSymbols(), false, null)) {
             lstSymbols.addItem(symbolTransaction);
         }
         if (lstSymbols.getModel().getSize() > 0) {
@@ -321,7 +329,6 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      * This method is called from within the constructor to initialize the form.
      */
     private void initComponents() {
-
         int vGap = 10;
         int hGap = 10;
         int lblGap = 5;
@@ -335,16 +342,22 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
 
         LineBorder lineBorder = new LineBorder(UIManager.getColor("Component.borderColor"), 1);
 
+        chkHideDisabled = new JCheckBox("Hide Disabled Symbols");
+        chkHideDisabled.setBounds(hGap, vGap, 200, stdHeight);
+        chkHideDisabled.setFont(new Font(chkHideDisabled.getFont().getName(), Font.PLAIN, 10));
+        chkHideDisabled.setSelected(settings.isHideDisabledSymbols());
+        getContentPane().add(chkHideDisabled);
+
         // List of Symbols
         JScrollPane jScrollPane1 = new JScrollPane();
         lstSymbols = new SymbolsList();
         lstSymbols.setBorder(null);
         jScrollPane1.setBorder(lineBorder);
         jScrollPane1.setViewportView(lstSymbols);
-        jScrollPane1.setBounds(hGap, vGap, 150, 400);
+        jScrollPane1.setBounds(hGap, chkHideDisabled.getX() + chkHideDisabled.getHeight() + vGap / 2, 150, 400);
         getContentPane().add(jScrollPane1);
 
-        int left = jScrollPane1.getX() + jScrollPane1.getWidth() + hGap;
+        int left = jScrollPane1.getX() + jScrollPane1.getWidth() + (int)(hGap * 1.5);
 
         // Symbol & Details Labels/Fields
         JLabel jLabel1 = new JLabel("Symbol");
