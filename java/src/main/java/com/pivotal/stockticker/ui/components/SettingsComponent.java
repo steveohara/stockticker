@@ -41,7 +41,7 @@ public class SettingsComponent<T extends JComponent> {
      * @param y The y-coordinate.
      * @return The component itself for method chaining.
      */
-    public T setTop(int y) {
+    public T atTop(int y) {
         component.setBounds(component.getX(), y, component.getWidth(), component.getHeight());
         return component;
     }
@@ -97,7 +97,7 @@ public class SettingsComponent<T extends JComponent> {
      * @return The component itself for method chaining.
      */
     public T atLeft(JComponent alignmentComp, int offset) {
-        component.setBounds(alignmentComp.getX() + offset, alignmentComp.getY(), component.getWidth(), component.getHeight());
+        component.setBounds(alignmentComp.getX() + offset, component.getY(), component.getWidth(), component.getHeight());
         return component;
     }
 
@@ -204,6 +204,17 @@ public class SettingsComponent<T extends JComponent> {
     }
 
     /**
+     * Sets the width of the component to match another component.
+     *
+     * @param alignmentComp The component to match width with.
+     * @return The component itself for method chaining.
+     */
+    public T withWidth(JComponent alignmentComp) {
+        component.setBounds(component.getX(), component.getY(), alignmentComp.getWidth(), component.getHeight());
+        return component;
+    }
+
+    /**
      * Sets the height of the component to the specified value.
      *
      * @param height The height to set.
@@ -211,6 +222,17 @@ public class SettingsComponent<T extends JComponent> {
      */
     public T withHeight(int height) {
         component.setBounds(component.getX(), component.getY(), component.getWidth(), height);
+        return component;
+    }
+
+    /**
+     * Sets the height of the component to match another component.
+     *
+     * @param alignmentComp The component to match height with.
+     * @return The component itself for method chaining.
+     */
+    public T withHeight(JComponent alignmentComp) {
+        component.setBounds(component.getX(), component.getY(), component.getWidth(), alignmentComp.getHeight());
         return component;
     }
 
@@ -234,7 +256,7 @@ public class SettingsComponent<T extends JComponent> {
      * @param offset        The offset to apply.
      * @return The component itself for method chaining.
      */
-    public T beside(JComponent alignmentComp, int offset) {
+    public T tail(JComponent alignmentComp, int offset) {
         atTop(alignmentComp);
         atRight(alignmentComp, offset);
         return component;
@@ -250,4 +272,38 @@ public class SettingsComponent<T extends JComponent> {
         component.setToolTipText(tooltip);
         return component;
     }
+
+    /**
+     * Sets the background color of the component.
+     *
+     * @param color The background color to set.
+     * @return The component itself for method chaining.
+     */
+    public T setBackColor(Color color) {
+        component.setBackground(color);
+        return component;
+    }
+
+    /**
+     * Sets the foreground color of the component.
+     *
+     * @param color The foreground color to set.
+     * @return The component itself for method chaining.
+     */
+    public T setForeColor(Color color) {
+        component.setForeground(color);
+        return component;
+    }
+
+    /**
+     * Sets the dimensions of the component to match another component.
+     *
+     * @param alignmentComp The component to match dimensions with.
+     * @return The component itself for method chaining.
+     */
+    public T withDimensions(JComponent alignmentComp) {
+        component.setBounds(component.getX(), component.getY(), alignmentComp.getWidth(), alignmentComp.getHeight());
+        return component;
+    }
+
 }

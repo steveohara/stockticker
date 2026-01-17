@@ -3,10 +3,7 @@ package com.pivotal.stockticker.ui;
 import com.pivotal.stockticker.Utils;
 import com.pivotal.stockticker.model.Settings;
 import com.pivotal.stockticker.service.PersistanceManager;
-import com.pivotal.stockticker.ui.components.CapableTextField;
-import com.pivotal.stockticker.ui.components.SettingsLabel;
-import com.pivotal.stockticker.ui.components.SettingsSpinner;
-import com.pivotal.stockticker.ui.components.SettingsTextField;
+import com.pivotal.stockticker.ui.components.*;
 import com.pivotal.stockticker.utils.CallbackInterface;
 import com.pivotal.stockticker.utils.StartupManager;
 
@@ -20,10 +17,10 @@ import java.awt.event.*;
 public class SettingsForm extends JDialog implements CallbackInterface {
 
     private CapableTextField txtCurrencyCode, txtMargin, txtTotalInvestment;
-    private JButton btnBackground, btnBackup, btnCancel, btnDownArrowColour, btnDownColour, btnHighAlarm, btnLowAlarm, btnNormalText, btnOk, btnRestore, btnUpArrowColour, btnUpColour;
-    private JCheckBox chkBold, chkItalic, chkShowDailyChange, chkShowTotalCost, chkShowTotalProfit, chkShowTotalProfitPercentage, chkShowTotalValue, chkShowUniqueSymbols;
+    private SettingsButton btnBackground, btnBackup, btnCancel, btnDownArrowColour, btnDownColour, btnLabelColour, btnHighAlarm, btnLowAlarm, btnNormalText, btnOk, btnRestore, btnUpArrowColour, btnUpColour;
+    private SettingsCheckbox chkBold, chkItalic, chkShowDailyChange, chkShowTotalCost, chkShowTotalProfit, chkShowTotalProfitPercentage, chkShowTotalValue, chkShowUniqueSymbols;
     private JComboBox<String> lstFont;
-    private JSpinner spnTickerUpdate;
+    private SettingsSpinner spnTickerUpdate;
     private SettingsTextField txtAlphaVantagToken, txtCurrencySymbol, txtFinHubToken, txtFreeCurrencyToken, txtHighAlarm, txtIexToken, txtLowAlarm, txtMarketStackToken, txtProxyServer, txtTiingoToken, txtTwelveDataToken;
 
     private final Settings settings;
@@ -267,65 +264,95 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         setMaximumSize(getSize());
         setMinimumSize(getSize());
 
-        int vGap = 10;
+        int vGap = 8;
         int hGap = 10;
         int lblGap = 5;
         int stdWidth = 100;
         int stdHeight = 20;
-        int width = StartupManager.isWindows() ? 460 :  450;
+        int width = StartupManager.isWindows() ? 500 :  450;
         setResizable(false);
         getContentPane().setLayout(null);
 
+        // Normal Settings
         SettingsLabel jLabel1 = SettingsLabel.create("Proxy Server").atPosition(hGap, vGap).to(getContentPane());
         txtProxyServer = SettingsTextField.create("", "The address of a proxy server to use e.g. www.proxy.com:8989 etc.")
-                        .beside(jLabel1, lblGap).withWidth(getWidth() - jLabel1.getRight() - hGap - lblGap).to(getContentPane());
+                        .tail(jLabel1, lblGap).withWidth(getWidth() - (jLabel1.getRight() + lblGap + hGap * 3)).to(getContentPane());
 
         SettingsLabel jLabel2 = SettingsLabel.create("Update Every").below(jLabel1, vGap).to(getContentPane());
-        spnTickerUpdate = SettingsSpinner.create(30, 30, 600, 10).beside(jLabel2, lblGap).setTooltip("How often to retrieve prices data (30-600)").to(getContentPane());
-        JLabel jLabel3 = SettingsLabel.create("Seconds").setAlignment(Label.LEFT).beside(spnTickerUpdate, hGap).to(getContentPane());
+        spnTickerUpdate = SettingsSpinner.create(30, 30, 600, 10).tail(jLabel2, lblGap).setTooltip("How often to retrieve prices data (30-600)").to(getContentPane());
+        JLabel jLabel3 = SettingsLabel.create("Seconds").setAlignment(Label.LEFT).tail(spnTickerUpdate, hGap).to(getContentPane());
+
+        // Divider
+        SettingsSeparator jSeparator1 = SettingsSeparator.create().below(jLabel2, vGap * 2).withWidth(txtProxyServer.getRight() - jLabel2.getX()).to(getContentPane());
+        JLabel jLabel30 = SettingsLabel.create("<html><p style='font-weight:bold;color:#808080'>&nbsp;&nbsp;Colours, Fonts & Sounds</p></html>")
+                .setAlignment(SwingConstants.LEFT)
+                .withWidth(145)
+                .atTop(jSeparator1.getY() - vGap)
+                .atLeft(jSeparator1.getX() + hGap * 3)
+                .setBackColor(getContentPane().getBackground())
+                .to(getContentPane());
+        jLabel30.setOpaque(true);
+        getContentPane().setComponentZOrder(jLabel30, 0);
+
+
+        // Colour buttons
+        SettingsLabel jLabel4 = SettingsLabel.create("Background").below(jLabel30, vGap).atLeft(jLabel2).withHeight(16).to(getContentPane());
+        btnBackground = SettingsButton.create("").tail(jLabel4, lblGap).withWidth(25).withHeight(jLabel4).setBackColor(new java.awt.Color(0, 0, 0)).to(getContentPane());
+
+        SettingsLabel jLabel5 = SettingsLabel.create("Up Colour").tail(btnBackground, vGap).withHeight(jLabel4).withWidth(75).to(getContentPane());
+        btnUpColour = SettingsButton.create("").tail(jLabel5, lblGap).withDimensions(btnBackground).setBackColor(new java.awt.Color(0, 204, 204)).to(getContentPane());
+
+        SettingsLabel jLabel6 = SettingsLabel.create("Up Arrow Colour").tail(btnUpColour, vGap).withHeight(jLabel4).withWidth(115).withHeight(jLabel4).to(getContentPane());
+        btnUpArrowColour = SettingsButton.create("").tail(jLabel6, lblGap).withDimensions(btnBackground).setBackColor(new java.awt.Color(0, 204, 51)).to(getContentPane());
+
+
+        SettingsLabel jLabel7 = SettingsLabel.create("Normal Text").below(jLabel4, vGap).withDimensions(jLabel4).to(getContentPane());
+        btnNormalText = SettingsButton.create("").tail(jLabel7, lblGap).withDimensions(btnBackground).setBackColor(new java.awt.Color(153, 153, 153)).to(getContentPane());
+
+        SettingsLabel jLabel8 = SettingsLabel.create("Down Colour").below(jLabel5, vGap).withDimensions(jLabel5).to(getContentPane());
+        btnDownColour = SettingsButton.create("").tail(jLabel8, lblGap).withDimensions(btnBackground).setBackColor(new java.awt.Color(255, 102, 102)).to(getContentPane());
+
+        SettingsLabel jLabel9 = SettingsLabel.create("Down Arrow Colour").below(jLabel6, vGap).withDimensions(jLabel6).to(getContentPane());
+        btnDownArrowColour = SettingsButton.create("").tail(jLabel9, lblGap).withDimensions(btnBackground).setBackColor(new java.awt.Color(0, 204, 204)).to(getContentPane());
+
+        SettingsLabel jLabel10 = SettingsLabel.create("Label Text").below(jLabel7, vGap).withDimensions(jLabel4).to(getContentPane());
+        btnLabelColour = SettingsButton.create("").tail(jLabel10, lblGap).withDimensions(btnBackground).setBackColor(new java.awt.Color(153, 153, 153)).to(getContentPane());
+
+        // Font settings
+        SettingsLabel jLabel11 = SettingsLabel.create("Font").below(jLabel10, vGap).withDimensions(jLabel4).to(getContentPane());
+
+
+        SettingsLabel jLabel12 = SettingsLabel.create("High alarm").below(jLabel11, vGap).withDimensions(jLabel1).to(getContentPane());
+        txtHighAlarm = SettingsTextField.create().tail(jLabel12, lblGap).withWidth(getWidth() - (jLabel12.getRight() + lblGap + 70)).to(getContentPane());
+
+
+        SettingsLabel jLabel13 = SettingsLabel.create("Low alarm").below(jLabel12, vGap).withDimensions(jLabel1).to(getContentPane());
+        txtLowAlarm = SettingsTextField.create().tail(jLabel13, lblGap).withDimensions(txtHighAlarm).to(getContentPane());
 
 
 
 
 
+        btnOk = SettingsButton.create();
 
-
-
-
-        btnOk = new JButton();
-
-        btnCancel = new JButton();
-        btnRestore = new JButton();
+        btnCancel = SettingsButton.create();
+        btnRestore = SettingsButton.create();
         JPanel jPanel1 = new JPanel();
-        btnNormalText = new JButton();
-        btnUpColour = new JButton();
-        btnDownColour = new JButton();
-        btnUpArrowColour = new JButton();
-        btnDownArrowColour = new JButton();
-        SettingsLabel jLabel10 = SettingsLabel.create();
+        btnDownColour = SettingsButton.create();
+        btnUpArrowColour = SettingsButton.create();
+        btnDownArrowColour = SettingsButton.create();
         lstFont = new JComboBox<>();
-        chkBold = new JCheckBox();
-        chkItalic = new JCheckBox();
-        SettingsLabel jLabel12 = SettingsLabel.create();
-        SettingsLabel jLabel4 = SettingsLabel.create();
-        txtHighAlarm = SettingsTextField.create();
-        SettingsLabel jLabel5 = SettingsLabel.create();
-        btnHighAlarm = new JButton();
-        SettingsLabel jLabel6 = SettingsLabel.create();
-        SettingsLabel jLabel13 = SettingsLabel.create();
-        SettingsLabel jLabel7 = SettingsLabel.create();
-        txtLowAlarm = SettingsTextField.create();
-        SettingsLabel jLabel8 = SettingsLabel.create();
-        btnLowAlarm = new JButton();
+        chkBold = SettingsCheckbox.create("");
+        chkItalic = SettingsCheckbox.create("");
         SettingsLabel jLabel26 = SettingsLabel.create();
-        btnBackground = new JButton();
+        btnBackground = SettingsButton.create();
         JPanel jPanel2 = new JPanel();
-        chkShowTotalProfitPercentage = new JCheckBox();
-        chkShowTotalCost = new JCheckBox();
-        chkShowTotalValue = new JCheckBox();
-        chkShowDailyChange = new JCheckBox();
-        chkShowTotalProfit = new JCheckBox();
-        chkShowUniqueSymbols = new JCheckBox();
+        chkShowTotalProfitPercentage = SettingsCheckbox.create("");
+        chkShowTotalCost = SettingsCheckbox.create("");
+        chkShowTotalValue = SettingsCheckbox.create("");
+        chkShowDailyChange = SettingsCheckbox.create("");
+        chkShowTotalProfit = SettingsCheckbox.create("");
+        chkShowUniqueSymbols = SettingsCheckbox.create("");
         JPanel jPanel3 = new JPanel();
         SettingsLabel jLabel15 = SettingsLabel.create();
         txtIexToken = SettingsTextField.create();
@@ -342,7 +369,6 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         SettingsLabel jLabel21 = SettingsLabel.create();
         txtFreeCurrencyToken = SettingsTextField.create();
         JPanel jPanel4 = new JPanel();
-        SettingsLabel jLabel11 = SettingsLabel.create();
         SettingsLabel jLabel14 = SettingsLabel.create();
         SettingsLabel jLabel22 = SettingsLabel.create();
         txtCurrencySymbol = SettingsTextField.create();
@@ -352,9 +378,8 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         txtTotalInvestment = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
         SettingsLabel jLabel24 = SettingsLabel.create();
         SettingsLabel jLabel25 = SettingsLabel.create();
-        JSeparator jSeparator1 = new JSeparator();
         JSeparator jSeparator2 = new JSeparator();
-        btnBackup = new JButton();
+        btnBackup = SettingsButton.create();
         JSeparator jSeparator4 = new JSeparator();
 
         btnOk.setText("OK");
@@ -363,56 +388,24 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         btnCancel.setText("Cancel");
 
         btnRestore.setText("Restore");
-        btnRestore.setToolTipText("Restore settings and syymbols from a local file");
+        btnRestore.setToolTipText("Restore settings and symbols from a local file");
 
-        btnNormalText.setBackground(new java.awt.Color(153, 153, 153));
-
-        btnUpColour.setBackground(new java.awt.Color(0, 204, 204));
-
-        btnDownColour.setBackground(new java.awt.Color(255, 102, 102));
-
-        btnUpArrowColour.setBackground(new java.awt.Color(0, 204, 51));
 
         btnDownArrowColour.setBackground(java.awt.Color.red);
-
-        jLabel10.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel10.setText("Font");
 
         chkBold.setText("Bold");
 
         chkItalic.setText("Italic");
 
-        jLabel12.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel12.setText("High Alarm");
-
-        jLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel4.setText("Background");
-
-        jLabel5.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel5.setText("Up Colour");
-
-        btnHighAlarm.setBackground(new java.awt.Color(204, 204, 204));
-        btnHighAlarm.setText("...");
-
-        jLabel6.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel6.setText("Up Arrow Colour");
-
-        jLabel13.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel13.setText("Low Alarm");
-
-        jLabel7.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel7.setText("Normal Text");
-
-        jLabel8.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel8.setText("Down Colour");
-
-        btnLowAlarm.setBackground(new java.awt.Color(204, 204, 204));
-        btnLowAlarm.setText("...");
+//        btnHighAlarm.setBackground(new java.awt.Color(204, 204, 204));
+//        btnHighAlarm.setText("...");
+//
+//        btnLowAlarm.setBackground(new java.awt.Color(204, 204, 204));
+//        btnLowAlarm.setText("...");
 
         jLabel26.setHorizontalAlignment(SwingConstants.RIGHT);
         jLabel26.setText("Down Arrow Colour");
 
-        btnBackground.setBackground(new java.awt.Color(0, 0, 0));
 
 
         chkShowTotalProfitPercentage.setText("Show Portfolio Profit & Loss as Percentage");

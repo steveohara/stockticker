@@ -30,7 +30,7 @@ public class SettingsFormX extends JDialog implements CallbackInterface {
         this.settings = settings;
         initComponents();
         setTitle("Settings");
-        setModal(true);
+//        setModal(true);
         setAlwaysOnTop(true);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -71,15 +71,17 @@ public class SettingsFormX extends JDialog implements CallbackInterface {
         });
         btnCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Point location = null;
-                if (settingsForm != null) {
-                    location = settingsForm.getLocation();
-                    settingsForm.dispose();
-                }
-                settingsForm = new SettingsForm(caller, settings);
-                if (location != null) {
-                    settingsForm.setLocation(location);
-                }
+                SwingUtilities.invokeLater(() -> {
+                    Point location = null;
+                    if (settingsForm != null) {
+                        location = settingsForm.getLocation();
+                        settingsForm.dispose();
+                    }
+                    settingsForm = new SettingsForm(caller, settings);
+                    if (location != null) {
+                        settingsForm.setLocation(location);
+                    }
+                });
             }
         });
 
