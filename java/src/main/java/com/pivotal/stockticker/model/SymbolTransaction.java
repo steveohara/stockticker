@@ -1,6 +1,7 @@
 package com.pivotal.stockticker.model;
 
 import com.pivotal.stockticker.Utils;
+import com.pivotal.stockticker.service.PersistanceManager;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

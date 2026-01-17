@@ -4,7 +4,7 @@
  * Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  */
-package com.pivotal.stockticker;
+package com.pivotal.stockticker.utils;
 
 import lombok.extern.slf4j.Slf4j;
 

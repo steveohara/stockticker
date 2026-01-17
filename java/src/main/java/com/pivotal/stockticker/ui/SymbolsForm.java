@@ -6,11 +6,15 @@
  */
 package com.pivotal.stockticker.ui;
 
-import com.pivotal.stockticker.StartupManager;
 import com.pivotal.stockticker.Utils;
 import com.pivotal.stockticker.model.Settings;
 import com.pivotal.stockticker.model.SymbolTransaction;
-import com.pivotal.stockticker.model.SymbolsManager;
+import com.pivotal.stockticker.service.SymbolsManager;
+import com.pivotal.stockticker.ui.components.CapableTextField;
+import com.pivotal.stockticker.ui.components.CheckBoxFrame;
+import com.pivotal.stockticker.ui.components.SymbolsList;
+import com.pivotal.stockticker.utils.CallbackInterface;
+import com.pivotal.stockticker.utils.StartupManager;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;

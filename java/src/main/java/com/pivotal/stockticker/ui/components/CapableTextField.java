@@ -4,7 +4,7 @@
  * 4NG PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  */
-package com.pivotal.stockticker.ui;
+package com.pivotal.stockticker.ui.components;
 
 import com.pivotal.stockticker.Utils;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.swing.*;
 import javax.swing.text.*;
 
 /**
@@ -20,7 +19,7 @@ import javax.swing.text.*;
  * keeps it numeric or leaves it unchanged based on the specified conversion type.
  */
 @Slf4j
-public class CapableTextField extends JTextField {
+public class CapableTextField extends SettingsTextField {
 
     /**
      * Enumeration for case conversion types.

@@ -4,7 +4,7 @@
  * 4NG PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  */
-package com.pivotal.stockticker.ui;
+package com.pivotal.stockticker.ui.components;
 
 import com.pivotal.stockticker.model.SymbolTransaction;
 import lombok.Getter;

@@ -1,5 +1,7 @@
-package com.pivotal.stockticker.model;
+package com.pivotal.stockticker.service;
 
+import com.pivotal.stockticker.model.ExchangeRate;
+import com.pivotal.stockticker.model.Settings;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,33 +13,33 @@ import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 
 /**
- * Manages stock prices including loading from storage and periodic updates
+ * Manages exchange rates including loading from storage and periodic updates
  */
 @Slf4j
-public class PricesManager {
+public class ExchangeRatesManager {
 
-    private static final String PRICES_ROOT = PersistanceManager.ROOT_NODE + Price.class.getSimpleName();
-    private Preferences prefs = Preferences.userRoot().node(PRICES_ROOT);
+    private static final String EXCHANGE_RATES_ROOT = PersistanceManager.ROOT_NODE + ExchangeRate.class.getSimpleName();
+    private Preferences prefs = Preferences.userRoot().node(EXCHANGE_RATES_ROOT);
 
-    private final Map<String, Price> currentPrices = new TreeMap<>(String::compareToIgnoreCase);
+    private final Map<String, ExchangeRate> currentRates = new TreeMap<>(String::compareToIgnoreCase);
 
-    private final PriceCurrencyUpdateTask scheduler;
+    private final UpdateTask scheduler;
     private final Settings settings;
 
     /**
-     * Constructor - loads all prices from persistent storage and starts the periodic update task
+     * Constructor - loads all exchange rates from persistent storage and starts the periodic update task
      *
      * @param settings Application settings
      */
-    public PricesManager(Settings settings) {
+    public ExchangeRatesManager(Settings settings) {
         this.settings = settings;
 
         // Load all the saved prices values from persistent storage
         loadFromStorage();
 
         // Schedule the task to run every X seconds with an initial delay of 0 seconds
-        scheduler = new PriceCurrencyUpdateTask(settings, currentPrices);
-        scheduler.start(settings.getFrequency());
+        scheduler = new UpdateTask(settings, currentRates);
+        scheduler.start(settings.getExchangeRateFrequency());
     }
 
     /**
@@ -45,35 +47,35 @@ public class PricesManager {
      */
     public void loadFromStorage() {
         // Load all the prices from the persistent storage
-        prefs = Preferences.userRoot().node(PRICES_ROOT);
+        prefs = Preferences.userRoot().node(EXCHANGE_RATES_ROOT);
         try {
             for (String code : prefs.childrenNames()) {
-                currentPrices.put(code, Price.getPrice(code));
+                currentRates.put(code, ExchangeRate.getExchangeRate(code));
             }
         }
         catch (Exception e) {
             log.error("Error accessing storage: {}", e.getMessage());
         }
-        log.info("Loaded {} prices", currentPrices.size());
+        log.info("Loaded {} exchange rates", currentRates.size());
     }
 
     /**
-     * Replaces all the current prices with new ones
+     * Replaces all the current exchange rates with new ones
      *
-     * @param codes Collection of stock codes
+     * @param codes Collection of exchange rate codes
      */
-    public void replacePrices(Collection<String> codes) {
+    public void replaceExchangeRates(Collection<String> codes) {
         if (codes == null || codes.isEmpty()) {
             return;
         }
         // Add or update prices from the new list
         for (String symbol : codes) {
-            addPrice(symbol);
+            addRate(symbol);
         }
 
         // Find all the redundant prices that are no longer needed
         List<String> codesToDelete = new ArrayList<>();
-        for (String code : currentPrices.keySet()) {
+        for (String code : currentRates.keySet()) {
             if (!codes.contains(code)) {
                 codesToDelete.add(code);
             }
@@ -81,7 +83,7 @@ public class PricesManager {
 
         // Remove all prices that are no longer needed
         for (String code : codesToDelete) {
-            currentPrices.remove(code);
+            currentRates.remove(code);
             Preferences pref = prefs.node(code);
             if (pref != null) {
                 try {
@@ -96,65 +98,65 @@ public class PricesManager {
     }
 
     /**
-     * Create a new Price
+     * Create a new Exchange Rate
      *
      * @param code Symbol code
-     * @return Newly created Price with defaults
+     * @return Newly created ExchangeRate with defaults
      */
-    public Price addPrice(String code) {
-        if (currentPrices.containsKey(code)) {
-            return currentPrices.get(code);
+    public ExchangeRate addRate(String code) {
+        if (currentRates.containsKey(code)) {
+            return currentRates.get(code);
         }
         try {
-            Price price = Price.getPrice(code);
-            currentPrices.put(code, price);
-            log.debug("Added {} price", code);
-            return price;
+            ExchangeRate rate = ExchangeRate.getExchangeRate(code);
+            currentRates.put(code, rate);
+            log.debug("Added {} rate", code);
+            return rate;
         }
         catch (Exception e) {
-            log.error("Error creating new price: {}", e.getMessage());
+            log.error("Error creating new rate: {}", e.getMessage());
             return null;
         }
     }
 
     /**
-     * Retrieve the price for a given stock code
+     * Retrieve the exchange rate for a given source code
      *
      * @param code The stock code
-     * @return The Price object for the given code, or null if not found
+     * @return The ExchangeRate object for the given code, or null if not found
      */
-    public Price getPrice(String code) {
-        return currentPrices.get(code);
+    public ExchangeRate getPrice(String code) {
+        return currentRates.get(code);
     }
 
     /**
-     * Get all current prices
+     * Get all current exchange rates
      *
      * @return A map of stock codes to their corresponding Price objects
      */
-    public Map<String, Price> getAllPrices() {
-        return currentPrices;
+    public Map<String, ExchangeRate> getAllExchangeRates() {
+        return currentRates;
     }
 
     /**
      * Update settings from the application
      */
     public void resetScheduler() {
-        if (settings.getFrequency() != scheduler.getPeriodSeconds()) {
-            scheduler.start(settings.getFrequency());
+        if (settings.getExchangeRateFrequency() != scheduler.getPeriodSeconds()) {
+            scheduler.start(settings.getExchangeRateFrequency());
         }
     }
 
     /**
-     * Scheduler to update prices periodically
+     * Scheduler to update exchange rates periodically
      */
     @Slf4j
-    private static class PriceCurrencyUpdateTask {
+    private static class UpdateTask {
 
         private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         private ScheduledFuture<?> scheduledFuture;
         private final Settings settings;
-        private Map<String, Price> currentPrices = new HashMap<>();
+        private Map<String, ExchangeRate> currentExchangeRates = new HashMap<>();
         @Getter
         private int periodSeconds;
 
@@ -162,21 +164,21 @@ public class PricesManager {
          * Constructor
          *
          * @param settings      Application settings
-         * @param currentPrices Map of current prices
+         * @param currentExchangeRates Map of current prices
          */
-        public PriceCurrencyUpdateTask(Settings settings, Map<String, Price> currentPrices) {
+        public UpdateTask(Settings settings, Map<String, ExchangeRate> currentExchangeRates) {
             this.settings = settings;
-            this.currentPrices = currentPrices;
+            this.currentExchangeRates = currentExchangeRates;
         }
 
         /**
-         * The periodic task to update prices
+         * The periodic task to update exchange rates
          */
         private final Runnable task = () -> {
 
-            // Get the list of stock symbols to update prices for
-            log.debug("Updating prices for {} symbols", currentPrices.size());
-            Map<String, Price> prices = new HashMap<>(currentPrices);
+            // Get the list of stock symbols to update rates for
+            log.debug("Updating exchange rates for {} rates", currentExchangeRates.size());
+            Map<String, ExchangeRate> rates = new HashMap<>(currentExchangeRates);
 
             // Update prices for each symbol from each source
         };

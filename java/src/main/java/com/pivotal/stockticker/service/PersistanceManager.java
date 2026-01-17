@@ -1,6 +1,8 @@
-package com.pivotal.stockticker.model;
+package com.pivotal.stockticker.service;
 
 import com.pivotal.stockticker.Utils;
+import com.pivotal.stockticker.model.Settings;
+import com.pivotal.stockticker.model.SymbolTransaction;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -281,7 +283,7 @@ abstract public class PersistanceManager {
     /**
      * Loads all fields from storage into the current instance.
      */
-    void loadFromStorage(Preferences prefs) {
+    protected void loadFromStorage(Preferences prefs) {
         this.prefs = prefs;
         for (Field field : getClass().getSuperclass().getDeclaredFields()) {
             this.loadField(field);

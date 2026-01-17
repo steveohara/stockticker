@@ -1,4 +1,4 @@
-package com.pivotal.stockticker.ui;
+package com.pivotal.stockticker.ui.components;
 
 import lombok.AccessLevel;
 import lombok.Getter;

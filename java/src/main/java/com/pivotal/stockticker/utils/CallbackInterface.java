@@ -1,4 +1,4 @@
-package com.pivotal.stockticker.ui;
+package com.pivotal.stockticker.utils;
 
 import java.awt.*;
 

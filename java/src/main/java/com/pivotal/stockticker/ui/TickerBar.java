@@ -1,9 +1,17 @@
 package com.pivotal.stockticker.ui;
 
-import com.pivotal.stockticker.StartupManager;
 import com.pivotal.stockticker.Utils;
-import com.pivotal.stockticker.VersionInfo;
-import com.pivotal.stockticker.model.*;
+import com.pivotal.stockticker.model.LivePrice;
+import com.pivotal.stockticker.model.Settings;
+import com.pivotal.stockticker.model.SummaryStats;
+import com.pivotal.stockticker.model.SymbolTransaction;
+import com.pivotal.stockticker.service.ExchangeRatesManager;
+import com.pivotal.stockticker.service.PricesManager;
+import com.pivotal.stockticker.service.SymbolsManager;
+import com.pivotal.stockticker.ui.components.ColouredTextPanel;
+import com.pivotal.stockticker.utils.CallbackInterface;
+import com.pivotal.stockticker.utils.StartupManager;
+import com.pivotal.stockticker.utils.VersionInfo;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -637,7 +645,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
      */
     private void showSettingsDialog() {
         SwingUtilities.invokeLater(() -> {
-            new SettingsForm(this, settings);
+            new SettingsFormX(this, settings);
         });
     }
 

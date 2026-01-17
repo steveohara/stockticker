@@ -7,6 +7,9 @@
 package com.pivotal.stockticker.model;
 
 import com.pivotal.stockticker.Utils;
+import com.pivotal.stockticker.service.ExchangeRatesManager;
+import com.pivotal.stockticker.service.PricesManager;
+import com.pivotal.stockticker.service.SymbolsManager;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

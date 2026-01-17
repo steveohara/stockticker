@@ -1,6 +1,6 @@
 package com.pivotal.stockticker;
 
-import com.pivotal.stockticker.ui.CallbackInterface;
+import com.pivotal.stockticker.utils.CallbackInterface;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -136,5 +136,50 @@ public class Utils {
         }
         return String.format("%s%.2f", currencySymbol, Math.abs(value));
     }
+
+    /**
+     * Recursively dumps the bounds of components in the hierarchy.
+     *
+     * @param c      The component to dump.
+     * @param indent Indentation for formatting.
+     */
+    private static void dumpBoundsTree(Component c, String indent) {
+        Rectangle b = c.getBounds();
+        Dimension pref = c.getPreferredSize();
+
+        String extra = "";
+        if (c instanceof JLabel l) extra = " text=\"" + l.getText() + "\"";
+        else if (c instanceof AbstractButton bttn) extra = " text=\"" + bttn.getText() + "\"";
+        else if (c instanceof JTextField tf) extra = " textField";
+        else if (c instanceof JComboBox<?> cb) extra = " combo";
+        else if (c instanceof JSpinner sp) extra = " spinner";
+
+        System.out.printf(
+                "%s%s%s bounds=[x=%d,y=%d,w=%d,h=%d] pref=[w=%d,h=%d]%n",
+                indent,
+                c.getClass().getSimpleName(),
+                extra,
+                b.x, b.y, b.width, b.height,
+                pref.width, pref.height
+        );
+
+        if (c instanceof Container container) {
+            for (Component child : container.getComponents()) {
+                dumpBoundsTree(child, indent + "  ");
+            }
+        }
+    }
+
+    /**
+     * Dumps the bounds of all components in the hierarchy starting from the given root component.
+     *
+     * @param root The root component to start dumping from.
+     */
+    public static void dumpAllBounds(Component root) {
+        System.out.println("===== BOUNDS DUMP START =====");
+        dumpBoundsTree(root, "");
+        System.out.println("===== BOUNDS DUMP END =====");
+    }
+
 
 }

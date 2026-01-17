@@ -4,8 +4,9 @@
  * 4NG PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  */
-package com.pivotal.stockticker.model;
+package com.pivotal.stockticker.service;
 
+import com.pivotal.stockticker.model.SymbolTransaction;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
