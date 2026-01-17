@@ -76,6 +76,14 @@ public class TickerBar extends JFrame implements CallbackInterface {
      * Draw the content of the ticker
      */
     synchronized private void drawTickerContent() {
+        drawLivePrices();
+        drawSummary();
+    }
+
+    /**
+     * Draw the content of the ticker
+     */
+    private void drawLivePrices() {
 
         // Get a fresh list of live prices to work with
         pnlStocks.cls();
@@ -85,17 +93,61 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
         // Draw these on the ticker panel
         int x = 0;
+        pnlStocks.setCurrentX(VALUE_SEPARATION);
         for (LivePrice livePrice : livePrices) {
-
-            // Set the starting point of the next stock
-            pnlStocks.setCurrentX(pnlStocks.getCurrentX() + STOCK_SEPARATION);
 
             // Draw the stock data
             drawLivePrice(livePrice);
 
+            // Separate from the next stock
+            pnlStocks.setCurrentX(pnlStocks.getCurrentX() + STOCK_SEPARATION);
+
             // Set the bounds for this live price
             livePrice.setBounds(new Rectangle(x, 0, pnlStocks.getCurrentX() - x, pnlStocks.getHeight()));
             x = pnlStocks.getCurrentX();
+        }
+    }
+
+    /**
+     * Draws the summary panel on the ticker.
+     */
+    private void drawSummary() {
+        pnlSummary.cls();
+        if (settings.isShowSummary()) {
+            pnlSummary.setBackground(settings.getBackgroundColor());
+            pnlSummary.setFontColor(settings.getNormalTextColor());
+            pnlSummary.setFont(new Font(settings.getFontName(), settings.getFontStyle(), settings.getFontSize()));
+
+            // Create a summary stats object to calculate the summary data
+            SummaryStats summaryStats = new SummaryStats(symbols, prices, rates, settings);
+            double totalValue = summaryStats.calculateTotalValue();
+            double totalCost = summaryStats.calculateTotalCost();
+            double adjustedTotalValue = totalValue - settings.getTotalInvestment() - settings.getMargin();
+
+            // Draw the summary data
+            pnlSummary.print("Summary:");
+            if (settings.isShowPortfolioProfitAndLoss()) {
+                pnlSummary.print(Utils.formatCurrencyValue(totalValue, settings.getCurrencySymbol()));
+                pnlSummary.setFontColor(adjustedTotalValue < totalCost ? settings.getDownColor() : adjustedTotalValue > totalCost ? settings.getUpColor() : settings.getNormalTextColor());
+                pnlSummary.print(String.format(" (%s)", Utils.formatCurrencyValue(totalValue==0.0 ? 0 : (totalCost - adjustedTotalValue), settings.getCurrencySymbol())));
+                pnlSummary.setCurrentX(pnlSummary.getCurrentX() + VALUE_SEPARATION);
+            }
+            if (settings.isShowPortfolioProfitAndLossPercent()) {
+                pnlSummary.setFontColor(adjustedTotalValue < totalCost ? settings.getDownColor() : adjustedTotalValue > totalCost ? settings.getUpColor() : settings.getNormalTextColor());
+                pnlSummary.print(String.format("%.2f%%", totalValue==0.0 ? 0 : (adjustedTotalValue - totalCost) / totalCost * 100));
+                pnlSummary.setCurrentX(pnlSummary.getCurrentX() + VALUE_SEPARATION);
+            }
+            if (settings.isShowTotalCost()) {
+                pnlSummary.setFontColor(settings.getNormalTextColor());
+                pnlSummary.print(String.format("Cost:%s", Utils.formatCurrencyValue(totalCost, settings.getCurrencySymbol())));
+                pnlSummary.setCurrentX(pnlSummary.getCurrentX() + VALUE_SEPARATION);
+            }
+            if (settings.isShowTotalValue()) {
+                pnlSummary.setFontColor(settings.getNormalTextColor());
+                pnlSummary.print(String.format("Value:%s", Utils.formatCurrencyValue(totalValue, settings.getCurrencySymbol())));
+                pnlSummary.setCurrentX(pnlSummary.getCurrentX() + VALUE_SEPARATION);
+            }
+            pnlSummary.print(" ");
         }
     }
 
@@ -124,36 +176,35 @@ public class TickerBar extends JFrame implements CallbackInterface {
         // Check if we need to show day changes
         SymbolTransaction symbol = livePrice.getSymbolTransaction();
         if ((symbol.isShowDayChange() || symbol.isShowDayChangePercent() || symbol.isShowDayChangeUpDown())) {
-            boolean shownDayData = false;
             boolean showBraces = (bShownOtherData && (symbol.isShowDayChange() || symbol.isShowDayChangePercent())) || (symbol.isShowChangeUpDown() && symbol.isShowDayChangeUpDown());
-            pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.VALUE_SEPARATION);
             pnlStocks.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : livePrice.isDownToday() ? settings.getDownColor() : settings.getNormalTextColor());
             if (showBraces) {
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + VALUE_SEPARATION);
                 pnlStocks.print("(");
             }
 
             // Show the Day price difference
             if (symbol.isShowDayChange()) {
                 pnlStocks.print(livePrice.getFormattedDayChange());
-                shownDayData = true;
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + VALUE_SEPARATION);
             }
 
             // Show the Day change in percent
             if (symbol.isShowDayChangePercent()) {
-                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + (shownDayData ? TickerBar.VALUE_SEPARATION : 0));
                 pnlStocks.print(livePrice.getFormattedPercentDayChange());
-                shownDayData = true;
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + VALUE_SEPARATION);
             }
 
             // Show the day profit/loss
             if (symbol.isShowProfitLoss() && symbol.isShowDayChange()) {
-                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.VALUE_SEPARATION);
                 pnlStocks.print(livePrice.getFormattedDayProfitLoss());
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + VALUE_SEPARATION);
             }
 
             // Show the Day up/down arrows
             if (symbol.isShowDayChangeUpDown()) {
-                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.UP_DOWN_SEPARATION);
+                boolean needSeparation = symbol.isShowDayChange() || symbol.isShowDayChangePercent() || symbol.isShowProfitLoss();
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + (needSeparation ? -UP_DOWN_SEPARATION : UP_DOWN_SEPARATION));
                 pnlStocks.setFontColor(livePrice.isUpToday() ? settings.getUpArrowColor() : livePrice.isDownToday() ? settings.getDownArrowColor() : settings.getNormalTextColor());
                 pnlStocks.print(livePrice.isUpToday() ? "↑" : livePrice.isDownToday() ? "↓" : "↕");
             }
@@ -175,46 +226,46 @@ public class TickerBar extends JFrame implements CallbackInterface {
         SymbolTransaction symbol = livePrice.getSymbolTransaction();
         pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpColor() : livePrice.isDown() ? settings.getDownColor() : settings.getNormalTextColor());
         pnlStocks.print(livePrice.getSymbolTransaction().getDisplayName());
+        pnlStocks.setCurrentX(pnlStocks.getCurrentX() + VALUE_SEPARATION);
 
         // Show the price and other data
-        boolean bShownOtherData = false;
-        if (symbol.isShowPrice() || symbol.isShowChangeUpDown() || symbol.isShowChange() || symbol.isShowChangePercent() || symbol.isShowProfitLoss()) {
+        boolean showData = symbol.isShowPrice() || symbol.isShowChangeUpDown() || symbol.isShowChange() || symbol.isShowChangePercent() || symbol.isShowProfitLoss();
+        if (showData) {
 
             // Show the price
             if (symbol.isShowPrice()) {
-                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.VALUE_SEPARATION);
                 pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpColor() : livePrice.isDown() ? settings.getDownColor() : settings.getNormalTextColor());
                 pnlStocks.print(livePrice.getFormattedPrice());
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + VALUE_SEPARATION);
             }
 
             // Show the price difference
             if (symbol.isShowChange()) {
-                bShownOtherData = true;
-                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.VALUE_SEPARATION);
                 pnlStocks.print(livePrice.getFormattedChange());
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + VALUE_SEPARATION);
             }
 
             // Show the change in percent
             if (symbol.isShowChangePercent()) {
-                bShownOtherData = true;
-                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.VALUE_SEPARATION);
                 pnlStocks.print(livePrice.getFormattedPercentChange());
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + VALUE_SEPARATION);
             }
 
             // Show the profit/loss
             if (symbol.isShowProfitLoss()) {
-                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.VALUE_SEPARATION);
                 pnlStocks.print(livePrice.getFormattedProfitLoss());
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + VALUE_SEPARATION);
             }
 
             // Show the up/down arrows
             if (symbol.isShowChangeUpDown()) {
-                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + TickerBar.UP_DOWN_SEPARATION);
+                boolean needSeparation = symbol.isShowPrice() || symbol.isShowChange() || symbol.isShowChangePercent() || symbol.isShowProfitLoss();
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + (needSeparation ? -UP_DOWN_SEPARATION : UP_DOWN_SEPARATION));
                 pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpArrowColor() : livePrice.isDown() ? settings.getDownArrowColor() : settings.getNormalTextColor());
                 pnlStocks.print(livePrice.isUp() ? "↑" : livePrice.isDown() ? "↓" : "↕");
             }
         }
-        return bShownOtherData;
+        return showData;
     }
 
     @Override
