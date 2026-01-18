@@ -152,13 +152,14 @@ public class SettingsComponent<T extends JComponent> {
     }
 
     /**
-     * Sets the right position of the component to the specified x coordinate.
+     * Sets the right position of the component so that the right most
+     * coordinate position is x.
      *
      * @param x The x-coordinate.
      * @return The component itself for method chaining.
      */
     public T atRight(int x) {
-        return atLeft(x + component.getWidth());
+        return atLeft(x - component.getWidth());
     }
 
     /**
@@ -246,6 +247,7 @@ public class SettingsComponent<T extends JComponent> {
     public T below(JComponent alignmentComp, int offset) {
         atLeft(alignmentComp);
         atBottom(alignmentComp, offset);
+        withDimensions(alignmentComp);
         return component;
     }
 
@@ -259,6 +261,7 @@ public class SettingsComponent<T extends JComponent> {
     public T tail(JComponent alignmentComp, int offset) {
         atTop(alignmentComp);
         atRight(alignmentComp, offset);
+        withHeight(alignmentComp);
         return component;
     }
 
@@ -296,6 +299,30 @@ public class SettingsComponent<T extends JComponent> {
     }
 
     /**
+     * Sets the position of the component to the specified x and y coordinates.
+     *
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return The component itself for method chaining.
+     */
+    public T at(int x, int y) {
+        component.setBounds(x, y, component.getWidth(), component.getHeight());
+        return component;
+    }
+
+    /**
+     * Sets the dimensions of the component to the specified width and height.
+     *
+     * @param width  The width to set.
+     * @param height The height to set.
+     * @return The component itself for method chaining.
+     */
+    public T withDimensions(int width, int height) {
+        component.setBounds(component.getX(), component.getY(), width, height);
+        return component;
+    }
+
+    /**
      * Sets the dimensions of the component to match another component.
      *
      * @param alignmentComp The component to match dimensions with.
@@ -303,6 +330,17 @@ public class SettingsComponent<T extends JComponent> {
      */
     public T withDimensions(JComponent alignmentComp) {
         component.setBounds(component.getX(), component.getY(), alignmentComp.getWidth(), alignmentComp.getHeight());
+        return component;
+    }
+
+    /**
+     * Sets the border of the component.
+     *
+     * @param border The border to set.
+     * @return The component itself for method chaining.
+     */
+    public T withBorder(javax.swing.border.Border border) {
+        component.setBorder(border);
         return component;
     }
 

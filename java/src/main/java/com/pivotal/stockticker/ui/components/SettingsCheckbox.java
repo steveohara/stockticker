@@ -14,7 +14,7 @@ public class SettingsCheckbox extends JCheckBox {
     @Delegate
     private final SettingsComponent<SettingsCheckbox> helper = new SettingsComponent<>(this);
 
-    public static final int DEFAULT_WIDTH = 100;
+    public static final int DEFAULT_WIDTH = 150;
     public static final int DEFAULT_HEIGHT = 20;
 
     /**

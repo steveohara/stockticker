@@ -342,7 +342,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
         // Summary settings
         chkShowTotalProfit = SettingsCheckbox.create("Show Portfolio Profit & Loss", "Displays the total cost of the portfolio (including cash investment)")
-                .below(jSeparator2, vGap).atLeft(50).withWidth(300).to(getContentPane());
+                .below(jLabel14, vGap).atLeft(50).withWidth(300).to(getContentPane());
         chkShowTotalProfitPercentage = SettingsCheckbox.create("Show Portfolio Profit & Loss as Percentage", "Show the overall portfolio position as a percentage of the total cost")
                 .below(chkShowTotalProfit, vGap / 3).withWidth(chkShowTotalProfit).to(getContentPane());
         chkShowTotalCost = SettingsCheckbox.create("Show Total Portfolio Cost", "Displays the total cost of the portfolio (including cash investment)")

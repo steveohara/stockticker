@@ -135,6 +135,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             // Draw the summary data
             pnlSummary.setFontColor(settings.getLabelColor());
             pnlSummary.print("Summary:");
+            pnlSummary.setFontColor(settings.getNormalTextColor());
             if (settings.isShowPortfolioProfitAndLoss()) {
                 pnlSummary.print(Utils.formatCurrencyValue(totalValue, settings.getCurrencySymbol()));
                 pnlSummary.setFontColor(adjustedTotalValue < totalCost ? settings.getDownColor() : adjustedTotalValue > totalCost ? settings.getUpColor() : settings.getNormalTextColor());
@@ -187,6 +188,8 @@ public class TickerBar extends JFrame implements CallbackInterface {
         if ((symbol.isShowDayChange() || symbol.isShowDayChangePercent() || symbol.isShowDayChangeUpDown())) {
             boolean showBraces = (bShownOtherData && (symbol.isShowDayChange() || symbol.isShowDayChangePercent())) || (symbol.isShowChangeUpDown() && symbol.isShowDayChangeUpDown());
             pnlStocks.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : livePrice.isDownToday() ? settings.getDownColor() : settings.getNormalTextColor());
+            pnlStocks.setFontBold(settings.isFontBold());
+            pnlStocks.setFontItalic(settings.isFontItalic());
             if (showBraces) {
                 pnlStocks.setCurrentX(pnlStocks.getCurrentX() + VALUE_SEPARATION);
                 pnlStocks.print("(");
@@ -220,6 +223,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 pnlStocks.setFontBold((settings.getFontStyle() | Font.BOLD) > 0);
             }
             if (showBraces) {
+                pnlStocks.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : livePrice.isDownToday() ? settings.getDownColor() : settings.getNormalTextColor());
                 pnlStocks.print(")");
             }
         }
@@ -236,6 +240,8 @@ public class TickerBar extends JFrame implements CallbackInterface {
         // Show the symbol
         SymbolTransaction symbol = livePrice.getSymbolTransaction();
         pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpColor() : livePrice.isDown() ? settings.getDownColor() : settings.getNormalTextColor());
+        pnlStocks.setFontBold(settings.isFontBold());
+        pnlStocks.setFontItalic(settings.isFontItalic());
         pnlStocks.print(livePrice.getSymbolTransaction().getDisplayName());
         pnlStocks.setCurrentX(pnlStocks.getCurrentX() + VALUE_SEPARATION);
 

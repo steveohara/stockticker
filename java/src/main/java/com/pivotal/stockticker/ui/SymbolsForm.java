@@ -10,16 +10,13 @@ import com.pivotal.stockticker.Utils;
 import com.pivotal.stockticker.model.Settings;
 import com.pivotal.stockticker.model.SymbolTransaction;
 import com.pivotal.stockticker.service.SymbolsManager;
-import com.pivotal.stockticker.ui.components.CapableTextField;
-import com.pivotal.stockticker.ui.components.CheckBoxFrame;
-import com.pivotal.stockticker.ui.components.SymbolsList;
+import com.pivotal.stockticker.ui.components.*;
 import com.pivotal.stockticker.utils.CallbackInterface;
 import com.pivotal.stockticker.utils.StartupManager;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
 import java.awt.event.*;
@@ -30,12 +27,12 @@ import java.awt.event.*;
 @Slf4j
 public class SymbolsForm extends JDialog implements CallbackInterface {
 
-    private JButton btnAdd, btnCancel, btnDelete, btnOk;
-    private JCheckBox chkHideDisabled, chkAlarmHighPercent, chkAlarmHighPlaySound, chkAlarmLowPercent, chkAlarmLowPlaySound, chkDisabled, chkExcludeFromSummary, chkShowChange, chkShowChangePercent, chkShowDayChange, chkShowDayChangePercent, chkShowDayUpDown, chkShowPrice, chkShowProfitLoss, chlShowUpDown;
+    private SettingsButton btnAdd, btnCancel, btnDelete, btnOk;
+    private SettingsCheckbox chkHideDisabled, chkAlarmHighPercent, chkAlarmHighPlaySound, chkAlarmLowPercent, chkAlarmLowPlaySound, chkDisabled, chkExcludeFromSummary, chkShowChange, chkShowChangePercent, chkShowDayChange, chkShowDayChangePercent, chkShowDayUpDown, chkShowPrice, chkShowProfitLoss, chlShowUpDown;
     private CheckBoxFrame pnlAlarmLow, pnlAlarmHigh;
     private SymbolsList lstSymbols;
     private CapableTextField txtAlarmHigh, txtAlarmLow, txtCurrencyCode, txtPricePaid, txtSharesBought, txtSymbol;
-    private JTextField txtCurrencySymbol, txtDisplayName;
+    private SettingsTextField txtCurrencySymbol, txtDisplayName;
     private JLabel lblTransactionTimestamp;
 
     private final Settings settings;
@@ -354,7 +351,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      * This method is called from within the constructor to initialize the form.
      */
     private void initComponents() {
-        int vGap = 10;
+        int vGap = 7;
         int hGap = 10;
         int lblGap = 5;
         int stdWidth = 100;
@@ -364,227 +361,100 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         // Set the dialog size and use null layout
         setResizable(false);
         getContentPane().setLayout(null);
-
         LineBorder lineBorder = new LineBorder(UIManager.getColor("Component.borderColor"), 1);
-
-        chkHideDisabled = new JCheckBox("Hide Disabled Symbols");
-        chkHideDisabled.setBounds(hGap, vGap, 200, stdHeight);
+        chkHideDisabled = SettingsCheckbox.create("Hide Disabled Symbols").atLeft(hGap).atTop(vGap).withWidth(150).to(getContentPane());
         chkHideDisabled.setFont(new Font(chkHideDisabled.getFont().getName(), Font.PLAIN, 10));
         chkHideDisabled.setSelected(settings.isHideDisabledSymbols());
-        getContentPane().add(chkHideDisabled);
 
         // List of Symbols
-        JScrollPane jScrollPane1 = new JScrollPane();
-        lstSymbols = new SymbolsList();
-        lstSymbols.setBorder(null);
-        lstSymbols.hideDisabled(settings.isHideDisabledSymbols());
-        jScrollPane1.setBorder(lineBorder);
-        jScrollPane1.setViewportView(lstSymbols);
-        jScrollPane1.setBounds(hGap, chkHideDisabled.getX() + chkHideDisabled.getHeight() + vGap / 2, 150, 400);
-        getContentPane().add(jScrollPane1);
+        lstSymbols = SymbolsList.create().hideDisabled(settings.isHideDisabledSymbols()).withBorder(null);
+        SettingsScrollPane jScrollPane1 = SettingsScrollPane.create().withBorder(lineBorder).withViewport(lstSymbols)
+                .at(hGap, chkHideDisabled.getY() + chkHideDisabled.getHeight() + vGap / 2).withDimensions(150, 400)
+                .to(getContentPane());
 
         int left = jScrollPane1.getX() + jScrollPane1.getWidth() + (int)(hGap * 1.5);
 
         // Symbol & Details Labels/Fields
-        JLabel jLabel1 = new JLabel("Symbol");
-        jLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel1.setBounds(left, hGap, stdWidth, stdHeight);
-        getContentPane().add(jLabel1);
-
-        txtSymbol = new CapableTextField(CapableTextField.CONVERSION_TYPE.UPPER);
-        txtSymbol.setBounds(jLabel1.getX() + jLabel1.getWidth() + lblGap, jLabel1.getY(), 100, stdHeight);
-        getContentPane().add(txtSymbol);
-
-        chkDisabled = new JCheckBox("Disabled");
-        chkDisabled.setToolTipText("Do not use this symbol");
-        chkDisabled.setBounds(width - stdWidth - hGap, txtSymbol.getY(), stdWidth, stdHeight);
-        getContentPane().add(chkDisabled);
-
-        lblTransactionTimestamp = new JLabel();
-        lblTransactionTimestamp.setHorizontalAlignment(SwingConstants.CENTER);
-        lblTransactionTimestamp.setBounds(txtSymbol.getX() + txtSymbol.getWidth(), txtSymbol.getY(), chkDisabled.getX() - txtSymbol.getX() - txtSymbol.getWidth(), stdHeight);
-        getContentPane().add(lblTransactionTimestamp);
+        JLabel jLabel1 = SettingsLabel.create("Symbol").at(left, hGap).withDimensions(stdWidth, stdHeight).to(getContentPane());
+        txtSymbol = CapableTextField.create().setConversionType(CapableTextField.CONVERSION_TYPE.UPPER).tail(jLabel1, lblGap).to(getContentPane());
+        lblTransactionTimestamp = SettingsLabel.create().setAlignment(SwingConstants.CENTER).tail(txtSymbol, 0).withWidth(120).to(getContentPane());
+        chkDisabled = SettingsCheckbox.create("Disabled", "Do not use this symbol").tail(lblTransactionTimestamp, 0).to(getContentPane());
 
         // Display Name
-        JLabel jLabel2 = new JLabel("Display Name");
-        jLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel2.setBounds(left, jLabel1.getY() + jLabel1.getHeight() + vGap, stdWidth, stdHeight);
-        getContentPane().add(jLabel2);
-
-        txtDisplayName = new JTextField();
-        txtDisplayName.setToolTipText("Name you want to appear instead of symbol");
-        txtDisplayName.setBounds(jLabel2.getX() + jLabel2.getWidth() + lblGap, jLabel2.getY(), 300, stdHeight);
-        getContentPane().add(txtDisplayName);
+        JLabel jLabel2 = SettingsLabel.create("Display Name").below(jLabel1, vGap).to(getContentPane());
+        txtDisplayName = SettingsTextField.create("", "Name you want to appear instead of symbol").tail(jLabel2, lblGap).withWidth(300).to(getContentPane());
 
         // Price Paid & Shares Bought
-        JLabel jLabel3 = new JLabel("Price Paid");
-        jLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel3.setBounds(left, jLabel2.getY() + jLabel2.getHeight() + vGap, stdWidth, stdHeight);
-        getContentPane().add(jLabel3);
+        JLabel jLabel3 = SettingsLabel.create("Price Paid").below(jLabel2, vGap).to(getContentPane());
+        txtPricePaid = CapableTextField.create().setConversionType(CapableTextField.CONVERSION_TYPE.NUMERIC).tail(jLabel3, lblGap).withWidth(70).to(getContentPane());
 
-        txtPricePaid = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
-        txtPricePaid.setBounds(jLabel3.getX() + jLabel3.getWidth() + lblGap, jLabel3.getY(), 70, stdHeight);
-        getContentPane().add(txtPricePaid);
-
-        txtSharesBought = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
-        txtSharesBought.setBounds(txtDisplayName.getX() + txtDisplayName.getWidth() - 70, txtPricePaid.getY(), 70, stdHeight);
-        getContentPane().add(txtSharesBought);
-
-        JLabel jLabel4 = new JLabel("No. of Shares Bought");
-        jLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel4.setBounds(txtSharesBought.getX() - 146 - lblGap, txtSharesBought.getY(), 146, stdHeight);
-        getContentPane().add(jLabel4);
+        txtSharesBought = CapableTextField.create().setConversionType(CapableTextField.CONVERSION_TYPE.NUMERIC)
+                .atTop(jLabel3).withWidth(70).atRight(txtDisplayName.getRight()).to(getContentPane());
+        JLabel jLabel4 = SettingsLabel.create("No. of Shares Bought").atTop(jLabel3).atRight(txtSharesBought.getX() - lblGap).to(getContentPane());
 
         // Currency
-        JLabel jLabel5 = new JLabel("Currency Code");
-        jLabel5.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel5.setBounds(left, jLabel4.getY() + jLabel4.getHeight() + vGap, stdWidth, stdHeight);
-        getContentPane().add(jLabel5);
+        JLabel jLabel5 = SettingsLabel.create("Currency Code").below(jLabel3, vGap).to(getContentPane());
+        txtCurrencyCode = CapableTextField.create("", "e.g. GBP, USD").setConversionType(CapableTextField.CONVERSION_TYPE.UPPER)
+                .below(txtPricePaid, vGap).withWidth(70).to(getContentPane());
 
-        txtCurrencyCode = new CapableTextField(CapableTextField.CONVERSION_TYPE.UPPER);
-        txtCurrencyCode.setToolTipText("e.g. GBP, USD");
-        txtCurrencyCode.setBounds(jLabel5.getX() + jLabel5.getWidth() + lblGap, jLabel5.getY(), 70, stdHeight);
-        getContentPane().add(txtCurrencyCode);
-
-        JLabel jLabel6 = new JLabel("Currency Symbol");
-        jLabel6.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel6.setBounds(jLabel4.getX(), jLabel4.getY() + jLabel4.getHeight() + vGap, jLabel4.getWidth(), stdHeight);
-        getContentPane().add(jLabel6);
-
-        txtCurrencySymbol = new JTextField();
-        txtCurrencySymbol.setToolTipText("e.g. $, £, p, c");
-        txtCurrencySymbol.setBounds(txtSharesBought.getX(), jLabel6.getY(), txtSharesBought.getWidth(), stdHeight);
-        getContentPane().add(txtCurrencySymbol);
+        JLabel jLabel6 = SettingsLabel.create("Currency Symbol").below(jLabel4, vGap).to(getContentPane());
+        txtCurrencySymbol = SettingsTextField.create("", "e.g. $, £, p, c").below(txtSharesBought, vGap).withWidth(50).to(getContentPane());
 
         // "Show" Panel (manual border and grouping)
-        JPanel jPanel1 = new JPanel(null);
-        TitledBorder border = BorderFactory.createTitledBorder(lineBorder, "Show");
-        border.setTitleColor(lineBorder.getLineColor());
-        jPanel1.setBorder(border);
-        jPanel1.setBounds(left, txtCurrencyCode.getY() + txtCurrencyCode.getHeight() + vGap, txtCurrencySymbol.getX() + txtCurrencySymbol.getWidth() - left, 300);
-        getContentPane().add(jPanel1);
+        SettingsPanel jPanel1 = SettingsPanel.create(null).withBorder(BorderFactory.createTitledBorder(lineBorder, "Show"))
+                .below(jLabel5, vGap).withDimensions(txtDisplayName.getRight() - jLabel5.getX(), 300).to(getContentPane());
 
         // Show-panel checkboxes
         // Left column
-        chkShowPrice = new JCheckBox("Price");
-        chkShowPrice.setBounds(30, 20, stdWidth, stdHeight);
-        jPanel1.add(chkShowPrice);
-
-        chkShowChange = new JCheckBox("Change");
-        chkShowChange.setBounds(chkShowPrice.getX(), chkShowPrice.getY() + chkShowPrice.getHeight() + vGap / 2, stdWidth, stdHeight);
-        jPanel1.add(chkShowChange);
-
-        chlShowUpDown = new JCheckBox("Up/Down");
-        chlShowUpDown.setBounds(chkShowChange.getX(), chkShowChange.getY() + chkShowChange.getHeight() + vGap / 2, stdWidth, stdHeight);
-        jPanel1.add(chlShowUpDown);
+        chkShowPrice = SettingsCheckbox.create("Price").at(30, 20).withWidth(140).to(jPanel1);
+        chkShowChange = SettingsCheckbox.create("Change").below(chkShowPrice, vGap / 3).to(jPanel1);
+        chlShowUpDown = SettingsCheckbox.create("Up/Down").below(chkShowChange, vGap / 3).to(jPanel1);
 
         // Right column
-        chkExcludeFromSummary = new JCheckBox("Hide from Summary");
-        chkExcludeFromSummary.setBounds(200, chkShowPrice.getY(), stdWidth * 2, stdHeight);
-        jPanel1.add(chkExcludeFromSummary);
-
-        chkShowChangePercent = new JCheckBox("Change %");
-        chkShowChangePercent.setBounds(chkExcludeFromSummary.getX(), chkShowChange.getY(), stdWidth, stdHeight);
-        jPanel1.add(chkShowChangePercent);
-
-        chkShowProfitLoss = new JCheckBox("Profit & Loss");
-        chkShowProfitLoss.setBounds(chkShowChangePercent.getX(), chlShowUpDown.getY(), stdWidth, stdHeight);
-        jPanel1.add(chkShowProfitLoss);
+        chkExcludeFromSummary = SettingsCheckbox.create("Hide from Summary").tail(chkShowPrice, 30).to(jPanel1);
+        chkShowChangePercent = SettingsCheckbox.create("Change %").below(chkExcludeFromSummary, vGap / 3).to(jPanel1);
+        chkShowProfitLoss = SettingsCheckbox.create("Profit & Loss").below(chkShowChangePercent, vGap / 3).to(jPanel1);
 
         // Day Change
         // Left column
-        chkShowDayChange = new JCheckBox("Day Change");
-        chkShowDayChange.setBounds(chkShowPrice.getX(), chlShowUpDown.getY() + chlShowUpDown.getHeight() + vGap, stdWidth, stdHeight);
-        jPanel1.add(chkShowDayChange);
+        chkShowDayChange = SettingsCheckbox.create("Day Change").below(chlShowUpDown, vGap).to(jPanel1).to(jPanel1);
+        chkShowDayUpDown = SettingsCheckbox.create("Day Up/Down").below(chkShowDayChange, vGap / 3).to(jPanel1);
+        chkShowDayChangePercent = SettingsCheckbox.create("Day Change %").below(chkShowProfitLoss, vGap).to(jPanel1);
 
-        chkShowDayChangePercent = new JCheckBox("Day Change %");
-        chkShowDayChangePercent.setBounds(chkShowDayChange.getX(), chkShowDayChange.getY() + chkShowDayChange.getHeight() + vGap / 2, stdWidth * 2, stdHeight);
-        jPanel1.add(chkShowDayChangePercent);
-
-        // Right column
-        chkShowDayUpDown = new JCheckBox("Day Up/Down");
-        chkShowDayUpDown.setBounds(chkExcludeFromSummary.getX(), chkShowDayChange.getY(), stdWidth * 2, stdHeight);
-        jPanel1.add(chkShowDayUpDown);
-
-        jPanel1.setBounds(left, jPanel1.getY(), jPanel1.getWidth(), chkShowDayChangePercent.getY() + chkShowDayChangePercent.getHeight() + vGap);
+        // Resize the Show panel to fit the checkboxes
+        jPanel1.withHeight(chkShowDayUpDown.getBottom() + vGap);
 
         // Low Alarm Panel
-        pnlAlarmLow = new CheckBoxFrame("Enable Low Alarm");
-        pnlAlarmLow.setBounds(left, jPanel1.getY() + jPanel1.getHeight() + vGap, jPanel1.getWidth(), 100);
-        getContentPane().add(pnlAlarmLow);
-
-        JLabel jLabel7 = new JLabel("Prices Drops to");
-        jLabel7.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel7.setBounds(20, 20, stdWidth, stdHeight);
-        pnlAlarmLow.getContentPanel().setLayout(null);
-        pnlAlarmLow.getContentPanel().add(jLabel7);
-
-        txtAlarmLow = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
-        txtAlarmLow.setToolTipText("Threshold for low alarm");
-        txtAlarmLow.setBounds(jLabel7.getX() + jLabel7.getWidth() + lblGap, jLabel7.getY(), txtPricePaid.getWidth(), stdHeight);
-        pnlAlarmLow.getContentPanel().add(txtAlarmLow);
-
-        chkAlarmLowPercent = new JCheckBox("Percent");
-        chkAlarmLowPercent.setBounds(250, txtAlarmLow.getY(), stdWidth, stdHeight);
-        pnlAlarmLow.getContentPanel().add(chkAlarmLowPercent);
-
-        chkAlarmLowPlaySound = new JCheckBox("Sound Alarm");
-        chkAlarmLowPlaySound.setBounds(chkAlarmLowPercent.getX(), chkAlarmLowPercent.getY() + chkAlarmLowPercent.getHeight() + vGap / 2, stdWidth, stdHeight);
-        pnlAlarmLow.getContentPanel().add(chkAlarmLowPlaySound);
-
-        pnlAlarmLow.setBounds(left, pnlAlarmLow.getY(), pnlAlarmLow.getWidth(), chkAlarmLowPlaySound.getY() + chkAlarmLowPlaySound.getHeight() + vGap * 2);
+        pnlAlarmLow = CheckBoxFrame.create("Enable Low Alarm").withLayout(null).below(jPanel1, vGap).to(getContentPane());
+        JLabel jLabel7 = SettingsLabel.create("Prices Drops to").at(20, 15).to(pnlAlarmLow.getContentPanel());
+        txtAlarmLow = CapableTextField.create("", "Threshold for low alarm").setConversionType(CapableTextField.CONVERSION_TYPE.NUMERIC)
+                .tail(jLabel7, lblGap).withWidth(70).to(pnlAlarmLow.getContentPanel());
+        chkAlarmLowPercent = SettingsCheckbox.create("Percent").tail(txtAlarmLow, hGap).to(pnlAlarmLow.getContentPanel());
+        chkAlarmLowPlaySound = SettingsCheckbox.create("Sound Alarm").below(chkAlarmLowPercent, vGap / 3).to(pnlAlarmLow.getContentPanel());
+        pnlAlarmLow.withHeight(chkAlarmLowPlaySound.getBottom() + vGap * 2);
 
         // High Alarm Panel
-        pnlAlarmHigh = new CheckBoxFrame("Enable High Alarm");
-        pnlAlarmHigh.setBounds(left, pnlAlarmLow.getY() + pnlAlarmLow.getHeight() + vGap, pnlAlarmLow.getWidth(), 100);
-        getContentPane().add(pnlAlarmHigh);
+        pnlAlarmHigh = CheckBoxFrame.create("Enable High Alarm").withLayout(null).below(pnlAlarmLow, vGap).to(getContentPane());
+        JLabel jLabel8 = SettingsLabel.create("Prices Rises to").at(20, 15).to(pnlAlarmHigh.getContentPanel());
+        txtAlarmHigh = CapableTextField.create("", "Threshold for high alarm").setConversionType(CapableTextField.CONVERSION_TYPE.NUMERIC)
+                .tail(jLabel8, lblGap).withWidth(70).to(pnlAlarmHigh.getContentPanel());
+        chkAlarmHighPercent = SettingsCheckbox.create("Percent").tail(txtAlarmHigh, hGap).to(pnlAlarmHigh.getContentPanel());
+        chkAlarmHighPlaySound = SettingsCheckbox.create("Sound Alarm").below(chkAlarmHighPercent, vGap / 3).to(pnlAlarmHigh.getContentPanel());
+        pnlAlarmHigh.withHeight(chkAlarmHighPlaySound.getBottom() + vGap * 2);
 
-        JLabel jLabel8 = new JLabel("Prices Drops to");
-        jLabel8.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel8.setBounds(20, 20, stdWidth, stdHeight);
-        pnlAlarmHigh.getContentPanel().setLayout(null);
-        pnlAlarmHigh.getContentPanel().add(jLabel8);
+        // Buttons
+        jScrollPane1.withHeight(pnlAlarmHigh.getBottom() - jScrollPane1.getY());
+        btnAdd = SettingsButton.create("Add").below(jScrollPane1, vGap).withDimensions(70, 15).to(getContentPane());
+        btnDelete = SettingsButton.create("Delete").tail(btnAdd, 0).withDimensions(btnAdd).atRight(jScrollPane1.getRight()).to(getContentPane());
+        btnCancel = SettingsButton.create("Cancel").atTop(btnAdd).withWidth(80).atRight(txtDisplayName.getRight()).to(getContentPane());
+        btnOk = SettingsButton.create("Ok").atTop(btnCancel).atLeft(btnCancel.getX() - btnCancel.getWidth() - hGap).withDimensions(btnCancel).to(getContentPane());
 
-        txtAlarmHigh = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
-        txtAlarmHigh.setToolTipText("Threshold for high alarm");
-        txtAlarmHigh.setBounds(jLabel8.getX() + jLabel8.getWidth() + lblGap, jLabel8.getY(), txtPricePaid.getWidth(), stdHeight);
-        pnlAlarmHigh.getContentPanel().add(txtAlarmHigh);
-
-        chkAlarmHighPercent = new JCheckBox("Percent");
-        chkAlarmHighPercent.setBounds(250, txtAlarmHigh.getY(), stdWidth, stdHeight);
-        pnlAlarmHigh.getContentPanel().add(chkAlarmHighPercent);
-
-        chkAlarmHighPlaySound = new JCheckBox("Sound Alarm");
-        chkAlarmHighPlaySound.setBounds(chkAlarmHighPercent.getX(), chkAlarmHighPercent.getY() + chkAlarmHighPercent.getHeight() + vGap / 2, stdWidth, stdHeight);
-        pnlAlarmHigh.getContentPanel().add(chkAlarmHighPlaySound);
-
-        pnlAlarmHigh.setBounds(left, pnlAlarmHigh.getY(), pnlAlarmHigh.getWidth(), chkAlarmHighPlaySound.getY() + chkAlarmHighPlaySound.getHeight() + vGap * 2);
-
-        // OK and Cancel Buttons
-        btnCancel = new JButton("Cancel");
-        btnCancel.setBounds(pnlAlarmHigh.getX() + pnlAlarmHigh.getWidth() - 75, pnlAlarmHigh.getY() + pnlAlarmHigh.getHeight() + vGap, 75, 30);
-        getContentPane().add(btnCancel);
-
-        btnOk = new JButton("OK");
-        btnOk.setEnabled(false);
-        btnOk.setBounds(btnCancel.getX() - btnCancel.getWidth() - vGap, btnCancel.getY(), btnCancel.getWidth(), btnCancel.getHeight());
-        getContentPane().add(btnOk);
-
-        // Add & Delete Buttons
-        jScrollPane1.setBounds(jScrollPane1.getX(), jScrollPane1.getY(), jScrollPane1.getWidth(), pnlAlarmHigh.getY() + pnlAlarmHigh.getHeight() - jScrollPane1.getY());
-        btnAdd = new JButton("Add");
-        btnAdd.setBounds(jScrollPane1.getX(), jScrollPane1.getY() + jScrollPane1.getHeight() + vGap, 70, 20);
-        getContentPane().add(btnAdd);
-
-        btnDelete = new JButton("Delete");
-        btnDelete.setBounds(jScrollPane1.getX() + jScrollPane1.getWidth() - 70, btnAdd.getY(), btnAdd.getWidth(), btnAdd.getHeight());
-        getContentPane().add(btnDelete);
-
-        // Size the dialog
-        setSize(width, btnCancel.getY() + btnCancel.getHeight() + (StartupManager.isWindows() ? 50 :  40));
+        setSize(width, btnOk.getBottom() + 40);
         setPreferredSize(getSize());
-        setMinimumSize(getSize());
         setMaximumSize(getSize());
+        setMinimumSize(getSize());
+
+        btnOk.setEnabled(false);
     }
 
 }

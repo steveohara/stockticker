@@ -8,6 +8,7 @@ package com.pivotal.stockticker.ui.components;
 
 import com.pivotal.stockticker.model.SymbolTransaction;
 import lombok.Getter;
+import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -22,15 +23,29 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SymbolsList extends JList<SymbolTransaction> {
 
+    public static final int DEFAULT_WIDTH = 50;
+    public static final int DEFAULT_HEIGHT = 200;
+
+    @Delegate
+    private final SettingsComponent<SymbolsList> helper = new SettingsComponent<>(this);
     private final FilterableStockListModel model = new FilterableStockListModel(this);
 
     /**
      * Constructor
      */
-    public SymbolsList() {
+    private SymbolsList() {
         super();
         setModel(model);
         initialize();
+    }
+
+    /**
+     * Creates a SymbolsList with specified settings.
+     */
+    public static SymbolsList create() {
+        SymbolsList component = new SymbolsList();
+        component.setBounds(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        return component;
     }
 
     /**
@@ -157,9 +172,11 @@ public class SymbolsList extends JList<SymbolTransaction> {
      * Set whether to hide disabled SymbolTransaction items
      *
      * @param hideDisabled true to hide disabled items, false to show all
+     * @return SymbolsList
      */
-    public void hideDisabled(boolean hideDisabled) {
+    public SymbolsList hideDisabled(boolean hideDisabled) {
         model.hideDisabled(hideDisabled);
+        return this;
     }
 
     /**

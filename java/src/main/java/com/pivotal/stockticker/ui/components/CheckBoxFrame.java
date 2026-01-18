@@ -7,6 +7,7 @@
 package com.pivotal.stockticker.ui.components;
 
 import lombok.Getter;
+import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -20,16 +21,37 @@ import java.awt.*;
 public class CheckBoxFrame extends JPanel {
 
     private static final int TITLE_X = 10;
+    public static final int DEFAULT_WIDTH = 100;
+    public static final int DEFAULT_HEIGHT = 100;
 
-    private final JCheckBox titleCheckbox;
-    private final JPanel contentPanel;
+    private JCheckBox titleCheckbox;
+    private JPanel contentPanel;
+
+    @Delegate
+    private final SettingsComponent<CheckBoxFrame> helper = new SettingsComponent<>(this);
+
+    /**
+     * Private constructor to enforce the use of the static create method.
+     */
+    private CheckBoxFrame(LayoutManager layout) {
+        super(layout);
+    }
+
+    /**
+     * Creates a CheckBoxFrame with specified settings.
+     */
+    public static CheckBoxFrame create(String title) {
+        CheckBoxFrame component = new CheckBoxFrame(title);
+        component.setBounds(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        return component;
+    }
 
     /**
      * Constructs a CheckboxFrame with the specified title.
      *
      * @param title The title to display in the checkbox.
      */
-    public CheckBoxFrame(String title) {
+    private CheckBoxFrame(String title) {
         setLayout(null);
         setOpaque(false);
 
@@ -132,6 +154,17 @@ public class CheckBoxFrame extends JPanel {
                 setEnabledRecursive((Container) comp, enabled);
             }
         }
+    }
+
+    /**
+     * Sets the layout manager for this CheckBoxFrame and returns the instance for chaining.
+     *
+     * @param layout The layout manager to set.
+     * @return The CheckBoxFrame instance.
+     */
+    public CheckBoxFrame withLayout(LayoutManager layout) {
+        contentPanel.setLayout(layout);
+        return this;
     }
 }
 
