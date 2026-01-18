@@ -50,7 +50,7 @@ abstract public class PersistanceManager {
     private Preferences prefs;
 
     // File chooser for backup/restore operations
-    private static final OverwritePromptChooser chooser = new OverwritePromptChooser();
+    private static OverwritePromptChooser chooser = null;
 
     // Auto-save flag - if true, changes are automatically saved to preferences
     @Getter
@@ -292,15 +292,20 @@ abstract public class PersistanceManager {
 
     /**
      * Backs up the given Preferences subtree to a user-selected file.
+     *
+     * @param dialog The parent dialog for the file chooser.
      */
-    public static void backupPreferences() {
+    public static void backupPreferences(Dialog dialog) {
 
         // Use JFileChooser to let user pick the file location
+        if (chooser == null) {
+            chooser = new OverwritePromptChooser();
+            chooser.setFileFilter(new FileNameExtensionFilter("Backup Files (*.bck)", "bck"));
+        }
         chooser.setChooserType(OverwritePromptChooser.CHOOSER_TYPE.SAVE);
         chooser.setDialogTitle("Backup Settings");
         chooser.setApproveButtonText("Save");
-        chooser.setFileFilter(new FileNameExtensionFilter("Backup Files (*.bck)", "bck"));
-        int userSelection = chooser.showSaveDialog(null);
+        int userSelection = chooser.showSaveDialog(dialog);
 
         // If user approved, export the preferences to the selected file
         if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -327,16 +332,20 @@ abstract public class PersistanceManager {
     /**
      * Restores Preferences subtree from a user-selected file.
      *
+     * @param dialog The parent dialog for the file chooser.
      * @return true if restore was successful, false otherwise.
      */
-    public static boolean restorePreferences() {
+    public static boolean restorePreferences(JDialog dialog) {
 
         // Use JFileChooser to let user pick the file location
+        if (chooser == null) {
+            chooser = new OverwritePromptChooser();
+            chooser.setFileFilter(new FileNameExtensionFilter("Backup Files (*.bck)", "bck"));
+        }
         chooser.setChooserType(OverwritePromptChooser.CHOOSER_TYPE.OPEN);
         chooser.setDialogTitle("Restore Settings");
         chooser.setApproveButtonText("Open");
-        chooser.setFileFilter(new FileNameExtensionFilter("Backup Files (*.bck)", "bck"));
-        int userSelection = chooser.showSaveDialog(null);
+        int userSelection = chooser.showSaveDialog(dialog);
 
         // If user approved, import the preferences from the selected file
         if (userSelection == JFileChooser.APPROVE_OPTION) {

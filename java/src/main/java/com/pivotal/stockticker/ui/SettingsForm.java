@@ -106,18 +106,14 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         btnLabelColour.addActionListener(this::colourButtonClicked);
 
         btnBackup.addActionListener(e -> {
-            setAlwaysOnTop(false);
-            PersistanceManager.backupPreferences();
-            setAlwaysOnTop(true);
+            PersistanceManager.backupPreferences(this);
         });
         btnRestore.addActionListener(e -> {
-            setAlwaysOnTop(false);
-            if (PersistanceManager.restorePreferences()) {
+            if (PersistanceManager.restorePreferences(this)) {
                 caller.changed(null);
                 loadFromSettings(settings);
                 btnOk.setEnabled(false);
             }
-            setAlwaysOnTop(true);
         });
 
         // Listen for changes
