@@ -165,6 +165,9 @@ public class SymbolsManager {
 
         // Clear everything
         deletedSymbolTransactions.clear();
+
+        // Load them all back from storage
+        loadFromStorage();
     }
 
     /**

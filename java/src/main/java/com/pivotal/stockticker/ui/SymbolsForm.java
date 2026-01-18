@@ -337,6 +337,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             symbol.setHighAlarmValue(txtAlarmHigh.getValue());
 
             symbolsManager.markSymbolTransactionAsModified(symbol);
+            lstSymbols.repaint();
         }
     }
 

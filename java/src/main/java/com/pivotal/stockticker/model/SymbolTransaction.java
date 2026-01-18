@@ -144,6 +144,9 @@ public class SymbolTransaction extends PersistanceManager {
      * @return Formatted timestamp string.
      */
     public String getDisplayTimestamp() {
+        if (key == null || key.isEmpty()) {
+            return "[NEW]";
+        }
         Instant instant = Instant.ofEpochMilli(Long.parseLong(key));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return formatter.format(LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault()));
@@ -155,6 +158,9 @@ public class SymbolTransaction extends PersistanceManager {
      * @return Formatted timestamp string.
      */
     public String getFullDisplayTimestamp() {
+        if (key == null || key.isEmpty()) {
+            return "[NEW]";
+        }
         Instant instant = Instant.ofEpochMilli(Long.parseLong(key));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE d MMM yyyy h:mm a");
         return formatter.format(LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault()));
