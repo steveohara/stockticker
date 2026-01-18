@@ -133,6 +133,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             double adjustedTotalValue = totalValue - settings.getTotalInvestment() - settings.getMargin();
 
             // Draw the summary data
+            pnlSummary.setFontColor(settings.getLabelColor());
             pnlSummary.print("Summary:");
             if (settings.isShowPortfolioProfitAndLoss()) {
                 pnlSummary.print(Utils.formatCurrencyValue(totalValue, settings.getCurrencySymbol()));
@@ -211,10 +212,12 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
             // Show the Day up/down arrows
             if (symbol.isShowDayChangeUpDown()) {
+                pnlStocks.setFontBold(true);
                 boolean needSeparation = symbol.isShowDayChange() || symbol.isShowDayChangePercent() || symbol.isShowProfitLoss();
                 pnlStocks.setCurrentX(pnlStocks.getCurrentX() + (needSeparation ? -UP_DOWN_SEPARATION : UP_DOWN_SEPARATION));
-                pnlStocks.setFontColor(livePrice.isUpToday() ? settings.getUpArrowColor() : livePrice.isDownToday() ? settings.getDownArrowColor() : settings.getNormalTextColor());
+                pnlStocks.setFontColor(livePrice.isUpToday() ? settings.getUpArrowColor() : livePrice.isDownToday() ? settings.getDownArrowColor() : settings.getLabelColor());
                 pnlStocks.print(livePrice.isUpToday() ? "↑" : livePrice.isDownToday() ? "↓" : "↕");
+                pnlStocks.setFontBold((settings.getFontStyle() | Font.BOLD) > 0);
             }
             if (showBraces) {
                 pnlStocks.print(")");
@@ -267,10 +270,12 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
             // Show the up/down arrows
             if (symbol.isShowChangeUpDown()) {
+                pnlStocks.setFontBold(true);
                 boolean needSeparation = symbol.isShowPrice() || symbol.isShowChange() || symbol.isShowChangePercent() || symbol.isShowProfitLoss();
                 pnlStocks.setCurrentX(pnlStocks.getCurrentX() + (needSeparation ? -UP_DOWN_SEPARATION : UP_DOWN_SEPARATION));
-                pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpArrowColor() : livePrice.isDown() ? settings.getDownArrowColor() : settings.getNormalTextColor());
+                pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpArrowColor() : livePrice.isDown() ? settings.getDownArrowColor() : settings.getLabelColor());
                 pnlStocks.print(livePrice.isUp() ? "↑" : livePrice.isDown() ? "↓" : "↕");
+                pnlStocks.setFontBold((settings.getFontStyle() | Font.BOLD) > 0);
             }
         }
         return showData;
@@ -645,7 +650,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
      */
     private void showSettingsDialog() {
         SwingUtilities.invokeLater(() -> {
-            new SettingsFormX(this, settings);
+            new SettingsForm(this, settings);
         });
     }
 

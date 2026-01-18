@@ -16,12 +16,12 @@ import java.awt.event.*;
  */
 public class SettingsForm extends JDialog implements CallbackInterface {
 
-    private CapableTextField txtCurrencyCode, txtMargin, txtTotalInvestment;
+    private CapableTextField txtCurrencyCode, txtCurrencySymbol, txtMargin, txtTotalInvestment;
     private SettingsButton btnBackground, btnBackup, btnCancel, btnDownArrowColour, btnDownColour, btnLabelColour, btnHighAlarm, btnLowAlarm, btnNormalText, btnOk, btnRestore, btnUpArrowColour, btnUpColour;
     private SettingsCheckbox chkBold, chkItalic, chkShowDailyChange, chkShowTotalCost, chkShowTotalProfit, chkShowTotalProfitPercentage, chkShowTotalValue, chkShowUniqueSymbols;
-    private JComboBox<String> lstFont;
+    private SettingsComboBox<String> lstFont;
     private SettingsSpinner spnTickerUpdate;
-    private SettingsTextField txtAlphaVantagToken, txtCurrencySymbol, txtFinHubToken, txtFreeCurrencyToken, txtHighAlarm, txtIexToken, txtLowAlarm, txtMarketStackToken, txtProxyServer, txtTiingoToken, txtTwelveDataToken;
+    private SettingsTextField txtAlphaVantageToken, txtFinHubToken, txtFreeCurrencyToken, txtHighAlarm, txtIexToken, txtLowAlarm, txtMarketStackToken, txtProxyServer, txtTiingoToken, txtTwelveDataToken;
 
     private final Settings settings;
     private final CallbackInterface caller;
@@ -37,10 +37,10 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         this.settings = settings;
         initComponents();
         setTitle("Settings New");
-//      setModal(true);
+        setModal(true);
         setAlwaysOnTop(true);
         setLocationRelativeTo(null);
-//        setResizable(false);
+        setResizable(false);
 
         // Init the settings from storage
         loadFromSettings(settings);
@@ -103,6 +103,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         btnDownColour.addActionListener(this::colourButtonClicked);
         btnUpArrowColour.addActionListener(this::colourButtonClicked);
         btnDownArrowColour.addActionListener(this::colourButtonClicked);
+        btnLabelColour.addActionListener(this::colourButtonClicked);
 
         btnBackup.addActionListener(e -> {
             setAlwaysOnTop(false);
@@ -137,6 +138,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         btnDownColour.setBackground(settings.getDownColor());
         btnUpArrowColour.setBackground(settings.getUpArrowColor());
         btnDownArrowColour.setBackground(settings.getDownArrowColor());
+        btnLabelColour.setBackground(settings.getLabelColor());
 
         // Fonts
         String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
@@ -164,7 +166,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
         // API Keys
         txtIexToken.setText(settings.getIexToken());
-        txtAlphaVantagToken.setText(settings.getAlphaVantageToken());
+        txtAlphaVantageToken.setText(settings.getAlphaVantageToken());
         txtMarketStackToken.setText(settings.getMarketStackToken());
         txtTwelveDataToken.setText(settings.getTwelveDataToken());
         txtFinHubToken.setText(settings.getFinhubToken());
@@ -190,6 +192,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         settings.setDownColor(btnDownColour.getBackground());
         settings.setUpArrowColor(btnUpArrowColour.getBackground());
         settings.setDownArrowColor(btnDownArrowColour.getBackground());
+        settings.setLabelColor(btnLabelColour.getBackground());
 
         // Fonts
         settings.setFontName((String) lstFont.getSelectedItem());
@@ -211,7 +214,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
         // API Keys
         settings.setIexToken(txtIexToken.getText().trim());
-        settings.setAlphaVantageToken(txtAlphaVantagToken.getText().trim());
+        settings.setAlphaVantageToken(txtAlphaVantageToken.getText().trim());
         settings.setMarketStackToken(txtMarketStackToken.getText().trim());
         settings.setTwelveDataToken(txtTwelveDataToken.getText().trim());
         settings.setFinhubToken(txtFinHubToken.getText().trim());
@@ -259,17 +262,16 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        setSize(450, 800);
+        int vGap = 7;
+        int hGap = 10;
+        int lblGap = 5;
+        int width = StartupManager.isWindows() ? 460 :  450;
+
+        setSize(width, 800);
         setPreferredSize(getSize());
         setMaximumSize(getSize());
         setMinimumSize(getSize());
 
-        int vGap = 8;
-        int hGap = 10;
-        int lblGap = 5;
-        int stdWidth = 100;
-        int stdHeight = 20;
-        int width = StartupManager.isWindows() ? 500 :  450;
         setResizable(false);
         getContentPane().setLayout(null);
 
@@ -283,17 +285,16 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         JLabel jLabel3 = SettingsLabel.create("Seconds").setAlignment(Label.LEFT).tail(spnTickerUpdate, hGap).to(getContentPane());
 
         // Divider
-        SettingsSeparator jSeparator1 = SettingsSeparator.create().below(jLabel2, vGap * 2).withWidth(txtProxyServer.getRight() - jLabel2.getX()).to(getContentPane());
+        SettingsSeparator jSeparator1 = SettingsSeparator.create().below(jLabel2, vGap * 3).withWidth(txtProxyServer.getRight() - jLabel2.getX()).to(getContentPane());
         JLabel jLabel30 = SettingsLabel.create("<html><p style='font-weight:bold;color:#808080'>&nbsp;&nbsp;Colours, Fonts & Sounds</p></html>")
                 .setAlignment(SwingConstants.LEFT)
-                .withWidth(145)
-                .atTop(jSeparator1.getY() - vGap)
+                .withWidth(170)
+                .atTop(jSeparator1.getY() - vGap - 2)
                 .atLeft(jSeparator1.getX() + hGap * 3)
                 .setBackColor(getContentPane().getBackground())
                 .to(getContentPane());
         jLabel30.setOpaque(true);
         getContentPane().setComponentZOrder(jLabel30, 0);
-
 
         // Colour buttons
         SettingsLabel jLabel4 = SettingsLabel.create("Background").below(jLabel30, vGap).atLeft(jLabel2).withHeight(16).to(getContentPane());
@@ -304,7 +305,6 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
         SettingsLabel jLabel6 = SettingsLabel.create("Up Arrow Colour").tail(btnUpColour, vGap).withHeight(jLabel4).withWidth(115).withHeight(jLabel4).to(getContentPane());
         btnUpArrowColour = SettingsButton.create("").tail(jLabel6, lblGap).withDimensions(btnBackground).setBackColor(new java.awt.Color(0, 204, 51)).to(getContentPane());
-
 
         SettingsLabel jLabel7 = SettingsLabel.create("Normal Text").below(jLabel4, vGap).withDimensions(jLabel4).to(getContentPane());
         btnNormalText = SettingsButton.create("").tail(jLabel7, lblGap).withDimensions(btnBackground).setBackColor(new java.awt.Color(153, 153, 153)).to(getContentPane());
@@ -319,175 +319,115 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         btnLabelColour = SettingsButton.create("").tail(jLabel10, lblGap).withDimensions(btnBackground).setBackColor(new java.awt.Color(153, 153, 153)).to(getContentPane());
 
         // Font settings
-        SettingsLabel jLabel11 = SettingsLabel.create("Font").below(jLabel10, vGap).withDimensions(jLabel4).to(getContentPane());
-
+        SettingsLabel jLabel11 = SettingsLabel.create("Font").below(jLabel10, vGap).to(getContentPane());
+        lstFont = SettingsComboBox.<String>create().tail(jLabel11, lblGap).withWidth(100).to(getContentPane());
+        chkBold = SettingsCheckbox.create("Bold").tail(lstFont, hGap * 2).withWidth(60).to(getContentPane());
+        chkItalic = SettingsCheckbox.create("Italic").tail(chkBold, hGap).withWidth(chkBold).to(getContentPane());
 
         SettingsLabel jLabel12 = SettingsLabel.create("High alarm").below(jLabel11, vGap).withDimensions(jLabel1).to(getContentPane());
         txtHighAlarm = SettingsTextField.create().tail(jLabel12, lblGap).withWidth(getWidth() - (jLabel12.getRight() + lblGap + 70)).to(getContentPane());
-
+        btnHighAlarm = SettingsButton.create("...").tail(txtHighAlarm, lblGap).withWidth(25).withHeight(txtHighAlarm).setBackColor(new java.awt.Color(204, 204, 204)).to(getContentPane());
 
         SettingsLabel jLabel13 = SettingsLabel.create("Low alarm").below(jLabel12, vGap).withDimensions(jLabel1).to(getContentPane());
         txtLowAlarm = SettingsTextField.create().tail(jLabel13, lblGap).withDimensions(txtHighAlarm).to(getContentPane());
+        btnLowAlarm = SettingsButton.create("...").tail(txtLowAlarm, lblGap).withDimensions(btnHighAlarm).setBackColor(new java.awt.Color(204, 204, 204)).to(getContentPane());
 
+        // Divider
+        SettingsSeparator jSeparator2 = SettingsSeparator.create().below(jLabel13, vGap * 3).withDimensions(jSeparator1).to(getContentPane());
+        JLabel jLabel14 = SettingsLabel.create("<html><p style='font-weight:bold;color:#808080'>&nbsp;&nbsp;Summary</p></html>")
+                .setAlignment(SwingConstants.LEFT)
+                .withWidth(75)
+                .atTop(jSeparator2.getY() - vGap - 2)
+                .atLeft(jSeparator2.getX() + hGap * 3)
+                .setBackColor(getContentPane().getBackground())
+                .to(getContentPane());
+        jLabel14.setOpaque(true);
+        getContentPane().setComponentZOrder(jLabel14, 0);
 
+        // Summary settings
+        chkShowTotalProfit = SettingsCheckbox.create("Show Portfolio Profit & Loss", "Displays the total cost of the portfolio (including cash investment)")
+                .below(jSeparator2, vGap).atLeft(50).withWidth(300).to(getContentPane());
+        chkShowTotalProfitPercentage = SettingsCheckbox.create("Show Portfolio Profit & Loss as Percentage", "Show the overall portfolio position as a percentage of the total cost")
+                .below(chkShowTotalProfit, vGap / 3).withWidth(chkShowTotalProfit).to(getContentPane());
+        chkShowTotalCost = SettingsCheckbox.create("Show Total Portfolio Cost", "Displays the total cost of the portfolio (including cash investment)")
+                .below(chkShowTotalProfitPercentage, vGap / 3).withWidth(chkShowTotalProfit).to(getContentPane());
+        chkShowTotalValue = SettingsCheckbox.create("Show Total Portfolio Value", "Display the current value of the portfolio (minus cash investment)")
+                .below(chkShowTotalCost, vGap / 3).withWidth(chkShowTotalProfit).to(getContentPane());
+        chkShowDailyChange = SettingsCheckbox.create("Show Daily Change", "Show the daily summary and day position of the portfolio")
+                .below(chkShowTotalValue, vGap / 3).withWidth(chkShowTotalProfit).to(getContentPane());
+        chkShowUniqueSymbols = SettingsCheckbox.create("Show Unique Stock Symbols", "Shows a single stock for multiple trades of the same symbol and aggregates the costs (Base Cost)")
+                .below(chkShowDailyChange, vGap / 3).withWidth(chkShowTotalProfit).to(getContentPane());
 
+        // Divider
+        SettingsSeparator jSeparator3 = SettingsSeparator.create().below(chkShowUniqueSymbols, vGap * 3).atLeft(jSeparator1).withDimensions(jSeparator1).to(getContentPane());
+        JLabel jLabel15 = SettingsLabel.create("<html><p style='font-weight:bold;color:#808080'>&nbsp;&nbsp;Currency Conversion & Investment</p></html>")
+                .setAlignment(SwingConstants.LEFT)
+                .withWidth(240)
+                .atTop(jSeparator3.getY() - vGap - 2)
+                .atLeft(jSeparator3.getX() + hGap * 3)
+                .setBackColor(getContentPane().getBackground())
+                .to(getContentPane());
+        jLabel15.setOpaque(true);
+        getContentPane().setComponentZOrder(jLabel15, 0);
 
+        SettingsLabel jLabel16 = SettingsLabel.create("Currency Code").below(jLabel15, vGap).withDimensions(jLabel1).to(getContentPane());
+        txtCurrencyCode = CapableTextField.create("", "ISO Currency to convert summary values into e.g. GBP, USD etc.").tail(jLabel16, lblGap).withWidth(70).setConversionType(CapableTextField.CONVERSION_TYPE.UPPER).to(getContentPane());
 
-        btnOk = SettingsButton.create();
+        SettingsLabel jLabel17 = SettingsLabel.create("Currency Symbol").tail(txtCurrencyCode, hGap).withDimensions(jLabel1).withWidth(120).to(getContentPane());
+        txtCurrencySymbol = CapableTextField.create("", "ISO Currency to convert summary values into e.g. GBP, USD etc.").tail(jLabel17, lblGap).withWidth(30).setConversionType(CapableTextField.CONVERSION_TYPE.UPPER).to(getContentPane());
 
-        btnCancel = SettingsButton.create();
-        btnRestore = SettingsButton.create();
-        JPanel jPanel1 = new JPanel();
-        btnDownColour = SettingsButton.create();
-        btnUpArrowColour = SettingsButton.create();
-        btnDownArrowColour = SettingsButton.create();
-        lstFont = new JComboBox<>();
-        chkBold = SettingsCheckbox.create("");
-        chkItalic = SettingsCheckbox.create("");
-        SettingsLabel jLabel26 = SettingsLabel.create();
-        btnBackground = SettingsButton.create();
-        JPanel jPanel2 = new JPanel();
-        chkShowTotalProfitPercentage = SettingsCheckbox.create("");
-        chkShowTotalCost = SettingsCheckbox.create("");
-        chkShowTotalValue = SettingsCheckbox.create("");
-        chkShowDailyChange = SettingsCheckbox.create("");
-        chkShowTotalProfit = SettingsCheckbox.create("");
-        chkShowUniqueSymbols = SettingsCheckbox.create("");
-        JPanel jPanel3 = new JPanel();
-        SettingsLabel jLabel15 = SettingsLabel.create();
-        txtIexToken = SettingsTextField.create();
-        SettingsLabel jLabel16 = SettingsLabel.create();
-        txtAlphaVantagToken = SettingsTextField.create();
-        SettingsLabel jLabel17 = SettingsLabel.create();
-        txtMarketStackToken = SettingsTextField.create();
-        SettingsLabel jLabel18 = SettingsLabel.create();
-        txtTwelveDataToken = SettingsTextField.create();
-        SettingsLabel jLabel19 = SettingsLabel.create();
-        txtFinHubToken = SettingsTextField.create();
-        SettingsLabel jLabel20 = SettingsLabel.create();
-        txtTiingoToken = SettingsTextField.create();
-        SettingsLabel jLabel21 = SettingsLabel.create();
-        txtFreeCurrencyToken = SettingsTextField.create();
-        JPanel jPanel4 = new JPanel();
-        SettingsLabel jLabel14 = SettingsLabel.create();
-        SettingsLabel jLabel22 = SettingsLabel.create();
-        txtCurrencySymbol = SettingsTextField.create();
-        txtCurrencyCode = new CapableTextField(CapableTextField.CONVERSION_TYPE.UPPER);
-        SettingsLabel jLabel23 = SettingsLabel.create();
-        txtMargin = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
-        txtTotalInvestment = new CapableTextField(CapableTextField.CONVERSION_TYPE.NUMERIC);
-        SettingsLabel jLabel24 = SettingsLabel.create();
-        SettingsLabel jLabel25 = SettingsLabel.create();
-        JSeparator jSeparator2 = new JSeparator();
-        btnBackup = SettingsButton.create();
-        JSeparator jSeparator4 = new JSeparator();
+        SettingsLabel jLabel19 = SettingsLabel.create("Total Investment").below(jLabel16, vGap).withDimensions(jLabel1).to(getContentPane());
+        txtTotalInvestment = CapableTextField.create("", "Total amount invested (cash paid) in stocks in local currency").tail(jLabel19, lblGap).withWidth(90).setConversionType(CapableTextField.CONVERSION_TYPE.NUMERIC).to(getContentPane());
 
-        btnOk.setText("OK");
+        SettingsLabel jLabel20 = SettingsLabel.create("Margin").tail(txtTotalInvestment, hGap).withDimensions(jLabel1).withWidth(70).to(getContentPane());
+        txtMargin = CapableTextField.create("", "Amount of money in debit (margin) account").tail(jLabel20, lblGap).withDimensions(txtTotalInvestment).setConversionType(CapableTextField.CONVERSION_TYPE.NUMERIC).to(getContentPane());
+
+        // Divider
+        SettingsSeparator jSeparator5 = SettingsSeparator.create().below(txtTotalInvestment, vGap * 3).atLeft(jSeparator1).withDimensions(jSeparator1).to(getContentPane());
+        JLabel jLabel21 = SettingsLabel.create("<html><p style='font-weight:bold;color:#808080'>&nbsp;&nbsp;API Tokens</p></html>")
+                .setAlignment(SwingConstants.LEFT)
+                .withWidth(90)
+                .atTop(jSeparator5.getY() - vGap - 2)
+                .atLeft(jSeparator5.getX() + hGap * 3)
+                .setBackColor(getContentPane().getBackground())
+                .to(getContentPane());
+        jLabel21.setOpaque(true);
+        getContentPane().setComponentZOrder(jLabel21, 0);
+
+        SettingsLabel jLabel22 = SettingsLabel.create("IEX Token").below(jLabel21, vGap).withWidth(130).to(getContentPane());
+        txtIexToken = SettingsTextField.create().tail(jLabel22, lblGap).withWidth(getWidth() - jLabel22.getRight() - lblGap - hGap * 2).to(getContentPane());
+
+        SettingsLabel jLabel23 = SettingsLabel.create("AlphaVantage Token").below(jLabel22, vGap).withDimensions(jLabel22).to(getContentPane());
+        txtAlphaVantageToken = SettingsTextField.create().tail(jLabel23, vGap).withDimensions(txtIexToken).to(getContentPane());
+
+        SettingsLabel jLabel24 = SettingsLabel.create("MaketStack Token").below(jLabel23, vGap).withDimensions(jLabel22).to(getContentPane());
+        txtMarketStackToken = SettingsTextField.create().tail(jLabel24, vGap).withDimensions(txtIexToken).to(getContentPane());
+
+        SettingsLabel jLabel25 = SettingsLabel.create("TwelveData Token").below(jLabel24, vGap).withDimensions(jLabel22).to(getContentPane());
+        txtTwelveDataToken = SettingsTextField.create().tail(jLabel25, vGap).withDimensions(txtIexToken).to(getContentPane());
+
+        SettingsLabel jLabel26 = SettingsLabel.create("Finhub Token").below(jLabel25, vGap).withDimensions(jLabel22).to(getContentPane());
+        txtFinHubToken = SettingsTextField.create().tail(jLabel26, vGap).withDimensions(txtIexToken).to(getContentPane());
+
+        SettingsLabel jLabel27 = SettingsLabel.create("Tiingo Token").below(jLabel26, vGap).withDimensions(jLabel22).to(getContentPane());
+        txtTiingoToken = SettingsTextField.create().tail(jLabel27, vGap).withDimensions(txtIexToken).to(getContentPane());
+
+        SettingsLabel jLabel28 = SettingsLabel.create("FreeCurrency Token").below(jLabel27, vGap).withDimensions(jLabel22).to(getContentPane());
+        txtFreeCurrencyToken = SettingsTextField.create().tail(jLabel28, vGap).withDimensions(txtIexToken).to(getContentPane());
+
+        // Buttons
+        btnBackup = SettingsButton.create("Backup").below(jLabel28, vGap * 3).atLeft(hGap * 2).withWidth(80).to(getContentPane());
+        btnRestore = SettingsButton.create("Restore").tail(btnBackup, hGap).withDimensions(btnBackup).to(getContentPane());
+
+        btnCancel = SettingsButton.create("Cancel").atTop(btnBackup).atLeft(getWidth() - btnBackup.getWidth() - hGap * 2).withDimensions(btnBackup).to(getContentPane());
+        btnOk = SettingsButton.create("Ok").atTop(btnBackup).atLeft(btnCancel.getX() - btnBackup.getWidth() - hGap).withDimensions(btnBackup).to(getContentPane());
+
+        setSize(width, btnOk.getBottom() + vGap * 2);
+        setPreferredSize(getSize());
+        setMaximumSize(getSize());
+        setMinimumSize(getSize());
+
         btnOk.setEnabled(false);
-
-        btnCancel.setText("Cancel");
-
-        btnRestore.setText("Restore");
-        btnRestore.setToolTipText("Restore settings and symbols from a local file");
-
-
-        btnDownArrowColour.setBackground(java.awt.Color.red);
-
-        chkBold.setText("Bold");
-
-        chkItalic.setText("Italic");
-
-//        btnHighAlarm.setBackground(new java.awt.Color(204, 204, 204));
-//        btnHighAlarm.setText("...");
-//
-//        btnLowAlarm.setBackground(new java.awt.Color(204, 204, 204));
-//        btnLowAlarm.setText("...");
-
-        jLabel26.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel26.setText("Down Arrow Colour");
-
-
-
-        chkShowTotalProfitPercentage.setText("Show Portfolio Profit & Loss as Percentage");
-        chkShowTotalProfitPercentage.setToolTipText("Show the overall portfolio position as a percentage of the total cost");
-
-        chkShowTotalCost.setText("Show Total Portfolio Cost");
-        chkShowTotalCost.setToolTipText("Displays the total cost of the portfolio (including cash investment)");
-
-        chkShowTotalValue.setText("Show Total Portfolio Value");
-        chkShowTotalValue.setToolTipText("Display the current value of the portfolio (minus cash investment)");
-
-        chkShowDailyChange.setText("Show Daily Change");
-        chkShowDailyChange.setToolTipText("Show the daily summary and day position of the portfolio");
-
-        chkShowTotalProfit.setText("Show Portfolio Profit & Loss");
-        chkShowTotalProfit.setToolTipText("Show an overall position of the portfolio");
-
-        chkShowUniqueSymbols.setText("Show Unique Stock Symbols");
-        chkShowUniqueSymbols.setToolTipText("Shows a single stock for multiple trades of the same symbol and aggregates the costs (Base Cost)");
-
-        jLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
-
-
-        spnTickerUpdate.setToolTipText("How often to retrieve prices data (30-600)");
-
-        jLabel3.setHorizontalAlignment(SwingConstants.LEFT);
-        jLabel3.setText("Seconds");
-
-
-        jLabel15.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel15.setText("IEX Token");
-
-        jLabel16.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel16.setText("AlphaVantage Token");
-
-        jLabel17.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel17.setText("MarketStack Token");
-
-        jLabel18.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel18.setText("TwelveData Token");
-
-        jLabel19.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel19.setText("Finhub Token");
-
-        jLabel20.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel20.setText("Tiingo Token");
-
-        jLabel21.setHorizontalAlignment(SwingConstants.RIGHT);
-        jLabel21.setText("FreeCurrency Token");
-
-        jLabel11.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
-        jLabel11.setForeground(new java.awt.Color(204, 204, 204));
-        jLabel11.setHorizontalAlignment(SwingConstants.CENTER);
-        jLabel11.setText("Currency Conversion");
-
-        jLabel14.setText("Currency Code");
-
-        jLabel22.setText("Currency Symbol");
-
-        txtCurrencyCode.setToolTipText("ISO Currency to convert summary values into e.g. GBP, USD etc.");
-
-        jLabel23.setText("Margin");
-
-        txtMargin.setToolTipText("Ampunt of money in debit (margin) account");
-
-        txtTotalInvestment.setToolTipText("Total amount invested in stocks in local currency");
-
-        jLabel24.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
-        jLabel24.setForeground(new java.awt.Color(204, 204, 204));
-        jLabel24.setHorizontalAlignment(SwingConstants.CENTER);
-        jLabel24.setText("Investment");
-
-        jLabel25.setText("Total Investment");
-
-
-        txtProxyServer.setToolTipText("The address of a proxy server to use e.g. www.proxy.com:8989 etc.");
-        txtProxyServer.setName(""); // NOI18N
-
-
-        btnBackup.setText("Backup");
-        btnBackup.setToolTipText("Backup all settings and symbols to a local file");
-
     }
 
 }

@@ -33,8 +33,21 @@ public class SettingsCheckbox extends JCheckBox {
      * @return A configured SettingsCheckbox instance.
      */
     public static SettingsCheckbox create(String text) {
+        return create(text, null);
+    }
+
+    /**
+     * Creates a SettingsCheckbox with specified text and tooltip, aligned to the right.
+     *
+     * @param text        The text of the label.
+     * @param toolTipText The tooltip text for the label.
+     * @return A configured SettingsLabel instance.
+     */
+    public static SettingsCheckbox create(String text, String toolTipText) {
         SettingsCheckbox checkbox = new SettingsCheckbox(text);
+        checkbox.setToolTipText(toolTipText);
         checkbox.setBounds(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
         return checkbox;
     }
+
 }

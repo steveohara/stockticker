@@ -42,6 +42,7 @@ public class Settings extends PersistanceManager {
     private Color normalTextColor = Color.WHITE;
     private Color upArrowColor = new Color(0, 255, 0);
     private Color downArrowColor = new Color(255, 0, 0);
+    private Color labelColor = Color.LIGHT_GRAY;
     private String fontName = "Calibri";
     private boolean fontBold = false;
     private boolean fontItalic = false;

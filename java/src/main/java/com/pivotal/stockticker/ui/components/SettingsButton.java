@@ -13,7 +13,7 @@ public class SettingsButton extends JButton {
     private final SettingsComponent<SettingsButton> helper = new SettingsComponent<>(this);
 
     public static final int DEFAULT_LABEL_WIDTH = 60;
-    public static final int DEFAULT_LABEL_HEIGHT = 20;
+    public static final int DEFAULT_LABEL_HEIGHT = 25;
 
     /**
      * Creates a SettingsButton with specified text.
@@ -55,7 +55,7 @@ public class SettingsButton extends JButton {
     public static SettingsButton create(String text, String toolTipText) {
         SettingsButton label = new SettingsButton(text);
         label.setToolTipText(toolTipText);
-        label.setHorizontalAlignment(SwingConstants.RIGHT);
+        label.setHorizontalAlignment(SwingConstants.CENTER);
         label.setBounds(0, 0, DEFAULT_LABEL_WIDTH, DEFAULT_LABEL_HEIGHT);
         return label;
     }

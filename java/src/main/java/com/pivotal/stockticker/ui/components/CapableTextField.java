@@ -10,8 +10,10 @@ import com.pivotal.stockticker.Utils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.swing.*;
 import javax.swing.text.*;
 
 /**
@@ -19,7 +21,13 @@ import javax.swing.text.*;
  * keeps it numeric or leaves it unchanged based on the specified conversion type.
  */
 @Slf4j
-public class CapableTextField extends SettingsTextField {
+public class CapableTextField extends JTextField {
+
+    @Delegate
+    private final SettingsComponent<CapableTextField> helper = new SettingsComponent<>(this);
+
+    public static final int DEFAULT_WIDTH = 100;
+    public static final int DEFAULT_HEIGHT = 20;
 
     /**
      * Enumeration for case conversion types.
@@ -52,6 +60,42 @@ public class CapableTextField extends SettingsTextField {
     }
 
     /**
+     * Creates a CapableTextField aligned to the right and of
+     * default size.
+     *
+     * @return A configured CapableTextField instance.
+     */
+    public static CapableTextField create() {
+        return create(null, null);
+    }
+
+    /**
+     * Creates a CapableTextField with specified text of
+     * default size.
+     *
+     * @param text        The text.
+     * @return A configured CapableTextField instance.
+     */
+    public static CapableTextField create(String text) {
+        return create(text, null);
+    }
+
+    /**
+     * Creates a CapableTextField with specified text and tooltip.
+     *
+     * @param text        The text.
+     * @param toolTipText The tooltip text.
+     * @return A configured CapableTextField instance.
+     */
+    public static CapableTextField create(String text, String toolTipText) {
+        CapableTextField label = new CapableTextField();
+        label.setToolTipText(toolTipText);
+        label.setConversionType(CONVERSION_TYPE.NONE);
+        label.setBounds(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        return label;
+    }
+
+    /**
      * Gets the current conversion type.
      *
      * @return The conversion type.
@@ -64,9 +108,11 @@ public class CapableTextField extends SettingsTextField {
      * Sets the conversion type.
      *
      * @param conversionType The conversion type to set.
+     * @return CapableTextField
      */
-    public void setConversionType(CONVERSION_TYPE conversionType) {
+    public CapableTextField setConversionType(CONVERSION_TYPE conversionType) {
         filter.setConversionType(conversionType);
+        return this;
     }
 
     /**
