@@ -28,7 +28,7 @@ public class LivePrice {
     private final PricesManager prices;
     private final ExchangeRatesManager exchangeRates;
     private final SymbolsManager symbols;
-    private final Settings settings;
+    private final SettingsManager settings;
     private final String symbol;
     private final boolean aggregated;
     private SymbolTransaction symbolTransaction;
@@ -44,7 +44,7 @@ public class LivePrice {
      * @param symbolTransaction Specific symbol transaction
      * @param aggregated        Whether to aggregate across all transactions for the symbol
      */
-    public LivePrice(SymbolsManager symbols, PricesManager prices, ExchangeRatesManager exchangeRates, Settings settings, SymbolTransaction symbolTransaction, boolean aggregated) {
+    public LivePrice(SymbolsManager symbols, PricesManager prices, ExchangeRatesManager exchangeRates, SettingsManager settings, SymbolTransaction symbolTransaction, boolean aggregated) {
         this.symbols = symbols;
         this.prices = prices;
         this.exchangeRates = exchangeRates;
@@ -286,7 +286,7 @@ public class LivePrice {
      * @param settings      Application settings
      * @return List of LivePrice objects
      */
-    public static ArrayList<LivePrice> getLivePrices(SymbolsManager symbols, PricesManager prices, ExchangeRatesManager exchangeRates, Settings settings) {
+    public static ArrayList<LivePrice> getLivePrices(SymbolsManager symbols, PricesManager prices, ExchangeRatesManager exchangeRates, SettingsManager settings) {
         ArrayList<LivePrice> livePrices = new ArrayList<>();
         boolean isAveraged = settings.isShowUniqueSymbols();
         for (SymbolTransaction symbolTransaction : symbols.getSymbolTransactions(false, isAveraged, null)) {

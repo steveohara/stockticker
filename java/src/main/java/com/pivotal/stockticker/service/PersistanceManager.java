@@ -1,7 +1,7 @@
 package com.pivotal.stockticker.service;
 
 import com.pivotal.stockticker.Utils;
-import com.pivotal.stockticker.model.Settings;
+import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.model.SymbolTransaction;
 import lombok.Getter;
 import lombok.Setter;
@@ -389,7 +389,7 @@ abstract public class PersistanceManager {
         }
 
         // Get some transient values that need to be maintained
-        Settings settings = Settings.getPersistentSettings();
+        SettingsManager settings = SettingsManager.getPersistentSettings();
         int left = settings.getWindowX();
         int top = settings.getWindowY();
         int width = settings.getWindowWidth();
@@ -403,7 +403,7 @@ abstract public class PersistanceManager {
         }
 
         // Replace the positioning settings to maintain window position
-        settings = Settings.getPersistentSettings();
+        settings = SettingsManager.getPersistentSettings();
         settings.setWindowX(left);
         settings.setWindowY(top);
         settings.setWindowWidth(width);
@@ -439,7 +439,7 @@ abstract public class PersistanceManager {
         prefs.removeNode();
 
         // Now create new managers to load the data into
-        Settings settings = Settings.getPersistentSettings();
+        SettingsManager settings = SettingsManager.getPersistentSettings();
         SymbolsManager symbolsManager = new SymbolsManager();
         PricesManager pricesManager = new PricesManager(settings);
         ExchangeRatesManager exchangeRatesManager = new ExchangeRatesManager(settings);
@@ -468,7 +468,7 @@ abstract public class PersistanceManager {
      * @param line     The starting line index.
      * @return The next line index after processing.
      */
-    private static int loadSettingsFromRegistryLines(Settings settings, String[] lines, int line) {
+    private static int loadSettingsFromRegistryLines(SettingsManager settings, String[] lines, int line) {
 
         // Loop through all the lines until we hit another section
         int row;
@@ -525,14 +525,14 @@ abstract public class PersistanceManager {
                     break;
                 case "font size":
                     int size = Integer.parseInt(value);
-                    if (size < Settings.FONT_SIZE_SMALL) {
-                        size = Settings.FONT_SIZE_SMALL;
+                    if (size < SettingsManager.FONT_SIZE_SMALL) {
+                        size = SettingsManager.FONT_SIZE_SMALL;
                     }
-                    else if (size < Settings.FONT_SIZE_MEDIUM) {
-                        size = Settings.FONT_SIZE_MEDIUM;
+                    else if (size < SettingsManager.FONT_SIZE_MEDIUM) {
+                        size = SettingsManager.FONT_SIZE_MEDIUM;
                     }
                     else {
-                        size = Settings.FONT_SIZE_LARGE;
+                        size = SettingsManager.FONT_SIZE_LARGE;
                     }
                     settings.setFontSize(size);
                     break;
@@ -615,14 +615,14 @@ abstract public class PersistanceManager {
 
                 case "scroll speed":
                     int speed = Integer.parseInt(value.replaceFirst("^[^,]+,", ""));
-                    if (speed < Settings.SCROLL_SPEED_SLOW) {
-                        speed = Settings.SCROLL_SPEED_SLOW;
+                    if (speed < SettingsManager.SCROLL_SPEED_SLOW) {
+                        speed = SettingsManager.SCROLL_SPEED_SLOW;
                     }
-                    else if (speed < Settings.SCROLL_SPEED_MEDIUM) {
-                        speed = Settings.SCROLL_SPEED_MEDIUM;
+                    else if (speed < SettingsManager.SCROLL_SPEED_MEDIUM) {
+                        speed = SettingsManager.SCROLL_SPEED_MEDIUM;
                     }
                     else {
-                        speed = Settings.SCROLL_SPEED_FAST;
+                        speed = SettingsManager.SCROLL_SPEED_FAST;
                     }
                     settings.setTickerSpeed(speed);
                     break;

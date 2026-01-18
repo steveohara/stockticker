@@ -9,14 +9,14 @@ import java.time.LocalDateTime;
 import java.util.prefs.Preferences;
 
 /**
- * Represents the current exchange rate for a currency pair.
+ * Represents the current exchange rate for a currency as compared
+ * to the application base currency.
  */
 @Slf4j
 @Getter
 @Setter
 public class ExchangeRate extends PersistanceManager {
     private String sourceCurrencyCode;
-    private String targetCurrencyCode;
     private double exchangeRate;
     private String errorDescription;
     private LocalDateTime lastUpdate;

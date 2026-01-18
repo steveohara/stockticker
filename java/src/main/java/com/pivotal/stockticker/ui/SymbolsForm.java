@@ -7,7 +7,7 @@
 package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.Utils;
-import com.pivotal.stockticker.model.Settings;
+import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.model.SymbolTransaction;
 import com.pivotal.stockticker.service.SymbolsManager;
 import com.pivotal.stockticker.ui.components.*;
@@ -20,6 +20,9 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Currency;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Form to manage stock symbols
@@ -31,11 +34,12 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
     private SettingsCheckbox chkHideDisabled, chkAlarmHighPercent, chkAlarmHighPlaySound, chkAlarmLowPercent, chkAlarmLowPlaySound, chkDisabled, chkExcludeFromSummary, chkShowChange, chkShowChangePercent, chkShowDayChange, chkShowDayChangePercent, chkShowDayUpDown, chkShowPrice, chkShowProfitLoss, chlShowUpDown;
     private CheckBoxFrame pnlAlarmLow, pnlAlarmHigh;
     private SymbolsList lstSymbols;
-    private CapableTextField txtAlarmHigh, txtAlarmLow, txtCurrencyCode, txtPricePaid, txtSharesBought, txtSymbol;
+    private SettingsComboBox<String> lstCurrencyCode;
+    private CapableTextField txtAlarmHigh, txtAlarmLow, txtPricePaid, txtSharesBought, txtSymbol;
     private SettingsTextField txtCurrencySymbol, txtDisplayName;
     private JLabel lblTransactionTimestamp;
 
-    private final Settings settings;
+    private final SettingsManager settings;
     private final SymbolsManager symbolsManager;
     private final CallbackInterface caller;
     private boolean ignoreChanges = false;
@@ -43,7 +47,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
     /**
      * Creates new form Symbols
      */
-    public SymbolsForm(Settings settings, CallbackInterface caller, SymbolsManager symbolsManager) {
+    public SymbolsForm(SettingsManager settings, CallbackInterface caller, SymbolsManager symbolsManager) {
         this.settings = settings;
         this.caller = caller;
         this.symbolsManager = symbolsManager;
@@ -168,7 +172,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         txtDisplayName.setText("");
         txtPricePaid.setText("");
         txtSharesBought.setText("");
-        txtCurrencyCode.setText("");
+        lstCurrencyCode.setSelectedIndex(-1);
         txtCurrencySymbol.setText("");
 
         chkShowPrice.setSelected(false);
@@ -208,7 +212,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         txtDisplayName.setText(symbol.getAlias());
         txtPricePaid.setText(symbol.getPricePaid());
         txtSharesBought.setText(symbol.getSharesBought());
-        txtCurrencyCode.setText(symbol.getCurrencyCode());
+        lstCurrencyCode.setSelectedItem(symbol.getCurrencyCode());
         txtCurrencySymbol.setText(symbol.getCurrencySymbol());
 
         chkShowPrice.setSelected(symbol.isShowPrice());
@@ -312,7 +316,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             symbol.setAlias(txtDisplayName.getText());
             symbol.setPricePaid(txtPricePaid.getValue());
             symbol.setSharesBought(txtSharesBought.getValue());
-            symbol.setCurrencyCode(txtCurrencyCode.getText());
+            symbol.setCurrencyCode(Objects.requireNonNull(lstCurrencyCode.getSelectedItem()).toString());
             symbol.setCurrencySymbol(txtCurrencySymbol.getText());
 
             symbol.setShowPrice(chkShowPrice.isSelected());
@@ -395,8 +399,15 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
 
         // Currency
         JLabel jLabel5 = SettingsLabel.create("Currency Code").below(jLabel3, vGap).to(getContentPane());
-        txtCurrencyCode = CapableTextField.create("", "e.g. GBP, USD").setConversionType(CapableTextField.CONVERSION_TYPE.UPPER)
+        lstCurrencyCode = SettingsComboBox.<String>create().setTooltip("e.g. GBP, USD")
                 .below(txtPricePaid, vGap).withWidth(70).to(getContentPane());
+        lstCurrencyCode.addItem("");
+        Set<Currency> currencies = Currency.getAvailableCurrencies();
+        currencies.stream()
+            .map(Currency::getCurrencyCode)
+            .sorted()
+            .forEach(code -> lstCurrencyCode.addItem(code));
+
 
         JLabel jLabel6 = SettingsLabel.create("Currency Symbol").below(jLabel4, vGap).to(getContentPane());
         txtCurrencySymbol = SettingsTextField.create("", "e.g. $, £, p, c").below(txtSharesBought, vGap).withWidth(50).to(getContentPane());

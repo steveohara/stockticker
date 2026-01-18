@@ -1,7 +1,7 @@
 package com.pivotal.stockticker.service;
 
 import com.pivotal.stockticker.model.Price;
-import com.pivotal.stockticker.model.Settings;
+import com.pivotal.stockticker.model.SettingsManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,14 +24,14 @@ public class PricesManager {
     private final Map<String, Price> currentPrices = new TreeMap<>(String::compareToIgnoreCase);
 
     private final PriceCurrencyUpdateTask scheduler;
-    private final Settings settings;
+    private final SettingsManager settings;
 
     /**
      * Constructor - loads all prices from persistent storage and starts the periodic update task
      *
      * @param settings Application settings
      */
-    public PricesManager(Settings settings) {
+    public PricesManager(SettingsManager settings) {
         this.settings = settings;
 
         // Load all the saved prices values from persistent storage
@@ -155,7 +155,7 @@ public class PricesManager {
 
         private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         private ScheduledFuture<?> scheduledFuture;
-        private final Settings settings;
+        private final SettingsManager settings;
         private Map<String, Price> currentPrices = new HashMap<>();
         @Getter
         private int periodSeconds;
@@ -166,7 +166,7 @@ public class PricesManager {
          * @param settings      Application settings
          * @param currentPrices Map of current prices
          */
-        public PriceCurrencyUpdateTask(Settings settings, Map<String, Price> currentPrices) {
+        public PriceCurrencyUpdateTask(SettingsManager settings, Map<String, Price> currentPrices) {
             this.settings = settings;
             this.currentPrices = currentPrices;
         }

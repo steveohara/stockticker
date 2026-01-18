@@ -16,7 +16,7 @@ import java.util.prefs.Preferences;
 @Slf4j
 @Getter
 @Setter
-public class Settings extends PersistanceManager {
+public class SettingsManager extends PersistanceManager {
 
     public static String BROWSER_STOCK_LAUNCH_URL = "https://finance.yahoo.com/quote";
 
@@ -89,8 +89,8 @@ public class Settings extends PersistanceManager {
      * @return A proxy instance of this class.
      * @throws Exception if proxy creation fails.
      */
-    public static Settings getPersistentSettings() throws Exception {
-        return createProxyInstance(Settings.class, Preferences.userRoot().node(ROOT_NODE + Settings.class.getSimpleName()), true);
+    public static SettingsManager getPersistentSettings() throws Exception {
+        return createProxyInstance(SettingsManager.class, Preferences.userRoot().node(ROOT_NODE + SettingsManager.class.getSimpleName()), true);
     }
 
     /**
@@ -118,6 +118,6 @@ public class Settings extends PersistanceManager {
      * Reloads the settings from persistent storage.
      */
     public void loadFromStorage() {
-        loadFromStorage(Preferences.userRoot().node(PersistanceManager.ROOT_NODE + Settings.class.getSimpleName()));
+        loadFromStorage(Preferences.userRoot().node(PersistanceManager.ROOT_NODE + SettingsManager.class.getSimpleName()));
     }
 }

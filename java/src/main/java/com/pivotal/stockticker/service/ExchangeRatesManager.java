@@ -1,7 +1,7 @@
 package com.pivotal.stockticker.service;
 
 import com.pivotal.stockticker.model.ExchangeRate;
-import com.pivotal.stockticker.model.Settings;
+import com.pivotal.stockticker.model.SettingsManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,6 +14,11 @@ import java.util.prefs.Preferences;
 
 /**
  * Manages exchange rates including loading from storage and periodic updates
+ * All rates are stored in user preferences so that they persist between application runs
+ * Rates are identified by their currency code (e.g. "USD", "EUR") and are the multiplier
+ * to convert from that currency to the base currency defined in application settings @see SettingsManager.getCurrencyCode()
+ * The rates are updated periodically based on the application settings
+ * @see ExchangeRate
  */
 @Slf4j
 public class ExchangeRatesManager {
@@ -22,16 +27,15 @@ public class ExchangeRatesManager {
     private Preferences prefs = Preferences.userRoot().node(EXCHANGE_RATES_ROOT);
 
     private final Map<String, ExchangeRate> currentRates = new TreeMap<>(String::compareToIgnoreCase);
-
     private final UpdateTask scheduler;
-    private final Settings settings;
+    private final SettingsManager settings;
 
     /**
      * Constructor - loads all exchange rates from persistent storage and starts the periodic update task
      *
      * @param settings Application settings
      */
-    public ExchangeRatesManager(Settings settings) {
+    public ExchangeRatesManager(SettingsManager settings) {
         this.settings = settings;
 
         // Load all the saved prices values from persistent storage
@@ -125,7 +129,7 @@ public class ExchangeRatesManager {
      * @param code The stock code
      * @return The ExchangeRate object for the given code, or null if not found
      */
-    public ExchangeRate getPrice(String code) {
+    public ExchangeRate getRate(String code) {
         return currentRates.get(code);
     }
 
@@ -136,6 +140,22 @@ public class ExchangeRatesManager {
      */
     public Map<String, ExchangeRate> getAllExchangeRates() {
         return currentRates;
+    }
+
+    /**
+     * Convert an amount from one currency to the base currency defined in settings
+     *
+     * @param fromCode The currency code to convert from
+     * @param amount   The amount in the from currency
+     * @return The equivalent amount in the base currency
+     */
+    public double convertAmount(String fromCode, double amount) {
+        ExchangeRate fromRate = getRate(fromCode);
+        if (fromRate == null) {
+            log.warn("Cannot convert amount - missing exchange rate for {}", fromCode);
+            return 0.0;
+        }
+        return amount * fromRate.getExchangeRate();
     }
 
     /**
@@ -155,7 +175,7 @@ public class ExchangeRatesManager {
 
         private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         private ScheduledFuture<?> scheduledFuture;
-        private final Settings settings;
+        private final SettingsManager settings;
         private Map<String, ExchangeRate> currentExchangeRates = new HashMap<>();
         @Getter
         private int periodSeconds;
@@ -166,7 +186,7 @@ public class ExchangeRatesManager {
          * @param settings      Application settings
          * @param currentExchangeRates Map of current prices
          */
-        public UpdateTask(Settings settings, Map<String, ExchangeRate> currentExchangeRates) {
+        public UpdateTask(SettingsManager settings, Map<String, ExchangeRate> currentExchangeRates) {
             this.settings = settings;
             this.currentExchangeRates = currentExchangeRates;
         }
@@ -181,6 +201,7 @@ public class ExchangeRatesManager {
             Map<String, ExchangeRate> rates = new HashMap<>(currentExchangeRates);
 
             // Update prices for each symbol from each source
+            // TODO - Implement actual exchange rate fetching logic here
         };
 
         /**

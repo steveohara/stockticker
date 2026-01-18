@@ -10,7 +10,7 @@ public class SummaryStats {
     private final SymbolsManager symbols;
     private final PricesManager prices;
     private final ExchangeRatesManager rates;
-    private final Settings settings;
+    private final SettingsManager settings;
 
     public double calculateTotalValue() {
 //        return symbols.getAllEnabledSymbols().stream()

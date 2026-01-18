@@ -1,7 +1,7 @@
 package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.Utils;
-import com.pivotal.stockticker.model.Settings;
+import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.service.PersistanceManager;
 import com.pivotal.stockticker.ui.components.*;
 import com.pivotal.stockticker.utils.CallbackInterface;
@@ -10,20 +10,23 @@ import com.pivotal.stockticker.utils.StartupManager;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Currency;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Settings form for the Stock Ticker application
  */
 public class SettingsForm extends JDialog implements CallbackInterface {
 
-    private CapableTextField txtCurrencyCode, txtCurrencySymbol, txtMargin, txtTotalInvestment;
+    private CapableTextField txtCurrencySymbol, txtMargin, txtTotalInvestment;
     private SettingsButton btnBackground, btnBackup, btnCancel, btnDownArrowColour, btnDownColour, btnLabelColour, btnHighAlarm, btnLowAlarm, btnNormalText, btnOk, btnRestore, btnUpArrowColour, btnUpColour;
     private SettingsCheckbox chkBold, chkItalic, chkShowDailyChange, chkShowTotalCost, chkShowTotalProfit, chkShowTotalProfitPercentage, chkShowTotalValue, chkShowUniqueSymbols;
-    private SettingsComboBox<String> lstFont;
+    private SettingsComboBox<String> lstFont, lstCurrencyCode;
     private SettingsSpinner spnTickerUpdate;
     private SettingsTextField txtAlphaVantageToken, txtFinHubToken, txtFreeCurrencyToken, txtHighAlarm, txtIexToken, txtLowAlarm, txtMarketStackToken, txtProxyServer, txtTiingoToken, txtTwelveDataToken;
 
-    private final Settings settings;
+    private final SettingsManager settings;
     private final CallbackInterface caller;
 
     /**
@@ -32,7 +35,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
      * @param caller   Parent callback interface
      * @param settings Settings object to load and save data
      */
-    public SettingsForm(CallbackInterface caller, Settings settings) {
+    public SettingsForm(CallbackInterface caller, SettingsManager settings) {
         this.caller = caller;
         this.settings = settings;
         initComponents();
@@ -125,7 +128,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
      *
      * @param settings Settings object to load data from
      */
-    private void loadFromSettings(Settings settings) {
+    private void loadFromSettings(SettingsManager settings) {
 
         // Colours
         btnBackground.setBackground(settings.getBackgroundColor());
@@ -137,13 +140,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         btnLabelColour.setBackground(settings.getLabelColor());
 
         // Fonts
-        String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-        for (String font : fonts) {
-            lstFont.addItem(font);
-            if (font.equalsIgnoreCase(settings.getFontName())) {
-                lstFont.setSelectedItem(font);
-            }
-        }
+        lstFont.setSelectedItem(settings.getFontName());
         chkBold.setSelected(settings.isFontBold());
         chkItalic.setSelected(settings.isFontItalic());
 
@@ -171,7 +168,8 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
         // Other
         txtProxyServer.setText(settings.getProxyServer());
-        txtCurrencyCode.setText(settings.getCurrencyCode());
+        lstCurrencyCode.setSelectedItem(settings.getCurrencyCode());
+
         txtCurrencySymbol.setText(settings.getCurrencySymbol());
         txtTotalInvestment.setText(settings.getTotalInvestment());
         txtMargin.setText(settings.getMargin());
@@ -219,7 +217,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
         // Other
         settings.setProxyServer(txtProxyServer.getText().trim());
-        settings.setCurrencyCode(txtCurrencyCode.getText().trim());
+        settings.setCurrencyCode(Objects.requireNonNull(lstCurrencyCode.getSelectedItem()).toString());
         settings.setCurrencySymbol(txtCurrencySymbol.getText().trim());
         settings.setMargin(txtMargin.getValue());
         settings.setTotalInvestment(txtTotalInvestment.getValue());
@@ -293,7 +291,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         getContentPane().setComponentZOrder(jLabel30, 0);
 
         // Colour buttons
-        SettingsLabel jLabel4 = SettingsLabel.create("Background").below(jLabel30, vGap).atLeft(jLabel2).withHeight(16).to(getContentPane());
+        SettingsLabel jLabel4 = SettingsLabel.create("Background").below(jLabel30, vGap).atLeft(jLabel1).withDimensions(jLabel1).to(getContentPane());
         btnBackground = SettingsButton.create("").tail(jLabel4, lblGap).withWidth(25).withHeight(jLabel4).setBackColor(new java.awt.Color(0, 0, 0)).to(getContentPane());
 
         SettingsLabel jLabel5 = SettingsLabel.create("Up Colour").tail(btnBackground, vGap).withHeight(jLabel4).withWidth(75).to(getContentPane());
@@ -316,9 +314,19 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
         // Font settings
         SettingsLabel jLabel11 = SettingsLabel.create("Font").below(jLabel10, vGap).to(getContentPane());
-        lstFont = SettingsComboBox.<String>create().tail(jLabel11, lblGap).withWidth(100).to(getContentPane());
+        lstFont = SettingsComboBox.<String>create().tail(jLabel11, lblGap).withWidth(150).to(getContentPane());
         chkBold = SettingsCheckbox.create("Bold").tail(lstFont, hGap * 2).withWidth(60).to(getContentPane());
         chkItalic = SettingsCheckbox.create("Italic").tail(chkBold, hGap).withWidth(chkBold).to(getContentPane());
+
+        // Set the font list
+        lstFont.addItem("");
+        String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+        for (String font : fonts) {
+            lstFont.addItem(font.toUpperCase());
+            if (font.equalsIgnoreCase(settings.getFontName())) {
+                lstFont.setSelectedItem(font);
+            }
+        }
 
         SettingsLabel jLabel12 = SettingsLabel.create("High alarm").below(jLabel11, vGap).withDimensions(jLabel1).to(getContentPane());
         txtHighAlarm = SettingsTextField.create().tail(jLabel12, lblGap).withWidth(getWidth() - (jLabel12.getRight() + lblGap + 70)).to(getContentPane());
@@ -367,16 +375,25 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         getContentPane().setComponentZOrder(jLabel15, 0);
 
         SettingsLabel jLabel16 = SettingsLabel.create("Currency Code").below(jLabel15, vGap).withDimensions(jLabel1).to(getContentPane());
-        txtCurrencyCode = CapableTextField.create("", "ISO Currency to convert summary values into e.g. GBP, USD etc.").tail(jLabel16, lblGap).withWidth(70).setConversionType(CapableTextField.CONVERSION_TYPE.UPPER).to(getContentPane());
+        lstCurrencyCode = SettingsComboBox.<String>create().setTooltip("ISO Currency to convert summary values into e.g. GBP, USD etc.").tail(jLabel16, lblGap).withWidth(70).to(getContentPane());
+        lstCurrencyCode.addItem("");
+        Set<Currency> currencies = Currency.getAvailableCurrencies();
+        currencies.stream()
+            .map(Currency::getCurrencyCode)
+            .sorted()
+            .forEach(code -> lstCurrencyCode.addItem(code));
 
-        SettingsLabel jLabel17 = SettingsLabel.create("Currency Symbol").tail(txtCurrencyCode, hGap).withDimensions(jLabel1).withWidth(120).to(getContentPane());
-        txtCurrencySymbol = CapableTextField.create("", "ISO Currency to convert summary values into e.g. GBP, USD etc.").tail(jLabel17, lblGap).withWidth(30).setConversionType(CapableTextField.CONVERSION_TYPE.UPPER).to(getContentPane());
+        SettingsLabel jLabel17 = SettingsLabel.create("Currency Symbol").tail(lstCurrencyCode, hGap).withDimensions(jLabel1).withWidth(120).to(getContentPane());
+        txtCurrencySymbol = CapableTextField.create("", "The display symbol to use. Note: if the symbol is a letter, it is assumed it appends otherwise it prepends e.g. £/$ would go at the front where as c/p will go at the back")
+                .tail(jLabel17, lblGap).withWidth(30).atRight(txtProxyServer.getRight()).setConversionType(CapableTextField.CONVERSION_TYPE.UPPER).to(getContentPane());
+        jLabel17.atRight(txtCurrencySymbol.getX() - lblGap);
 
         SettingsLabel jLabel19 = SettingsLabel.create("Total Investment").below(jLabel16, vGap).withDimensions(jLabel1).to(getContentPane());
         txtTotalInvestment = CapableTextField.create("", "Total amount invested (cash paid) in stocks in local currency").tail(jLabel19, lblGap).withWidth(90).setConversionType(CapableTextField.CONVERSION_TYPE.NUMERIC).to(getContentPane());
 
         SettingsLabel jLabel20 = SettingsLabel.create("Margin").tail(txtTotalInvestment, hGap).withDimensions(jLabel1).withWidth(70).to(getContentPane());
-        txtMargin = CapableTextField.create("", "Amount of money in debit (margin) account").tail(jLabel20, lblGap).withDimensions(txtTotalInvestment).setConversionType(CapableTextField.CONVERSION_TYPE.NUMERIC).to(getContentPane());
+        txtMargin = CapableTextField.create("", "Amount of money in debit (margin) account").tail(jLabel20, lblGap).withDimensions(txtTotalInvestment).atRight(txtProxyServer.getRight()).setConversionType(CapableTextField.CONVERSION_TYPE.NUMERIC).to(getContentPane());
+        jLabel20.atRight(txtMargin.getX() - lblGap);
 
         // Divider
         SettingsSeparator jSeparator5 = SettingsSeparator.create().below(txtTotalInvestment, vGap * 3).atLeft(jSeparator1).withDimensions(jSeparator1).to(getContentPane());
@@ -418,7 +435,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         btnCancel = SettingsButton.create("Cancel").atTop(btnBackup).atLeft(getWidth() - btnBackup.getWidth() - hGap * 2).withDimensions(btnBackup).to(getContentPane());
         btnOk = SettingsButton.create("Ok").atTop(btnBackup).atLeft(btnCancel.getX() - btnBackup.getWidth() - hGap).withDimensions(btnBackup).to(getContentPane());
 
-        setSize(width, btnOk.getBottom() + vGap * 2);
+        setSize(width, btnOk.getBottom() + 40);
         setPreferredSize(getSize());
         setMaximumSize(getSize());
         setMinimumSize(getSize());

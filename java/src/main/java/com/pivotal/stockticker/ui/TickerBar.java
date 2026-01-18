@@ -2,7 +2,7 @@ package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.Utils;
 import com.pivotal.stockticker.model.LivePrice;
-import com.pivotal.stockticker.model.Settings;
+import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.model.SummaryStats;
 import com.pivotal.stockticker.model.SymbolTransaction;
 import com.pivotal.stockticker.service.ExchangeRatesManager;
@@ -32,7 +32,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
     public static final int VALUE_SEPARATION = 5;
     public static final int UP_DOWN_SEPARATION = 0;
 
-    private final Settings settings = Settings.getPersistentSettings();
+    private final SettingsManager settings = SettingsManager.getPersistentSettings();
     private final SymbolsManager symbols = new SymbolsManager();
     private final PricesManager prices = new PricesManager(settings);
     private final ExchangeRatesManager rates = new ExchangeRatesManager(settings);
@@ -296,7 +296,6 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
                 // Load all the changed settings from storage
                 settings.loadFromStorage();
-                setFontSize(settings.getFontSize());
                 setTicketSpeed(settings.getTickerSpeed());
                 initializeUI();
 
@@ -315,9 +314,9 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
             // If the settings form was the source, update settings
             case SettingsForm settingsForm -> {
-                setFontSize(settings.getFontSize());
                 setTicketSpeed(settings.getTickerSpeed());
                 initializeUI();
+                drawTickerContent();
             }
 
             // If the symbols form was the source, update the prices and redraw
@@ -523,7 +522,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         LivePrice price = getLivePriceAtPoint(mousePos);
         if (price != null) {
             try {
-                String url = String.format("%s/%s?p=%s", Settings.BROWSER_STOCK_LAUNCH_URL, price.getSymbol(), price.getSymbol());
+                String url = String.format("%s/%s?p=%s", SettingsManager.BROWSER_STOCK_LAUNCH_URL, price.getSymbol(), price.getSymbol());
                 Desktop desktop = Desktop.getDesktop();
                 desktop.browse(new URI(url));
             }
@@ -567,27 +566,27 @@ public class TickerBar extends JFrame implements CallbackInterface {
         contextMenu.addSeparator();
 
         JMenuItem fontSize = new JMenu("Font Size");
-        fontSizeItemSmall = new JCheckBoxMenuItem("Small", settings.getFontSize() == Settings.FONT_SIZE_SMALL);
-        fontSizeItemSmall.addActionListener(e -> setFontSize(Settings.FONT_SIZE_SMALL));
+        fontSizeItemSmall = new JCheckBoxMenuItem("Small", settings.getFontSize() == SettingsManager.FONT_SIZE_SMALL);
+        fontSizeItemSmall.addActionListener(e -> setFontSize(SettingsManager.FONT_SIZE_SMALL));
         fontSize.add(fontSizeItemSmall);
-        fontSizeItemMedium = new JCheckBoxMenuItem("Normal", settings.getFontSize() == Settings.FONT_SIZE_MEDIUM);
-        fontSizeItemMedium.addActionListener(e -> setFontSize(Settings.FONT_SIZE_MEDIUM));
+        fontSizeItemMedium = new JCheckBoxMenuItem("Normal", settings.getFontSize() == SettingsManager.FONT_SIZE_MEDIUM);
+        fontSizeItemMedium.addActionListener(e -> setFontSize(SettingsManager.FONT_SIZE_MEDIUM));
         fontSize.add(fontSizeItemMedium);
-        fontSizeItemLarge = new JCheckBoxMenuItem("Large", settings.getFontSize() == Settings.FONT_SIZE_LARGE);
-        fontSizeItemLarge.addActionListener(e -> setFontSize(Settings.FONT_SIZE_LARGE));
+        fontSizeItemLarge = new JCheckBoxMenuItem("Large", settings.getFontSize() == SettingsManager.FONT_SIZE_LARGE);
+        fontSizeItemLarge.addActionListener(e -> setFontSize(SettingsManager.FONT_SIZE_LARGE));
         fontSize.add(fontSizeItemLarge);
         contextMenu.add(fontSize);
         contextMenu.addSeparator();
 
         JMenuItem scroll = new JMenu("Scroll");
-        scrollItemSlow = new JCheckBoxMenuItem("Slow", settings.getTickerSpeed() == Settings.SCROLL_SPEED_SLOW);
-        scrollItemSlow.addActionListener(e -> setTicketSpeed(Settings.SCROLL_SPEED_SLOW));
+        scrollItemSlow = new JCheckBoxMenuItem("Slow", settings.getTickerSpeed() == SettingsManager.SCROLL_SPEED_SLOW);
+        scrollItemSlow.addActionListener(e -> setTicketSpeed(SettingsManager.SCROLL_SPEED_SLOW));
         scroll.add(scrollItemSlow);
-        scrollItemNormal = new JCheckBoxMenuItem("Medium", settings.getTickerSpeed() == Settings.SCROLL_SPEED_MEDIUM);
-        scrollItemNormal.addActionListener(e -> setTicketSpeed(Settings.SCROLL_SPEED_MEDIUM));
+        scrollItemNormal = new JCheckBoxMenuItem("Medium", settings.getTickerSpeed() == SettingsManager.SCROLL_SPEED_MEDIUM);
+        scrollItemNormal.addActionListener(e -> setTicketSpeed(SettingsManager.SCROLL_SPEED_MEDIUM));
         scroll.add(scrollItemNormal);
-        scrollItemFast = new JCheckBoxMenuItem("Fast", settings.getTickerSpeed() == Settings.SCROLL_SPEED_FAST);
-        scrollItemFast.addActionListener(e -> setTicketSpeed(Settings.SCROLL_SPEED_FAST));
+        scrollItemFast = new JCheckBoxMenuItem("Fast", settings.getTickerSpeed() == SettingsManager.SCROLL_SPEED_FAST);
+        scrollItemFast.addActionListener(e -> setTicketSpeed(SettingsManager.SCROLL_SPEED_FAST));
         scroll.add(scrollItemFast);
         contextMenu.add(scroll);
         contextMenu.addSeparator();
@@ -686,9 +685,9 @@ public class TickerBar extends JFrame implements CallbackInterface {
         pnlTicker.setPreferredSize(new Dimension(getWidth(), getFontMetrics(newFont).getHeight() + 2));
         setSize(new Dimension(getWidth(), getFontMetrics(newFont).getHeight() + 2));
         settings.setFontSize(size);
-        fontSizeItemSmall.setSelected(size == Settings.FONT_SIZE_SMALL);
-        fontSizeItemMedium.setSelected(size == Settings.FONT_SIZE_MEDIUM);
-        fontSizeItemLarge.setSelected(size == Settings.FONT_SIZE_LARGE);
+        fontSizeItemSmall.setSelected(size == SettingsManager.FONT_SIZE_SMALL);
+        fontSizeItemMedium.setSelected(size == SettingsManager.FONT_SIZE_MEDIUM);
+        fontSizeItemLarge.setSelected(size == SettingsManager.FONT_SIZE_LARGE);
 
         // Redraw all the ticker content
         drawTickerContent();
@@ -702,9 +701,9 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private void setTicketSpeed(int speed) {
         settings.setTickerSpeed(speed);
         pnlStocks.setScrollSpeed(speed);
-        scrollItemSlow.setSelected(speed == Settings.SCROLL_SPEED_SLOW);
-        scrollItemNormal.setSelected(speed == Settings.SCROLL_SPEED_MEDIUM);
-        scrollItemFast.setSelected(speed == Settings.SCROLL_SPEED_FAST);
+        scrollItemSlow.setSelected(speed == SettingsManager.SCROLL_SPEED_SLOW);
+        scrollItemNormal.setSelected(speed == SettingsManager.SCROLL_SPEED_MEDIUM);
+        scrollItemFast.setSelected(speed == SettingsManager.SCROLL_SPEED_FAST);
     }
 
     /**
