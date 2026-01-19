@@ -282,7 +282,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         int vGap = 6;
         int hGap = 10;
         int lblGap = 5;
-        int width = StartupManager.isWindows() ? 460 :  450;
+        int width = StartupManager.isWindows() ? 460 :  480;
 
         setSize(width, 400);
         setPreferredSize(getSize());
@@ -293,7 +293,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         getContentPane().setLayout(null);
 
         // Normal Settings
-        SettingsLabel jLabel1 = SettingsLabel.create("Proxy Server").atPosition(hGap, vGap).to(getContentPane());
+        SettingsLabel jLabel1 = SettingsLabel.create("Proxy Server").atPosition(hGap, vGap * 2).to(getContentPane());
         txtProxyServer = SettingsTextField.create("", "The address of a proxy server to use e.g. www.proxy.com:8989 etc.")
                         .tail(jLabel1, lblGap).withWidth(getWidth() - (jLabel1.getRight() + lblGap + hGap * 3)).to(getContentPane());
 
