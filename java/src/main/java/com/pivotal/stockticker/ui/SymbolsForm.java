@@ -1,7 +1,7 @@
 /*
  *
- * Copyright (c) 2026, 4NG and/or its affiliates. All rights reserved.
- * 4NG PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * Copyright (c) 2026, Pivotal Solutions and/or its affiliates. All rights reserved.
+ * Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  */
 package com.pivotal.stockticker.ui;
@@ -461,7 +461,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         btnCancel = SettingsButton.create("Cancel").atTop(btnAdd).withWidth(80).atRight(txtDisplayName.getRight()).to(getContentPane());
         btnOk = SettingsButton.create("Ok").atTop(btnCancel).atLeft(btnCancel.getX() - btnCancel.getWidth() - hGap).withDimensions(btnCancel).to(getContentPane());
 
-        setSize(width, btnOk.getBottom() + 40);
+        setSize(width, btnOk.getBottom() + (StartupManager.isWindows() ? 50 :  40));
         setPreferredSize(getSize());
         setMaximumSize(getSize());
         setMinimumSize(getSize());

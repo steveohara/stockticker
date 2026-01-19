@@ -1,7 +1,7 @@
 /*
  *
- * Copyright (c) 2026, 4NG and/or its affiliates. All rights reserved.
- * 4NG PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * Copyright (c) 2026, Pivotal Solutions and/or its affiliates. All rights reserved.
+ * Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  */
 package com.pivotal.stockticker.model;

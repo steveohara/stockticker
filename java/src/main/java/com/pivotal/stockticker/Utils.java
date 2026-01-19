@@ -1,3 +1,9 @@
+/*
+ *
+ * Copyright (c) 2026, Pivotal Solutions and/or its affiliates. All rights reserved.
+ * Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *
+ */
 package com.pivotal.stockticker;
 
 import com.pivotal.stockticker.utils.CallbackInterface;
@@ -31,8 +37,20 @@ public class Utils {
      * @param messageType The type of message (e.g., JOptionPane.INFORMATION_MESSAGE).
      */
     public static void showTopmostMessage(String message, String title, int messageType) {
+        showTopmostMessage(null, message, title, messageType);
+    }
+
+    /**
+     * Displays a message dialog that stays on top of all other windows.
+     *
+     * @param parent      The parent component for the dialog.
+     * @param message     The message to display.
+     * @param title       The title of the dialog.
+     * @param messageType The type of message (e.g., JOptionPane.INFORMATION_MESSAGE).
+     */
+    public static void showTopmostMessage(Component parent, String message, String title, int messageType) {
         JOptionPane pane = new JOptionPane(message, messageType);
-        JDialog dialog = pane.createDialog(null, title);
+        JDialog dialog = pane.createDialog(parent, title);
         dialog.setAlwaysOnTop(true);
         dialog.setModal(true);
         dialog.setVisible(true);

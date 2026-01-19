@@ -1,3 +1,9 @@
+/*
+ *
+ * Copyright (c) 2026, Pivotal Solutions and/or its affiliates. All rights reserved.
+ * Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *
+ */
 package com.pivotal.stockticker.model;
 
 import com.pivotal.stockticker.service.PersistanceManager;
@@ -52,7 +58,7 @@ public class SettingsManager extends PersistanceManager {
     private boolean showPortfolioProfitAndLossPercent = true;
     private boolean showTotalCost = false;
     private boolean showTotalValue = false;
-    private boolean showDailyChange = true;
+    private boolean showDailySummary = true;
     private boolean showUniqueSymbols = true;
     private boolean alwaysOnTop = true;
     private boolean hideDisabledSymbols = false;

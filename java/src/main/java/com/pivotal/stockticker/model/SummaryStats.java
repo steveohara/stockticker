@@ -1,3 +1,9 @@
+/*
+ *
+ * Copyright (c) 2026, Pivotal Solutions and/or its affiliates. All rights reserved.
+ * Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *
+ */
 package com.pivotal.stockticker.model;
 
 import com.pivotal.stockticker.service.ExchangeRatesManager;
@@ -35,4 +41,9 @@ public class SummaryStats {
     public double calculateTotalCost() {
         return 0;
     }
+
+    public double calculateTotalValueAtStartOfDay() {
+        return 0;
+    }
+
 }

@@ -1,3 +1,9 @@
+/*
+ *
+ * Copyright (c) 2026, Pivotal Solutions and/or its affiliates. All rights reserved.
+ * Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *
+ */
 package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.Utils;
@@ -30,7 +36,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
     public static final int STOCK_SEPARATION = 10;
     public static final int VALUE_SEPARATION = 5;
-    public static final int UP_DOWN_SEPARATION = 0;
+    public static final int UP_DOWN_SEPARATION = 1;
 
     private final SettingsManager settings = SettingsManager.getPersistentSettings();
     private final SymbolsManager symbols = new SymbolsManager();
@@ -86,6 +92,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
     synchronized private void drawTickerContent() {
         drawLivePrices();
         drawSummary();
+        drawDaySummary();
     }
 
     /**
@@ -125,6 +132,10 @@ public class TickerBar extends JFrame implements CallbackInterface {
             pnlSummary.setBackground(settings.getBackgroundColor());
             pnlSummary.setFontColor(settings.getNormalTextColor());
             pnlSummary.setFont(new Font(settings.getFontName(), settings.getFontStyle(), settings.getFontSize()));
+            pnlSummary.setFontBold(settings.isFontBold());
+            pnlSummary.setFontItalic(settings.isFontItalic());
+            pnlSummary.setCurrentX(VALUE_SEPARATION);
+            pnlSummary.print("");
 
             // Create a summary stats object to calculate the summary data
             SummaryStats summaryStats = new SummaryStats(symbols, prices, rates, settings);
@@ -138,8 +149,9 @@ public class TickerBar extends JFrame implements CallbackInterface {
             pnlSummary.setFontColor(settings.getNormalTextColor());
             if (settings.isShowPortfolioProfitAndLoss()) {
                 pnlSummary.print(Utils.formatCurrencyValue(totalValue, settings.getCurrencySymbol()));
+                pnlSummary.setCurrentX(pnlSummary.getCurrentX() + VALUE_SEPARATION);
                 pnlSummary.setFontColor(adjustedTotalValue < totalCost ? settings.getDownColor() : adjustedTotalValue > totalCost ? settings.getUpColor() : settings.getNormalTextColor());
-                pnlSummary.print(String.format(" (%s)", Utils.formatCurrencyValue(totalValue==0.0 ? 0 : (totalCost - adjustedTotalValue), settings.getCurrencySymbol())));
+                pnlSummary.print(String.format("(%s)", Utils.formatCurrencyValue(totalValue==0.0 ? 0 : (totalCost - adjustedTotalValue), settings.getCurrencySymbol())));
                 pnlSummary.setCurrentX(pnlSummary.getCurrentX() + VALUE_SEPARATION);
             }
             if (settings.isShowPortfolioProfitAndLossPercent()) {
@@ -157,7 +169,40 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 pnlSummary.print(String.format("Value:%s", Utils.formatCurrencyValue(totalValue, settings.getCurrencySymbol())));
                 pnlSummary.setCurrentX(pnlSummary.getCurrentX() + VALUE_SEPARATION);
             }
-            pnlSummary.print(" ");
+            pnlSummary.print("");
+        }
+    }
+
+    /**
+     * Draws the day summary panel on the ticker.
+     */
+    private void drawDaySummary() {
+        pnlDaySummary.cls();
+        if (settings.isShowDailySummary()) {
+            pnlDaySummary.setBackground(settings.getBackgroundColor());
+            pnlDaySummary.setFontColor(settings.getNormalTextColor());
+            pnlDaySummary.setFont(new Font(settings.getFontName(), settings.getFontStyle(), settings.getFontSize()));
+            pnlDaySummary.setFontBold(settings.isFontBold());
+            pnlDaySummary.setFontItalic(settings.isFontItalic());
+            pnlDaySummary.setCurrentX(VALUE_SEPARATION);
+            pnlDaySummary.print("");
+
+            // Create a summary stats object to calculate the summary data
+            SummaryStats summaryStats = new SummaryStats(symbols, prices, rates, settings);
+            double totalValue = summaryStats.calculateTotalValueAtStartOfDay();
+            double totalCost = summaryStats.calculateTotalCost();
+
+            // Draw the summary data
+            pnlDaySummary.setFontColor(settings.getLabelColor());
+            pnlDaySummary.print("Today: ");
+            pnlDaySummary.setFontColor(totalValue < totalCost ? settings.getDownColor() : totalValue > totalCost ? settings.getUpColor() : settings.getNormalTextColor());
+            pnlDaySummary.print(String.format("%s", Utils.formatCurrencyValue(totalValue==0.0 ? 0 : (totalCost - totalValue), settings.getCurrencySymbol())));
+            pnlDaySummary.setCurrentX(pnlDaySummary.getCurrentX() + VALUE_SEPARATION);
+
+            // Percentage change
+            pnlDaySummary.print(String.format("%.2f%%", totalValue==0.0 ? 0 : (totalValue - totalCost) / totalCost * 100));
+            pnlDaySummary.setCurrentX(pnlDaySummary.getCurrentX() + VALUE_SEPARATION);
+            pnlDaySummary.print("");
         }
     }
 
@@ -216,8 +261,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             // Show the Day up/down arrows
             if (symbol.isShowDayChangeUpDown()) {
                 pnlStocks.setFontBold(true);
-                boolean needSeparation = symbol.isShowDayChange() || symbol.isShowDayChangePercent() || symbol.isShowProfitLoss();
-                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + (needSeparation ? -UP_DOWN_SEPARATION : UP_DOWN_SEPARATION));
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() - VALUE_SEPARATION + UP_DOWN_SEPARATION);
                 pnlStocks.setFontColor(livePrice.isUpToday() ? settings.getUpArrowColor() : livePrice.isDownToday() ? settings.getDownArrowColor() : settings.getLabelColor());
                 pnlStocks.print(livePrice.isUpToday() ? "↑" : livePrice.isDownToday() ? "↓" : "↕");
                 pnlStocks.setFontBold((settings.getFontStyle() | Font.BOLD) > 0);
@@ -277,8 +321,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             // Show the up/down arrows
             if (symbol.isShowChangeUpDown()) {
                 pnlStocks.setFontBold(true);
-                boolean needSeparation = symbol.isShowPrice() || symbol.isShowChange() || symbol.isShowChangePercent() || symbol.isShowProfitLoss();
-                pnlStocks.setCurrentX(pnlStocks.getCurrentX() + (needSeparation ? -UP_DOWN_SEPARATION : UP_DOWN_SEPARATION));
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() - VALUE_SEPARATION + UP_DOWN_SEPARATION);
                 pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpArrowColor() : livePrice.isDown() ? settings.getDownArrowColor() : settings.getLabelColor());
                 pnlStocks.print(livePrice.isUp() ? "↑" : livePrice.isDown() ? "↓" : "↕");
                 pnlStocks.setFontBold((settings.getFontStyle() | Font.BOLD) > 0);
@@ -359,7 +402,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         pnlSummary.setFont(getFont());
         pnlStocks.setFont(getFont());
         pnlSummary.setVisible(settings.isShowSummary());
-        pnlDaySummary.setVisible(settings.isShowDailyChange());
+        pnlDaySummary.setVisible(settings.isShowDailySummary());
         pnlStocks.setScrollSpeed(settings.getTickerSpeed());
         pnlDaySummary.setBackground(pnlTicker.getBackground());
         pnlSummary.setBackground(pnlTicker.getBackground());
@@ -367,6 +410,10 @@ public class TickerBar extends JFrame implements CallbackInterface {
         pnlDaySummary.setForeground(pnlTicker.getForeground());
         pnlSummary.setForeground(pnlTicker.getForeground());
         pnlStocks.setForeground(pnlTicker.getForeground());
+
+        // Set the colors for the borders
+        pnlSummary.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, settings.getLabelColor()));
+        pnlDaySummary.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, settings.getLabelColor()));
 
         // Finalize and display the frame
         setVisible(true);
@@ -734,13 +781,13 @@ public class TickerBar extends JFrame implements CallbackInterface {
         pnlSummary = new ColouredTextPanel();
         pnlSummary.setBackground(pnlTicker.getBackground());
         pnlSummary.setDisplayStyle(ColouredTextPanel.DISPLAY_STYLE.FIT);
-        pnlSummary.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY));
+        pnlSummary.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, settings.getLabelColor()));
         pnlTicker.add(pnlSummary);
 
         pnlDaySummary = new ColouredTextPanel();
         pnlDaySummary.setBackground(pnlTicker.getBackground());
         pnlDaySummary.setDisplayStyle(ColouredTextPanel.DISPLAY_STYLE.FIT);
-        pnlDaySummary.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY));
+        pnlDaySummary.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, settings.getLabelColor()));
         pnlTicker.add(pnlDaySummary);
 
         pnlStocks = new ColouredTextPanel();

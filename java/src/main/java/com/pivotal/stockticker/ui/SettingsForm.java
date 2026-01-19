@@ -1,3 +1,9 @@
+/*
+ *
+ * Copyright (c) 2026, Pivotal Solutions and/or its affiliates. All rights reserved.
+ * Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *
+ */
 package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.Utils;
@@ -157,7 +163,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         chkShowTotalProfitPercentage.setSelected(settings.isShowPortfolioProfitAndLossPercent());
         chkShowTotalCost.setSelected(settings.isShowTotalCost());
         chkShowTotalValue.setSelected(settings.isShowTotalValue());
-        chkShowDailyChange.setSelected(settings.isShowDailyChange());
+        chkShowDailyChange.setSelected(settings.isShowDailySummary());
         chkShowUniqueSymbols.setSelected(settings.isShowUniqueSymbols());
 
         // API Keys
@@ -206,7 +212,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         settings.setShowPortfolioProfitAndLossPercent(chkShowTotalProfitPercentage.isSelected());
         settings.setShowTotalCost(chkShowTotalCost.isSelected());
         settings.setShowTotalValue(chkShowTotalValue.isSelected());
-        settings.setShowDailyChange(chkShowDailyChange.isSelected());
+        settings.setShowDailySummary(chkShowDailyChange.isSelected());
         settings.setShowUniqueSymbols(chkShowUniqueSymbols.isSelected());
 
         // API Keys
@@ -278,7 +284,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         int lblGap = 5;
         int width = StartupManager.isWindows() ? 460 :  450;
 
-        setSize(width, 800);
+        setSize(width, 400);
         setPreferredSize(getSize());
         setMaximumSize(getSize());
         setMinimumSize(getSize());

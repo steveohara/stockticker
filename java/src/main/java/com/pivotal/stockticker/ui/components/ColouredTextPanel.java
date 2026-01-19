@@ -1,3 +1,9 @@
+/*
+ *
+ * Copyright (c) 2026, Pivotal Solutions and/or its affiliates. All rights reserved.
+ * Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *
+ */
 package com.pivotal.stockticker.ui.components;
 
 import lombok.AccessLevel;
@@ -6,8 +12,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
-import javax.swing.plaf.ComponentUI;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 /**
@@ -21,6 +27,14 @@ public class ColouredTextPanel extends JPanel {
 
     private static final int SCROLL_SPEED = 2;
     private static final int SCROLL_DELAY = 30;
+
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private BufferedImage cachedContent;
+
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private boolean contentDirty = true;
 
     /**
      * Display styles for text rendering.
@@ -60,41 +74,31 @@ public class ColouredTextPanel extends JPanel {
     private final ArrayList<TextItem> items = new ArrayList<>();
 
     /**
-     * Calls the UI delegate's paint method, if the UI delegate
-     * is non-<code>null</code>.  We pass the delegate a copy of the
-     * <code>Graphics</code> object to protect the rest of the
-     * paint code from irrevocable changes
-     * (for example, <code>Graphics.translate</code>).
-     * <p>
-     * If you override this in a subclass you should not make permanent
-     * changes to the passed in <code>Graphics</code>. For example, you
-     * should not alter the clip <code>Rectangle</code> or modify the
-     * transform. If you need to do these operations you may find it
-     * easier to create a new <code>Graphics</code> from the passed in
-     * <code>Graphics</code> and manipulate it. Further, if you do not
-     * invoke super's implementation you must honor the opaque property, that is
-     * if this component is opaque, you must completely fill in the background
-     * in an opaque color. If you do not honor the opaque property you
-     * will likely see visual artifacts.
-     * <p>
-     * The passed in <code>Graphics</code> object might
-     * have a transform other than the identify transform
-     * installed on it.  In this case, you might get
-     * unexpected results if you cumulatively apply
-     * another transform.
-     *
-     * @param g the <code>Graphics</code> object to protect
-     * @see #paint
-     * @see ComponentUI
+     * Creates a new ColouredTextPanel with default settings.
      */
+    public ColouredTextPanel() {
+        setDoubleBuffered(true);
+        setOpaque(true);
+    }
+
+    @Override
+    public void invalidate() {
+        contentDirty = true;
+        super.invalidate();
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        int drawCount = 1;
 
-        // Handle the scrolling style if needed
+        // Recreate cache if needed
+        if (contentDirty || cachedContent == null) {
+            createCachedContent();
+            contentDirty = false;
+        }
+
+        // Handle scrolling timer
         if (displayStyle == DISPLAY_STYLE.SCROLL && totalTextWidth > getWidth()) {
-            drawCount++;
             if (scrollTimer == null) {
                 scrollTimer = new Timer(SCROLL_DELAY, e -> {
                     scrollPosition += scrollSpeed;
@@ -118,42 +122,77 @@ public class ColouredTextPanel extends JPanel {
             }
         }
 
-        // Get the graphics context
         Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        if (displayStyle == DISPLAY_STYLE.SCROLL && totalTextWidth > getWidth()) {
+            // Draw from cached image
+            g2.drawImage(cachedContent, -scrollPosition, 0, null);
 
-        // Draw all text items
-        for (int i = 0; i < drawCount; i++) {
-            for (TextItem item : items) {
-                int startX = (i * totalTextWidth) + item.x - scrollPosition;
-                g2.setFont(item.font);
-                g2.setColor(item.color);
-                g2.drawString(item.text, startX, item.y + item.font.getSize());
-                log.debug("Drawing text '{}' at ({}, {}) with font: {}", item.text, startX, item.y + item.font.getSize(), item.font);
+            // Draw second copy if needed
+            if (scrollPosition > 0) {
+                g2.drawImage(cachedContent, totalTextWidth - scrollPosition, 0, null);
             }
         }
+        else {
+            // Normal rendering
+            g2.drawImage(cachedContent, 0, 0, null);
+        }
+    }
+
+    /**
+     * Creates the cached content image with all text drawn.
+     */
+    private void createCachedContent() {
+        // If there's nothing to draw, skip
+        if (totalTextWidth == 0 || totalTextHeight == 0) {
+            return;
+        }
+        // Ensure we have a valid graphics configuration
+        GraphicsConfiguration gc = getGraphicsConfiguration();
+        if (gc != null) {
+            cachedContent = gc.createCompatibleImage(
+                totalTextWidth,
+                Math.max(totalTextHeight, getHeight()),
+                Transparency.TRANSLUCENT
+            );
+        }
+        else {
+            cachedContent = new BufferedImage(
+                totalTextWidth,
+                Math.max(totalTextHeight, getHeight()),
+                BufferedImage.TYPE_INT_ARGB
+            );
+        }
+
+        // Set the rendering hints for quality
+        Graphics2D g2 = cachedContent.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+
+        // Match panel background and font
+        g2.setFont(getFont());
+        g2.setColor(getFontColor());
+        g2.setBackground(getBackground());
+
+        // Draw the text items
+        for (TextItem item : items) {
+            g2.setFont(item.font);
+            g2.setColor(item.color);
+            g2.drawString(item.text, item.x, item.y + item.font.getSize());
+        }
+        g2.dispose();
     }
 
     @Override
     public void setFont(Font font) {
         super.setFont(font);
-        this.fontFamily = font.getFamily();
-        this.fontSize = font.getSize();
-        this.fontBold = font.isBold();
-        this.fontItalic = font.isItalic();
+        fontFamily = font.getFamily();
+        fontSize = font.getSize();
+        fontBold = font.isBold();
+        fontItalic = font.isItalic();
     }
 
-    /**
-     * If the <code>preferredSize</code> has been set to a
-     * non-<code>null</code> value just returns it.
-     * If the UI delegate's <code>getPreferredSize</code>
-     * method returns a non <code>null</code> value then return that;
-     * otherwise defer to the component's layout manager.
-     *
-     * @return the value of the <code>preferredSize</code> property
-     * @see #setPreferredSize
-     * @see ComponentUI
-     */
     @Override
     public Dimension getPreferredSize() {
         return displayStyle == DISPLAY_STYLE.FIT
@@ -161,16 +200,6 @@ public class ColouredTextPanel extends JPanel {
                 : new Dimension(super.getPreferredSize().width, super.getPreferredSize().height);
     }
 
-    /**
-     * If the maximum size has been set to a non-<code>null</code> value
-     * just returns it.  If the UI delegate's <code>getMaximumSize</code>
-     * method returns a non-<code>null</code> value then return that;
-     * otherwise defer to the component's layout manager.
-     *
-     * @return the value of the <code>maximumSize</code> property
-     * @see #setMaximumSize
-     * @see ComponentUI
-     */
     @Override
     public Dimension getMaximumSize() {
         return displayStyle == DISPLAY_STYLE.FIT
@@ -178,16 +207,6 @@ public class ColouredTextPanel extends JPanel {
                 : new Dimension(super.getMaximumSize().width, super.getMaximumSize().height);
     }
 
-    /**
-     * If the minimum size has been set to a non-<code>null</code> value
-     * just returns it.  If the UI delegate's <code>getMinimumSize</code>
-     * method returns a non-<code>null</code> value then return that; otherwise
-     * defer to the component's layout manager.
-     *
-     * @return the value of the <code>minimumSize</code> property
-     * @see #setMinimumSize
-     * @see ComponentUI
-     */
     @Override
     public Dimension getMinimumSize() {
         return displayStyle == DISPLAY_STYLE.FIT
@@ -217,6 +236,10 @@ public class ColouredTextPanel extends JPanel {
         // Move cursor to the end of the printed text
         FontMetrics fm = getFontMetrics(item.font);
         currentX += fm.stringWidth(text);
+
+        // Mark cache as dirty
+        contentDirty = true;
+
         if (displayStyle == DISPLAY_STYLE.FIT) {
             revalidate();
         }
@@ -234,6 +257,8 @@ public class ColouredTextPanel extends JPanel {
         totalTextHeight = 0;
         fontBold = false;
         fontItalic = false;
+        contentDirty = true;
+
         if (displayStyle == DISPLAY_STYLE.FIT) {
             revalidate();
         }
@@ -250,11 +275,11 @@ public class ColouredTextPanel extends JPanel {
         this.displayStyle = displayStyle;
 
         // If switching to/from GROW mode, revalidate
-        if (oldStyle != displayStyle &&
-            (oldStyle == DISPLAY_STYLE.FIT || displayStyle == DISPLAY_STYLE.FIT)) {
+        if (oldStyle != displayStyle && (oldStyle == DISPLAY_STYLE.FIT || displayStyle == DISPLAY_STYLE.FIT)) {
             revalidate();
         }
-        repaint();    }
+        repaint();
+    }
 
     /**
      * Sets the scroll speed for scrolling text.
@@ -285,10 +310,15 @@ public class ColouredTextPanel extends JPanel {
             this.text = text;
             x = panel.getCurrentX();
             y = panel.getCurrentY();
-            font = new Font(panel.getFontFamily(),
-                    (panel.isFontBold() ? Font.BOLD : Font.PLAIN) |
-                    (panel.isFontItalic() ? Font.ITALIC : Font.PLAIN),
-                    panel.getFontSize());
+
+            int style = Font.PLAIN;
+            if (panel.isFontBold()) {
+                style |= Font.BOLD;
+            }
+            if (panel.isFontItalic()) {
+                style |= Font.ITALIC;
+            }
+            font = new Font(panel.getFontFamily(), style, panel.getFontSize());
             color = panel.getFontColor();
             width = panel.getFontMetrics(font).stringWidth(text);
             height = panel.getFontMetrics(font).getHeight();

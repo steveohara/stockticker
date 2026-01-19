@@ -1,3 +1,9 @@
+/*
+ *
+ * Copyright (c) 2026, Pivotal Solutions and/or its affiliates. All rights reserved.
+ * Pivotal Solutions PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *
+ */
 package com.pivotal.stockticker.service;
 
 import com.pivotal.stockticker.Utils;
@@ -324,11 +330,11 @@ abstract public class PersistanceManager {
             try (OutputStream os = Files.newOutputStream(selectedFile.toPath())) {
                 Preferences prefs = Preferences.userRoot().node(ROOT_NODE_NAME);
                 prefs.exportSubtree(os);
-                Utils.showTopmostMessage("Settings backed up successfully!", "Backup Successful", JOptionPane.INFORMATION_MESSAGE);
+                Utils.showTopmostMessage(dialog, "Settings backed up successfully!", "Backup Successful", JOptionPane.INFORMATION_MESSAGE);
                 log.info("Preferences backed up to {}", selectedFile);
             }
             catch (IOException | BackingStoreException ex) {
-                Utils.showTopmostMessage("Export failed: " + ex.getMessage(), "Backup Failed", JOptionPane.ERROR_MESSAGE);
+                Utils.showTopmostMessage(dialog, "Export failed: " + ex.getMessage(), "Backup Failed", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -361,20 +367,20 @@ abstract public class PersistanceManager {
             // Get the file and make sure it has an extension
             File selectedFile = chooser.getSelectedFile();
             if (selectedFile == null || !selectedFile.exists()) {
-                Utils.showTopmostMessage("Selected file does not exist.", "Restore Failed", JOptionPane.ERROR_MESSAGE);
+                Utils.showTopmostMessage(dialog, "Selected file does not exist.", "Restore Failed", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
 
             // Load the preferences from the file
             try {
                 loadPreferencesFromFile(selectedFile);
-                Utils.showTopmostMessage("Settings restored successfully!", "Restore Successful", JOptionPane.INFORMATION_MESSAGE);
+                Utils.showTopmostMessage(dialog, "Settings restored successfully!", "Restore Successful", JOptionPane.INFORMATION_MESSAGE);
                 log.info("Preferences restored from {}", chooser.getSelectedFile());
                 return true;
             }
             catch (Exception ex) {
                 log.error("Restore from {} failed", selectedFile, ex);
-                Utils.showTopmostMessage("Restore failed: " + ex.getMessage(), "Restore Failed", JOptionPane.ERROR_MESSAGE);
+                Utils.showTopmostMessage(dialog, "Restore failed: " + ex.getMessage(), "Restore Failed", JOptionPane.ERROR_MESSAGE);
             }
         }
         return false;
@@ -466,6 +472,7 @@ abstract public class PersistanceManager {
                 line = loadSymbolFromRegistryLines(symbolsManager, pricesManager, exchangeRatesManager, lines, line);
             }
         }
+        symbolsManager.persistChanges();
     }
 
     /**
@@ -559,7 +566,7 @@ abstract public class PersistanceManager {
                     break;
 
                 case "show daily change":
-                    settings.setShowDailyChange(Boolean.parseBoolean(value));
+                    settings.setShowDailySummary(Boolean.parseBoolean(value));
                     break;
                 case "summarise":
                     settings.setShowUniqueSymbols(Boolean.parseBoolean(value));
@@ -757,7 +764,6 @@ abstract public class PersistanceManager {
         log.info("Added symbol from registry: {}", symbol);
         pricesManager.addPrice(symbol.getCode());
         ratesManager.addRate(symbol.getCurrencySymbol());
-        symbolsManager.persistChanges();
         return row - 1;
     }
 
