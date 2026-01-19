@@ -134,7 +134,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
             // Draw the summary data
             pnlSummary.setFontColor(settings.getLabelColor());
-            pnlSummary.print("Summary:");
+            pnlSummary.print("Summary: ");
             pnlSummary.setFontColor(settings.getNormalTextColor());
             if (settings.isShowPortfolioProfitAndLoss()) {
                 pnlSummary.print(Utils.formatCurrencyValue(totalValue, settings.getCurrencySymbol()));

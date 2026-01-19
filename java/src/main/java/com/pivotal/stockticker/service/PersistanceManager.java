@@ -303,6 +303,10 @@ abstract public class PersistanceManager {
             chooser.setFileFilter(new FileNameExtensionFilter("Backup Files (*.bck)", "bck"));
         }
         chooser.setChooserType(OverwritePromptChooser.CHOOSER_TYPE.SAVE);
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
+        chooser.setMultiSelectionEnabled(false);
+        chooser.setDialogType(JFileChooser.SAVE_DIALOG);
         chooser.setDialogTitle("Backup Settings");
         chooser.setApproveButtonText("Save");
         int userSelection = chooser.showSaveDialog(dialog);
@@ -343,6 +347,10 @@ abstract public class PersistanceManager {
             chooser.setFileFilter(new FileNameExtensionFilter("Backup Files (*.bck)", "bck"));
         }
         chooser.setChooserType(OverwritePromptChooser.CHOOSER_TYPE.OPEN);
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
+        chooser.setMultiSelectionEnabled(false);
+        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
         chooser.setDialogTitle("Restore Settings");
         chooser.setApproveButtonText("Open");
         int userSelection = chooser.showSaveDialog(dialog);

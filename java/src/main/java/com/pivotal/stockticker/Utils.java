@@ -3,17 +3,25 @@ package com.pivotal.stockticker;
 import com.pivotal.stockticker.utils.CallbackInterface;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioSystem;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.io.File;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
 @Slf4j
 public class Utils {
+
+    private static JFileChooser fileChooser = null;
 
     /**
      * Displays a message dialog that stays on top of all other windows.
@@ -148,11 +156,21 @@ public class Utils {
         Dimension pref = c.getPreferredSize();
 
         String extra = "";
-        if (c instanceof JLabel l) extra = " text=\"" + l.getText() + "\"";
-        else if (c instanceof AbstractButton bttn) extra = " text=\"" + bttn.getText() + "\"";
-        else if (c instanceof JTextField tf) extra = " textField";
-        else if (c instanceof JComboBox<?> cb) extra = " combo";
-        else if (c instanceof JSpinner sp) extra = " spinner";
+        if (c instanceof JLabel l) {
+            extra = " text=\"" + l.getText() + "\"";
+        }
+        else if (c instanceof AbstractButton bttn) {
+            extra = " text=\"" + bttn.getText() + "\"";
+        }
+        else if (c instanceof JTextField tf) {
+            extra = " textField";
+        }
+        else if (c instanceof JComboBox<?> cb) {
+            extra = " combo";
+        }
+        else if (c instanceof JSpinner sp) {
+            extra = " spinner";
+        }
 
         System.out.printf(
                 "%s%s%s bounds=[x=%d,y=%d,w=%d,h=%d] pref=[w=%d,h=%d]%n",
@@ -181,5 +199,85 @@ public class Utils {
         System.out.println("===== BOUNDS DUMP END =====");
     }
 
+
+    /**
+     * Opens a file chooser dialog to select an audio file.
+     *
+     * @param base        The parent component for the dialog.
+     * @param dialogTitle The title of the dialog.
+     * @param filePath    Existing file path to pre-select (can be null).
+     * @return The selected audio file path, or null if no file was selected.
+     */
+    public static String selectAudioFile(Component base, String dialogTitle, String filePath) {
+
+        // Initialise the file chooser if not already done
+        if (fileChooser == null) {
+            fileChooser = new JFileChooser();
+            Arrays.stream(AudioSystem.getAudioFileTypes())
+                    .sorted(Comparator.comparing(AudioFileFormat.Type::toString))
+                    .forEach(type -> {
+                        log.info("Supported audio file type: {}", type);
+                        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter(type + " (*." + type.getExtension() + ")", type.getExtension()));
+                    });
+        }
+        fileChooser.setDialogTitle(dialogTitle);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        if (filePath != null) {
+            File file = new File(filePath);
+            fileChooser.setCurrentDirectory(file.getParentFile());
+            fileChooser.setSelectedFile(file);
+
+            // Find and set matching filter
+            String extension = getFileExtension(file);
+            FileFilter matchingFilter = findMatchingFilter(fileChooser, extension);
+            if (matchingFilter != null) {
+                fileChooser.setFileFilter(matchingFilter);
+            }
+        }
+        fileChooser.setApproveButtonText("Select");
+        int userSelection = fileChooser.showSaveDialog(base);
+
+        // If user approved, return the selected file path
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            return fileChooser.getSelectedFile().getAbsolutePath();
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the file extension from a given file.
+     *
+     * @param file The file to extract the extension from.
+     * @return The file extension in lowercase, or an empty string if none exists.
+     */
+    public static String getFileExtension(File file) {
+        String name = file.getName();
+        int lastDot = name.lastIndexOf('.');
+        return (lastDot > 0) ? name.substring(lastDot + 1).toLowerCase() : "";
+    }
+
+    /**
+     * Finds a matching file filter in the JFileChooser for a given extension.
+     *
+     * @param chooser   The JFileChooser instance.
+     * @param extension The file extension to match.
+     * @return The matching FileFilter, or null if none found.
+     */
+    private static FileFilter findMatchingFilter(JFileChooser chooser, String extension) {
+        for (FileFilter filter : chooser.getChoosableFileFilters()) {
+            if (filter instanceof FileNameExtensionFilter) {
+                FileNameExtensionFilter extFilter = (FileNameExtensionFilter) filter;
+                for (String ext : extFilter.getExtensions()) {
+                    if (ext.equalsIgnoreCase(extension)) {
+                        return filter;
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
 }

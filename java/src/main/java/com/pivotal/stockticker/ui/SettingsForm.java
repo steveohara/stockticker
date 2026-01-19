@@ -108,6 +108,9 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         btnDownArrowColour.addActionListener(this::colourButtonClicked);
         btnLabelColour.addActionListener(this::colourButtonClicked);
 
+        btnLowAlarm.addActionListener(this::selectAudioFile);
+        btnHighAlarm.addActionListener(this::selectAudioFile);
+
         btnBackup.addActionListener(e -> {
             PersistanceManager.backupPreferences(this);
         });
@@ -244,6 +247,20 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         dispose();
     }
 
+    /**
+     * Handles the selection of audio files for alarm sounds.
+     *
+     * @param e ActionEvent triggered by button click
+     */
+    private void selectAudioFile(ActionEvent e) {
+        JButton button = (JButton) e.getSource();
+        JTextField textField = button == btnHighAlarm ? txtHighAlarm : txtLowAlarm;
+        String file = Utils.selectAudioFile(this, String.format("Select %s Alarm Sound File", button == btnHighAlarm ? "High" : "Low"), textField.getText());
+        if (file != null) {
+            textField.setText(file);
+        }
+    }
+
     @Override
     public void changed(Component c) {
         btnOk.setEnabled(true);
@@ -256,7 +273,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        int vGap = 7;
+        int vGap = 6;
         int hGap = 10;
         int lblGap = 5;
         int width = StartupManager.isWindows() ? 460 :  450;
@@ -407,35 +424,35 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         jLabel21.setOpaque(true);
         getContentPane().setComponentZOrder(jLabel21, 0);
 
-        SettingsLabel jLabel22 = SettingsLabel.create("IEX Token").below(jLabel21, vGap).withWidth(130).to(getContentPane());
-        txtIexToken = SettingsTextField.create().tail(jLabel22, lblGap).withWidth(getWidth() - jLabel22.getRight() - lblGap - hGap * 2).to(getContentPane());
+        txtIexToken = SettingsTextField.create().below(jLabel21, vGap / 2).withWidth(300).atRight(txtProxyServer.getRight()).to(getContentPane());
+        SettingsLabel jLabel22 = SettingsLabel.create("IEX Token").atTop(txtIexToken).withWidth(130).atRight(txtIexToken.getX() - lblGap).to(getContentPane());
 
-        SettingsLabel jLabel23 = SettingsLabel.create("AlphaVantage Token").below(jLabel22, vGap).withDimensions(jLabel22).to(getContentPane());
-        txtAlphaVantageToken = SettingsTextField.create().tail(jLabel23, vGap).withDimensions(txtIexToken).to(getContentPane());
+        SettingsLabel jLabel23 = SettingsLabel.create("AlphaVantage Token").below(jLabel22, vGap).to(getContentPane());
+        txtAlphaVantageToken = SettingsTextField.create().below(txtIexToken, vGap).to(getContentPane());
 
-        SettingsLabel jLabel24 = SettingsLabel.create("MaketStack Token").below(jLabel23, vGap).withDimensions(jLabel22).to(getContentPane());
-        txtMarketStackToken = SettingsTextField.create().tail(jLabel24, vGap).withDimensions(txtIexToken).to(getContentPane());
+        SettingsLabel jLabel24 = SettingsLabel.create("MarketStack Token").below(jLabel23, vGap).to(getContentPane());
+        txtMarketStackToken = SettingsTextField.create().below(txtAlphaVantageToken, vGap).to(getContentPane());
 
-        SettingsLabel jLabel25 = SettingsLabel.create("TwelveData Token").below(jLabel24, vGap).withDimensions(jLabel22).to(getContentPane());
-        txtTwelveDataToken = SettingsTextField.create().tail(jLabel25, vGap).withDimensions(txtIexToken).to(getContentPane());
+        SettingsLabel jLabel25 = SettingsLabel.create("TwelveData Token").below(jLabel24, vGap).to(getContentPane());
+        txtTwelveDataToken = SettingsTextField.create().below(txtMarketStackToken, vGap).to(getContentPane());
 
-        SettingsLabel jLabel26 = SettingsLabel.create("Finhub Token").below(jLabel25, vGap).withDimensions(jLabel22).to(getContentPane());
-        txtFinHubToken = SettingsTextField.create().tail(jLabel26, vGap).withDimensions(txtIexToken).to(getContentPane());
+        SettingsLabel jLabel26 = SettingsLabel.create("Finhub Token").below(jLabel25, vGap).to(getContentPane());
+        txtFinHubToken = SettingsTextField.create().below(txtTwelveDataToken, vGap).to(getContentPane());
 
         SettingsLabel jLabel27 = SettingsLabel.create("Tiingo Token").below(jLabel26, vGap).withDimensions(jLabel22).to(getContentPane());
-        txtTiingoToken = SettingsTextField.create().tail(jLabel27, vGap).withDimensions(txtIexToken).to(getContentPane());
+        txtTiingoToken = SettingsTextField.create().below(txtFinHubToken, vGap).to(getContentPane());
 
         SettingsLabel jLabel28 = SettingsLabel.create("FreeCurrency Token").below(jLabel27, vGap).withDimensions(jLabel22).to(getContentPane());
-        txtFreeCurrencyToken = SettingsTextField.create().tail(jLabel28, vGap).withDimensions(txtIexToken).to(getContentPane());
+        txtFreeCurrencyToken = SettingsTextField.create().below(txtTiingoToken, vGap).to(getContentPane());
 
         // Buttons
         btnBackup = SettingsButton.create("Backup").below(jLabel28, vGap * 3).atLeft(hGap * 2).withWidth(80).to(getContentPane());
         btnRestore = SettingsButton.create("Restore").tail(btnBackup, hGap).withDimensions(btnBackup).to(getContentPane());
 
-        btnCancel = SettingsButton.create("Cancel").atTop(btnBackup).atLeft(getWidth() - btnBackup.getWidth() - hGap * 2).withDimensions(btnBackup).to(getContentPane());
-        btnOk = SettingsButton.create("Ok").atTop(btnBackup).atLeft(btnCancel.getX() - btnBackup.getWidth() - hGap).withDimensions(btnBackup).to(getContentPane());
+        btnCancel = SettingsButton.create("Cancel").atTop(btnBackup).withDimensions(btnBackup).atRight(txtProxyServer.getRight()).to(getContentPane());
+        btnOk = SettingsButton.create("Ok").atTop(btnBackup).withDimensions(btnBackup).atRight(btnCancel.getX() - hGap).to(getContentPane());
 
-        setSize(width, btnOk.getBottom() + 40);
+        setSize(width, btnOk.getBottom() + (StartupManager.isWindows() ? 50 : 40));
         setPreferredSize(getSize());
         setMaximumSize(getSize());
         setMinimumSize(getSize());
