@@ -20,6 +20,9 @@ import java.util.prefs.Preferences;
 
 /**
  * Manages stock prices including loading from storage and periodic updates
+ * All prices are stored in user preferences so that they persist between application runs
+ * Prices are identified by their stock code (e.g. "AAPL", "GOOGL")
+ * The prices are updated periodically based on the application settings
  */
 @Slf4j
 public class PricesManager {

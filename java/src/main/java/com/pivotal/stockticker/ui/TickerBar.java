@@ -138,7 +138,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             pnlSummary.print("");
 
             // Create a summary stats object to calculate the summary data
-            SummaryStats summaryStats = new SummaryStats(symbols, prices, rates, settings);
+            SummaryStats summaryStats = new SummaryStats(symbols, prices, rates);
             double totalValue = summaryStats.calculateTotalValue();
             double totalCost = summaryStats.calculateTotalCost();
             double adjustedTotalValue = totalValue - settings.getTotalInvestment() - settings.getMargin();
@@ -188,7 +188,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             pnlDaySummary.print("");
 
             // Create a summary stats object to calculate the summary data
-            SummaryStats summaryStats = new SummaryStats(symbols, prices, rates, settings);
+            SummaryStats summaryStats = new SummaryStats(symbols, prices, rates);
             double totalValue = summaryStats.calculateTotalValueAtStartOfDay();
             double totalCost = summaryStats.calculateTotalCost();
 

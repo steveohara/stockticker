@@ -8,6 +8,7 @@ package com.pivotal.stockticker.service;
 
 import com.pivotal.stockticker.model.ExchangeRate;
 import com.pivotal.stockticker.model.SettingsManager;
+import com.pivotal.stockticker.model.SymbolTransaction;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,6 +25,7 @@ import java.util.prefs.Preferences;
  * Rates are identified by their currency code (e.g. "USD", "EUR") and are the multiplier
  * to convert from that currency to the base currency defined in application settings @see SettingsManager.getCurrencyCode()
  * The rates are updated periodically based on the application settings
+ *
  * @see ExchangeRate
  */
 @Slf4j
@@ -151,17 +153,41 @@ public class ExchangeRatesManager {
     /**
      * Convert an amount from one currency to the base currency defined in settings
      *
-     * @param fromCode The currency code to convert from
-     * @param amount   The amount in the from currency
+     * @param symbolTransaction The symbol transaction containing the from currency
+     * @param amount            The amount in the from currency
      * @return The equivalent amount in the base currency
      */
-    public double convertAmount(String fromCode, double amount) {
+    public double convertAmount(SymbolTransaction symbolTransaction, double amount) {
+        return convertAmount(symbolTransaction.getCurrencyCode(), symbolTransaction.getCurrencySymbol(), amount);
+    }
+
+    /**
+     * Convert an amount from one currency to the base currency defined in settings
+     *
+     * @param fromCode           The currency code to convert from
+     * @param fromCurrencySymbol The currency symbol to convert from
+     * @param amount             The amount in the from currency
+     * @return The equivalent amount in the base currency
+     */
+    public double convertAmount(String fromCode, String fromCurrencySymbol, double amount) {
         ExchangeRate fromRate = getRate(fromCode);
         if (fromRate == null) {
             log.warn("Cannot convert amount - missing exchange rate for {}", fromCode);
             return 0.0;
         }
-        return amount * fromRate.getExchangeRate();
+        double total = amount * fromRate.getExchangeRate();
+
+        // We need to take the currency symbol into account if it indicates a different denomination
+        if (fromCurrencySymbol != null && fromCurrencySymbol.matches("[a-zA-Z¢]+")) {
+            total = total / 100.0;
+        }
+
+        // Now we need to do a similar adjustment for the base currency symbol
+        String baseCurrencySymbol = settings.getCurrencySymbol();
+        if (baseCurrencySymbol != null && baseCurrencySymbol.matches("[a-zA-Z¢]+")) {
+            total = total * 100.0;
+        }
+        return total;
     }
 
     /**
@@ -189,7 +215,7 @@ public class ExchangeRatesManager {
         /**
          * Constructor
          *
-         * @param settings      Application settings
+         * @param settings             Application settings
          * @param currentExchangeRates Map of current prices
          */
         public UpdateTask(SettingsManager settings, Map<String, ExchangeRate> currentExchangeRates) {
