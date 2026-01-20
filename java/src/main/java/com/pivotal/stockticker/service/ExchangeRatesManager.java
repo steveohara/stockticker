@@ -9,6 +9,7 @@ package com.pivotal.stockticker.service;
 import com.pivotal.stockticker.model.ExchangeRate;
 import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.model.SymbolTransaction;
+import com.pivotal.stockticker.service.apis.FreeCurrency;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,7 +51,7 @@ public class ExchangeRatesManager {
         loadFromStorage();
 
         // Schedule the task to run every X seconds with an initial delay of 0 seconds
-        scheduler = new UpdateTask(settings, currentRates);
+        scheduler = new UpdateTask(settings, this);
         scheduler.start(settings.getExchangeRateFrequency());
     }
 
@@ -175,7 +176,7 @@ public class ExchangeRatesManager {
             log.warn("Cannot convert amount - missing exchange rate for {}", fromCode);
             return 0.0;
         }
-        double total = amount * fromRate.getExchangeRate();
+        double total = amount / fromRate.getExchangeRate();
 
         // We need to take the currency symbol into account if it indicates a different denomination
         if (fromCurrencySymbol != null && fromCurrencySymbol.matches("[a-zA-Z¢]+")) {
@@ -207,8 +208,8 @@ public class ExchangeRatesManager {
 
         private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         private ScheduledFuture<?> scheduledFuture;
-        private final SettingsManager settings;
-        private Map<String, ExchangeRate> currentExchangeRates = new HashMap<>();
+        private SettingsManager settings;
+        private ExchangeRatesManager exchangeRatesManager;
         @Getter
         private int periodSeconds;
 
@@ -216,11 +217,11 @@ public class ExchangeRatesManager {
          * Constructor
          *
          * @param settings             Application settings
-         * @param currentExchangeRates Map of current prices
+         * @param exchangeRatesManager Map of current prices
          */
-        public UpdateTask(SettingsManager settings, Map<String, ExchangeRate> currentExchangeRates) {
+        public UpdateTask(SettingsManager settings, ExchangeRatesManager exchangeRatesManager) {
             this.settings = settings;
-            this.currentExchangeRates = currentExchangeRates;
+            this.exchangeRatesManager = exchangeRatesManager;
         }
 
         /**
@@ -228,12 +229,9 @@ public class ExchangeRatesManager {
          */
         private final Runnable task = () -> {
 
-            // Get the list of stock symbols to update rates for
-            log.debug("Updating exchange rates for {} rates", currentExchangeRates.size());
-            Map<String, ExchangeRate> rates = new HashMap<>(currentExchangeRates);
-
             // Update prices for each symbol from each source
-            // TODO - Implement actual exchange rate fetching logic here
+            FreeCurrency freeCurrency = new FreeCurrency(settings, exchangeRatesManager);
+            freeCurrency.fetchAndUpdateExchangeRates(exchangeRatesManager.getAllExchangeRates().keySet());
         };
 
         /**

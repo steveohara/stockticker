@@ -195,7 +195,7 @@ public class LivePrice {
     public String getFormattedValue() {
         double currentPrice = prices.getPrice(symbol).getCurrentPrice();
         double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
-        return Utils.formatCurrencyValue(currentPrice * sharesBought, symbolTransaction.getCurrencySymbol());
+        return Utils.formatCurrencyValue(exchangeRates.convertAmount(symbolTransaction, currentPrice * sharesBought), settings.getCurrencySymbol());
     }
 
     /**
@@ -207,7 +207,7 @@ public class LivePrice {
         double pricePaid = aggregated ? getAggregatedPricePaid() : symbolTransaction.getPricePaid();
         double currentPrice = prices.getPrice(symbol).getCurrentPrice();
         double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
-        return (currentPrice - pricePaid) * sharesBought;
+        return exchangeRates.convertAmount(symbolTransaction, (currentPrice - pricePaid) * sharesBought);
     }
 
     /**
@@ -218,7 +218,7 @@ public class LivePrice {
     public double getDayProfitLoss() {
         Price price = prices.getPrice(symbol);
         double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
-        return (price.getCurrentPrice() - price.getDayStart()) * sharesBought;
+        return exchangeRates.convertAmount(symbolTransaction, (price.getCurrentPrice() - price.getDayStart()) * sharesBought);
     }
 
     /**
@@ -227,7 +227,7 @@ public class LivePrice {
      * @return Formatted profit or loss.
      */
     public String getFormattedProfitLoss() {
-        return Utils.formatCurrencyValue(getProfitLoss(), symbolTransaction.getCurrencySymbol());
+        return Utils.formatCurrencyValue(getProfitLoss(), settings.getCurrencySymbol());
     }
 
     /**
@@ -236,7 +236,7 @@ public class LivePrice {
      * @return Formatted profit or loss.
      */
     public String getFormattedDayProfitLoss() {
-        return Utils.formatCurrencyValue(getDayProfitLoss(), symbolTransaction.getCurrencySymbol());
+        return Utils.formatCurrencyValue(getDayProfitLoss(), settings.getCurrencySymbol());
     }
 
     /**
