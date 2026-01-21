@@ -64,7 +64,6 @@ public class SettingsManager extends PersistanceManager {
     private boolean hideDisabledSymbols = false;
     private String highAlarmWaveFile = null;
     private String lowAlarmWaveFile = null;
-    private String iexToken = null;
     private String alphaVantageToken = null;
     private String marketStackToken = null;
     private String twelveDataToken = null;

@@ -606,9 +606,6 @@ abstract public class PersistanceManager {
                     settings.setHighAlarmWaveFile(value);
                     break;
 
-                case "iex key":
-                    settings.setIexToken(value);
-                    break;
                 case "alphavantage key":
                     settings.setAlphaVantageToken(value);
                     break;

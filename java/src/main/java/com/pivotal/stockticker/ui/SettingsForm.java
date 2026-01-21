@@ -30,7 +30,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
     private SettingsCheckbox chkBold, chkItalic, chkShowDailyChange, chkShowTotalCost, chkShowTotalProfit, chkShowTotalProfitPercentage, chkShowTotalValue, chkShowUniqueSymbols;
     private SettingsComboBox<String> lstFont, lstCurrencyCode;
     private SettingsSpinner spnTickerUpdate;
-    private SettingsTextField txtAlphaVantageToken, txtFinHubToken, txtFreeCurrencyToken, txtHighAlarm, txtIexToken, txtLowAlarm, txtMarketStackToken, txtProxyServer, txtTiingoToken, txtTwelveDataToken;
+    private SettingsTextField txtAlphaVantageToken, txtFinHubToken, txtFreeCurrencyToken, txtHighAlarm, txtLowAlarm, txtMarketStackToken, txtProxyServer, txtTiingoToken, txtTwelveDataToken;
 
     private final SettingsManager settings;
     private final CallbackInterface caller;
@@ -167,7 +167,6 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         chkShowUniqueSymbols.setSelected(settings.isShowUniqueSymbols());
 
         // API Keys
-        txtIexToken.setText(settings.getIexToken());
         txtAlphaVantageToken.setText(settings.getAlphaVantageToken());
         txtMarketStackToken.setText(settings.getMarketStackToken());
         txtTwelveDataToken.setText(settings.getTwelveDataToken());
@@ -216,7 +215,6 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         settings.setShowUniqueSymbols(chkShowUniqueSymbols.isSelected());
 
         // API Keys
-        settings.setIexToken(txtIexToken.getText().trim());
         settings.setAlphaVantageToken(txtAlphaVantageToken.getText().trim());
         settings.setMarketStackToken(txtMarketStackToken.getText().trim());
         settings.setTwelveDataToken(txtTwelveDataToken.getText().trim());
@@ -430,13 +428,10 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         jLabel21.setOpaque(true);
         getContentPane().setComponentZOrder(jLabel21, 0);
 
-        txtIexToken = SettingsTextField.create().below(jLabel21, vGap / 2).withWidth(300).atRight(txtProxyServer.getRight()).to(getContentPane());
-        SettingsLabel jLabel22 = SettingsLabel.create("IEX Token").atTop(txtIexToken).withWidth(130).atRight(txtIexToken.getX() - lblGap).to(getContentPane());
+        txtAlphaVantageToken = SettingsTextField.create().below(jLabel21, vGap / 2).withWidth(300).atRight(txtProxyServer.getRight()).to(getContentPane());
+        SettingsLabel jLabel22 = SettingsLabel.create("AlphaVantage Token").atTop(txtAlphaVantageToken).withWidth(130).atRight(txtAlphaVantageToken.getX() - lblGap).to(getContentPane());
 
-        SettingsLabel jLabel23 = SettingsLabel.create("AlphaVantage Token").below(jLabel22, vGap).to(getContentPane());
-        txtAlphaVantageToken = SettingsTextField.create().below(txtIexToken, vGap).to(getContentPane());
-
-        SettingsLabel jLabel24 = SettingsLabel.create("MarketStack Token").below(jLabel23, vGap).to(getContentPane());
+        SettingsLabel jLabel24 = SettingsLabel.create("MarketStack Token").below(jLabel22, vGap).to(getContentPane());
         txtMarketStackToken = SettingsTextField.create().below(txtAlphaVantageToken, vGap).to(getContentPane());
 
         SettingsLabel jLabel25 = SettingsLabel.create("TwelveData Token").below(jLabel24, vGap).to(getContentPane());
