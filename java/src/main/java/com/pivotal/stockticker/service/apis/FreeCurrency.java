@@ -50,7 +50,6 @@ public class FreeCurrency {
      * @return List of symbols that were not successfully updated
      */
     public Collection<String> fetchAndUpdateExchangeRates(Collection<String> symbols) {
-
         List<String> returnVal = new ArrayList<>(symbols);
 
         // Check if API key is set
@@ -60,7 +59,7 @@ public class FreeCurrency {
             return returnVal;
         }
         else {
-            log.info("Fetching exchange rates from FreeCurrency API...");
+            log.debug("Fetching exchange rates from FreeCurrency API...");
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL + String.format("?apikey=%s&base_currency=%s&currencies=%s",
                             apiKey, settingsManager.getCurrencyCode(), String.join(",", symbols))))
@@ -76,7 +75,7 @@ public class FreeCurrency {
                 else {
 
                     // Got some rates
-                    log.info("Successfully fetched exchange rates from FreeCurrency API");
+                    log.debug("Successfully fetched exchange rates from FreeCurrency API");
                     Map<String, Object> rates = JsonPath.read(response.body(), "$.data");
 
                     // Loop through the rates and update the ExchangeRatesManager
@@ -100,6 +99,7 @@ public class FreeCurrency {
                             log.error("Failed to decode exchange rate from JSON {}", currency, e);
                         }
                     });
+                    log.info("Successfully fetched {} exchange rates from FreeCurrency API", String.join(",", updatedSymbols));
                     returnVal.removeAll(updatedSymbols);
                 }
             }

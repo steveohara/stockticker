@@ -48,17 +48,19 @@ public class ExchangeRatesManager {
         this.settings = settings;
 
         // Load all the saved prices values from persistent storage
-        loadFromStorage();
+        loadFromStorage(false);
 
         // Schedule the task to run every X seconds with an initial delay of 0 seconds
-        scheduler = new UpdateTask(settings, this);
+        scheduler = new UpdateTask(this);
         scheduler.start(settings.getExchangeRateFrequency());
     }
 
     /**
      * Load all symbols from persistent storage into memory
+     *
+     * @param updateImmediately Update the exchange rates immediately after loading
      */
-    public void loadFromStorage() {
+    public void loadFromStorage(boolean updateImmediately) {
         // Load all the prices from the persistent storage
         prefs = Preferences.userRoot().node(EXCHANGE_RATES_ROOT);
         try {
@@ -70,6 +72,11 @@ public class ExchangeRatesManager {
             log.error("Error accessing storage: {}", e.getMessage());
         }
         log.info("Loaded {} exchange rates", currentRates.size());
+
+        // Optionally update the exchange rates immediately after loading
+        if (updateImmediately) {
+            refreshExchangeRates();
+        }
     }
 
     /**
@@ -198,6 +205,22 @@ public class ExchangeRatesManager {
         if (settings.getExchangeRateFrequency() != scheduler.getPeriodSeconds()) {
             scheduler.start(settings.getExchangeRateFrequency());
         }
+        else {
+            refreshExchangeRates();
+        }
+    }
+
+    /**
+     * Refresh exchange rates from all sources
+     * This is a synchronous call that will block until all rates are updated
+     * It's useful to call this method when the user requests a manual refresh
+     * after adding/deleting symbols or changing settings
+     */
+    synchronized public void refreshExchangeRates() {
+
+        // Update prices for each symbol from each source
+        FreeCurrency freeCurrency = new FreeCurrency(settings, this);
+        freeCurrency.fetchAndUpdateExchangeRates(getAllExchangeRates().keySet());
     }
 
     /**
@@ -208,7 +231,6 @@ public class ExchangeRatesManager {
 
         private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         private ScheduledFuture<?> scheduledFuture;
-        private SettingsManager settings;
         private ExchangeRatesManager exchangeRatesManager;
         @Getter
         private int periodSeconds;
@@ -216,11 +238,9 @@ public class ExchangeRatesManager {
         /**
          * Constructor
          *
-         * @param settings             Application settings
          * @param exchangeRatesManager Map of current prices
          */
-        public UpdateTask(SettingsManager settings, ExchangeRatesManager exchangeRatesManager) {
-            this.settings = settings;
+        public UpdateTask(ExchangeRatesManager exchangeRatesManager) {
             this.exchangeRatesManager = exchangeRatesManager;
         }
 
@@ -228,10 +248,7 @@ public class ExchangeRatesManager {
          * The periodic task to update exchange rates
          */
         private final Runnable task = () -> {
-
-            // Update prices for each symbol from each source
-            FreeCurrency freeCurrency = new FreeCurrency(settings, exchangeRatesManager);
-            freeCurrency.fetchAndUpdateExchangeRates(exchangeRatesManager.getAllExchangeRates().keySet());
+            exchangeRatesManager.refreshExchangeRates();
         };
 
         /**
