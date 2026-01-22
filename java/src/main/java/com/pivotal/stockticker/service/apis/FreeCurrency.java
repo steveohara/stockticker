@@ -46,11 +46,17 @@ public class FreeCurrency {
     /**
      * Fetch exchange rates from FreeCurrency API and update the ExchangeRatesManager
      *
-     * @param symbols List of currency symbols to fetch rates for
+     * @param currencyCodes List of currency codes to fetch rates for
      * @return List of symbols that were not successfully updated
      */
-    public Collection<String> fetchAndUpdateExchangeRates(Collection<String> symbols) {
-        List<String> returnVal = new ArrayList<>(symbols);
+    public Collection<String> fetchAndUpdateExchangeRates(Collection<String> currencyCodes) {
+        List<String> returnVal = new ArrayList<>(currencyCodes);
+
+        // If there are no symbols, return immediately
+        if (currencyCodes.isEmpty()) {
+            log.debug("No symbols provided to fetch prices from AlphaVantage API");
+            return returnVal;
+        }
 
         // Check if API key is set
         String apiKey = settingsManager.getFreeCurrencyToken();
@@ -62,7 +68,7 @@ public class FreeCurrency {
             log.debug("Fetching exchange rates from FreeCurrency API...");
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL + String.format("?apikey=%s&base_currency=%s&currencies=%s",
-                            apiKey, settingsManager.getCurrencyCode(), String.join(",", symbols))))
+                            apiKey, settingsManager.getCurrencyCode(), String.join(",", currencyCodes))))
                     .GET()
                     .header("Accept", "application/json")
                     .build();

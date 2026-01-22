@@ -24,12 +24,11 @@ public class Price extends PersistanceManager {
     private String code;
     private double currentPrice;
     private double dayStart;
-    private double dayChange;
     private double dayHigh;
     private double dayLow;
     private String errorDescription;
-    private LocalDateTime lastPriceUpdate;
-    private String priceSource;
+    private LocalDateTime lastUpdate;
+    private String source;
 
     /**
      * Creates a proxy instance of this class loaded from persistent storage.
@@ -42,6 +41,15 @@ public class Price extends PersistanceManager {
         Price price = createProxyInstance(Price.class, Preferences.userRoot().node(ROOT_NODE + Price.class.getSimpleName() + '/' + code), true);
         price.setCode(code);
         return price;
+    }
+
+    /**
+     * Get the price change since the start of the day
+     *
+     * @return Price change since the start of the day
+     */
+    public double getDayChange() {
+        return currentPrice - dayStart;
     }
 
 }

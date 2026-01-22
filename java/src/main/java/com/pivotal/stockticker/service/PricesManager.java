@@ -8,6 +8,8 @@ package com.pivotal.stockticker.service;
 
 import com.pivotal.stockticker.model.Price;
 import com.pivotal.stockticker.model.SettingsManager;
+import com.pivotal.stockticker.service.apis.AlphaVantageAdapter;
+import com.pivotal.stockticker.service.apis.PricesApiAdapter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,7 +49,7 @@ public class PricesManager {
         loadFromStorage();
 
         // Schedule the task to run every X seconds with an initial delay of 0 seconds
-        scheduler = new PriceCurrencyUpdateTask(settings, currentPrices);
+        scheduler = new PriceCurrencyUpdateTask(settings, this);
         scheduler.start(settings.getFrequency());
     }
 
@@ -157,6 +159,21 @@ public class PricesManager {
     }
 
     /**
+     * Refresh prices from all sources
+     * This is a synchronous call that will block until all rates are updated
+     * It's useful to call this method when the user requests a manual refresh
+     * after adding/deleting symbols or changing settings
+     */
+    synchronized public void refreshPrices() {
+
+        Collection<String> symbols = new ArrayList<>(currentPrices.keySet());
+
+        // Update prices for each symbol from each source
+        PricesApiAdapter adapter = new AlphaVantageAdapter(settings, this);
+        symbols = adapter.fetchAndUpdatePrices(symbols);
+    }
+
+    /**
      * Scheduler to update prices periodically
      */
     @Slf4j
@@ -164,8 +181,8 @@ public class PricesManager {
 
         private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         private ScheduledFuture<?> scheduledFuture;
-        private final SettingsManager settings;
-        private Map<String, Price> currentPrices = new HashMap<>();
+        private SettingsManager settings;
+        private PricesManager prices = null;
         @Getter
         private int periodSeconds;
 
@@ -173,11 +190,11 @@ public class PricesManager {
          * Constructor
          *
          * @param settings      Application settings
-         * @param currentPrices Map of current prices
+         * @param prices Map of current prices
          */
-        public PriceCurrencyUpdateTask(SettingsManager settings, Map<String, Price> currentPrices) {
+        public PriceCurrencyUpdateTask(SettingsManager settings, PricesManager prices) {
             this.settings = settings;
-            this.currentPrices = currentPrices;
+            this.prices = prices;
         }
 
         /**
@@ -186,10 +203,10 @@ public class PricesManager {
         private final Runnable task = () -> {
 
             // Get the list of stock symbols to update prices for
-            log.debug("Updating prices for {} symbols", currentPrices.size());
-            Map<String, Price> prices = new HashMap<>(currentPrices);
+            log.debug("Updating prices for {} symbols", prices.currentPrices.size());
 
             // Update prices for each symbol from each source
+            prices.refreshPrices();
         };
 
         /**
