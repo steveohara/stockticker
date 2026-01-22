@@ -15,4 +15,12 @@ public interface PricesApiAdapter {
      */
     Collection<String> fetchAndUpdatePrices(Collection<String> symbols);
 
+    /**
+     * Get the name of the adapter (e.g., "AlphaVantage", "MarketStack")
+     *
+     * @return Adapter name
+     */
+    default String geAdapterName() {
+        return this.getClass().getSimpleName().replace("Adapter", "");
+    }
 }

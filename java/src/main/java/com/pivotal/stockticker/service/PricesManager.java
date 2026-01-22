@@ -9,6 +9,7 @@ package com.pivotal.stockticker.service;
 import com.pivotal.stockticker.model.Price;
 import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.service.apis.AlphaVantageAdapter;
+import com.pivotal.stockticker.service.apis.MarketStackAdapter;
 import com.pivotal.stockticker.service.apis.PricesApiAdapter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -170,6 +171,9 @@ public class PricesManager {
 
         // Update prices for each symbol from each source
         PricesApiAdapter adapter = new AlphaVantageAdapter(settings, this);
+        symbols = adapter.fetchAndUpdatePrices(symbols);
+
+        adapter = new MarketStackAdapter(settings, this);
         symbols = adapter.fetchAndUpdatePrices(symbols);
     }
 

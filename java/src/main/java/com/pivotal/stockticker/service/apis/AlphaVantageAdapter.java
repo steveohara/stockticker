@@ -49,14 +49,14 @@ public class AlphaVantageAdapter implements PricesApiAdapter {
 
         // If there are no symbols, return immediately
         if (symbols.isEmpty()) {
-            log.debug("No symbols provided to fetch prices from AlphaVantage API");
+            log.debug("No symbols provided to fetch prices from {} API", geAdapterName());
             return returnVal;
         }
 
         // Check if API key is set
         String apiKey = settingsManager.getAlphaVantageToken();
         if (apiKey == null || apiKey.isEmpty()) {
-            log.debug("AlphaVantage API key is not set. Cannot fetch prices");
+            log.debug("{} API key is not set. Cannot fetch prices", geAdapterName());
             return returnVal;
         }
         else {
@@ -66,12 +66,12 @@ public class AlphaVantageAdapter implements PricesApiAdapter {
 
                 // Check for symbols that are not supported by AlphaVantage
                 if (symbol.matches("(?i).+[.][a-z]+")) {
-                    log.debug("Skipping symbol for price fetch from AlphaVantage API: {}", symbol);
+                    log.debug("Skipping symbol for price fetch from {} API: {}", geAdapterName(), symbol);
                     continue;
                 }
 
                 // Build request to fetch price for symbol
-                log.debug("Fetching price for {} from AlphaVantage API...", symbol);
+                log.debug("Fetching price for {} from {} API...", symbol, geAdapterName());
                 String adjustedSymbol = symbol.trim().replace('^', '.');
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(String.format(BASE_URL, apiKey, adjustedSymbol)))
@@ -87,7 +87,7 @@ public class AlphaVantageAdapter implements PricesApiAdapter {
                     else {
 
                         // Got some rates
-                        log.debug("Successfully fetched price for {} from AlphaVantage API", symbol);
+                        log.debug("Successfully fetched price for {} from {} API", symbol, geAdapterName());
                         Map<String, Object> priceData = JsonPath.read(response.body(), "$");
                         if (priceData.containsKey("Information")) {
                             log.error("Error fetching price for {}: {}", symbol, priceData.get("Information"));
@@ -119,10 +119,10 @@ public class AlphaVantageAdapter implements PricesApiAdapter {
                     }
                 }
                 catch (Exception e) {
-                    log.error("Error fetching exchange rates from AlphaVantage API: {}", e.getMessage());
+                    log.error("Error fetching exchange rates from {} API: {}", e.getMessage(), geAdapterName());
                 }
             }
-            log.info("Successfully fetched {} prices from AlphaVantage API", String.join(",", updatedSymbols));
+            log.info("Successfully fetched {} prices from {} API", String.join(",", updatedSymbols), geAdapterName());
             returnVal.removeAll(updatedSymbols);
         }
         return returnVal;
