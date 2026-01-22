@@ -50,14 +50,14 @@ public class TwelveDataAdapter implements PricesApiAdapter {
 
         // If there are no symbols, return immediately
         if (symbols.isEmpty()) {
-            log.debug("No symbols provided to fetch prices from {} API", geAdapterName());
+            log.debug("No symbols provided to fetch prices from {} API", getAdapterName());
             return returnVal;
         }
 
         // Check if API key is set
         String apiKey = settingsManager.getTwelveDataToken();
         if (apiKey == null || apiKey.isEmpty()) {
-            log.debug("{} API key is not set. Cannot fetch prices", geAdapterName());
+            log.debug("{} API key is not set. Cannot fetch prices", getAdapterName());
             return returnVal;
         }
         else {
@@ -66,20 +66,20 @@ public class TwelveDataAdapter implements PricesApiAdapter {
             for (String symbol : symbols) {
 
                 // Build request to fetch price for symbol
-                log.debug("Fetching price for {} from {} API...", symbol, geAdapterName());
-                String adjustedSymbol = symbol.trim().replaceAll("(=?i)[.]L", "");
+                log.debug("Fetching price for {} from {} API...", symbol, getAdapterName());
+                String adjustedSymbol = symbol.trim().replaceAll("(?i)[.]L", "");
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(String.format(BASE_URL, apiKey, adjustedSymbol)))
                         .GET().header("Accept", "application/json").build();
                 try {
                     HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                     if (response.statusCode() != 200) {
-                        log.error("Failed to fetch day values: HTTP [{}] {}", response.statusCode(), response.body());
+                        log.error("Failed to fetch day values for {} : HTTP [{}] {}", symbol, response.statusCode(), response.body());
                     }
                     else {
 
                         // Got a price
-                        log.debug("Successfully fetched price for {} from {} API", symbol, geAdapterName());
+                        log.debug("Successfully fetched price for {} from {} API", symbol, getAdapterName());
                         Map<String, Object> priceData = JsonPath.read(response.body(), "$");
                         if (priceData.containsKey("status")) {
                             log.debug("Error fetching price for {}: {}", symbol, priceData.get("message"));
@@ -94,11 +94,12 @@ public class TwelveDataAdapter implements PricesApiAdapter {
                             }
 
                             // Update price details
-                            price.setDayStart(Double.parseDouble((String)priceData.get("open")));
-                            price.setDayHigh(Double.parseDouble((String)priceData.get("high")));
-                            price.setDayLow(Double.parseDouble((String)priceData.get("low")));
+                            price.setDayClose(getValue(priceData.get("close"), price.getDayClose()));
+                            price.setDayStart(getValue(priceData.get("open"), price.getDayStart()));
+                            price.setDayHigh(getValue(priceData.get("high"), price.getDayHigh()));
+                            price.setDayLow(getValue(priceData.get("low"), price.getDayLow()));
                             price.setLastUpdate(LocalDateTime.now());
-                            price.setSource(this.getClass().getSimpleName());
+                            price.setSource(getAdapterName());
 
                             // Have to get the price separately
                             request = HttpRequest.newBuilder()
@@ -106,24 +107,23 @@ public class TwelveDataAdapter implements PricesApiAdapter {
                                     .GET().header("Accept", "application/json").build();
                             response = client.send(request, HttpResponse.BodyHandlers.ofString());
                             if (response.statusCode() != 200) {
-                                log.error("Failed to fetch price: HTTP [{}] {}", response.statusCode(), response.body());
+                                log.error("Failed to fetch price for {} : HTTP [{}] {}", symbol, response.statusCode(), response.body());
                             }
                             else {
-                                String priceStr = JsonPath.read(response.body(), "$.price");
-                                price.setCurrentPrice(Double.parseDouble(priceStr));
+                                price.setCurrentPrice(getValue(JsonPath.read(response.body(), "$.price"), price.getDayLow()));
                             }
                             updatedSymbols.add(symbol);
                         }
                         catch (Exception e) {
-                            log.error("Failed to decode price from JSON {}", symbol, e);
+                            log.error("Failed to decode price from JSON {} - {}", symbol, e.getMessage());
                         }
                     }
                 }
                 catch (Exception e) {
-                    log.error("Error fetching prices from {} API: {}", e.getMessage(), geAdapterName());
+                    log.error("Error fetching prices from {} API: {}", e.getMessage(), getAdapterName());
                 }
             }
-            log.info("Successfully fetched {} prices from {} API", String.join(",", updatedSymbols), geAdapterName());
+            log.info("Successfully fetched {} prices from {} API", String.join(",", updatedSymbols), getAdapterName());
             returnVal.removeAll(updatedSymbols);
         }
         return returnVal;

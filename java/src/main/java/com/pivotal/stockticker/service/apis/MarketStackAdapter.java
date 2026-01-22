@@ -49,14 +49,14 @@ public class MarketStackAdapter implements PricesApiAdapter {
 
         // If there are no symbols, return immediately
         if (symbols.isEmpty()) {
-            log.debug("No symbols provided to fetch prices from {} API", geAdapterName());
+            log.debug("No symbols provided to fetch prices from {} API", getAdapterName());
             return returnVal;
         }
 
         // Check if API key is set
         String apiKey = settingsManager.getMarketStackToken();
         if (apiKey == null || apiKey.isEmpty()) {
-            log.debug("{} API key is not set. Cannot fetch prices", geAdapterName());
+            log.debug("{} API key is not set. Cannot fetch prices", getAdapterName());
             return returnVal;
         }
         else {
@@ -65,7 +65,7 @@ public class MarketStackAdapter implements PricesApiAdapter {
 
             // Build request to fetch price for symbol
             String symbolsList = String.join(",", symbols);
-            log.debug("Fetching price for {} from {} API...", symbolsList, geAdapterName());
+            log.debug("Fetching price for {} from {} API...", symbolsList, getAdapterName());
             String adjustedSymbol = symbolsList.trim().replace('^', '.');
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(String.format(BASE_URL, apiKey, adjustedSymbol)))
@@ -76,12 +76,12 @@ public class MarketStackAdapter implements PricesApiAdapter {
             try {
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() != 200) {
-                    log.error("Failed to fetch price: HTTP [{}] {}", response.statusCode(), response.body());
+                    log.error("Failed to fetch price for {} : HTTP [{}] {}", symbols, response.statusCode(), response.body());
                 }
                 else {
 
                     // Got some rates
-                    log.debug("Successfully fetched prices for {} from {} API", symbolsList, geAdapterName());
+                    log.debug("Successfully fetched prices for {} from {} API", symbolsList, getAdapterName());
                     List<Map<String, Object>> pricesData = JsonPath.read(response.body(), "$.data");
 
                     // Loop through the rates and update the ExchangeRatesManager
@@ -98,24 +98,25 @@ public class MarketStackAdapter implements PricesApiAdapter {
                             }
 
                             // Update rate details
-                            price.setDayStart(((Number)priceData.get("open")).doubleValue());
-                            price.setDayHigh(((Number)priceData.get("high")).doubleValue());
-                            price.setDayLow(((Number)priceData.get("low")).doubleValue());
-                            price.setCurrentPrice(((Number)priceData.get("last")).doubleValue());
+                            price.setDayClose(getValue(priceData.get("close"), price.getDayClose()));
+                            price.setDayStart(getValue(priceData.get("open"), price.getDayStart()));
+                            price.setDayHigh(getValue(priceData.get("high"), price.getDayHigh()));
+                            price.setDayLow(getValue(priceData.get("low"), price.getDayLow()));
+                            price.setCurrentPrice(getValue(priceData.get("last"), price.getCurrentPrice()));
                             price.setLastUpdate(LocalDateTime.now());
-                            price.setSource(this.getClass().getSimpleName());
+                            price.setSource(getAdapterName());
                             updatedSymbols.add(symbol);
                         }
                         catch (Exception e) {
-                            log.error("Failed to decode price from JSON {}", symbol, e);
+                            log.error("Failed to decode price from JSON {} - {}", symbol, e.getMessage());
                         }
                     }
                 }
             }
             catch (Exception e) {
-                log.error("Error fetching exchange rates from {} API: {}", geAdapterName(), e.getMessage());
+                log.error("Error fetching exchange rates from {} API: {}", getAdapterName(), e.getMessage());
             }
-            log.info("Fetched {} prices from {} API", updatedSymbols.isEmpty() ? "0" : String.join(",", updatedSymbols), geAdapterName());
+            log.info("Fetched {} prices from {} API", updatedSymbols.isEmpty() ? "0" : String.join(",", updatedSymbols), getAdapterName());
             returnVal.removeAll(updatedSymbols);
         }
         return returnVal;

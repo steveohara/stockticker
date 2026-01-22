@@ -18,15 +18,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Client for AlphaVantage API that provides live prices for stocks
+ * Client for FinnHub API that provides live prices for stocks
  *
- * @see <a href="https://www.alphavantage.co/documentation//">...</a>
+ * @see <a href="https://www.finnhub.com">...</a>
  *
  */
 @Slf4j
-public class AlphaVantageAdapter implements PricesApiAdapter {
+public class FinnHubAdapter implements PricesApiAdapter {
 
-    private static final String BASE_URL = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&datatype=json&apikey=%s&symbol=%s";
+    private static final String BASE_URL = "https://finnhub.io/api/v1/quote?token=%s&symbol=%s";
     private final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
     private final SettingsManager settingsManager;
@@ -38,7 +38,7 @@ public class AlphaVantageAdapter implements PricesApiAdapter {
      * @param settingsManager Application settings manager
      * @param pricesManager Prices manager
      */
-    public AlphaVantageAdapter(SettingsManager settingsManager, PricesManager pricesManager) {
+    public FinnHubAdapter(SettingsManager settingsManager, PricesManager pricesManager) {
         this.settingsManager = settingsManager;
         this.pricesManager = pricesManager;
     }
@@ -54,7 +54,7 @@ public class AlphaVantageAdapter implements PricesApiAdapter {
         }
 
         // Check if API key is set
-        String apiKey = settingsManager.getAlphaVantageToken();
+        String apiKey = settingsManager.getFinhubToken();
         if (apiKey == null || apiKey.isEmpty()) {
             log.debug("{} API key is not set. Cannot fetch prices", getAdapterName());
             return returnVal;
@@ -75,27 +75,21 @@ public class AlphaVantageAdapter implements PricesApiAdapter {
                 String adjustedSymbol = symbol.trim().replace('^', '.');
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(String.format(BASE_URL, apiKey, adjustedSymbol)))
-                        .GET()
-                        .header("Accept", "application/json")
-                        .build();
-
+                        .GET().header("Accept", "application/json").build();
                 try {
                     HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                     if (response.statusCode() != 200) {
-                        log.error("Failed to fetch price for {} : HTTP [{}] {}", symbol, response.statusCode(), response.body());
+                        log.error("Failed to fetch value for {}: HTTP [{}] {}", symbol, response.statusCode(), response.body());
                     }
                     else {
 
-                        // Got some rates
+                        // Got a price
                         log.debug("Successfully fetched price for {} from {} API", symbol, getAdapterName());
                         Map<String, Object> priceData = JsonPath.read(response.body(), "$");
-                        if (priceData.containsKey("Information")) {
-                            log.error("Error fetching price for {}: {}", symbol, priceData.get("Information"));
+                        if (priceData.containsKey("status")) {
+                            log.debug("Error fetching price for {}: {}", symbol, priceData.get("message"));
                             continue;
                         }
-
-                        // Loop through the rates and update the ExchangeRatesManager
-                        priceData = JsonPath.read(response.body(), "$['Global Quote']");
 
                         // Convert data to Price and update manager
                         Price price = pricesManager.getPrice(symbol);
@@ -104,23 +98,23 @@ public class AlphaVantageAdapter implements PricesApiAdapter {
                                 price = pricesManager.addPrice(symbol);
                             }
 
-                            // Update rate details
-                            price.setDayStart(getValue(priceData.get("02. open"), price.getDayStart()));
-                            price.setDayHigh(getValue(priceData.get("03. high"), price.getDayHigh()));
-                            price.setDayLow(getValue(priceData.get("04. low"), price.getDayLow()));
-                            price.setCurrentPrice(getValue(priceData.get("05. price"), price.getCurrentPrice()));
-                            price.setDayClose(getValue(priceData.get("08. previous close"), price.getDayClose()));
+                            // Update price details
+                            price.setDayClose(getValue(priceData.get("pc"), price.getDayClose()));
+                            price.setDayStart(getValue(priceData.get("o"), price.getDayStart()));
+                            price.setDayHigh(getValue(priceData.get("h"), price.getDayHigh()));
+                            price.setDayLow(getValue(priceData.get("l"), price.getDayLow()));
+                            price.setCurrentPrice(getValue(priceData.get("c"), price.getCurrentPrice()));
                             price.setLastUpdate(LocalDateTime.now());
                             price.setSource(getAdapterName());
                             updatedSymbols.add(symbol);
                         }
                         catch (Exception e) {
-                            log.error("Failed to decode price from JSON {} - {}", symbol, e.getMessage());
+                            log.error("Failed to decode price from JSON {}", symbol, e);
                         }
                     }
                 }
                 catch (Exception e) {
-                    log.error("Error fetching exchange rates from {} API: {}", e.getMessage(), getAdapterName());
+                    log.error("Error fetching prices from {} API: {}", e.getMessage(), getAdapterName());
                 }
             }
             log.info("Successfully fetched {} prices from {} API", String.join(",", updatedSymbols), getAdapterName());

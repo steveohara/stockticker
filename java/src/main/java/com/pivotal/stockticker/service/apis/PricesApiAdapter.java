@@ -20,7 +20,33 @@ public interface PricesApiAdapter {
      *
      * @return Adapter name
      */
-    default String geAdapterName() {
+    default String getAdapterName() {
         return this.getClass().getSimpleName().replace("Adapter", "");
+    }
+
+    /**
+     * Utility method to extract a double value from an Object
+     *
+     * @param value        The object to extract the double from
+     * @param defaultValue The default value to return if extraction fails
+     * @return Extracted double value or defaultValue if extraction fails
+     */
+    default double getValue(Object value, double defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        }
+        switch(value) {
+            case Number n:
+                return n.doubleValue();
+            case String s:
+                try {
+                    return Double.parseDouble(s);
+                }
+                catch (NumberFormatException e) {
+                    return defaultValue;
+                }
+            default:
+                return defaultValue;
+        }
     }
 }

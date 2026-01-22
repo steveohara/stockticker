@@ -8,10 +8,7 @@ package com.pivotal.stockticker.service;
 
 import com.pivotal.stockticker.model.Price;
 import com.pivotal.stockticker.model.SettingsManager;
-import com.pivotal.stockticker.service.apis.AlphaVantageAdapter;
-import com.pivotal.stockticker.service.apis.MarketStackAdapter;
-import com.pivotal.stockticker.service.apis.PricesApiAdapter;
-import com.pivotal.stockticker.service.apis.TwelveDataAdapter;
+import com.pivotal.stockticker.service.apis.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -168,7 +165,14 @@ public class PricesManager {
      */
     synchronized public void refreshPrices() {
 
+        // Sort the symbols to update so that those without a value are first
         Collection<String> symbols = new ArrayList<>(currentPrices.keySet());
+        List<String> symbolsList = new ArrayList<>(symbols);
+        symbolsList.sort(Comparator.comparingDouble(code -> {
+            Price price = currentPrices.get(code);
+            return price != null ? price.getCurrentPrice() : Double.MIN_VALUE;
+        }));
+        symbols = symbolsList;
 
         // Update prices for each symbol from each source
         PricesApiAdapter adapter = new AlphaVantageAdapter(settings, this);
@@ -178,6 +182,9 @@ public class PricesManager {
         symbols = adapter.fetchAndUpdatePrices(symbols);
 
         adapter = new TwelveDataAdapter(settings, this);
+        symbols = adapter.fetchAndUpdatePrices(symbols);
+
+        adapter = new FinnHubAdapter(settings, this);
         symbols = adapter.fetchAndUpdatePrices(symbols);
     }
 

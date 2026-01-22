@@ -24,6 +24,7 @@ public class Price extends PersistanceManager {
     private String code;
     private double currentPrice;
     private double dayStart;
+    private double dayClose;
     private double dayHigh;
     private double dayLow;
     private String errorDescription;
@@ -49,7 +50,7 @@ public class Price extends PersistanceManager {
      * @return Price change since the start of the day
      */
     public double getDayChange() {
-        return currentPrice - dayStart;
+        return currentPrice - (dayClose > 0 ? dayClose : dayStart);
     }
 
 }
