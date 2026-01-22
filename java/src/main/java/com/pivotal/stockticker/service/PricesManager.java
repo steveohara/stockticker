@@ -186,6 +186,9 @@ public class PricesManager {
 
         adapter = new FinnHubAdapter(settings, this);
         symbols = adapter.fetchAndUpdatePrices(symbols);
+
+        adapter = new TiingoAdapter(settings, this);
+        symbols = adapter.fetchAndUpdatePrices(symbols);
     }
 
     /**
