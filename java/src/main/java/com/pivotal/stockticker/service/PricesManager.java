@@ -11,6 +11,7 @@ import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.service.apis.AlphaVantageAdapter;
 import com.pivotal.stockticker.service.apis.MarketStackAdapter;
 import com.pivotal.stockticker.service.apis.PricesApiAdapter;
+import com.pivotal.stockticker.service.apis.TwelveDataAdapter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -174,6 +175,9 @@ public class PricesManager {
         symbols = adapter.fetchAndUpdatePrices(symbols);
 
         adapter = new MarketStackAdapter(settings, this);
+        symbols = adapter.fetchAndUpdatePrices(symbols);
+
+        adapter = new TwelveDataAdapter(settings, this);
         symbols = adapter.fetchAndUpdatePrices(symbols);
     }
 
