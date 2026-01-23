@@ -117,7 +117,7 @@ public class FinnHubAdapter implements PricesApiAdapter {
                     log.error("Error fetching prices from {} API: {}", e.getMessage(), getAdapterName());
                 }
             }
-            log.info("Successfully fetched {} prices from {} API", String.join(",", updatedSymbols), getAdapterName());
+            log.info("Fetched {} prices from {} API", updatedSymbols.isEmpty() ? "0" : String.join(",", updatedSymbols), getAdapterName());
             returnVal.removeAll(updatedSymbols);
         }
         return returnVal;

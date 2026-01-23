@@ -183,7 +183,7 @@ public class ExchangeRatesManager {
             log.warn("Cannot convert amount - missing exchange rate for {}", fromCode);
             return 0.0;
         }
-        double total = amount / fromRate.getExchangeRate();
+        double total = amount / (fromRate.getExchangeRate() == 0.0 ? 1.0 : fromRate.getExchangeRate());
 
         // We need to take the currency symbol into account if it indicates a different denomination
         if (fromCurrencySymbol != null && fromCurrencySymbol.matches("[a-zA-Z¢]+")) {

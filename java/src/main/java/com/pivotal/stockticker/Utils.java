@@ -158,9 +158,14 @@ public class Utils {
 
         // If this is a lowercase letter, then it should trail
         if (currencySymbol != null && currencySymbol.matches("^[a-z]$")) {
-            return String.format("%,.2f%s", Math.abs(value), currencySymbol);
+            return  String.format("%,.2f%s", value, currencySymbol);
         }
-        return String.format("%s%,.2f", currencySymbol, Math.abs(value));
+        if (value < 0) {
+            return String.format("-%s%,.2f", currencySymbol, Math.abs(value));
+        }
+        else {
+            return String.format("%s%,.2f", currencySymbol, value);
+        }
     }
 
     /**

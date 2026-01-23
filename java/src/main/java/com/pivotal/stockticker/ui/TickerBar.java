@@ -34,9 +34,10 @@ import java.util.ArrayList;
 @Slf4j
 public class TickerBar extends JFrame implements CallbackInterface {
 
-    public static final int STOCK_SEPARATION = 10;
-    public static final int VALUE_SEPARATION = 5;
+    public static final int STOCK_SEPARATION = 7;
+    public static final int VALUE_SEPARATION = 4;
     public static final int UP_DOWN_SEPARATION = 1;
+    public static final int DISPLAY_REFRESH_SECONDS = 5;
 
     private final SettingsManager settings = SettingsManager.getPersistentSettings();
     private final SymbolsManager symbols = new SymbolsManager();
@@ -64,6 +65,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private Point rightDragStart = null;
     private int left = 0;
     private int right = 0;
+    private Timer refreshTimer = null;
 
     /**
      * Constructor to initialize the ticker bar UI.
@@ -82,8 +84,11 @@ public class TickerBar extends JFrame implements CallbackInterface {
         // Add all the currencies to the exchange rates manager
         rates.replaceExchangeRates(symbols.getAllCurrencyCodes(false));
 
-        // Draw the ticker content
-        drawTickerContent();
+        // Draw the ticker content every X seconds
+        refreshTimer = new Timer(DISPLAY_REFRESH_SECONDS, e -> {
+            drawTickerContent();
+        });
+        refreshTimer.start();
     }
 
     /**
@@ -141,22 +146,25 @@ public class TickerBar extends JFrame implements CallbackInterface {
             SummaryStats summaryStats = new SummaryStats(symbols, prices, rates);
             double totalValue = summaryStats.calculateTotalValue();
             double totalCost = summaryStats.calculateTotalCost();
-            double adjustedTotalValue = totalValue - settings.getTotalInvestment() - settings.getMargin();
+            double cashCost = settings.getTotalInvestment() + settings.getMargin();
+            double adjustedTotalValue = totalValue - cashCost;
 
             // Draw the summary data
             pnlSummary.setFontColor(settings.getLabelColor());
             pnlSummary.print("Summary: ");
             pnlSummary.setFontColor(settings.getNormalTextColor());
             if (settings.isShowPortfolioProfitAndLoss()) {
-                pnlSummary.print(Utils.formatCurrencyValue(totalValue, settings.getCurrencySymbol()));
+                pnlSummary.setFontColor(totalValue < totalCost ? settings.getDownColor() : totalValue > totalCost ? settings.getUpColor() : settings.getNormalTextColor());
+                pnlSummary.print(Utils.formatCurrencyValue(totalValue - totalCost, settings.getCurrencySymbol()));
                 pnlSummary.setCurrentX(pnlSummary.getCurrentX() + VALUE_SEPARATION);
-                pnlSummary.setFontColor(adjustedTotalValue < totalCost ? settings.getDownColor() : adjustedTotalValue > totalCost ? settings.getUpColor() : settings.getNormalTextColor());
-                pnlSummary.print(String.format("(%s)", Utils.formatCurrencyValue(totalValue==0.0 ? 0 : (totalCost - adjustedTotalValue), settings.getCurrencySymbol())));
+
+                pnlSummary.setFontColor(totalValue < cashCost ? settings.getDownColor() : totalValue > cashCost ? settings.getUpColor() : settings.getNormalTextColor());
+                pnlSummary.print(String.format("(%s)", Utils.formatCurrencyValue(adjustedTotalValue, settings.getCurrencySymbol())));
                 pnlSummary.setCurrentX(pnlSummary.getCurrentX() + VALUE_SEPARATION);
             }
             if (settings.isShowPortfolioProfitAndLossPercent()) {
-                pnlSummary.setFontColor(adjustedTotalValue < totalCost ? settings.getDownColor() : adjustedTotalValue > totalCost ? settings.getUpColor() : settings.getNormalTextColor());
-                pnlSummary.print(String.format("%.2f%%", totalValue==0.0 ? 0 : (adjustedTotalValue - totalCost) / totalCost * 100));
+                pnlSummary.setFontColor(totalValue < totalCost ? settings.getDownColor() : totalValue > totalCost ? settings.getUpColor() : settings.getNormalTextColor());
+                pnlSummary.print(String.format("%.2f%%", totalValue == 0.0 ? 0 : (totalValue - totalCost) / totalCost * 100));
                 pnlSummary.setCurrentX(pnlSummary.getCurrentX() + VALUE_SEPARATION);
             }
             if (settings.isShowTotalCost()) {
@@ -166,7 +174,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             }
             if (settings.isShowTotalValue()) {
                 pnlSummary.setFontColor(settings.getNormalTextColor());
-                pnlSummary.print(String.format("Value:%s", Utils.formatCurrencyValue(totalValue, settings.getCurrencySymbol())));
+                pnlSummary.print(String.format("Val:%s", Utils.formatCurrencyValue(totalValue, settings.getCurrencySymbol())));
                 pnlSummary.setCurrentX(pnlSummary.getCurrentX() + VALUE_SEPARATION);
             }
             pnlSummary.print("");
@@ -189,18 +197,18 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
             // Create a summary stats object to calculate the summary data
             SummaryStats summaryStats = new SummaryStats(symbols, prices, rates);
-            double totalValue = summaryStats.calculateTotalValueAtStartOfDay();
-            double totalCost = summaryStats.calculateTotalCost();
+            double totalCostAtPreviousClose = summaryStats.calculateTotalValueAtPreviousClose();
+            double totalValue = summaryStats.calculateTotalValue();
 
             // Draw the summary data
             pnlDaySummary.setFontColor(settings.getLabelColor());
             pnlDaySummary.print("Today: ");
-            pnlDaySummary.setFontColor(totalValue < totalCost ? settings.getDownColor() : totalValue > totalCost ? settings.getUpColor() : settings.getNormalTextColor());
-            pnlDaySummary.print(String.format("%s", Utils.formatCurrencyValue(totalValue==0.0 ? 0 : (totalCost - totalValue), settings.getCurrencySymbol())));
+            pnlDaySummary.setFontColor(totalValue < totalCostAtPreviousClose ? settings.getDownColor() : totalValue > totalCostAtPreviousClose ? settings.getUpColor() : settings.getNormalTextColor());
+            pnlDaySummary.print(String.format("%s", Utils.formatCurrencyValue(totalCostAtPreviousClose == 0.0 ? 0 : (totalValue - totalCostAtPreviousClose), settings.getCurrencySymbol())));
             pnlDaySummary.setCurrentX(pnlDaySummary.getCurrentX() + VALUE_SEPARATION);
 
             // Percentage change
-            pnlDaySummary.print(String.format("%.2f%%", totalValue==0.0 ? 0 : (totalValue - totalCost) / totalCost * 100));
+            pnlDaySummary.print(String.format("%.2f%%", totalCostAtPreviousClose == 0.0 ? 0 : (totalValue - totalCostAtPreviousClose) / totalCostAtPreviousClose * 100));
             pnlDaySummary.setCurrentX(pnlDaySummary.getCurrentX() + VALUE_SEPARATION);
             pnlDaySummary.print("");
         }
@@ -223,7 +231,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
     /**
      * Draws the day changes for a symbol on the ticker.
      *
-     * @param livePrice     The live price data for the symbol.
+     * @param livePrice       The live price data for the symbol.
      * @param bShownOtherData Indicates if other data has already been shown for this symbol.
      */
     private void drawSymbolDayChanges(LivePrice livePrice, boolean bShownOtherData) {
@@ -321,7 +329,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             // Show the up/down arrows
             if (symbol.isShowChangeUpDown()) {
                 pnlStocks.setFontBold(true);
-                pnlStocks.setCurrentX(pnlStocks.getCurrentX() - VALUE_SEPARATION + UP_DOWN_SEPARATION);
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() - VALUE_SEPARATION - UP_DOWN_SEPARATION);
                 pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpArrowColor() : livePrice.isDown() ? settings.getDownArrowColor() : settings.getLabelColor());
                 pnlStocks.print(livePrice.isUp() ? "↑" : livePrice.isDown() ? "↓" : "↕");
                 pnlStocks.setFontBold((settings.getFontStyle() | Font.BOLD) > 0);
@@ -430,6 +438,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             public void mousePressed(MouseEvent e) {
                 dragStart = e.getPoint();
             }
+
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (dragStart != null) {
@@ -438,6 +447,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                     dragStart = null;
                 }
             }
+
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
@@ -482,6 +492,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 leftDragStart = e.getPoint();
                 right = getLocationOnScreen().x + getWidth();
             }
+
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (leftDragStart != null) {
@@ -490,10 +501,12 @@ public class TickerBar extends JFrame implements CallbackInterface {
                     leftDragStart = null;
                 }
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 pnlLeftDrag.setBackground(Color.LIGHT_GRAY);
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 pnlLeftDrag.setBackground(pnlTicker.getBackground());
@@ -526,6 +539,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 left = getLocationOnScreen().x;
                 pnlRightDrag.setBackground(Color.LIGHT_GRAY);
             }
+
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (rightDragStart != null) {
@@ -534,10 +548,12 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 }
                 pnlLeftDrag.setBackground(pnlTicker.getBackground());
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 pnlRightDrag.setBackground(Color.LIGHT_GRAY);
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 pnlRightDrag.setBackground(pnlTicker.getBackground());

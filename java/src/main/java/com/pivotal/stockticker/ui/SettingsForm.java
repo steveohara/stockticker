@@ -45,7 +45,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         this.caller = caller;
         this.settings = settings;
         initComponents();
-        setTitle("Settings New");
+        setTitle("Settings");
         setModal(true);
         setAlwaysOnTop(true);
         setLocationRelativeTo(null);

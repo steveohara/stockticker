@@ -26,9 +26,9 @@ public class SettingsManager extends PersistanceManager {
 
     public static String BROWSER_STOCK_LAUNCH_URL = "https://finance.yahoo.com/quote";
 
-    public static final int FONT_SIZE_SMALL = 11;
-    public static final int FONT_SIZE_MEDIUM = 13;
-    public static final int FONT_SIZE_LARGE = 16;
+    public static final int FONT_SIZE_SMALL = 13;
+    public static final int FONT_SIZE_MEDIUM = 15;
+    public static final int FONT_SIZE_LARGE = 18;
 
     public static final int SCROLL_SPEED_SLOW = 1;
     public static final int SCROLL_SPEED_MEDIUM = 2;

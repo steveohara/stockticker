@@ -110,7 +110,7 @@ public class LivePrice {
      */
     public double getDayChange() {
         Price price = prices.getPrice(symbol);
-        return (price.getCurrentPrice() - price.getDayStart());
+        return (price.getCurrentPrice() - (price.getDayClose() == 0 ? price.getDayStart() : price.getDayClose()));
     }
 
     /**
@@ -152,10 +152,11 @@ public class LivePrice {
      */
     public double getPercentDayChange() {
         Price price = prices.getPrice(symbol);
-        if (price.getDayStart() == 0) {
+        double start = price.getDayClose() == 0 ? price.getDayStart() : price.getDayClose();
+        if (start == 0) {
             return 0;
         }
-        return ((price.getCurrentPrice() - price.getDayStart()) * 100) / price.getDayStart();
+        return ((price.getCurrentPrice() - start) * 100) / start;
     }
 
     /**
@@ -207,7 +208,7 @@ public class LivePrice {
         double pricePaid = aggregated ? getAggregatedPricePaid() : symbolTransaction.getPricePaid();
         double currentPrice = prices.getPrice(symbol).getCurrentPrice();
         double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
-        return exchangeRates.convertAmount(symbolTransaction, (currentPrice - pricePaid) * sharesBought);
+        return (currentPrice - pricePaid) * sharesBought;
     }
 
     /**
@@ -218,7 +219,8 @@ public class LivePrice {
     public double getDayProfitLoss() {
         Price price = prices.getPrice(symbol);
         double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
-        return exchangeRates.convertAmount(symbolTransaction, (price.getCurrentPrice() - price.getDayStart()) * sharesBought);
+        double start = price.getDayClose() == 0 ? price.getDayStart() : price.getDayClose();
+        return (price.getCurrentPrice() - start) * sharesBought;
     }
 
     /**
@@ -227,7 +229,7 @@ public class LivePrice {
      * @return Formatted profit or loss.
      */
     public String getFormattedProfitLoss() {
-        return Utils.formatCurrencyValue(getProfitLoss(), settings.getCurrencySymbol());
+        return Utils.formatCurrencyValue(getProfitLoss(), symbolTransaction.getCurrencySymbol());
     }
 
     /**
@@ -236,7 +238,7 @@ public class LivePrice {
      * @return Formatted profit or loss.
      */
     public String getFormattedDayProfitLoss() {
-        return Utils.formatCurrencyValue(getDayProfitLoss(), settings.getCurrencySymbol());
+        return Utils.formatCurrencyValue(getDayProfitLoss(), symbolTransaction.getCurrencySymbol());
     }
 
     /**

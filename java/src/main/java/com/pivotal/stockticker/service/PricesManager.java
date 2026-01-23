@@ -189,6 +189,14 @@ public class PricesManager {
 
         adapter = new TiingoAdapter(settings, this);
         symbols = adapter.fetchAndUpdatePrices(symbols);
+
+        adapter = new YahooAdapter(settings, this);
+        symbols = adapter.fetchAndUpdatePrices(symbols);
+
+        // Log any symbols that were not updated
+        if (!symbols.isEmpty()) {
+            log.warn("Prices not updated for symbols: {}", String.join(", ", symbols));
+        }
     }
 
     /**
@@ -239,7 +247,7 @@ public class PricesManager {
                 scheduledFuture.cancel(false);
             }
             log.debug("Starting price currency updates - scheduling every {} seconds", periodSeconds);
-            scheduledFuture = scheduler.scheduleAtFixedRate(task, 0, periodSeconds, TimeUnit.SECONDS);
+            scheduledFuture = scheduler.scheduleAtFixedRate(task, 2, periodSeconds, TimeUnit.SECONDS);
         }
 
         /**

@@ -32,16 +32,20 @@ public class SummaryStats {
         //         in whatever currencies they were paid in
         for (SymbolTransaction transaction : symbols.getSymbolTransactions(false, false, null)) {
 
-            // Get the total value of each transaction
-            Price price = prices.getPrice(transaction.getCode());
-            if (price == null) {
-                log.warn("No available Price for transaction {} ", transaction.getCode());
-                continue;
-            }
-            double totalValue = transaction.getSharesBought() * price.getCurrentPrice();
+            // Check if the transaction is excluded from summary calculations
+            if (!transaction.isExcludeFromSummary()) {
 
-            // Convert the total value to the base currency if needed
-            total += rates.convertAmount(transaction, totalValue);
+                // Get the total value of each transaction
+                Price price = prices.getPrice(transaction.getCode());
+                if (price == null) {
+                    log.warn("No available Price for transaction {} ", transaction.getCode());
+                    continue;
+                }
+                double totalValue = transaction.getSharesBought() * price.getCurrentPrice();
+
+                // Convert the total value to the base currency if needed
+                total += rates.convertAmount(transaction, totalValue);
+            }
         }
         return total;
     }
@@ -59,11 +63,15 @@ public class SummaryStats {
         //         in whatever currencies they were paid in
         for (SymbolTransaction transaction : symbols.getSymbolTransactions(false, false, null)) {
 
-            // Get the total value of each transaction
-            double totalValue = transaction.getSharesBought() * transaction.getPricePaid();
+            // Check if the transaction is excluded from summary calculations
+            if (!transaction.isExcludeFromSummary()) {
 
-            // Convert the total value to the base currency
-            total += rates.convertAmount(transaction, totalValue);
+                // Get the total value of each transaction
+                double totalValue = transaction.getSharesBought() * transaction.getPricePaid();
+
+                // Convert the total value to the base currency
+                total += rates.convertAmount(transaction, totalValue);
+            }
         }
         return total;
     }
@@ -81,16 +89,51 @@ public class SummaryStats {
         //         in whatever currencies they were paid in
         for (SymbolTransaction transaction : symbols.getSymbolTransactions(false, false, null)) {
 
-            // Get the total value of each transaction
-            Price price = prices.getPrice(transaction.getCode());
-            if (price == null) {
-                log.warn("No available Price for transaction {} ", transaction.getCode());
-                continue;
-            }
-            double totalValue = transaction.getSharesBought() * price.getDayStart();
+            // Check if the transaction is excluded from summary calculations
+            if (!transaction.isExcludeFromSummary()) {
 
-            // Convert the total value to the base currency if needed
-            total += rates.convertAmount(transaction, totalValue);
+                // Get the total value of each transaction
+                Price price = prices.getPrice(transaction.getCode());
+                if (price == null) {
+                    log.warn("No available Price for transaction {} ", transaction.getCode());
+                    continue;
+                }
+                double totalValue = transaction.getSharesBought() * price.getDayStart();
+
+                // Convert the total value to the base currency if needed
+                total += rates.convertAmount(transaction, totalValue);
+            }
+        }
+        return total;
+    }
+
+    /**
+     * Calculate the total value of all symbol transactions at the close of the previous day in the base currency
+     *
+     * @return Total value of all symbol transactions at the start of the day
+     */
+    public double calculateTotalValueAtPreviousClose() {
+        double total = 0;
+
+        // Iterate through all symbol transactions
+        // Note: - we use getSymbolTransactions without condensing to ensure we get all transactions
+        //         in whatever currencies they were paid in
+        for (SymbolTransaction transaction : symbols.getSymbolTransactions(false, false, null)) {
+
+            // Check if the transaction is excluded from summary calculations
+            if (!transaction.isExcludeFromSummary()) {
+
+                // Get the total value of each transaction
+                Price price = prices.getPrice(transaction.getCode());
+                if (price == null) {
+                    log.warn("No available Price for transaction {} ", transaction.getCode());
+                    continue;
+                }
+                double totalValue = transaction.getSharesBought() * ((price.getDayClose() == 0 ? price.getDayStart() : price.getDayClose()));
+
+                // Convert the total value to the base currency if needed
+                total += rates.convertAmount(transaction, totalValue);
+            }
         }
         return total;
     }
