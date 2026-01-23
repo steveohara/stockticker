@@ -73,7 +73,10 @@ public class TwelveDataAdapter implements PricesApiAdapter {
                         .GET().header("Accept", "application/json").build();
                 try {
                     HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                    if (response.statusCode() != 200) {
+                    if (response.statusCode() == 429) {
+                        log.debug("Too many requests - cannot fetch value for {}: HTTP [{}] {}", symbol, response.statusCode(), response.body());
+                    }
+                    else if (response.statusCode() != 200) {
                         log.error("Failed to fetch day values for {} : HTTP [{}] {}", symbol, response.statusCode(), response.body());
                     }
                     else {
@@ -123,7 +126,12 @@ public class TwelveDataAdapter implements PricesApiAdapter {
                     log.error("Error fetching prices from {} API: {}", e.getMessage(), getAdapterName());
                 }
             }
-            log.info("Fetched {} prices from {} API", updatedSymbols.isEmpty() ? "0" : String.join(",", updatedSymbols), getAdapterName());
+            if (updatedSymbols.isEmpty()) {
+                log.debug("Fetched 0 prices from {} API", getAdapterName());
+            }
+            else {
+                log.info("Fetched {} prices from {} API", String.join(",", updatedSymbols), getAdapterName());
+            }
             returnVal.removeAll(updatedSymbols);
         }
         return returnVal;

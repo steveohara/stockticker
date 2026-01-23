@@ -109,7 +109,12 @@ public class YahooAdapter implements PricesApiAdapter {
                 log.error("Error fetching prices from {} API: {}", e.getMessage(), getAdapterName());
             }
         }
-        log.info("Fetched {} prices from {} API", updatedSymbols.isEmpty() ? "0" : String.join(",", updatedSymbols), getAdapterName());
+        if (updatedSymbols.isEmpty()) {
+            log.debug("Fetched 0 prices from {} API", getAdapterName());
+        }
+        else {
+            log.info("Fetched {} prices from {} API", String.join(",", updatedSymbols), getAdapterName());
+        }
         returnVal.removeAll(updatedSymbols);
         return returnVal;
     }

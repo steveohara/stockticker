@@ -17,7 +17,6 @@ Class=cChart; psChart.cls
 Class=JsonBag; JsonBag.cls
 Form=frmTooltip.frm
 Module=Data; psdata.bas
-ResFile32="resources.RES"
 IconForm="frmMain"
 Startup="Sub Main"
 HelpFile=""

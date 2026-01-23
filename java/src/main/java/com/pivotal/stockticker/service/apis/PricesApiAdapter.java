@@ -40,7 +40,7 @@ public interface PricesApiAdapter {
                 return n.doubleValue();
             case String s:
                 try {
-                    return Double.parseDouble(s);
+                    return Double.parseDouble(s.replaceAll("[^0-9.]", ""));
                 }
                 catch (NumberFormatException e) {
                     return defaultValue;

@@ -103,6 +103,10 @@ abstract public class PersistanceManager {
                 double value = prefs.getDouble(key, field.get(target) == null ? 0.0 : field.getDouble(target));
                 field.set(target, value);
             }
+            else if (type == float.class || type == Float.class) {
+                float value = prefs.getFloat(key, field.get(target) == null ? 0.0f : field.getFloat(target));
+                field.set(target, value);
+            }
             else if (type == Color.class || type == Font.class) {
                 Object value = deserializeObject(prefs.get(key, null));
                 if (value != null) {
@@ -155,6 +159,9 @@ abstract public class PersistanceManager {
             }
             else if (type == double.class || type == Double.class) {
                 prefs.putDouble(key, (double) value);
+            }
+            else if (type == float.class || type == Float.class) {
+                prefs.putFloat(key, (float) value);
             }
             else if (type == Color.class || type == Font.class) {
                 String serialized = serializeObject((Serializable) value);
@@ -539,7 +546,7 @@ abstract public class PersistanceManager {
                     settings.setFontItalic(Boolean.parseBoolean(value));
                     break;
                 case "font size":
-                    int size = Integer.parseInt(value);
+                    float size = Float.parseFloat(value);
                     if (size < SettingsManager.FONT_SIZE_SMALL) {
                         size = SettingsManager.FONT_SIZE_SMALL;
                     }

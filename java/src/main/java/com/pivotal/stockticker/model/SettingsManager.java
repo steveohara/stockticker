@@ -26,9 +26,9 @@ public class SettingsManager extends PersistanceManager {
 
     public static String BROWSER_STOCK_LAUNCH_URL = "https://finance.yahoo.com/quote";
 
-    public static final int FONT_SIZE_SMALL = 13;
-    public static final int FONT_SIZE_MEDIUM = 15;
-    public static final int FONT_SIZE_LARGE = 18;
+    public static final float FONT_SIZE_SMALL = 11.1f;
+    public static final float FONT_SIZE_MEDIUM = 12.49f;
+    public static final float FONT_SIZE_LARGE = 14.3f;
 
     public static final int SCROLL_SPEED_SLOW = 1;
     public static final int SCROLL_SPEED_MEDIUM = 2;
@@ -52,7 +52,7 @@ public class SettingsManager extends PersistanceManager {
     private String fontName = "Calibri";
     private boolean fontBold = false;
     private boolean fontItalic = false;
-    private int fontSize = FONT_SIZE_MEDIUM;
+    private float fontSize = FONT_SIZE_MEDIUM;
     private int tickerSpeed = SCROLL_SPEED_MEDIUM;
     private boolean showPortfolioProfitAndLoss = true;
     private boolean showPortfolioProfitAndLossPercent = true;
@@ -124,5 +124,15 @@ public class SettingsManager extends PersistanceManager {
      */
     public void loadFromStorage() {
         loadFromStorage(Preferences.userRoot().node(PersistanceManager.ROOT_NODE + SettingsManager.class.getSimpleName()));
+    }
+
+    /**
+     * Gets the Font object based on the current font settings.
+     *
+     * @return The Font object configured with the current font name, style, and size.
+     */
+    public Font getFont() {
+        Font font = new Font(getFontName(), getFontStyle(), 1);
+        return font.deriveFont(getFontSize());
     }
 }

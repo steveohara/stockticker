@@ -303,4 +303,23 @@ public class Utils {
         return null;
     }
 
+    /**
+     * Gets the combined bounds of all screens.
+     *
+     * @return Rectangle representing the bounds of all screens.
+     */
+    public static Rectangle getAllScreensBounds() {
+        Rectangle allScreensBounds = new Rectangle();
+
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice[] screens = ge.getScreenDevices();
+
+        for (GraphicsDevice screen : screens) {
+            GraphicsConfiguration gc = screen.getDefaultConfiguration();
+            Rectangle screenBounds = gc.getBounds();
+            allScreensBounds = allScreensBounds.union(screenBounds);
+        }
+
+        return allScreensBounds;
+    }
 }

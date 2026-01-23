@@ -85,7 +85,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         rates.replaceExchangeRates(symbols.getAllCurrencyCodes(false));
 
         // Draw the ticker content every X seconds
-        refreshTimer = new Timer(DISPLAY_REFRESH_SECONDS, e -> {
+        refreshTimer = new Timer(DISPLAY_REFRESH_SECONDS * 1000, e -> {
             drawTickerContent();
         });
         refreshTimer.start();
@@ -136,7 +136,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         if (settings.isShowSummary()) {
             pnlSummary.setBackground(settings.getBackgroundColor());
             pnlSummary.setFontColor(settings.getNormalTextColor());
-            pnlSummary.setFont(new Font(settings.getFontName(), settings.getFontStyle(), settings.getFontSize()));
+            pnlSummary.setFont(settings.getFont());
             pnlSummary.setFontBold(settings.isFontBold());
             pnlSummary.setFontItalic(settings.isFontItalic());
             pnlSummary.setCurrentX(VALUE_SEPARATION);
@@ -156,7 +156,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             if (settings.isShowPortfolioProfitAndLoss()) {
                 pnlSummary.setFontColor(totalValue < totalCost ? settings.getDownColor() : totalValue > totalCost ? settings.getUpColor() : settings.getNormalTextColor());
                 pnlSummary.print(Utils.formatCurrencyValue(totalValue - totalCost, settings.getCurrencySymbol()));
-                pnlSummary.setCurrentX(pnlSummary.getCurrentX() + VALUE_SEPARATION);
+                pnlSummary.setCurrentX(pnlSummary.getCurrentX() + VALUE_SEPARATION / 2);
 
                 pnlSummary.setFontColor(totalValue < cashCost ? settings.getDownColor() : totalValue > cashCost ? settings.getUpColor() : settings.getNormalTextColor());
                 pnlSummary.print(String.format("(%s)", Utils.formatCurrencyValue(adjustedTotalValue, settings.getCurrencySymbol())));
@@ -189,9 +189,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         if (settings.isShowDailySummary()) {
             pnlDaySummary.setBackground(settings.getBackgroundColor());
             pnlDaySummary.setFontColor(settings.getNormalTextColor());
-            pnlDaySummary.setFont(new Font(settings.getFontName(), settings.getFontStyle(), settings.getFontSize()));
-            pnlDaySummary.setFontBold(settings.isFontBold());
-            pnlDaySummary.setFontItalic(settings.isFontItalic());
+            pnlDaySummary.setFont(settings.getFont());
             pnlDaySummary.setCurrentX(VALUE_SEPARATION);
             pnlDaySummary.print("");
 
@@ -208,7 +206,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             pnlDaySummary.setCurrentX(pnlDaySummary.getCurrentX() + VALUE_SEPARATION);
 
             // Percentage change
-            pnlDaySummary.print(String.format("%.2f%%", totalCostAtPreviousClose == 0.0 ? 0 : (totalValue - totalCostAtPreviousClose) / totalCostAtPreviousClose * 100));
+            pnlDaySummary.print(String.format("(%.2f%%)", totalCostAtPreviousClose == 0.0 ? 0 : (totalValue - totalCostAtPreviousClose) / totalCostAtPreviousClose * 100));
             pnlDaySummary.setCurrentX(pnlDaySummary.getCurrentX() + VALUE_SEPARATION);
             pnlDaySummary.print("");
         }
@@ -391,7 +389,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
         // Position and size the main frame
         setAlwaysOnTop(settings.isAlwaysOnTop());
-        setFont(new Font(settings.getFontName(), settings.getFontStyle(), settings.getFontSize()));
+        setTextCharacteristics();
         setLocation(settings.getWindowX(), settings.getWindowY());
         pnlTicker.setPreferredSize(new Dimension(settings.getWindowWidth(), getFontMetrics(getFont()).getHeight() + 1));
         pack();
@@ -464,10 +462,9 @@ public class TickerBar extends JFrame implements CallbackInterface {
                     int y = current.y - dragStart.y;
                     x = Math.max(x, 0);
                     y = Math.max(y, 0);
-                    x = x + getWidth() > Toolkit.getDefaultToolkit().getScreenSize().width
-                            ? Toolkit.getDefaultToolkit().getScreenSize().width - getWidth() : x;
-                    y = y + getHeight() > Toolkit.getDefaultToolkit().getScreenSize().height
-                            ? Toolkit.getDefaultToolkit().getScreenSize().height - getHeight() : y;
+                    Rectangle screen = Utils.getAllScreensBounds();
+                    x = x + getWidth() > screen.width ? screen.width - getWidth() : x;
+                    y = y + getHeight() > screen.height ? screen.height - getHeight() : y;
                     setLocation(x, y);
                 }
             }
@@ -598,17 +595,34 @@ public class TickerBar extends JFrame implements CallbackInterface {
     /**
      * Retrieves the live price at a given point.
      *
-     * @param point The point to check.
+     * @param point The point on the screen to check.
      * @return The LivePrice at the point, or null if none found.
      */
     private LivePrice getLivePriceAtPoint(Point point) {
-        Point panelOnScreen = pnlStocks.getLocationOnScreen();
-        point.x -= panelOnScreen.x;
-        point.y -= panelOnScreen.y;
+
+        // Check if the point is within the stocks panel
+        Point screenLocation = pnlStocks.getLocationOnScreen();
+        Rectangle bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlStocks.getWidth(), pnlStocks.getHeight());
+        if (!bounds.contains(point)) {
+            return null;
+        }
+
+        // Adjust the mouse point to be relative to the stocks panel
+        Point pointOverStocks = new Point(point.x - bounds.x, point.y - bounds.y);
+
+        // Adjust point for scrolling if necessary
+        int scrollPosition = pnlStocks.getScrollPosition();
+        if (pointOverStocks.x + scrollPosition > pnlStocks.getTotalTextWidth() &&
+                pnlStocks.getTotalTextWidth() > pnlStocks.getWidth()) {
+            scrollPosition -= pnlStocks.getTotalTextWidth();
+        }
+
+        // Find the live price at the adjusted point
+        pointOverStocks.x += scrollPosition;
         for (LivePrice livePrice : livePrices) {
-            Rectangle bounds = livePrice.getBounds();
-            if (bounds != null && bounds.contains(point)) {
-                log.debug("Found live price at point {}: {}", point, livePrice.getSymbolTransaction().getCode());
+            bounds = livePrice.getBounds();
+            if (bounds != null && bounds.contains(pointOverStocks)) {
+                log.info("Found live price at point {}: {}", pointOverStocks, livePrice.getSymbolTransaction().getCode());
                 return livePrice;
             }
         }
@@ -734,23 +748,38 @@ public class TickerBar extends JFrame implements CallbackInterface {
     }
 
     /**
+     * Sets the font characteristics for the ticker and updates settings.
+     */
+    private void setTextCharacteristics() {
+
+        // Set the font for the ticker and cascade it to the children panels
+        Font masterFont = new Font(settings.getFontName(), settings.getFontStyle(), Math.round(settings.getFontSize())).deriveFont(settings.getFontSize());
+        setFont(masterFont);
+        pnlDaySummary.setFont(masterFont);
+        pnlSummary.setFont(masterFont);
+        pnlStocks.setFont(masterFont);
+
+        // Base the size of the ticker on the font height
+        pnlTicker.setPreferredSize(new Dimension(settings.getWindowWidth(), getFontMetrics(masterFont).getHeight() + 1));
+        setSize(new Dimension(getWidth(), getFontMetrics(masterFont).getHeight() + 1));
+
+        // Update the font size menu items
+        float size = settings.getFontSize();
+        fontSizeItemSmall.setSelected(size <= SettingsManager.FONT_SIZE_SMALL);
+        fontSizeItemMedium.setSelected(size > SettingsManager.FONT_SIZE_SMALL && size < SettingsManager.FONT_SIZE_LARGE);
+        fontSizeItemLarge.setSelected(size >= SettingsManager.FONT_SIZE_LARGE);
+    }
+
+    /**
      * Sets the font size for the ticker and updates settings.
      *
      * @param size The new font size.
      */
-    private void setFontSize(int size) {
-        Font currentFont = getFont();
-        Font newFont = new Font(currentFont.getName(), currentFont.getStyle(), size);
-        setFont(newFont);
-        pnlDaySummary.setFont(newFont);
-        pnlSummary.setFont(newFont);
-        pnlStocks.setFont(newFont);
-        pnlTicker.setPreferredSize(new Dimension(getWidth(), getFontMetrics(newFont).getHeight() + 2));
-        setSize(new Dimension(getWidth(), getFontMetrics(newFont).getHeight() + 2));
+    private void setFontSize(float size) {
+
+        // Set the font for the ticker and cascade it to the children panels
         settings.setFontSize(size);
-        fontSizeItemSmall.setSelected(size == SettingsManager.FONT_SIZE_SMALL);
-        fontSizeItemMedium.setSelected(size == SettingsManager.FONT_SIZE_MEDIUM);
-        fontSizeItemLarge.setSelected(size == SettingsManager.FONT_SIZE_LARGE);
+        setTextCharacteristics();
 
         // Redraw all the ticker content
         drawTickerContent();

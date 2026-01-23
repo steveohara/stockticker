@@ -257,7 +257,7 @@ public class LivePrice {
      */
     public boolean isUpToday() {
         Price price = prices.getPrice(symbol);
-        return price.getCurrentPrice() > price.getDayStart();
+        return price.getCurrentPrice() > (price.getDayClose() == 0 ? price.getDayStart() : price.getDayClose());
     }
 
     /**
@@ -276,7 +276,7 @@ public class LivePrice {
      */
     public boolean isDownToday() {
         Price price = prices.getPrice(symbol);
-        return price.getCurrentPrice() < price.getDayStart();
+        return price.getCurrentPrice() < (price.getDayClose() == 0 ? price.getDayStart() : price.getDayClose());
     }
 
     /**

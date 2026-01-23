@@ -50,18 +50,15 @@ public class ColouredTextPanel extends JPanel {
     private Color fontColor = Color.WHITE;
     private boolean fontBold = false;
     private boolean fontItalic = false;
-    private int fontSize = 14;
+    private float fontSize = 13.3f;
     private String fontFamily = "Arial";
     private int totalTextWidth = 0;
     private int totalTextHeight = 0;
+    private int scrollPosition = 0;
 
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private Timer scrollTimer;
-
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private int scrollPosition = 0;
 
     @Setter(AccessLevel.NONE)
     private DISPLAY_STYLE displayStyle = DISPLAY_STYLE.CLIP;
@@ -188,7 +185,7 @@ public class ColouredTextPanel extends JPanel {
     public void setFont(Font font) {
         super.setFont(font);
         fontFamily = font.getFamily();
-        fontSize = font.getSize();
+        fontSize = font.getSize2D();
         fontBold = font.isBold();
         fontItalic = font.isItalic();
     }
@@ -318,7 +315,7 @@ public class ColouredTextPanel extends JPanel {
             if (panel.isFontItalic()) {
                 style |= Font.ITALIC;
             }
-            font = new Font(panel.getFontFamily(), style, panel.getFontSize());
+            font = new Font(panel.getFontFamily(), style, 13).deriveFont(panel.getFontSize());
             color = panel.getFontColor();
             width = panel.getFontMetrics(font).stringWidth(text);
             height = panel.getFontMetrics(font).getHeight();
