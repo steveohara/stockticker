@@ -10,7 +10,7 @@ Option Explicit
     ' Version number form the build system
     Public Const VERSION_NAME = "pivotalstockticker (pivotalstockticker.exe)"
     Public Const VERSION_NUMBER = "3.6.10"
-    Public Const VERSION_TIMESTAMP = "26-Dec-2025 14:20"
+    Public Const VERSION_TIMESTAMP = "23-Jan-2026 15:28"
 
     ' Registry entries
     Dim mobjReg As New cRegistry

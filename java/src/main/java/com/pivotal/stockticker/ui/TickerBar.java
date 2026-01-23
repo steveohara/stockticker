@@ -622,7 +622,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         for (LivePrice livePrice : livePrices) {
             bounds = livePrice.getBounds();
             if (bounds != null && bounds.contains(pointOverStocks)) {
-                log.info("Found live price at point {}: {}", pointOverStocks, livePrice.getSymbolTransaction().getCode());
+                log.debug("Found live price at point {}: {}", pointOverStocks, livePrice.getSymbolTransaction().getCode());
                 return livePrice;
             }
         }

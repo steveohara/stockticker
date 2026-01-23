@@ -102,7 +102,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.8.1</version>
+                <version>3.6.3</version>
                 <configuration>
                     <quiet>true</quiet>
                     <show>public</show>
@@ -121,6 +121,8 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
+                            <doclint>none</doclint>
+                            <quiet>true</quiet>
                         </configuration>
                     </execution>
                     <execution>
@@ -159,26 +161,24 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.graalvm.buildtools</groupId>
-                <artifactId>native-maven-plugin</artifactId>
-                <version>0.10.3</version>
-                <extensions>true</extensions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.1</version>
                 <executions>
                     <execution>
-                        <id>build-native</id>
-                        <goals>
-                            <goal>compile-no-fork</goal>
-                        </goals>
                         <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.pivotal.stockticker.App</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <imageName>${project.artifactId}</imageName>
-                    <mainClass>com.pivotal.stockticker.App</mainClass>
-                    <buildArgs>
-                        <buildArg>--no-fallback</buildArg>
-                    </buildArgs>
-                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -190,5 +190,118 @@
             <url>https://maven.pkg.github.com/steveohara/${project.artifactId}</url>
         </repository>
     </distributionManagement>
+
+    <profiles>
+        <profile>
+            <id>native</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>0.10.3</version>
+                        <extensions>true</extensions>
+                        <executions>
+                            <execution>
+                                <id>build-native</id>
+                                <goals>
+                                    <goal>compile-no-fork</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <imageName>${project.artifactId}</imageName>
+                            <mainClass>com.pivotal.stockticker.App</mainClass>
+                            <buildArgs>
+                                <buildArg>--no-fallback</buildArg>
+                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+
+                                <!-- FlatLaf and AWT initialization -->
+                                <buildArg>--initialize-at-build-time=com.formdev.flatlaf</buildArg>
+                                <buildArg>--initialize-at-build-time=sun.awt.SunHints</buildArg>
+                                <buildArg>--initialize-at-build-time=sun.awt.SunHints$Key</buildArg>
+                                <buildArg>--initialize-at-build-time=sun.awt.SunHints$Value</buildArg>
+                                <buildArg>--initialize-at-build-time=sun.awt.SunHints$LCDContrastKey</buildArg>
+
+                                <!-- General AWT support -->
+                                <buildArg>--initialize-at-build-time=java.awt.color.ColorSpace</buildArg>
+                                <buildArg>--initialize-at-run-time=java.awt.Desktop</buildArg>
+                                <buildArg>--initialize-at-run-time=sun.java2d</buildArg>
+                                <buildArg>--initialize-at-run-time=sun.font</buildArg>
+
+                                <buildArg>-J-Djava.awt.headless=false</buildArg>
+                            </buildArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>executable</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>run-jpackage</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${java.home}/bin/jpackage</executable>
+                                    <arguments>
+                                        <!-- use app-image so NO WiX / installers are needed -->
+                                        <argument>--type</argument>
+                                        <argument>app-image</argument>
+
+                                        <argument>--name</argument>
+                                        <argument>PivotalStockTicker</argument>
+
+                                        <argument>--app-version</argument>
+                                        <argument>${project.version}</argument>
+
+                                        <argument>--input</argument>
+                                        <argument>${project.build.directory}</argument>
+
+                                        <argument>--main-jar</argument>
+                                        <argument>${project.build.finalName}.jar</argument>
+
+                                        <argument>--main-class</argument>
+                                        <argument>com.pivotal.stockticker.App</argument>
+
+                                        <argument>--dest</argument>
+                                        <argument>${project.build.directory}/jpackage</argument>
+
+                                        <argument>--java-options</argument>
+                                        <argument>-Xms256m</argument>
+
+                                        <argument>--java-options</argument>
+                                        <argument>-Xmx1g</argument>
+
+                                        <argument>--description</argument>
+                                        <argument>${project.description}</argument>
+
+                                        <argument>--vendor</argument>
+                                        <argument>${project.organization.name}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
