@@ -89,6 +89,13 @@ public class TickerBar extends JFrame implements CallbackInterface {
             drawTickerContent();
         });
         refreshTimer.start();
+
+        // Draw the ticket now
+        drawTickerContent();
+
+        // Start the schedulers to update prices and exchange rates
+        prices.startScheduler();
+        rates.startScheduler();
     }
 
     /**
@@ -354,8 +361,8 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 rates.loadFromStorage(true);
 
                 // Reset the schedulers to pick up any changes
-                prices.resetScheduler();
-                rates.resetScheduler();
+                prices.startScheduler();
+                rates.startScheduler();
 
                 // Draw the ticker content
                 drawTickerContent();
@@ -370,11 +377,12 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
             // If the symbols form was the source, update the prices and redraw
             case SymbolsForm symbolsForm -> {
+                symbols.loadFromStorage();
                 prices.replacePrices(symbols.getAllSymbolCodes(false));
-                prices.resetScheduler();
-
                 rates.replaceExchangeRates(symbols.getAllCurrencyCodes(false));
-                rates.resetScheduler();
+
+                prices.startScheduler();
+                rates.startScheduler();
                 drawTickerContent();
             }
             default -> {
@@ -723,7 +731,12 @@ public class TickerBar extends JFrame implements CallbackInterface {
      */
     private void showSymbolsDialog() {
         SwingUtilities.invokeLater(() -> {
-            new SymbolsForm(settings, this, symbols);
+            try {
+                new SymbolsForm(this);
+            }
+            catch (Exception ex) {
+                Utils.showTopmostMessage("Failed to open Symbols Form\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
     }
 

@@ -271,8 +271,8 @@
                                         <argument>--app-version</argument>
                                         <argument>${project.version}</argument>
 
-                                        <argument>--input</argument>
-                                        <argument>${project.build.directory}</argument>
+<!--                                        <argument>&#45;&#45;input</argument>-->
+<!--                                        <argument>${project.build.directory}</argument>-->
 
                                         <argument>--main-jar</argument>
                                         <argument>${project.build.finalName}.jar</argument>

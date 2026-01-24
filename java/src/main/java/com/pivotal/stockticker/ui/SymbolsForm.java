@@ -40,17 +40,19 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
     private JLabel lblTransactionTimestamp;
 
     private final SettingsManager settings;
-    private final SymbolsManager symbolsManager;
+    private final SymbolsManager symbolsManager = new SymbolsManager();
     private final CallbackInterface caller;
     private boolean ignoreChanges = false;
 
     /**
      * Creates new form Symbols
+     *
+     * @param caller The callback interface to notify of changes
+     * @throws Exception if it cannot load settings
      */
-    public SymbolsForm(SettingsManager settings, CallbackInterface caller, SymbolsManager symbolsManager) {
-        this.settings = settings;
+    public SymbolsForm(CallbackInterface caller) throws Exception {
+        settings = SettingsManager.getPersistentSettings();
         this.caller = caller;
-        this.symbolsManager = symbolsManager;
         initComponents();
         setTitle("Symbols");
         setModal(true);
@@ -119,22 +121,12 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         });
 
         // Handle hide disabled symbols
-        chkHideDisabled.addActionListener( e -> {
+        chkHideDisabled.addActionListener(e -> {
             settings.setHideDisabledSymbols(chkHideDisabled.isSelected());
             lstSymbols.hideDisabled(chkHideDisabled.isSelected());
         });
-        chkDisabled.addActionListener( e -> {
-            int index = lstSymbols.getSelectedIndex();
+        chkDisabled.addActionListener(e -> {
             lstSymbols.hideDisabled(lstSymbols.isHideDisabled());
-//            if (lstSymbols.isHideDisabled() && chkDisabled.isSelected()) {
-//                if (!lstSymbols.getModel().isEmpty()) {
-//                    lstSymbols.clearSelection();
-//                    lstSymbols.setSelectedIndex(30);
-////                    SwingUtilities.invokeLater( () -> {
-////                        lstSymbols.setSelectedIndex(index < lstSymbols.getModel().getSize() ? index : lstSymbols.getModel().getSize() - 1);
-////                    });
-//                }
-//            }
         });
 
         // Listen for changes
@@ -361,7 +353,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         int lblGap = 5;
         int stdWidth = 100;
         int stdHeight = 20;
-        int width = StartupManager.isWindows() ? 610 :  600;
+        int width = StartupManager.isWindows() ? 610 : 600;
 
         // Set the dialog size and use null layout
         setResizable(false);
@@ -377,7 +369,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
                 .at(hGap, chkHideDisabled.getY() + chkHideDisabled.getHeight() + vGap / 2).withDimensions(150, 400)
                 .to(getContentPane());
 
-        int left = jScrollPane1.getX() + jScrollPane1.getWidth() + (int)(hGap * 1.5);
+        int left = jScrollPane1.getX() + jScrollPane1.getWidth() + (int) (hGap * 1.5);
 
         // Symbol & Details Labels/Fields
         JLabel jLabel1 = SettingsLabel.create("Symbol").at(left, hGap).withDimensions(stdWidth, stdHeight).to(getContentPane());
@@ -404,9 +396,9 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         lstCurrencyCode.addItem("");
         Set<Currency> currencies = Currency.getAvailableCurrencies();
         currencies.stream()
-            .map(Currency::getCurrencyCode)
-            .sorted()
-            .forEach(code -> lstCurrencyCode.addItem(code));
+                .map(Currency::getCurrencyCode)
+                .sorted()
+                .forEach(code -> lstCurrencyCode.addItem(code));
 
 
         JLabel jLabel6 = SettingsLabel.create("Currency Symbol").below(jLabel4, vGap).to(getContentPane());
@@ -461,7 +453,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         btnCancel = SettingsButton.create("Cancel").atTop(btnAdd).withWidth(80).atRight(txtDisplayName.getRight()).to(getContentPane());
         btnOk = SettingsButton.create("Ok").atTop(btnCancel).atLeft(btnCancel.getX() - btnCancel.getWidth() - hGap).withDimensions(btnCancel).to(getContentPane());
 
-        setSize(width, btnOk.getBottom() + (StartupManager.isWindows() ? 50 :  40));
+        setSize(width, btnOk.getBottom() + (StartupManager.isWindows() ? 50 : 40));
         setPreferredSize(getSize());
         setMaximumSize(getSize());
         setMinimumSize(getSize());

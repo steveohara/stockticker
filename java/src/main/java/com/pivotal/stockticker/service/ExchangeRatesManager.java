@@ -52,7 +52,6 @@ public class ExchangeRatesManager {
 
         // Schedule the task to run every X seconds with an initial delay of 0 seconds
         scheduler = new UpdateTask(this);
-        scheduler.start(settings.getExchangeRateFrequency());
     }
 
     /**
@@ -201,8 +200,8 @@ public class ExchangeRatesManager {
     /**
      * Update settings from the application
      */
-    public void resetScheduler() {
-        if (settings.getExchangeRateFrequency() != scheduler.getPeriodSeconds()) {
+    public void startScheduler() {
+        if (!scheduler.isRunning() || settings.getExchangeRateFrequency() != scheduler.getPeriodSeconds()) {
             scheduler.start(settings.getExchangeRateFrequency());
         }
         else {
@@ -242,6 +241,13 @@ public class ExchangeRatesManager {
          */
         public UpdateTask(ExchangeRatesManager exchangeRatesManager) {
             this.exchangeRatesManager = exchangeRatesManager;
+        }
+
+        /**
+         * Return a true if the periodic task is currently running
+         */
+        public boolean isRunning() {
+            return scheduledFuture != null && !scheduledFuture.isCancelled();
         }
 
         /**

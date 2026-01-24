@@ -49,7 +49,6 @@ public class PricesManager {
 
         // Schedule the task to run every X seconds with an initial delay of 0 seconds
         scheduler = new PriceCurrencyUpdateTask(settings, this);
-        scheduler.start(settings.getFrequency());
     }
 
     /**
@@ -151,8 +150,8 @@ public class PricesManager {
     /**
      * Update settings from the application
      */
-    public void resetScheduler() {
-        if (settings.getFrequency() != scheduler.getPeriodSeconds()) {
+    public void startScheduler() {
+        if (!scheduler.isRunning() || settings.getFrequency() != scheduler.getPeriodSeconds()) {
             scheduler.start(settings.getFrequency());
         }
     }
@@ -221,6 +220,13 @@ public class PricesManager {
         public PriceCurrencyUpdateTask(SettingsManager settings, PricesManager prices) {
             this.settings = settings;
             this.prices = prices;
+        }
+
+        /**
+         * Return a true if the periodic task is currently running
+         */
+        public boolean isRunning() {
+            return scheduledFuture != null && !scheduledFuture.isCancelled();
         }
 
         /**

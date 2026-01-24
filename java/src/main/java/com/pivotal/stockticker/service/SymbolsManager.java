@@ -52,7 +52,7 @@ public class SymbolsManager {
                 }
             }
 
-            // Sort the symbols by code
+            // Sort the symbols by code and timestamp
             symbols.sort(Comparator.comparing(SymbolTransaction::getSortKey, String.CASE_INSENSITIVE_ORDER));
             symbolTransactions.clear();
             symbolTransactions.addAll(symbols);
