@@ -34,7 +34,6 @@ import java.util.prefs.Preferences;
 public class ExchangeRatesManager {
 
     private static final String EXCHANGE_RATES_ROOT = PersistanceManager.ROOT_NODE + ExchangeRate.class.getSimpleName();
-    private final SettingsManager settings = SettingsManager.getInstance();
     private Preferences prefs = Preferences.userRoot().node(EXCHANGE_RATES_ROOT);
 
     private final Map<String, ExchangeRate> currentRates = new TreeMap<>(String::compareToIgnoreCase);
@@ -192,6 +191,7 @@ public class ExchangeRatesManager {
         }
 
         // Now we need to do a similar adjustment for the base currency symbol
+        SettingsManager settings = SettingsManager.getInstance();
         String baseCurrencySymbol = settings.getCurrencySymbol();
         if (baseCurrencySymbol != null && baseCurrencySymbol.matches("[a-zA-Z¢]+")) {
             total = total * 100.0;
@@ -203,6 +203,7 @@ public class ExchangeRatesManager {
      * Update settings from the application
      */
     public void startScheduler() {
+        SettingsManager settings = SettingsManager.getInstance();
         if (!scheduler.isRunning() || settings.getExchangeRateFrequency() != scheduler.getPeriodSeconds()) {
             scheduler.start(settings.getExchangeRateFrequency());
         }

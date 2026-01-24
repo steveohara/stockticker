@@ -52,8 +52,7 @@ public class BackupReload {
         chooser.setMultiSelectionEnabled(false);
         chooser.setDialogType(JFileChooser.SAVE_DIALOG);
         chooser.setDialogTitle("Backup Settings");
-        chooser.setApproveButtonText("Save");
-        int userSelection = chooser.showSaveDialog(dialog);
+        int userSelection = chooser.showDialog(dialog, "Save");
 
         // If user approved, export the preferences to the selected file
         if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -96,8 +95,7 @@ public class BackupReload {
         chooser.setMultiSelectionEnabled(false);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
         chooser.setDialogTitle("Restore Settings");
-        chooser.setApproveButtonText("Open");
-        int userSelection = chooser.showSaveDialog(dialog);
+        int userSelection = chooser.showDialog(dialog, "Open");
 
         // If user approved, import the preferences from the selected file
         if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -191,7 +189,7 @@ public class BackupReload {
         prefs.removeNode();
 
         // Now create new managers to load the data into
-        SettingsManager settings = SettingsManager.getInstance();
+        SettingsManager settings = SettingsManager.getInstance(true);
         SymbolsManager symbolsManager = new SymbolsManager();
         PricesManager pricesManager = new PricesManager(null);
         ExchangeRatesManager exchangeRatesManager = new ExchangeRatesManager(null);

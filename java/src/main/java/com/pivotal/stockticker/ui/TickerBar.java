@@ -348,9 +348,9 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 initializeUI();
 
                 // Load all symbols, prices and exchange rates from storage
+                rates.loadFromStorage(true);
                 symbols.loadFromStorage();
                 prices.loadFromStorage();
-                rates.loadFromStorage(true);
 
                 // Reset the schedulers to pick up any changes
                 prices.startScheduler();

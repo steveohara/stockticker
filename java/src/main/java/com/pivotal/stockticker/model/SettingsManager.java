@@ -102,7 +102,18 @@ public class SettingsManager extends PersistanceManager {
      * @return A proxy instance of this class.
      */
     public static SettingsManager getInstance() {
-        if (instance == null) {
+        return getInstance(false);
+    }
+
+    /**
+     * Creates an auto-saving proxy instance of this class so that we can intercept method calls
+     * and automatically save the values to persistent storage.
+     *
+     * @param refresh If true, forces the creation of a new instance.
+     * @return A proxy instance of this class.
+     */
+    public static SettingsManager getInstance(boolean refresh) {
+        if (refresh || instance == null) {
             try {
                 instance = createProxyInstance(SettingsManager.class, Preferences.userRoot().node(ROOT_NODE + SettingsManager.class.getSimpleName()), true);
             }

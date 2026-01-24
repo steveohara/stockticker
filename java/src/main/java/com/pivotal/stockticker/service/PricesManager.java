@@ -35,7 +35,6 @@ public class PricesManager {
     private final Map<String, Price> currentPrices = new TreeMap<>(String::compareToIgnoreCase);
 
     private final PriceCurrencyUpdateTask scheduler;
-    private final SettingsManager settings;
     private final CallbackInterface callback;
 
     /**
@@ -45,7 +44,6 @@ public class PricesManager {
      */
     public PricesManager(CallbackInterface callback) {
         this.callback = callback;
-        this.settings = SettingsManager.getInstance();
 
         // Load all the saved prices values from persistent storage
         loadFromStorage();
@@ -58,6 +56,7 @@ public class PricesManager {
      * Load all symbols from persistent storage into memory
      */
     public void loadFromStorage() {
+
         // Load all the prices from the persistent storage
         prefs = Preferences.userRoot().node(PRICES_ROOT);
         try {
@@ -154,6 +153,7 @@ public class PricesManager {
      * Update settings from the application
      */
     public void startScheduler() {
+        SettingsManager settings = SettingsManager.getInstance();
         if (!scheduler.isRunning() || settings.getFrequency() != scheduler.getPeriodSeconds()) {
             scheduler.start(settings.getFrequency());
         }
