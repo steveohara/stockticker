@@ -35,11 +35,10 @@ public class MarketStackAdapter implements PricesApiAdapter {
     /**
      * Constructor
      *
-     * @param settingsManager Application settings manager
      * @param pricesManager Prices manager
      */
-    public MarketStackAdapter(SettingsManager settingsManager, PricesManager pricesManager) {
-        this.settingsManager = settingsManager;
+    public MarketStackAdapter(PricesManager pricesManager) {
+        this.settingsManager = SettingsManager.getInstance();
         this.pricesManager = pricesManager;
     }
 

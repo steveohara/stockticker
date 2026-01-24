@@ -6,11 +6,15 @@
  */
 package com.pivotal.stockticker.utils;
 
-import java.awt.*;
-
 /**
  * Callback interface for settings changes
  */
 public interface CallbackInterface {
-    void changed(Component c);
+
+    /**
+     * Method called when a change occurs
+     *
+     * @param source The source object that triggered the change
+     */
+    void changed(Object source);
 }

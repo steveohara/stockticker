@@ -78,6 +78,14 @@ public class SettingsManager extends PersistanceManager {
     private String daySortColumn = "Code";
     private String daySortOrder = "ascending";
 
+    private static SettingsManager instance = null;
+
+    /**
+     * Required for the ByteBuddy proxy creation
+     */
+    public SettingsManager() {
+    }
+
     /**
      * Sets the update frequency, ensuring it is within valid bounds (1 to 600 seconds).
      *
@@ -92,14 +100,23 @@ public class SettingsManager extends PersistanceManager {
      * and automatically save the values to persistent storage.
      *
      * @return A proxy instance of this class.
-     * @throws Exception if proxy creation fails.
      */
-    public static SettingsManager getPersistentSettings() throws Exception {
-        return createProxyInstance(SettingsManager.class, Preferences.userRoot().node(ROOT_NODE + SettingsManager.class.getSimpleName()), true);
+    public static SettingsManager getInstance() {
+        if (instance == null) {
+            try {
+                instance = createProxyInstance(SettingsManager.class, Preferences.userRoot().node(ROOT_NODE + SettingsManager.class.getSimpleName()), true);
+            }
+            catch (Exception e) {
+                log.error("Failed to create SettingsManager proxy instance: {}", e.getMessage(), e);
+                instance = new SettingsManager();
+            }
+        }
+        return instance;
     }
 
     /**
      * Returns the font style based on the bold and italic settings.
+     *
      * @return The font style as an integer constant from the Font class.
      */
     public int getFontStyle() {
@@ -114,9 +131,9 @@ public class SettingsManager extends PersistanceManager {
      */
     public boolean isShowSummary() {
         return showPortfolioProfitAndLoss ||
-               showPortfolioProfitAndLossPercent ||
-               showTotalCost ||
-               showTotalValue;
+                showPortfolioProfitAndLossPercent ||
+                showTotalCost ||
+                showTotalValue;
     }
 
     /**

@@ -37,12 +37,11 @@ public class TickerBar extends JFrame implements CallbackInterface {
     public static final int STOCK_SEPARATION = 7;
     public static final int VALUE_SEPARATION = 4;
     public static final int UP_DOWN_SEPARATION = 1;
-    public static final int DISPLAY_REFRESH_SECONDS = 5;
 
-    private final SettingsManager settings = SettingsManager.getPersistentSettings();
+    private final SettingsManager settings = SettingsManager.getInstance();
     private final SymbolsManager symbols = new SymbolsManager();
-    private final PricesManager prices = new PricesManager(settings);
-    private final ExchangeRatesManager rates = new ExchangeRatesManager(settings);
+    private final PricesManager prices = new PricesManager(this);
+    private final ExchangeRatesManager rates = new ExchangeRatesManager(this);
     private final ArrayList<LivePrice> livePrices = new ArrayList<>();
 
     private JPanel pnlLeftDrag;
@@ -65,14 +64,12 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private Point rightDragStart = null;
     private int left = 0;
     private int right = 0;
-    private Timer refreshTimer = null;
 
     /**
      * Constructor to initialize the ticker bar UI.
      *
-     * @throws Exception if there is an error during initialization.
      */
-    public TickerBar() throws Exception {
+    public TickerBar() {
         createUIComponents();
         setupContextMenu();
         initializeUI();
@@ -83,12 +80,6 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
         // Add all the currencies to the exchange rates manager
         rates.replaceExchangeRates(symbols.getAllCurrencyCodes(false));
-
-        // Draw the ticker content every X seconds
-        refreshTimer = new Timer(DISPLAY_REFRESH_SECONDS * 1000, e -> {
-            drawTickerContent();
-        });
-        refreshTimer.start();
 
         // Draw the ticket now
         drawTickerContent();
@@ -102,6 +93,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
      * Draw the content of the ticker
      */
     synchronized private void drawTickerContent() {
+        log.info("Drawing ticker symbols");
         drawLivePrices();
         drawSummary();
         drawDaySummary();
@@ -344,10 +336,10 @@ public class TickerBar extends JFrame implements CallbackInterface {
     }
 
     @Override
-    public void changed(Component sourceForm) {
+    public void changed(Object source) {
 
         // If there is no component, then this is a complete initialization
-        switch (sourceForm) {
+        switch (source) {
             case null -> {
 
                 // Load all the changed settings from storage
@@ -386,6 +378,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 drawTickerContent();
             }
             default -> {
+                drawTickerContent();
             }
         }
     }
@@ -677,7 +670,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         contextMenu.addSeparator();
 
         JMenuItem refresh = new JMenuItem("Refresh");
-        refresh.addActionListener(e -> drawTickerContent());
+        refresh.addActionListener(e -> refreshTicker());
         contextMenu.add(refresh);
         contextMenu.addSeparator();
 
@@ -701,9 +694,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         });
         contextMenu.add(help);
         JMenuItem about = new JMenuItem("About...");
-        about.addActionListener(e -> {
-            Utils.showTopmostMessage(VersionInfo.getVersionString(), "About", JOptionPane.INFORMATION_MESSAGE);
-        });
+        about.addActionListener(e -> Utils.showTopmostMessage(VersionInfo.getVersionString(), "About", JOptionPane.INFORMATION_MESSAGE));
         contextMenu.add(about);
         contextMenu.addSeparator();
 
@@ -744,9 +735,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
      * Displays the settings dialog.
      */
     private void showSettingsDialog() {
-        SwingUtilities.invokeLater(() -> {
-            new SettingsForm(this, settings);
-        });
+        SwingUtilities.invokeLater(() -> new SettingsForm(this));
     }
 
     /**
@@ -799,6 +788,17 @@ public class TickerBar extends JFrame implements CallbackInterface {
     }
 
     /**
+     * Refreshes the ticker data and redraws the content.
+     * This is a synchronous call to the data sources so could take some time
+     */
+    private void refreshTicker() {
+        SwingUtilities.invokeLater(() -> {
+            rates.refreshExchangeRates();
+            prices.refreshPrices(true);
+        });
+    }
+
+    /**
      * Sets the ticker scroll speed and updates settings.
      *
      * @param speed The new scroll speed.
@@ -816,6 +816,8 @@ public class TickerBar extends JFrame implements CallbackInterface {
      */
     private void exitApplication() {
         pnlStocks.stopScrolling();
+        prices.stopScheduler();
+        rates.stopScheduler();
         System.exit(0);
     }
 

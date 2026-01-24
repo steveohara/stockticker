@@ -48,10 +48,9 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      * Creates new form Symbols
      *
      * @param caller The callback interface to notify of changes
-     * @throws Exception if it cannot load settings
      */
-    public SymbolsForm(CallbackInterface caller) throws Exception {
-        settings = SettingsManager.getPersistentSettings();
+    public SymbolsForm(CallbackInterface caller) {
+        settings = SettingsManager.getInstance();
         this.caller = caller;
         initComponents();
         setTitle("Symbols");
@@ -125,9 +124,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             settings.setHideDisabledSymbols(chkHideDisabled.isSelected());
             lstSymbols.hideDisabled(chkHideDisabled.isSelected());
         });
-        chkDisabled.addActionListener(e -> {
-            lstSymbols.hideDisabled(lstSymbols.isHideDisabled());
-        });
+        chkDisabled.addActionListener(e -> lstSymbols.hideDisabled(lstSymbols.isHideDisabled()));
 
         // Listen for changes
         Utils.attachChangeListeners(getContentPane(), this, chkHideDisabled);
@@ -261,7 +258,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
     }
 
     /**
-     * Set-up the display with data from storage
+     * Set up the display with data from storage
      */
     private void loadFromStorage() {
         lstSymbols.clear();
@@ -296,7 +293,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
     }
 
     @Override
-    public void changed(Component c) {
+    public void changed(Object source) {
         if (ignoreChanges) {
             return;
         }
@@ -401,7 +398,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
                 .forEach(code -> lstCurrencyCode.addItem(code));
 
 
-        JLabel jLabel6 = SettingsLabel.create("Currency Symbol").below(jLabel4, vGap).to(getContentPane());
+        SettingsLabel.create("Currency Symbol").below(jLabel4, vGap).to(getContentPane());
         txtCurrencySymbol = SettingsTextField.create("", "e.g. $, £, p, c").below(txtSharesBought, vGap).withWidth(50).to(getContentPane());
 
         // "Show" Panel (manual border and grouping)

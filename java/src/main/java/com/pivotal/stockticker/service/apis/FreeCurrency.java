@@ -35,11 +35,10 @@ public class FreeCurrency {
     /**
      * Constructor
      *
-     * @param settingsManager Application settings manager
      * @param exchangeRatesManager Exchange rates manager
      */
-    public FreeCurrency(SettingsManager settingsManager, ExchangeRatesManager exchangeRatesManager) {
-        this.settingsManager = settingsManager;
+    public FreeCurrency(ExchangeRatesManager exchangeRatesManager) {
+        this.settingsManager = SettingsManager.getInstance();
         this.exchangeRatesManager = exchangeRatesManager;
     }
 

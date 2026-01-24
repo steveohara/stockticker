@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A custom JPanel that allows printing coloured and styled text
@@ -68,7 +68,7 @@ public class ColouredTextPanel extends JPanel {
 
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
-    private final ArrayList<TextItem> items = new ArrayList<>();
+    private final CopyOnWriteArrayList<TextItem> items = new CopyOnWriteArrayList<>();
 
     /**
      * Creates a new ColouredTextPanel with default settings.

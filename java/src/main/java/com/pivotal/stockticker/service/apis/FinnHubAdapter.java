@@ -35,11 +35,10 @@ public class FinnHubAdapter implements PricesApiAdapter {
     /**
      * Constructor
      *
-     * @param settingsManager Application settings manager
      * @param pricesManager Prices manager
      */
-    public FinnHubAdapter(SettingsManager settingsManager, PricesManager pricesManager) {
-        this.settingsManager = settingsManager;
+    public FinnHubAdapter(PricesManager pricesManager) {
+        this.settingsManager = SettingsManager.getInstance();
         this.pricesManager = pricesManager;
     }
 

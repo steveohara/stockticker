@@ -36,11 +36,10 @@ public class TwelveDataAdapter implements PricesApiAdapter {
     /**
      * Constructor
      *
-     * @param settingsManager Application settings manager
      * @param pricesManager Prices manager
      */
-    public TwelveDataAdapter(SettingsManager settingsManager, PricesManager pricesManager) {
-        this.settingsManager = settingsManager;
+    public TwelveDataAdapter(PricesManager pricesManager) {
+        this.settingsManager = SettingsManager.getInstance();
         this.pricesManager = pricesManager;
     }
 

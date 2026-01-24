@@ -9,6 +9,7 @@ package com.pivotal.stockticker.service;
 import com.pivotal.stockticker.model.Price;
 import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.service.apis.*;
+import com.pivotal.stockticker.utils.CallbackInterface;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,20 +36,22 @@ public class PricesManager {
 
     private final PriceCurrencyUpdateTask scheduler;
     private final SettingsManager settings;
+    private final CallbackInterface callback;
 
     /**
      * Constructor - loads all prices from persistent storage and starts the periodic update task
      *
-     * @param settings Application settings
+     * @param callback Callback interface for notifying UI of updates
      */
-    public PricesManager(SettingsManager settings) {
-        this.settings = settings;
+    public PricesManager(CallbackInterface callback) {
+        this.callback = callback;
+        this.settings = SettingsManager.getInstance();
 
         // Load all the saved prices values from persistent storage
         loadFromStorage();
 
         // Schedule the task to run every X seconds with an initial delay of 0 seconds
-        scheduler = new PriceCurrencyUpdateTask(settings, this);
+        scheduler = new PriceCurrencyUpdateTask(this);
     }
 
     /**
@@ -157,12 +160,30 @@ public class PricesManager {
     }
 
     /**
+     * Stop the scheduler
+     */
+    public void stopScheduler() {
+        if (scheduler.isRunning()) {
+            scheduler.stop();
+        }
+    }
+
+    /**
      * Refresh prices from all sources
      * This is a synchronous call that will block until all rates are updated
      * It's useful to call this method when the user requests a manual refresh
      * after adding/deleting symbols or changing settings
      */
-    synchronized public void refreshPrices() {
+    public void refreshPrices() {
+        refreshPrices(false);
+    }
+
+    /**
+     * Refresh prices from all sources and notify the callback if requested
+     *
+     * @param notifyCallback True to notify the callback after updating prices
+     */
+    synchronized public void refreshPrices(boolean notifyCallback) {
 
         // Sort the symbols to update so that those without a value are first
         Collection<String> symbols = new ArrayList<>(currentPrices.keySet());
@@ -174,27 +195,32 @@ public class PricesManager {
         symbols = symbolsList;
 
         // Update prices for each symbol from each source
-        PricesApiAdapter adapter = new AlphaVantageAdapter(settings, this);
+        PricesApiAdapter adapter = new AlphaVantageAdapter(this);
         symbols = adapter.fetchAndUpdatePrices(symbols);
 
-        adapter = new MarketStackAdapter(settings, this);
+        adapter = new MarketStackAdapter(this);
         symbols = adapter.fetchAndUpdatePrices(symbols);
 
-        adapter = new TwelveDataAdapter(settings, this);
+        adapter = new TwelveDataAdapter(this);
         symbols = adapter.fetchAndUpdatePrices(symbols);
 
-        adapter = new FinnHubAdapter(settings, this);
+        adapter = new FinnHubAdapter(this);
         symbols = adapter.fetchAndUpdatePrices(symbols);
 
-        adapter = new TiingoAdapter(settings, this);
+        adapter = new TiingoAdapter(this);
         symbols = adapter.fetchAndUpdatePrices(symbols);
 
-        adapter = new YahooAdapter(settings, this);
+        adapter = new YahooAdapter(this);
         symbols = adapter.fetchAndUpdatePrices(symbols);
 
         // Log any symbols that were not updated
         if (!symbols.isEmpty()) {
             log.warn("Prices not updated for symbols: {}", String.join(", ", symbols));
+        }
+
+        // Notify the callback that prices have been updated
+        if (notifyCallback && callback != null) {
+            callback.changed(this);
         }
     }
 
@@ -206,7 +232,6 @@ public class PricesManager {
 
         private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         private ScheduledFuture<?> scheduledFuture;
-        private SettingsManager settings;
         private PricesManager prices = null;
         @Getter
         private int periodSeconds;
@@ -214,11 +239,9 @@ public class PricesManager {
         /**
          * Constructor
          *
-         * @param settings      Application settings
          * @param prices Map of current prices
          */
-        public PriceCurrencyUpdateTask(SettingsManager settings, PricesManager prices) {
-            this.settings = settings;
+        public PriceCurrencyUpdateTask(PricesManager prices) {
             this.prices = prices;
         }
 
@@ -238,7 +261,7 @@ public class PricesManager {
             log.debug("Updating prices for {} symbols", prices.currentPrices.size());
 
             // Update prices for each symbol from each source
-            prices.refreshPrices();
+            prices.refreshPrices(true);
         };
 
         /**
@@ -253,7 +276,7 @@ public class PricesManager {
                 scheduledFuture.cancel(false);
             }
             log.debug("Starting price currency updates - scheduling every {} seconds", periodSeconds);
-            scheduledFuture = scheduler.scheduleAtFixedRate(task, 2, periodSeconds, TimeUnit.SECONDS);
+            scheduledFuture = scheduler.scheduleAtFixedRate(task, 0, periodSeconds, TimeUnit.SECONDS);
         }
 
         /**

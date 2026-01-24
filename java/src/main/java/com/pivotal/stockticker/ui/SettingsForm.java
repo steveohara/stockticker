@@ -8,14 +8,17 @@ package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.Utils;
 import com.pivotal.stockticker.model.SettingsManager;
-import com.pivotal.stockticker.service.PersistanceManager;
+import com.pivotal.stockticker.service.BackupReload;
 import com.pivotal.stockticker.ui.components.*;
 import com.pivotal.stockticker.utils.CallbackInterface;
 import com.pivotal.stockticker.utils.StartupManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Currency;
 import java.util.Objects;
 import java.util.Set;
@@ -39,11 +42,10 @@ public class SettingsForm extends JDialog implements CallbackInterface {
      * Creates new form SettingsForm
      *
      * @param caller   Parent callback interface
-     * @param settings Settings object to load and save data
      */
-    public SettingsForm(CallbackInterface caller, SettingsManager settings) {
+    public SettingsForm(CallbackInterface caller) {
         this.caller = caller;
-        this.settings = settings;
+        this.settings = SettingsManager.getInstance();
         initComponents();
         setTitle("Settings");
         setModal(true);
@@ -80,16 +82,8 @@ public class SettingsForm extends JDialog implements CallbackInterface {
      */
     private void initListeners() {
         getRootPane().setDefaultButton(btnOk);
-        btnOk.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-        btnCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
+        btnOk.addActionListener(e -> onOK());
+        btnCancel.addActionListener(e -> onCancel());
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -100,11 +94,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         });
 
         // call onCancel() on ESCAPE
-        getRootPane().registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        getRootPane().registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         btnBackground.addActionListener(this::colourButtonClicked);
         btnNormalText.addActionListener(this::colourButtonClicked);
@@ -117,11 +107,9 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         btnLowAlarm.addActionListener(this::selectAudioFile);
         btnHighAlarm.addActionListener(this::selectAudioFile);
 
-        btnBackup.addActionListener(e -> {
-            PersistanceManager.backupPreferences(this);
-        });
+        btnBackup.addActionListener(e -> BackupReload.backupPreferences(this));
         btnRestore.addActionListener(e -> {
-            if (PersistanceManager.restorePreferences(this)) {
+            if (BackupReload.restorePreferences(this)) {
                 caller.changed(null);
                 loadFromSettings(settings);
                 btnOk.setEnabled(false);
@@ -133,7 +121,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
     }
 
     /**
-     * Set-up the display with data from storage
+     * Set up the display with data from storage
      *
      * @param settings Settings object to load data from
      */
@@ -266,12 +254,12 @@ public class SettingsForm extends JDialog implements CallbackInterface {
     }
 
     @Override
-    public void changed(Component c) {
+    public void changed(Object source) {
         btnOk.setEnabled(true);
     }
 
     /**
-     * Initialises all the UI components
+     * Initializes all the UI components
      */
     private void initComponents() {
 
@@ -297,7 +285,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
         SettingsLabel jLabel2 = SettingsLabel.create("Update Every").below(jLabel1, vGap).to(getContentPane());
         spnTickerUpdate = SettingsSpinner.create(30, 30, 600, 10).tail(jLabel2, lblGap).setTooltip("How often to retrieve prices data (30-600)").to(getContentPane());
-        JLabel jLabel3 = SettingsLabel.create("Seconds").setAlignment(Label.LEFT).tail(spnTickerUpdate, hGap).to(getContentPane());
+        SettingsLabel.create("Seconds").setAlignment(Label.LEFT).tail(spnTickerUpdate, hGap).to(getContentPane());
 
         // Divider
         SettingsSeparator jSeparator1 = SettingsSeparator.create().below(jLabel2, vGap * 3).withWidth(txtProxyServer.getRight() - jLabel2.getX()).to(getContentPane());

@@ -10,6 +10,7 @@ import com.pivotal.stockticker.model.ExchangeRate;
 import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.model.SymbolTransaction;
 import com.pivotal.stockticker.service.apis.FreeCurrency;
+import com.pivotal.stockticker.utils.CallbackInterface;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,19 +34,20 @@ import java.util.prefs.Preferences;
 public class ExchangeRatesManager {
 
     private static final String EXCHANGE_RATES_ROOT = PersistanceManager.ROOT_NODE + ExchangeRate.class.getSimpleName();
+    private final SettingsManager settings = SettingsManager.getInstance();
     private Preferences prefs = Preferences.userRoot().node(EXCHANGE_RATES_ROOT);
 
     private final Map<String, ExchangeRate> currentRates = new TreeMap<>(String::compareToIgnoreCase);
     private final UpdateTask scheduler;
-    private final SettingsManager settings;
+    private final CallbackInterface callback;
 
     /**
      * Constructor - loads all exchange rates from persistent storage and starts the periodic update task
      *
-     * @param settings Application settings
+     * @param callback Callback interface to notify when exchange rates are updated
      */
-    public ExchangeRatesManager(SettingsManager settings) {
-        this.settings = settings;
+    public ExchangeRatesManager(CallbackInterface callback) {
+        this.callback = callback;
 
         // Load all the saved prices values from persistent storage
         loadFromStorage(false);
@@ -204,8 +206,14 @@ public class ExchangeRatesManager {
         if (!scheduler.isRunning() || settings.getExchangeRateFrequency() != scheduler.getPeriodSeconds()) {
             scheduler.start(settings.getExchangeRateFrequency());
         }
-        else {
-            refreshExchangeRates();
+    }
+
+    /**
+     * Stop the scheduler
+     */
+    public void stopScheduler() {
+        if (scheduler.isRunning()) {
+            scheduler.stop();
         }
     }
 
@@ -215,11 +223,23 @@ public class ExchangeRatesManager {
      * It's useful to call this method when the user requests a manual refresh
      * after adding/deleting symbols or changing settings
      */
-    synchronized public void refreshExchangeRates() {
+    public void refreshExchangeRates() {
+        refreshExchangeRates(false);
+    }
+
+    /**
+     * Refresh exchange rates from all sources and notifies listeners
+     *
+     * @param notifyListeners True to notify listeners after refresh
+     */
+    synchronized public void refreshExchangeRates(boolean notifyListeners) {
 
         // Update prices for each symbol from each source
-        FreeCurrency freeCurrency = new FreeCurrency(settings, this);
+        FreeCurrency freeCurrency = new FreeCurrency(this);
         freeCurrency.fetchAndUpdateExchangeRates(getAllExchangeRates().keySet());
+        if (notifyListeners && callback != null) {
+            callback.changed(this);
+        }
     }
 
     /**
@@ -253,9 +273,7 @@ public class ExchangeRatesManager {
         /**
          * The periodic task to update exchange rates
          */
-        private final Runnable task = () -> {
-            exchangeRatesManager.refreshExchangeRates();
-        };
+        private final Runnable task = () -> exchangeRatesManager.refreshExchangeRates(true);
 
         /**
          * Start or restart the periodic task with a new frequency

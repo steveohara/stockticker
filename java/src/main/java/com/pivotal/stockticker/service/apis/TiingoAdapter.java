@@ -35,11 +35,10 @@ public class TiingoAdapter implements PricesApiAdapter {
     /**
      * Constructor
      *
-     * @param settingsManager Application settings manager
      * @param pricesManager Prices manager
      */
-    public TiingoAdapter(SettingsManager settingsManager, PricesManager pricesManager) {
-        this.settingsManager = settingsManager;
+    public TiingoAdapter(PricesManager pricesManager) {
+        this.settingsManager = SettingsManager.getInstance();
         this.pricesManager = pricesManager;
     }
 
