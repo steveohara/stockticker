@@ -106,7 +106,6 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
         // Get a fresh list of live prices to work with
         pnlStocks.cls();
-        pnlStocks.setBackground(settings.getBackgroundColor());
         livePrices.clear();
         livePrices.addAll(LivePrice.getLivePrices(symbols, prices, rates, settings));
 
@@ -218,11 +217,19 @@ public class TickerBar extends JFrame implements CallbackInterface {
      */
     private void drawLivePrice(LivePrice livePrice) {
 
+        // If this symbol is selected, set the background colour
+        pnlStocks.setBackground(livePrice.getSymbolTransaction().isSelected() ? settings.getHoverColor() : settings.getBackgroundColor());
+        pnlStocks.setContiguousBackground(true);
+
         // Draw the price and other data
         boolean bShownOtherData = drawSymbolPrice(livePrice);
 
         // Draw the day changes
         drawSymbolDayChanges(livePrice, bShownOtherData);
+
+        // Reset the background colour
+        pnlStocks.setBackground(settings.getBackgroundColor());
+        pnlStocks.setContiguousBackground(false);
     }
 
     /**
@@ -377,9 +384,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 rates.startScheduler();
                 drawTickerContent();
             }
-            default -> {
-                drawTickerContent();
-            }
+            default -> drawTickerContent();
         }
     }
 
@@ -473,9 +478,29 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
         // Set a timer to keep track of the mouse position for tooltips
         Timer timer = new Timer(500, e -> {
+
+            // Get the current mouse position and check if it's over a symbol
             Point mousePos = MouseInfo.getPointerInfo().getLocation();
             LivePrice price = getLivePriceAtPoint(mousePos);
-            pnlTicker.setToolTipText(price != null ? price.getSymbolTransaction().getDisplayName() + " " + price.getSymbolTransaction().getDisplayTimestamp() : null);
+
+            // If over a symbol, select it; otherwise, clear selection
+            if (price != null && price.getSymbolTransaction() != null && !price.getSymbolTransaction().isSelected()) {
+                symbols.clearSelected();
+                price.getSymbolTransaction().setSelected(true);
+                drawLivePrices();
+                log.debug("Setting tooltip for symbol at mouse position {}: {}", mousePos, price.getSymbolTransaction().getCode());
+            }
+
+            // Not over a symbol or the panel, clear any selected symbols
+            else {
+                Point screenLocation = pnlStocks.getLocationOnScreen();
+                Rectangle bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlStocks.getWidth(), pnlStocks.getHeight());
+                if (!bounds.contains(mousePos)) {
+                    if (symbols.clearSelected()) {
+                        drawLivePrices();
+                    }
+                }
+            }
         });
         timer.start();
 

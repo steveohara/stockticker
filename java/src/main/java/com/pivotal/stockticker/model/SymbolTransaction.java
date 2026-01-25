@@ -57,6 +57,7 @@ public class SymbolTransaction extends PersistanceManager {
     // Transient properties (not persisted)
     private transient boolean edited = false;
     private transient boolean added = false;
+    private transient boolean selected = false;
 
     /**
      * Default constructor to prevent instantiation without using factory methods.

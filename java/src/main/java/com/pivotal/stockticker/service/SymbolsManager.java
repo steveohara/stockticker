@@ -35,6 +35,22 @@ public class SymbolsManager {
     }
 
     /**
+     * Clear selected state for all symbols
+     *
+     * @return True if there was a change, false otherwise
+     */
+    public boolean clearSelected() {
+        boolean returnVal = false;
+        for (SymbolTransaction symbol : symbolTransactions) {
+            if (symbol.isSelected()) {
+                symbol.setSelected(false);
+                returnVal = true;
+            }
+        }
+        return returnVal;
+    }
+
+    /**
      * Load all symbols from persistent storage into memory
      */
     public void loadFromStorage() {

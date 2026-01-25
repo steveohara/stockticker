@@ -55,6 +55,7 @@ public class ColouredTextPanel extends JPanel {
     private int totalTextWidth = 0;
     private int totalTextHeight = 0;
     private int scrollPosition = 0;
+    private boolean contiguousBackground = false;
 
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
@@ -147,16 +148,16 @@ public class ColouredTextPanel extends JPanel {
         GraphicsConfiguration gc = getGraphicsConfiguration();
         if (gc != null) {
             cachedContent = gc.createCompatibleImage(
-                totalTextWidth,
-                Math.max(totalTextHeight, getHeight()),
-                Transparency.TRANSLUCENT
+                    totalTextWidth,
+                    Math.max(totalTextHeight, getHeight()),
+                    Transparency.TRANSLUCENT
             );
         }
         else {
             cachedContent = new BufferedImage(
-                totalTextWidth,
-                Math.max(totalTextHeight, getHeight()),
-                BufferedImage.TYPE_INT_ARGB
+                    totalTextWidth,
+                    Math.max(totalTextHeight, getHeight()),
+                    BufferedImage.TYPE_INT_ARGB
             );
         }
 
@@ -173,8 +174,44 @@ public class ColouredTextPanel extends JPanel {
         g2.setBackground(getBackground());
 
         // Draw the text items
-        for (TextItem item : items) {
+        for (int i = 0; i < items.size(); i++) {
+            TextItem item = items.get(i);
             g2.setFont(item.font);
+            g2.setColor(item.background);
+
+            // If this is a contiguous block then we need to look back to
+            // all previous contiguous items with the same background color
+            if (item.contiguousBackground) {
+                int x = item.x;
+                int y = item.y;
+                int width = item.width;
+                int height = item.height;
+
+                // Find the start of the contiguous block
+                int prev = i;
+                while (prev > 0 && items.get(prev - 1).contiguousBackground && items.get(prev - 1).background == item.background) {
+                    prev--;
+                    x = items.get(prev).x;
+                    y = items.get(prev).y;
+                    width += item.x - items.get(prev).x;
+                    height += item.y - items.get(prev).y;
+                }
+
+                // Fill the background rectangle
+                g2.fillRect(x, y, width, height);
+
+                // Redraw all the text in the block
+                for (int n = prev; n < i; n++) {
+                    TextItem tmp = items.get(n);
+                    g2.setFont(tmp.font);
+                    g2.setColor(tmp.color);
+                    g2.drawString(tmp.text, tmp.x, tmp.y + tmp.font.getSize());
+                }
+            }
+            else {
+                g2.fillRect(item.x, item.y, item.width, item.height);
+            }
+
             g2.setColor(item.color);
             g2.drawString(item.text, item.x, item.y + item.font.getSize());
         }
@@ -296,6 +333,8 @@ public class ColouredTextPanel extends JPanel {
         int x, y, width, height;
         Font font;
         Color color;
+        Color background;
+        boolean contiguousBackground;
 
         /**
          * Creates a new TextItem with the given text and styling.
@@ -317,6 +356,8 @@ public class ColouredTextPanel extends JPanel {
             }
             font = new Font(panel.getFontFamily(), style, 13).deriveFont(panel.getFontSize());
             color = panel.getFontColor();
+            background = panel.getBackground();
+            contiguousBackground = panel.isContiguousBackground();
             width = panel.getFontMetrics(font).stringWidth(text);
             height = panel.getFontMetrics(font).getHeight();
             panel.totalTextWidth = Math.max(x + width, panel.totalTextWidth);
