@@ -20,7 +20,7 @@
         <url>https://www.pivotal-solutions.co.uk</url>
     </organization>
     <url>https://github.com/steveohara/stockticker</url>
-    <description>A stock ticker bar</description>
+    <description>a simple stock ticker bar for Windows and Mac</description>
     <packaging>pom</packaging>
     <version>1.0.0</version>
 

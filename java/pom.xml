@@ -11,7 +11,6 @@
 
     <artifactId>pivotalstockticker-jar</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -80,6 +79,13 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.30</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
 
@@ -171,11 +177,38 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.pivotal.stockticker.App</mainClass>
                                 </transformer>
                             </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-fat-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/fatjar</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}</directory>
+                                    <includes>
+                                        <include>${project.build.finalName}.jar</include>
+                                    </includes>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>
@@ -193,57 +226,12 @@
 
     <profiles>
         <profile>
-            <id>native</id>
+            <id>executable-windows</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.graalvm.buildtools</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <version>0.10.3</version>
-                        <extensions>true</extensions>
-                        <executions>
-                            <execution>
-                                <id>build-native</id>
-                                <goals>
-                                    <goal>compile-no-fork</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <imageName>${project.artifactId}</imageName>
-                            <mainClass>com.pivotal.stockticker.App</mainClass>
-                            <buildArgs>
-                                <buildArg>--no-fallback</buildArg>
-                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
-
-                                <!-- FlatLaf and AWT initialization -->
-                                <buildArg>--initialize-at-build-time=com.formdev.flatlaf</buildArg>
-                                <buildArg>--initialize-at-build-time=sun.awt.SunHints</buildArg>
-                                <buildArg>--initialize-at-build-time=sun.awt.SunHints$Key</buildArg>
-                                <buildArg>--initialize-at-build-time=sun.awt.SunHints$Value</buildArg>
-                                <buildArg>--initialize-at-build-time=sun.awt.SunHints$LCDContrastKey</buildArg>
-
-                                <!-- General AWT support -->
-                                <buildArg>--initialize-at-build-time=java.awt.color.ColorSpace</buildArg>
-                                <buildArg>--initialize-at-run-time=java.awt.Desktop</buildArg>
-                                <buildArg>--initialize-at-run-time=sun.java2d</buildArg>
-                                <buildArg>--initialize-at-run-time=sun.font</buildArg>
-
-                                <buildArg>-J-Djava.awt.headless=false</buildArg>
-                            </buildArgs>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>executable</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
+                <os>
+                    <family>windows</family>
+                </os>
             </activation>
             <build>
                 <plugins>
@@ -261,39 +249,92 @@
                                 <configuration>
                                     <executable>${java.home}/bin/jpackage</executable>
                                     <arguments>
-                                        <!-- use app-image so NO WiX / installers are needed -->
                                         <argument>--type</argument>
-                                        <argument>app-image</argument>
-
+                                        <argument>exe</argument>
                                         <argument>--name</argument>
-                                        <argument>PivotalStockTicker</argument>
-
+                                        <argument>pivotalstockticker</argument>
                                         <argument>--app-version</argument>
                                         <argument>${project.version}</argument>
-
-<!--                                        <argument>&#45;&#45;input</argument>-->
-<!--                                        <argument>${project.build.directory}</argument>-->
-
+                                        <argument>--input</argument>
+                                        <argument>${project.build.directory}/fatjar</argument>
                                         <argument>--main-jar</argument>
                                         <argument>${project.build.finalName}.jar</argument>
-
                                         <argument>--main-class</argument>
                                         <argument>com.pivotal.stockticker.App</argument>
-
                                         <argument>--dest</argument>
                                         <argument>${project.build.directory}/jpackage</argument>
-
-                                        <argument>--java-options</argument>
-                                        <argument>-Xms256m</argument>
-
-                                        <argument>--java-options</argument>
-                                        <argument>-Xmx1g</argument>
-
                                         <argument>--description</argument>
                                         <argument>${project.description}</argument>
-
                                         <argument>--vendor</argument>
                                         <argument>${project.organization.name}</argument>
+                                        <argument>--about-url</argument>
+                                        <argument>${project.organization.url}</argument>
+                                        <argument>--icon</argument>
+                                        <argument>${project.basedir}/src/main/resources/favicon.ico</argument>
+
+                                        <argument>--win-menu</argument>
+                                        <argument>--win-shortcut</argument>
+                                        <argument>--win-shortcut-prompt</argument>
+                                        <argument>--win-dir-chooser</argument>
+                                        <argument>--win-help-url</argument>
+                                        <argument>${project.organization.url}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>executable-mac</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>run-jpackage</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${java.home}/bin/jpackage</executable>
+                                    <arguments>
+                                        <argument>--type</argument>
+                                        <argument>dmg</argument>
+                                        <argument>--name</argument>
+                                        <argument>pivotalstockticker</argument>
+                                        <argument>--app-version</argument>
+                                        <argument>${project.version}</argument>
+                                        <argument>--input</argument>
+                                        <argument>${project.build.directory}/fatjar</argument>
+                                        <argument>--main-jar</argument>
+                                        <argument>${project.build.finalName}.jar</argument>
+                                        <argument>--main-class</argument>
+                                        <argument>com.pivotal.stockticker.App</argument>
+                                        <argument>--dest</argument>
+                                        <argument>${project.build.directory}/jpackage</argument>
+                                        <argument>--description</argument>
+                                        <argument>${project.description}</argument>
+                                        <argument>--vendor</argument>
+                                        <argument>${project.organization.name}</argument>
+                                        <argument>--about-url</argument>
+                                        <argument>${project.organization.url}</argument>
+
+                                        <argument>--icon</argument>
+                                        <argument>${project.basedir}/src/main/resources/favicon.icns</argument>
+                                        <argument>--mac-package-identifier</argument>
+                                        <argument>com.pivotal.stockticker</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
