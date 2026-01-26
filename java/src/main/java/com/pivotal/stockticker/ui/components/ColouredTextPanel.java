@@ -9,6 +9,7 @@ package com.pivotal.stockticker.ui.components;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -24,6 +25,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Getter
 @Setter
 public class ColouredTextPanel extends JPanel {
+
+    @Delegate
+    private final SettingsComponent<ColouredTextPanel> helper = new SettingsComponent<>(this);
 
     private static final int SCROLL_SPEED = 2;
     private static final int SCROLL_DELAY = 30;
@@ -77,6 +81,16 @@ public class ColouredTextPanel extends JPanel {
     public ColouredTextPanel() {
         setDoubleBuffered(true);
         setOpaque(true);
+    }
+
+    /**
+     * Creates a ColouredTextPanel aligned to the right and of
+     * default size.
+     *
+     * @return A configured ColouredTextPanel instance.
+     */
+    public static ColouredTextPanel create() {
+        return new ColouredTextPanel();
     }
 
     @Override

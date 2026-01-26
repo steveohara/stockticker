@@ -43,6 +43,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private final PricesManager prices = new PricesManager(this);
     private final ExchangeRatesManager rates = new ExchangeRatesManager(this);
     private final ArrayList<LivePrice> livePrices = new ArrayList<>();
+    private final StockPreview stockPreview = new StockPreview(this);
 
     private JPanel pnlLeftDrag;
     private JPanel pnlRightDrag;
@@ -73,7 +74,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         createUIComponents();
         setupContextMenu();
         initializeUI();
-        setupDragging();
+        initListeners();
 
         // Add all the symbols to the prices manager
         prices.replacePrices(symbols.getAllSymbolCodes(false));
@@ -93,7 +94,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
      * Draw the content of the ticker
      */
     synchronized private void drawTickerContent() {
-        log.info("Drawing ticker symbols");
+        log.debug("Drawing ticker symbols");
         drawLivePrices();
         drawSummary();
         drawDaySummary();
@@ -105,6 +106,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private void drawLivePrices() {
 
         // Get a fresh list of live prices to work with
+        log.debug("Drawing live prices");
         pnlStocks.cls();
         livePrices.clear();
         livePrices.addAll(LivePrice.getLivePrices(symbols, prices, rates, settings));
@@ -130,6 +132,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
      * Draws the summary panel on the ticker.
      */
     private void drawSummary() {
+        log.debug("Drawing summary panel");
         pnlSummary.cls();
         if (settings.isShowSummary()) {
             pnlSummary.setBackground(settings.getBackgroundColor());
@@ -183,6 +186,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
      * Draws the day summary panel on the ticker.
      */
     private void drawDaySummary() {
+        log.debug("Drawing day summary panel");
         pnlDaySummary.cls();
         if (settings.isShowDailySummary()) {
             pnlDaySummary.setBackground(settings.getBackgroundColor());
@@ -365,6 +369,9 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
                 // Draw the ticker content
                 drawTickerContent();
+
+                // Tell the stock previewer about the change
+                stockPreview.changed(source);
             }
 
             // If the settings form was the source, update settings
@@ -372,6 +379,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 setTicketSpeed(settings.getTickerSpeed());
                 initializeUI();
                 drawTickerContent();
+                stockPreview.changed(source);
             }
 
             // If the symbols form was the source, update the prices and redraw
@@ -434,7 +442,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
     /**
      * Sets up dragging functionality for the ticker panel.
      */
-    private void setupDragging() {
+    private void initListeners() {
 
         // Add mouse listeners for dragging the ticker and double clicking
         pnlTicker.addMouseListener(new MouseAdapter() {
@@ -485,10 +493,16 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
             // If over a symbol, select it; otherwise, clear selection
             if (price != null && price.getSymbolTransaction() != null && !price.getSymbolTransaction().isSelected()) {
+
+                // Clear any previous selected symbols and select this one
                 symbols.clearSelected();
                 price.getSymbolTransaction().setSelected(true);
+
+                // Draw the prices with the selection
                 drawLivePrices();
-                log.debug("Setting tooltip for symbol at mouse position {}: {}", mousePos, price.getSymbolTransaction().getCode());
+
+                // Show the stock preview
+                stockPreview.showSymbol(price, mousePos);
             }
 
             // Not over a symbol or the panel, clear any selected symbols
@@ -624,7 +638,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
      * @param point The point on the screen to check.
      * @return The LivePrice at the point, or null if none found.
      */
-    private LivePrice getLivePriceAtPoint(Point point) {
+    protected LivePrice getLivePriceAtPoint(Point point) {
 
         // Check if the point is within the stocks panel
         Point screenLocation = pnlStocks.getLocationOnScreen();

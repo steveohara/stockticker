@@ -295,4 +295,9 @@ public class LivePrice {
         }
         return livePrices;
     }
+
+    @Override
+    public String toString() {
+        return symbolTransaction.toString();
+    }
 }
