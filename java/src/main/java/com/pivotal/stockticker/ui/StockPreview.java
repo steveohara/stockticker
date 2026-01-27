@@ -18,9 +18,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,6 +31,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public class StockPreview extends JDialog implements CallbackInterface {
+
+    private static final String AGENT_NAME = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+    private final HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).connectTimeout(Duration.ofSeconds(10)).build();
 
     // Where to get a chart from
     private static final String CHART_URL = "https://www.reuters.wallst.com/enhancements/chartapi/index_chart_api.asp?symbol=%s&duration=%d&headerType=quote&width=%d&height=%d";
@@ -121,18 +126,38 @@ public class StockPreview extends JDialog implements CallbackInterface {
             @Override
             protected ImageIcon doInBackground() throws Exception {
                 lblGraph.setText("Loading graph...");
+
+                // Build request to fetch graph image
                 String url = String.format(CHART_URL, livePrice.getSymbol(), graphType.durationDays, lblGraph.getWidth(), lblGraph.getHeight());
-                URL imageUrl;
-                try {
-                    imageUrl = URI.create(url).toURL();
-                    ImageIcon icon = new ImageIcon(imageUrl);
-                    lblGraph.setIcon(icon);
-                    ImageCache.add(livePrice.getSymbol(), graphType, icon);
-                    return icon;
-                }
-                catch (MalformedURLException e) {
-                    log.error("Error creating image URL", e);
-                }
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(url))
+                        .GET()
+                        .header("Accept", "image/png")
+                        .header("User-Agent", AGENT_NAME)
+                        .build();
+
+                // Loop round at most 3 times to get a valid image
+                HttpResponse<byte[]> response = null;
+                int loops = 1;
+                do {
+                    try {
+
+                        // Get raw bytes of the image
+                        response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+                        if (response.statusCode() != 200) {
+                            log.error("Failed to fetch graph for {}: HTTP [{}]", livePrice.getSymbol(), response.statusCode());
+                            Thread.sleep(500);
+                        }
+                        else {
+                            return new ImageIcon(response.body());
+                        }
+                    }
+                    catch (Exception e) {
+                        log.error("Error fetching graph from {} - {}", url, e.getMessage());
+                    }
+                } while (loops++ < 3 && response != null && response.statusCode() != 200);
+                log.error("Failed to get graph from {} - after {} attempts", url, loops - 1);
+                lblGraph.setText("Failed to load graph from external source");
                 return null;
             }
 
@@ -140,8 +165,11 @@ public class StockPreview extends JDialog implements CallbackInterface {
             protected void done() {
                 try {
                     ImageIcon icon = get();
-                    lblGraph.setIcon(icon);
-                    lblGraph.setText("");
+                    if (icon != null) {
+                        ImageCache.add(livePrice.getSymbol(), graphType, icon);
+                        lblGraph.setIcon(icon);
+                        lblGraph.setText("");
+                    }
                 }
                 catch (Exception e) {
                     lblGraph.setText("Error loading image");
@@ -222,7 +250,7 @@ public class StockPreview extends JDialog implements CallbackInterface {
         getContentPane().setLayout(null);
 
         pnlSummary = ColouredTextPanel.create().withDimensions(200, getHeight()).atRight(getWidth()).to(getContentPane());
-        lblGraph = SettingsLabel.create("").withDimensions(getWidth() - pnlSummary.getWidth(), getHeight()).atRight(pnlSummary.getX()).atTop(0).to(getContentPane());
+        lblGraph = SettingsLabel.create("").withDimensions(getWidth() - pnlSummary.getWidth(), getHeight()).atRight(pnlSummary.getX()).atTop(0).setAlignment(SwingConstants.CENTER).to(getContentPane());
         lblGraph.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
 
         SettingsManager settings = SettingsManager.getInstance();

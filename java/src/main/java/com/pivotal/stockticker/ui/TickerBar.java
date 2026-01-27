@@ -27,6 +27,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The main ticker bar UI class that displays stock prices and related information.
@@ -42,7 +43,8 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private final SymbolsManager symbols = new SymbolsManager();
     private final PricesManager prices = new PricesManager(this);
     private final ExchangeRatesManager rates = new ExchangeRatesManager(this);
-    private final ArrayList<LivePrice> livePrices = new ArrayList<>();
+    private final CopyOnWriteArrayList<LivePrice> livePrices = new CopyOnWriteArrayList<>();
+
     private final StockPreview stockPreview = new StockPreview(this);
 
     private JPanel pnlLeftDrag;
@@ -106,10 +108,11 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private void drawLivePrices() {
 
         // Get a fresh list of live prices to work with
-        log.debug("Drawing live prices");
+        ArrayList<LivePrice> livePricesList = LivePrice.getLivePrices(symbols, prices, rates, settings);
+        log.debug("Drawing live prices for {} symbols", livePricesList.size());
         pnlStocks.cls();
         livePrices.clear();
-        livePrices.addAll(LivePrice.getLivePrices(symbols, prices, rates, settings));
+        livePrices.addAll(livePricesList);
 
         // Draw these on the ticker panel
         int x = 0;
@@ -126,6 +129,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             livePrice.setBounds(new Rectangle(x, 0, pnlStocks.getCurrentX() - x, pnlStocks.getHeight()));
             x = pnlStocks.getCurrentX();
         }
+        log.debug("Drawing live prices complete");
     }
 
     /**
@@ -348,52 +352,57 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
     @Override
     public void changed(Object source) {
+        log.debug("TickerBar change notification received from source: {}", source == null ? "null" : source.getClass().getSimpleName());
 
-        // If there is no component, then this is a complete initialization
-        switch (source) {
-            case null -> {
+        // We need to make sure that all UI changes are done on the Swing thread
+        SwingUtilities.invokeLater(() -> {
 
-                // Load all the changed settings from storage
-                settings.loadFromStorage();
-                setTicketSpeed(settings.getTickerSpeed());
-                initializeUI();
+            // If there is no component, then this is a complete initialization
+            switch (source) {
+                case null -> {
 
-                // Load all symbols, prices and exchange rates from storage
-                rates.loadFromStorage(true);
-                symbols.loadFromStorage();
-                prices.loadFromStorage();
+                    // Load all the changed settings from storage
+                    settings.loadFromStorage();
+                    setTicketSpeed(settings.getTickerSpeed());
+                    initializeUI();
 
-                // Reset the schedulers to pick up any changes
-                prices.startScheduler();
-                rates.startScheduler();
+                    // Load all symbols, prices and exchange rates from storage
+                    rates.loadFromStorage(true);
+                    symbols.loadFromStorage();
+                    prices.loadFromStorage();
 
-                // Draw the ticker content
-                drawTickerContent();
+                    // Reset the schedulers to pick up any changes
+                    prices.startScheduler();
+                    rates.startScheduler();
 
-                // Tell the stock previewer about the change
-                stockPreview.changed(source);
+                    // Draw the ticker content
+                    drawTickerContent();
+
+                    // Tell the stock previewer about the change
+                    stockPreview.changed(source);
+                }
+
+                // If the settings form was the source, update settings
+                case SettingsForm settingsForm -> {
+                    setTicketSpeed(settings.getTickerSpeed());
+                    initializeUI();
+                    drawTickerContent();
+                    stockPreview.changed(source);
+                }
+
+                // If the symbols form was the source, update the prices and redraw
+                case SymbolsForm symbolsForm -> {
+                    symbols.loadFromStorage();
+                    prices.replacePrices(symbols.getAllSymbolCodes(false));
+                    rates.replaceExchangeRates(symbols.getAllCurrencyCodes(false));
+
+                    prices.startScheduler();
+                    rates.startScheduler();
+                    drawTickerContent();
+                }
+                default -> drawTickerContent();
             }
-
-            // If the settings form was the source, update settings
-            case SettingsForm settingsForm -> {
-                setTicketSpeed(settings.getTickerSpeed());
-                initializeUI();
-                drawTickerContent();
-                stockPreview.changed(source);
-            }
-
-            // If the symbols form was the source, update the prices and redraw
-            case SymbolsForm symbolsForm -> {
-                symbols.loadFromStorage();
-                prices.replacePrices(symbols.getAllSymbolCodes(false));
-                rates.replaceExchangeRates(symbols.getAllCurrencyCodes(false));
-
-                prices.startScheduler();
-                rates.startScheduler();
-                drawTickerContent();
-            }
-            default -> drawTickerContent();
-        }
+        });
     }
 
     /**
@@ -901,7 +910,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         pnlRightDrag.setMinimumSize(pnlLeftDrag.getPreferredSize());
         pnlTicker.add(pnlRightDrag);
 
-        setType(Window.Type.UTILITY);
+        setType(Type.UTILITY);
         setUndecorated(true);
         setContentPane(pnlTicker);
     }

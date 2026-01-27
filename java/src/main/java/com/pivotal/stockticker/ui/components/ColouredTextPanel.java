@@ -95,12 +95,14 @@ public class ColouredTextPanel extends JPanel {
 
     @Override
     public void invalidate() {
+        log.debug("Invalidating the layout and marking content dirty");
         contentDirty = true;
         super.invalidate();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
+        log.debug("Painting component");
         super.paintComponent(g);
 
         // Recreate cache if needed
@@ -111,6 +113,7 @@ public class ColouredTextPanel extends JPanel {
 
         // Handle scrolling timer
         if (displayStyle == DISPLAY_STYLE.SCROLL && totalTextWidth > getWidth()) {
+            log.debug("Creating scroll timer to scroll text");
             if (scrollTimer == null) {
                 scrollTimer = new Timer(SCROLL_DELAY, e -> {
                     scrollPosition += scrollSpeed;
@@ -129,23 +132,30 @@ public class ColouredTextPanel extends JPanel {
         // Stop scrolling if not needed
         if (displayStyle != DISPLAY_STYLE.SCROLL || totalTextWidth <= getWidth()) {
             if (scrollTimer != null && scrollTimer.isRunning()) {
+                log.debug("Scroll timer has been stopped and position reset to zero");
                 scrollTimer.stop();
                 scrollPosition = 0;
             }
         }
 
+        // Create a Graphics2D context for better rendering control when
+        // we are scrolling
         Graphics2D g2 = (Graphics2D) g;
         if (displayStyle == DISPLAY_STYLE.SCROLL && totalTextWidth > getWidth()) {
+
             // Draw from cached image
+            log.debug("Drawing the image from the cached version with scroll position {}", scrollPosition);
             g2.drawImage(cachedContent, -scrollPosition, 0, null);
 
             // Draw second copy if needed
             if (scrollPosition > 0) {
+                log.debug("Drawing the image again to account for rotation");
                 g2.drawImage(cachedContent, totalTextWidth - scrollPosition, 0, null);
             }
         }
         else {
             // Normal rendering
+            log.debug("Drawing the cached image in normal mode");
             g2.drawImage(cachedContent, 0, 0, null);
         }
     }
@@ -154,6 +164,8 @@ public class ColouredTextPanel extends JPanel {
      * Creates the cached content image with all text drawn.
      */
     private void createCachedContent() {
+        log.debug("Creating cached content image");
+
         // If there's nothing to draw, skip
         if (totalTextWidth == 0 || totalTextHeight == 0) {
             return;
@@ -161,6 +173,7 @@ public class ColouredTextPanel extends JPanel {
         // Ensure we have a valid graphics configuration
         GraphicsConfiguration gc = getGraphicsConfiguration();
         if (gc != null) {
+            log.debug("Creating compatible image for cached content width:{} height:{}", totalTextWidth, Math.max(totalTextHeight, getHeight()));
             cachedContent = gc.createCompatibleImage(
                     totalTextWidth,
                     Math.max(totalTextHeight, getHeight()),
@@ -168,6 +181,7 @@ public class ColouredTextPanel extends JPanel {
             );
         }
         else {
+            log.debug("Creating buffered image for cached content width:{} height:{}", totalTextWidth, Math.max(totalTextHeight, getHeight()));
             cachedContent = new BufferedImage(
                     totalTextWidth,
                     Math.max(totalTextHeight, getHeight()),
@@ -190,6 +204,7 @@ public class ColouredTextPanel extends JPanel {
         // Draw the text items
         for (int i = 0; i < items.size(); i++) {
             TextItem item = items.get(i);
+            log.debug("Drawing text item {}", item);
             g2.setFont(item.font);
             g2.setColor(item.background);
 
@@ -234,6 +249,7 @@ public class ColouredTextPanel extends JPanel {
 
     @Override
     public void setFont(Font font) {
+        log.debug("Setting font to {}", font);
         super.setFont(font);
         fontFamily = font.getFamily();
         fontSize = font.getSize2D();
@@ -266,6 +282,7 @@ public class ColouredTextPanel extends JPanel {
      * Stops any ongoing scrolling of text
      */
     public void stopScrolling() {
+        log.debug("Stop scrolling timer");
         if (scrollTimer != null) {
             scrollTimer.stop();
         }
@@ -278,6 +295,7 @@ public class ColouredTextPanel extends JPanel {
      * @param text The text to print.
      */
     public void print(String text) {
+        log.debug("Printing text {}", text);
         TextItem item = new TextItem(text, this);
         items.add(item);
 
@@ -298,6 +316,7 @@ public class ColouredTextPanel extends JPanel {
      * Clears the panel and resets the cursor position.
      */
     public void cls() {
+        log.debug("Clearing the panel");
         items.clear();
         currentX = 0;
         currentY = 0;
@@ -307,6 +326,7 @@ public class ColouredTextPanel extends JPanel {
         fontItalic = false;
         contentDirty = true;
 
+        // If in FIT mode, revalidate to adjust size
         if (displayStyle == DISPLAY_STYLE.FIT) {
             revalidate();
         }
@@ -319,6 +339,7 @@ public class ColouredTextPanel extends JPanel {
      * @param displayStyle The display style to set.
      */
     public void setDisplayStyle(DISPLAY_STYLE displayStyle) {
+        log.debug("Changed display style to {}", displayStyle);
         DISPLAY_STYLE oldStyle = this.displayStyle;
         this.displayStyle = displayStyle;
 
@@ -335,6 +356,7 @@ public class ColouredTextPanel extends JPanel {
      * @param scrollSpeed The scroll speed to set.
      */
     public void setScrollSpeed(int scrollSpeed) {
+        log.debug("Changed the scroll speed to {}", scrollSpeed);
         this.scrollSpeed = scrollSpeed;
         repaint();
     }
@@ -376,6 +398,11 @@ public class ColouredTextPanel extends JPanel {
             height = panel.getFontMetrics(font).getHeight();
             panel.totalTextWidth = Math.max(x + width, panel.totalTextWidth);
             panel.totalTextHeight = Math.max(y + height, panel.totalTextHeight);
+        }
+
+        @Override
+        public String toString() {
+            return text + " [" + x  + "," + y + "] " + color.toString();
         }
     }
 }
