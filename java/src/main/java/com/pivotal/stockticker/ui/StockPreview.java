@@ -100,7 +100,7 @@ public class StockPreview extends JDialog implements CallbackInterface {
      */
     private void initListeners() {
 
-        // Add a listner to the graph label for double-clicks to change the graph type
+        // Add a listener to the graph label for double-clicks to change the graph type
         lblGraph.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -378,7 +378,7 @@ public class StockPreview extends JDialog implements CallbackInterface {
         pnlSummary.setCurrentY(pnlSummary.getHeight() - pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() - LEFT_MARGIN / 2);
         pnlSummary.print("Updated: " + livePrice.getDisplayTimestamp());
         pnlSummary.setCurrentX(LEFT_MARGIN);
-        pnlSummary.setCurrentY(pnlSummary.getCurrentY() - pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() - VALUE_SEP);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() - pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() - VALUE_SEP / 2);
         pnlSummary.print("Source: " + livePrice.getSource());
     }
 
@@ -405,7 +405,7 @@ public class StockPreview extends JDialog implements CallbackInterface {
         setResizable(false);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        setSize(720, 350);
+        setSize(720, 360);
         setPreferredSize(getSize());
         setMaximumSize(getSize());
         setMinimumSize(getSize());
