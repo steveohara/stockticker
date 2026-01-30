@@ -354,6 +354,9 @@ public class TickerBar extends JFrame implements CallbackInterface {
     public void changed(Object source) {
         log.debug("TickerBar change notification received from source: {}", source == null ? "null" : source.getClass().getSimpleName());
 
+        // Notify any preview windows about the change
+        stockPreview.changed(source);
+
         // We need to make sure that all UI changes are done on the Swing thread
         SwingUtilities.invokeLater(() -> {
 

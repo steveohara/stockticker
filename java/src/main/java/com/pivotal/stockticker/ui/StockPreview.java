@@ -7,6 +7,7 @@
 package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.Utils;
+import com.pivotal.stockticker.model.ExchangeRate;
 import com.pivotal.stockticker.model.LivePrice;
 import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.ui.components.ColouredTextPanel;
@@ -32,6 +33,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class StockPreview extends JDialog implements CallbackInterface {
 
+    private static final int LEFT_MARGIN = 10;
+    private static final int VALUE_MARGIN = 95;
+    private static final int VALUE_SEP = 2;
     private static final String AGENT_NAME = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
     private final HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).connectTimeout(Duration.ofSeconds(10)).build();
 
@@ -83,7 +87,7 @@ public class StockPreview extends JDialog implements CallbackInterface {
             if (!bounds.contains(mousePos)) {
                 LivePrice price = tickerBar.getLivePriceAtPoint(mousePos);
                 if (price == null || !price.getSymbol().equalsIgnoreCase(livePrice.getSymbol())) {
-                    log.info("Closing stock preview for {} as mouse moved to {}", livePrice, price);
+                    log.debug("Closing stock preview for {} as mouse moved to {}", livePrice, price);
                     setVisible(false);
                 }
             }
@@ -127,25 +131,33 @@ public class StockPreview extends JDialog implements CallbackInterface {
             protected ImageIcon doInBackground() throws Exception {
                 lblGraph.setText("Loading graph...");
 
-                // Build request to fetch graph image
-                String url = String.format(CHART_URL, livePrice.getSymbol(), graphType.durationDays, lblGraph.getWidth(), lblGraph.getHeight());
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(url))
-                        .GET()
-                        .header("Accept", "image/png")
-                        .header("User-Agent", AGENT_NAME)
-                        .build();
-
                 // Loop round at most 3 times to get a valid image
                 HttpResponse<byte[]> response = null;
+                String url = null;
                 int loops = 1;
                 do {
+                    // Build request to fetch graph image
+                    String symbol = livePrice.getSymbol();
+                    if (loops == 2) {
+                        symbol += ".OQ";
+                    }
+                    else if (loops == 3) {
+                        symbol += ".N";
+                    }
+                    url = String.format(CHART_URL, symbol, graphType.durationDays, lblGraph.getWidth(), lblGraph.getHeight());
+                    HttpRequest request = HttpRequest.newBuilder()
+                            .uri(URI.create(url))
+                            .GET()
+                            .header("Accept", "image/png")
+                            .header("User-Agent", AGENT_NAME)
+                            .build();
+
                     try {
 
                         // Get raw bytes of the image
                         response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
                         if (response.statusCode() != 200) {
-                            log.error("Failed to fetch graph for {}: HTTP [{}]", livePrice.getSymbol(), response.statusCode());
+                            log.debug("Failed to fetch graph for {}: HTTP [{}]", livePrice.getSymbol(), response.statusCode());
                             Thread.sleep(500);
                         }
                         else {
@@ -157,7 +169,7 @@ public class StockPreview extends JDialog implements CallbackInterface {
                     }
                 } while (loops++ < 3 && response != null && response.statusCode() != 200);
                 log.error("Failed to get graph from {} - after {} attempts", url, loops - 1);
-                lblGraph.setText("Failed to load graph from external source");
+                lblGraph.setText("Failed to load graph from external source for " + livePrice.getSymbol());
                 return null;
             }
 
@@ -220,16 +232,168 @@ public class StockPreview extends JDialog implements CallbackInterface {
 
         // Show the graph and summary
         displayGraph();
+        displaySummary();
+    }
 
+    /**
+     * Displays the summary information for the current live price
+     */
+    private void displaySummary() {
+
+        SettingsManager settings = SettingsManager.getInstance();
         pnlSummary.cls();
-        pnlSummary.print(livePrice.getSymbol());
+        pnlSummary.setOpaque(true);
+        pnlSummary.setBackColor(settings.getBackgroundColor());
+        pnlSummary.setFontColor(settings.getLabelColor());
+        pnlSummary.setFont(settings.getFont());
+
+        // Draw the overall position data
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setCurrentY(LEFT_MARGIN / 2);
+        pnlSummary.setFontSize(settings.getFontSize() * 1.2f);
+        pnlSummary.setFontBold(true);
+        pnlSummary.print("Overall Position");
+
+        pnlSummary.setFontSize(settings.getFontSize());
+        pnlSummary.setFontBold(false);
+
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + (int)(VALUE_SEP * 1.5));
+        pnlSummary.print("Price:");
+        pnlSummary.setCurrentX(VALUE_MARGIN);
+        pnlSummary.print(livePrice.getFormattedPrice());
+
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
+        pnlSummary.print("Cost:");
+        pnlSummary.setCurrentX(VALUE_MARGIN);
+        pnlSummary.print(livePrice.getFormattedPricePaid());
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
+        pnlSummary.setCurrentX(VALUE_MARGIN);
+        pnlSummary.print(livePrice.getFormattedCost());
+
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
+        pnlSummary.print("Shares:");
+        pnlSummary.setCurrentX(VALUE_MARGIN);
+        pnlSummary.print(livePrice.getFormattedSharesBought());
+
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
+        pnlSummary.print("Value:");
+        pnlSummary.setCurrentX(VALUE_MARGIN);
+        pnlSummary.print(livePrice.getFormattedValue());
+
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
+        pnlSummary.print("Gain/Loss:");
+        pnlSummary.setCurrentX(VALUE_MARGIN);
+        pnlSummary.setFontColor(livePrice.isUp() ? settings.getUpColor() : settings.getDownColor());
+        pnlSummary.print(livePrice.getFormattedProfitLoss());
+        pnlSummary.setCurrentX(VALUE_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
+        pnlSummary.print("(" + livePrice.getFormattedProfitLossLocal() + ")");
+
+        // Draw the day position data
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setFontSize(settings.getFontSize() * 1.2f);
+        pnlSummary.setFontColor(settings.getLabelColor());
+        pnlSummary.setFontBold(true);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP * 2);
+        pnlSummary.print("Day Position");
+
+        pnlSummary.setFontSize(settings.getFontSize());
+        pnlSummary.setFontBold(false);
+
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + (int)(VALUE_SEP * 1.5));
+        pnlSummary.print("Start:");
+        pnlSummary.setCurrentX(VALUE_MARGIN);
+        pnlSummary.print(livePrice.getFormattedDayStart());
+
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + (int)(VALUE_SEP * 1.5));
+        pnlSummary.print("Low:");
+        pnlSummary.setCurrentX(VALUE_MARGIN);
+        pnlSummary.print(livePrice.getFormattedDayLow());
+
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + (int)(VALUE_SEP * 1.5));
+        pnlSummary.print("High:");
+        pnlSummary.setCurrentX(VALUE_MARGIN);
+        pnlSummary.print(livePrice.getFormattedDayHigh());
+
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
+        pnlSummary.print("Change:");
+        pnlSummary.setCurrentX(VALUE_MARGIN);
+        pnlSummary.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : settings.getDownColor());
+        pnlSummary.print(livePrice.getFormattedDayChange() + " (" + livePrice.getFormattedPercentDayChange() + ")");
+
+        pnlSummary.setFontColor(settings.getLabelColor());
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
+        pnlSummary.print("Gain/Loss:");
+        pnlSummary.setCurrentX(VALUE_MARGIN);
+        pnlSummary.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : settings.getDownColor());
+        pnlSummary.print(livePrice.getFormattedDayProfitLoss());
+        pnlSummary.setCurrentX(VALUE_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
+        pnlSummary.print("(" + livePrice.getFormattedDayProfitLossLocal() + ")");
+
+        // Now the FX rate if it is appropriate
+        if (!livePrice.getSymbolTransaction().getCurrencyCode().equalsIgnoreCase(settings.getCurrencyCode())) {
+            pnlSummary.setCurrentX(LEFT_MARGIN);
+            pnlSummary.setFontSize(settings.getFontSize() * 1.2f);
+            pnlSummary.setFontColor(settings.getLabelColor());
+            pnlSummary.setFontBold(true);
+            pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP * 2);
+            pnlSummary.print("FX Rate");
+
+            pnlSummary.setFontSize(settings.getFontSize());
+            pnlSummary.setFontBold(false);
+
+            pnlSummary.setCurrentX(LEFT_MARGIN);
+            pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + (int) (VALUE_SEP * 1.5));
+
+            ExchangeRate rate = livePrice.getExchangeRates().getRate(livePrice.getSymbolTransaction().getCurrencyCode());
+            if (rate == null) {
+                pnlSummary.print("N/A");
+            }
+            else {
+                pnlSummary.print(Utils.formatCurrencyValue(1, livePrice.getSymbolTransaction().getCurrencySymbol()));
+                pnlSummary.print(" = ");
+                pnlSummary.print(Utils.formatCurrencyValue(1 / rate.getExchangeRate(), settings.getCurrencySymbol()));
+                pnlSummary.setCurrentX(LEFT_MARGIN);
+                pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
+                pnlSummary.print(Utils.formatCurrencyValue(1, settings.getCurrencySymbol()));
+                pnlSummary.print(" = ");
+                pnlSummary.print(Utils.formatCurrencyValue(rate.getExchangeRate(), livePrice.getSymbolTransaction().getCurrencySymbol()));
+            }
+        }
+
+        // Show the source of the data
+        pnlSummary.setFontColor(Color.GRAY);
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getHeight() - pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() - LEFT_MARGIN / 2);
+        pnlSummary.print("Updated: " + livePrice.getDisplayTimestamp());
+        pnlSummary.setCurrentX(LEFT_MARGIN);
+        pnlSummary.setCurrentY(pnlSummary.getCurrentY() - pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() - VALUE_SEP);
+        pnlSummary.print("Source: " + livePrice.getSource());
     }
 
     @Override
     public void changed(Object source) {
-        SettingsManager settings = SettingsManager.getInstance();
-        setBackground(settings.getBackgroundColor());
-        pnlSummary.setBackground(settings.getBackgroundColor());
+        if (isVisible()) {
+
+            // We need to make sure that all UI changes are done on the Swing thread
+            SwingUtilities.invokeLater(() -> {
+                displaySummary();
+                if (graphType.equals(GRAPH_TYPE.DAY)) {
+                    displayGraph();
+                }
+            });
+        }
     }
 
     /**
@@ -241,7 +405,7 @@ public class StockPreview extends JDialog implements CallbackInterface {
         setResizable(false);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        setSize(700, 350);
+        setSize(720, 350);
         setPreferredSize(getSize());
         setMaximumSize(getSize());
         setMinimumSize(getSize());
@@ -249,7 +413,7 @@ public class StockPreview extends JDialog implements CallbackInterface {
         setResizable(false);
         getContentPane().setLayout(null);
 
-        pnlSummary = ColouredTextPanel.create().withDimensions(200, getHeight()).atRight(getWidth()).to(getContentPane());
+        pnlSummary = ColouredTextPanel.create().withDimensions(220, getHeight()).atRight(getWidth()).to(getContentPane());
         lblGraph = SettingsLabel.create("").withDimensions(getWidth() - pnlSummary.getWidth(), getHeight()).atRight(pnlSummary.getX()).atTop(0).setAlignment(SwingConstants.CENTER).to(getContentPane());
         lblGraph.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
 

@@ -169,6 +169,16 @@ public class Utils {
     }
 
     /**
+     * Formats a given value as a displayable string
+     *
+     * @param value          Value to format.
+     * @return Formatted string.
+     */
+    public static String formatValue(double value) {
+        return String.format("%,.0f", value);
+    }
+
+    /**
      * Recursively dumps the bounds of components in the hierarchy.
      *
      * @param c      The component to dump.

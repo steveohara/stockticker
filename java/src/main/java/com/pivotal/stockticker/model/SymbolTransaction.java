@@ -123,6 +123,15 @@ public class SymbolTransaction extends PersistanceManager {
     }
 
     /**
+     * Returns the formatted number of shares bought.
+     *
+     * @return Formatted shares bought.
+     */
+    public String getFormattedSharesBought() {
+        return Utils.formatValue(sharesBought);
+    }
+
+    /**
      * Generates a sort key based on the code and registration key.
      *
      * @return Sort key string.

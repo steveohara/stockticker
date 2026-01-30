@@ -15,6 +15,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 /**
@@ -92,6 +94,24 @@ public class LivePrice {
     }
 
     /**
+     * Gets the formatted aggregated price paid across all non-disabled transactions for the current symbol
+     *
+     * @return Formatted aggregated price paid
+     */
+    public String getFormattedPricePaid() {
+        return Utils.formatCurrencyValue(aggregated ? getAggregatedPricePaid() : symbolTransaction.getPricePaid(), symbolTransaction.getCurrencySymbol());
+    }
+
+    /**
+     * Gets the formatted aggregated shares bought
+     *
+     * @return Formatted aggregated shares bought
+     */
+    public String getFormattedSharesBought() {
+        return Utils.formatValue(aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought());
+    }
+
+    /**
      * Calculates the difference between the current price and the original price.
      *
      * @return Difference amount.
@@ -110,6 +130,37 @@ public class LivePrice {
     public double getDayChange() {
         Price price = prices.getPrice(symbol);
         return (price.getCurrentPrice() - (price.getDayClose() == 0 ? price.getDayStart() : price.getDayClose()));
+    }
+
+    /**
+     * Gets the formatted day start value.
+     *
+     * @return Day start.
+     */
+    public String getFormattedDayStart() {
+        Price price = prices.getPrice(symbol);
+        double start = price.getDayClose() == 0 ? price.getDayStart() : price.getDayClose();
+        return Utils.formatCurrencyValue(start, symbolTransaction.getCurrencySymbol());
+    }
+
+    /**
+     * Gets the formatted day low value.
+     *
+     * @return Day low.
+     */
+    public String getFormattedDayLow() {
+        Price price = prices.getPrice(symbol);
+        return Utils.formatCurrencyValue(price.getDayLow(), symbolTransaction.getCurrencySymbol());
+    }
+
+    /**
+     * Gets the formatted day high value.
+     *
+     * @return Day high.
+     */
+    public String getFormattedDayHigh() {
+        Price price = prices.getPrice(symbol);
+        return Utils.formatCurrencyValue(price.getDayHigh(), symbolTransaction.getCurrencySymbol());
     }
 
     /**
@@ -195,6 +246,28 @@ public class LivePrice {
     public String getFormattedValue() {
         double currentPrice = prices.getPrice(symbol).getCurrentPrice();
         double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
+        return Utils.formatCurrencyValue(currentPrice * sharesBought, symbolTransaction.getCurrencySymbol());
+    }
+
+    /**
+     * Returns the formatted total value (current price * shares) as a currency string.
+     *
+     * @return Formatted total value.
+     */
+    public String getFormattedCost() {
+        double shareCostBase = aggregated ? getAggregatedPricePaid() : symbolTransaction.getPricePaid();
+        double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
+        return Utils.formatCurrencyValue(shareCostBase * sharesBought, symbolTransaction.getCurrencySymbol());
+    }
+
+    /**
+     * Returns the formatted total value (current price * shares) as a currency string in local currency.
+     *
+     * @return Formatted total value.
+     */
+    public String getFormattedValueLocal() {
+        double currentPrice = prices.getPrice(symbol).getCurrentPrice();
+        double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
         return Utils.formatCurrencyValue(exchangeRates.convertAmount(symbolTransaction, currentPrice * sharesBought), settings.getCurrencySymbol());
     }
 
@@ -229,6 +302,15 @@ public class LivePrice {
      */
     public String getFormattedProfitLoss() {
         return Utils.formatCurrencyValue(getProfitLoss(), symbolTransaction.getCurrencySymbol());
+    }
+
+    /**
+     * Returns the formatted profit or loss as a currency string in the local currency.
+     *
+     * @return Formatted profit or loss.
+     */
+    public String getFormattedProfitLossLocal() {
+        return Utils.formatCurrencyValue(exchangeRates.convertAmount(symbolTransaction, getProfitLoss()), settings.getCurrencySymbol());
     }
 
     /**
@@ -300,4 +382,38 @@ public class LivePrice {
     public String toString() {
         return symbolTransaction.toString();
     }
+
+    /**
+     * Returns the formatted day profit or loss as a currency string in the local currency.
+     *
+     * @return Formatted profit or loss.
+     */
+    public String getFormattedDayProfitLossLocal() {
+        return Utils.formatCurrencyValue(exchangeRates.convertAmount(symbolTransaction, getDayProfitLoss()), settings.getCurrencySymbol());
+    }
+
+    /**
+     * Gets the source of the price data.
+     *
+     * @return Source of the price data.
+     */
+    public String getSource() {
+        return prices.getPrice(symbol).getSource();
+    }
+
+    /**
+     * Returns a human-readable timestamp.
+     *
+     * @return Formatted timestamp string.
+     */
+    public String getDisplayTimestamp() {
+        LocalDateTime updated = prices.getPrice(symbol).getLastUpdate();
+        if (updated == null) {
+            return "N/A";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return formatter.format(updated);
+    }
+
+
 }
