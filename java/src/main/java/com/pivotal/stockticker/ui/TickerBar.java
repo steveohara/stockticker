@@ -35,8 +35,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 public class TickerBar extends JFrame implements CallbackInterface {
 
-    public static final int STOCK_SEPARATION = 7;
-    public static final int VALUE_SEPARATION = 4;
+    public static final int STOCK_SEPARATION = 5;
+    public static final int VALUE_SEPARATION = 1;
     public static final int UP_DOWN_SEPARATION = 1;
 
     private final SettingsManager settings = SettingsManager.getInstance();
@@ -119,7 +119,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
         // Draw these on the ticker panel
         int x = 0;
-        pnlStocks.setCurrentX(VALUE_SEPARATION);
+        pnlStocks.setCurrentX(STOCK_SEPARATION);
         for (LivePrice livePrice : livePrices) {
 
             // Draw the stock data
@@ -148,7 +148,6 @@ public class TickerBar extends JFrame implements CallbackInterface {
             pnlSummary.setFontBold(settings.isFontBold());
             pnlSummary.setFontItalic(settings.isFontItalic());
             pnlSummary.setCurrentX(VALUE_SEPARATION);
-            pnlSummary.print("");
 
             // Create a summary stats object to calculate the summary data
             SummaryStats summaryStats = new SummaryStats(symbols, prices, rates);
@@ -285,9 +284,9 @@ public class TickerBar extends JFrame implements CallbackInterface {
             // Show the Day up/down arrows
             if (symbol.isShowDayChangeUpDown()) {
                 pnlStocks.setFontBold(true);
-                pnlStocks.setCurrentX(pnlStocks.getCurrentX() - VALUE_SEPARATION + UP_DOWN_SEPARATION);
-                pnlStocks.setFontColor(livePrice.isUpToday() ? settings.getUpArrowColor() : livePrice.isDownToday() ? settings.getDownArrowColor() : settings.getLabelColor());
-                pnlStocks.print(livePrice.isUpToday() ? "↑" : livePrice.isDownToday() ? "↓" : "↕");
+                pnlStocks.setCurrentX(pnlStocks.getCurrentX() - VALUE_SEPARATION - UP_DOWN_SEPARATION);
+                pnlStocks.setFontColor(livePrice.isUpToday() ? settings.getUpArrowColor() : livePrice.isDownToday() ? settings.getDownArrowColor() : settings.getNormalTextColor());
+                pnlStocks.print(livePrice.isUpToday() ? "▲" : livePrice.isDownToday() ? "▼" : "↕");
                 pnlStocks.setFontBold((settings.getFontStyle() | Font.BOLD) > 0);
             }
             if (showBraces) {
@@ -346,8 +345,8 @@ public class TickerBar extends JFrame implements CallbackInterface {
             if (symbol.isShowChangeUpDown()) {
                 pnlStocks.setFontBold(true);
                 pnlStocks.setCurrentX(pnlStocks.getCurrentX() - VALUE_SEPARATION - UP_DOWN_SEPARATION);
-                pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpArrowColor() : livePrice.isDown() ? settings.getDownArrowColor() : settings.getLabelColor());
-                pnlStocks.print(livePrice.isUp() ? "↑" : livePrice.isDown() ? "↓" : "↕");
+                pnlStocks.setFontColor(livePrice.isUp() ? settings.getUpArrowColor() : livePrice.isDown() ? settings.getDownArrowColor() : settings.getNormalTextColor());
+                pnlStocks.print(livePrice.isUp() ? "▲" : livePrice.isDown() ? "▼" : "↕");
                 pnlStocks.setFontBold((settings.getFontStyle() | Font.BOLD) > 0);
             }
         }
@@ -498,7 +497,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
             }
         });
 
-        // Set a timer to keep track of the mouse position for tooltips
+        // Set a timer to keep track of the mouse position for hover panels
         Timer timer = new Timer(500, e -> {
 
             // Get the current mouse position and check if it's over a symbol
@@ -632,7 +631,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 if (rightDragStart != null) {
                     Point current = e.getLocationOnScreen();
                     int x = current.x - rightDragStart.x + pnlRightDrag.getWidth();
-                    x = Math.min(x, Toolkit.getDefaultToolkit().getScreenSize().width);
+                    x = Math.min(x, Utils.getAllScreensBounds().width);
                     int width = x - left;
                     width = Math.max(width, 150);
                     pnlTicker.setPreferredSize(new Dimension(width, pnlTicker.getHeight()));
