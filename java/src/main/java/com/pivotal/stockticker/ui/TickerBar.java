@@ -232,6 +232,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         pnlStocks.setContiguousBackground(true);
 
         // Draw the price and other data
+        pnlStocks.setCurrentY(1);
         boolean bShownOtherData = drawSymbolPrice(livePrice);
 
         // Draw the day changes
