@@ -290,6 +290,7 @@ public class SettingsComponent<T extends JComponent> {
      */
     public T setBackColor(Color color) {
         component.setBackground(color);
+        component.setOpaque(true);
         return component;
     }
 

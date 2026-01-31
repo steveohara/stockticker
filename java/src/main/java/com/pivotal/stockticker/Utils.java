@@ -158,7 +158,7 @@ public class Utils {
 
         // If this is a lowercase letter, then it should trail
         if (currencySymbol != null && currencySymbol.matches("^[a-z]$")) {
-            return  String.format("%,.2f%s", value, currencySymbol);
+            return String.format("%,.2f%s", value, currencySymbol);
         }
         if (value < 0) {
             return String.format("-%s%,.2f", currencySymbol, Math.abs(value));
@@ -171,7 +171,7 @@ public class Utils {
     /**
      * Formats a given value as a displayable string
      *
-     * @param value          Value to format.
+     * @param value Value to format.
      * @return Formatted string.
      */
     public static String formatValue(double value) {
@@ -331,5 +331,20 @@ public class Utils {
         }
 
         return allScreensBounds;
+    }
+
+    /**
+     * Lightens a given color by a specified amount.
+     *
+     * @param color  The original color.
+     * @param amount The amount to lighten (0.0 to 1.0).
+     * @return The lightened color.
+     */
+    public static Color lighten(Color color, float amount) {
+        // amount: 0.0 = original color, 1.0 = white
+        int r = (int)(color.getRed() + (255 - color.getRed()) * amount);
+        int g = (int)(color.getGreen() + (255 - color.getGreen()) * amount);
+        int b = (int)(color.getBlue() + (255 - color.getBlue()) * amount);
+        return new Color(r, g, b, color.getAlpha());
     }
 }

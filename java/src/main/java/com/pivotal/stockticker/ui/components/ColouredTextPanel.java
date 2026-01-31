@@ -111,6 +111,11 @@ public class ColouredTextPanel extends JPanel {
             contentDirty = false;
         }
 
+        // If no content to display, we're done (super.paintComponent already cleared it)
+        if (cachedContent == null || items.isEmpty()) {
+            return;
+        }
+
         // Handle scrolling timer
         if (displayStyle == DISPLAY_STYLE.SCROLL && totalTextWidth > getWidth()) {
             log.debug("Creating scroll timer to scroll text");
@@ -166,27 +171,19 @@ public class ColouredTextPanel extends JPanel {
     private void createCachedContent() {
         log.debug("Creating cached content image");
 
-        // If there's nothing to draw, skip
-        if (totalTextWidth == 0 || totalTextHeight == 0) {
-            return;
-        }
+        // Determine the size for the cached image
+        int width = Math.max(1, totalTextWidth > 0 ? totalTextWidth : getWidth());
+        int height = Math.max(1, totalTextHeight > 0 ? totalTextHeight : getHeight());
+
         // Ensure we have a valid graphics configuration
         GraphicsConfiguration gc = getGraphicsConfiguration();
         if (gc != null) {
-            log.debug("Creating compatible image for cached content width:{} height:{}", totalTextWidth, Math.max(totalTextHeight, getHeight()));
-            cachedContent = gc.createCompatibleImage(
-                    totalTextWidth,
-                    Math.max(totalTextHeight, getHeight()),
-                    Transparency.TRANSLUCENT
-            );
+            log.debug("Creating compatible image for cached content width:{} height:{}", width, height);
+            cachedContent = gc.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
         }
         else {
-            log.debug("Creating buffered image for cached content width:{} height:{}", totalTextWidth, Math.max(totalTextHeight, getHeight()));
-            cachedContent = new BufferedImage(
-                    totalTextWidth,
-                    Math.max(totalTextHeight, getHeight()),
-                    BufferedImage.TYPE_INT_ARGB
-            );
+            log.debug("Creating buffered image for cached content width:{} height:{}", width, height);
+            cachedContent = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         }
 
         // Set the rendering hints for quality
@@ -195,6 +192,17 @@ public class ColouredTextPanel extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+
+        // Clear the background
+        g2.setComposite(AlphaComposite.Clear);
+        g2.fillRect(0, 0, width, height);
+        g2.setComposite(AlphaComposite.SrcOver);
+
+        // If there's nothing to draw, we're done
+        if (items.isEmpty()) {
+            g2.dispose();
+            return;
+        }
 
         // Match panel background and font
         g2.setFont(getFont());
@@ -213,8 +221,8 @@ public class ColouredTextPanel extends JPanel {
             if (item.contiguousBackground) {
                 int x = item.x;
                 int y = item.y;
-                int width = item.width;
-                int height = item.height;
+                width = item.width;
+                height = item.height;
 
                 // Find the start of the contiguous block
                 int prev = i;
@@ -278,6 +286,16 @@ public class ColouredTextPanel extends JPanel {
                 : new Dimension(super.getMinimumSize().width, super.getMinimumSize().height);
     }
 
+    @Override
+    public int getHeight() {
+        return displayStyle == DISPLAY_STYLE.FIT ? getPreferredSize().height :super.getHeight();
+    }
+
+    @Override
+    public int getWidth() {
+        return displayStyle == DISPLAY_STYLE.FIT ? getPreferredSize().width :super.getWidth();
+    }
+
     /**
      * Stops any ongoing scrolling of text
      */
@@ -300,13 +318,13 @@ public class ColouredTextPanel extends JPanel {
         items.add(item);
 
         // Move cursor to the end of the printed text
-        FontMetrics fm = getFontMetrics(item.font);
-        currentX += fm.stringWidth(text);
+        currentX = item.x + item.width;
 
         // Mark cache as dirty
         contentDirty = true;
 
         if (displayStyle == DISPLAY_STYLE.FIT) {
+            setSize(getPreferredSize());
             revalidate();
         }
         repaint();
@@ -325,6 +343,7 @@ public class ColouredTextPanel extends JPanel {
         fontBold = false;
         fontItalic = false;
         contentDirty = true;
+        cachedContent = null;
 
         // If in FIT mode, revalidate to adjust size
         if (displayStyle == DISPLAY_STYLE.FIT) {
@@ -394,15 +413,16 @@ public class ColouredTextPanel extends JPanel {
             color = panel.getFontColor();
             background = panel.getBackground();
             contiguousBackground = panel.isContiguousBackground();
-            width = panel.getFontMetrics(font).stringWidth(text);
+            width = panel.getFontMetrics(font).stringWidth(text) + 2;
             height = panel.getFontMetrics(font).getHeight();
             panel.totalTextWidth = Math.max(x + width, panel.totalTextWidth);
             panel.totalTextHeight = Math.max(y + height, panel.totalTextHeight);
+            log.debug("Created text item: {} textheight:{}", this, panel.totalTextHeight);
         }
 
         @Override
         public String toString() {
-            return text + " [" + x  + "," + y + "] " + color.toString();
+            return text + " [" + x  + "," + y + "," + width + "," + height + "] " + color.toString();
         }
     }
 }

@@ -250,6 +250,17 @@ public class LivePrice {
     }
 
     /**
+     * Returns the formatted total value (current price * shares) as a currency string in local currency.
+     *
+     * @return Formatted total value.
+     */
+    public String getFormattedValueLocal() {
+        double currentPrice = prices.getPrice(symbol).getCurrentPrice();
+        double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
+        return Utils.formatCurrencyValue(exchangeRates.convertAmount(symbolTransaction, currentPrice * sharesBought), settings.getCurrencySymbol());
+    }
+
+    /**
      * Returns the formatted total value (current price * shares) as a currency string.
      *
      * @return Formatted total value.
@@ -261,14 +272,14 @@ public class LivePrice {
     }
 
     /**
-     * Returns the formatted total value (current price * shares) as a currency string in local currency.
+     * Returns the formatted total cost (price paid * shares) as a currency string.
      *
-     * @return Formatted total value.
+     * @return Formatted total cost.
      */
-    public String getFormattedValueLocal() {
-        double currentPrice = prices.getPrice(symbol).getCurrentPrice();
+    public String getFormattedCostLocal() {
+        double shareCostBase = aggregated ? getAggregatedPricePaid() : symbolTransaction.getPricePaid();
         double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
-        return Utils.formatCurrencyValue(exchangeRates.convertAmount(symbolTransaction, currentPrice * sharesBought), settings.getCurrencySymbol());
+        return Utils.formatCurrencyValue(exchangeRates.convertAmount(symbolTransaction, shareCostBase * sharesBought), settings.getCurrencySymbol());
     }
 
     /**
@@ -281,6 +292,46 @@ public class LivePrice {
         double currentPrice = prices.getPrice(symbol).getCurrentPrice();
         double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
         return (currentPrice - pricePaid) * sharesBought;
+    }
+
+    /**
+     * Calculates the total value based on current price and shares bought.
+     *
+     * @return Total value amount.
+     */
+    public double getValue() {
+        double currentPrice = prices.getPrice(symbol).getCurrentPrice();
+        double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
+        return currentPrice * sharesBought;
+    }
+
+    /**
+     * Calculates the total value based on current price and shares bought in local currency.
+     *
+     * @return Total value amount.
+     */
+    public double getValueLocal() {
+        return exchangeRates.convertAmount(symbolTransaction, getValue());
+    }
+
+    /**
+     * Calculates the total cost based on current price and shares bought.
+     *
+     * @return Total cost amount.
+     */
+    public double getCost() {
+        double pricePaid = aggregated ? getAggregatedPricePaid() : symbolTransaction.getPricePaid();
+        double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
+        return pricePaid * sharesBought;
+    }
+
+    /**
+     * Calculates the total cost based on current price and shares bought in local currency.
+     *
+     * @return Total cost amount.
+     */
+    public double getCostLocal() {
+        return exchangeRates.convertAmount(symbolTransaction, getCost());
     }
 
     /**
@@ -370,8 +421,20 @@ public class LivePrice {
      * @return List of LivePrice objects
      */
     public static ArrayList<LivePrice> getLivePrices(SymbolsManager symbols, PricesManager prices, ExchangeRatesManager exchangeRates, SettingsManager settings) {
+        return getLivePrices(symbols, prices, exchangeRates, settings.isShowUniqueSymbols());
+    }
+
+    /**
+     * Generates a list of LivePrice objects based on the settings.
+     *
+     * @param symbols       Symbols manager
+     * @param prices        Prices manager
+     * @param exchangeRates Exchange rates manager
+     * @param isAveraged    Whether to aggregate across all transactions for each symbol
+     * @return List of LivePrice objects
+     */
+    public static ArrayList<LivePrice> getLivePrices(SymbolsManager symbols, PricesManager prices, ExchangeRatesManager exchangeRates, boolean isAveraged) {
         ArrayList<LivePrice> livePrices = new ArrayList<>();
-        boolean isAveraged = settings.isShowUniqueSymbols();
         for (SymbolTransaction symbolTransaction : symbols.getSymbolTransactions(false, isAveraged, null)) {
             livePrices.add(new LivePrice(symbols, prices, exchangeRates, symbolTransaction, isAveraged));
         }
@@ -415,5 +478,12 @@ public class LivePrice {
         return formatter.format(updated);
     }
 
-
+    /**
+     * Gets the number of shares bought.
+     *
+     * @return Number of shares bought.
+     */
+    public int getSharesBought() {
+        return (int)(aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought());
+    }
 }

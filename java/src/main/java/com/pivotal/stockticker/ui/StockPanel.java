@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Form showing the stock preview
  */
 @Slf4j
-public class StockPreview extends JDialog implements CallbackInterface {
+public class StockPanel extends JDialog implements CallbackInterface {
 
     private static final int LEFT_MARGIN = 10;
     private static final int VALUE_MARGIN = 95;
@@ -65,7 +65,7 @@ public class StockPreview extends JDialog implements CallbackInterface {
      *
      * @param tickerBar Parent callback interface
      */
-    public StockPreview(TickerBar tickerBar) {
+    public StockPanel(TickerBar tickerBar) {
         this.tickerBar = tickerBar;
         initComponents();
         initListeners();
@@ -404,6 +404,7 @@ public class StockPreview extends JDialog implements CallbackInterface {
         setAlwaysOnTop(true);
         setResizable(false);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        ((JPanel)getContentPane()).setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
 
         setSize(720, 360);
         setPreferredSize(getSize());

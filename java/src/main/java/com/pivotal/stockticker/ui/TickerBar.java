@@ -45,13 +45,14 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private final ExchangeRatesManager rates = new ExchangeRatesManager(this);
     private final CopyOnWriteArrayList<LivePrice> livePrices = new CopyOnWriteArrayList<>();
 
-    private final StockPreview stockPreview = new StockPreview(this);
+    private final StockPanel stockPanel = new StockPanel(this);
+    private final SummaryPanel summaryPanel = new SummaryPanel(this);
 
     private JPanel pnlLeftDrag;
     private JPanel pnlRightDrag;
     private ColouredTextPanel pnlStocks;
-    private ColouredTextPanel pnlSummary;
-    private ColouredTextPanel pnlDaySummary;
+    protected ColouredTextPanel pnlSummary;
+    protected ColouredTextPanel pnlDaySummary;
     private JPanel pnlTicker;
 
     private JCheckBoxMenuItem fontSizeItemSmall;
@@ -100,6 +101,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         drawLivePrices();
         drawSummary();
         drawDaySummary();
+
     }
 
     /**
@@ -355,7 +357,8 @@ public class TickerBar extends JFrame implements CallbackInterface {
         log.debug("TickerBar change notification received from source: {}", source == null ? "null" : source.getClass().getSimpleName());
 
         // Notify any preview windows about the change
-        stockPreview.changed(source);
+        stockPanel.changed(source);
+        summaryPanel.changed(source);
 
         // We need to make sure that all UI changes are done on the Swing thread
         SwingUtilities.invokeLater(() -> {
@@ -380,9 +383,6 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
                     // Draw the ticker content
                     drawTickerContent();
-
-                    // Tell the stock previewer about the change
-                    stockPreview.changed(source);
                 }
 
                 // If the settings form was the source, update settings
@@ -390,7 +390,6 @@ public class TickerBar extends JFrame implements CallbackInterface {
                     setTicketSpeed(settings.getTickerSpeed());
                     initializeUI();
                     drawTickerContent();
-                    stockPreview.changed(source);
                 }
 
                 // If the symbols form was the source, update the prices and redraw
@@ -514,7 +513,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 drawLivePrices();
 
                 // Show the stock preview
-                stockPreview.showSymbol(price, mousePos);
+                stockPanel.showSymbol(price, mousePos);
             }
 
             // Not over a symbol or the panel, clear any selected symbols
@@ -525,6 +524,13 @@ public class TickerBar extends JFrame implements CallbackInterface {
                     if (symbols.clearSelected()) {
                         drawLivePrices();
                     }
+                }
+
+                // Check to see if it's over the summary panel
+                screenLocation = pnlSummary.getLocationOnScreen();
+                bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlSummary.getWidth(), pnlSummary.getHeight());
+                if (bounds.contains(mousePos)) {
+                    summaryPanel.showSummary(mousePos);
                 }
             }
         });
