@@ -313,7 +313,7 @@
                                         <argument>--type</argument>
                                         <argument>dmg</argument>
                                         <argument>--name</argument>
-                                        <argument>pivotalstockticker</argument>
+                                        <argument>Pivotal Stock Ticker</argument>
                                         <argument>--app-version</argument>
                                         <argument>${project.version}</argument>
                                         <argument>--input</argument>
