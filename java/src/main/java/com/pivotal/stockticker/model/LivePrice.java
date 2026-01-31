@@ -347,6 +347,15 @@ public class LivePrice {
     }
 
     /**
+     * Calculates the profit or loss based on current price and day starting price in local currency.
+     *
+     * @return Profit or loss amount.
+     */
+    public double getDayProfitLossLocal() {
+        return exchangeRates.convertAmount(symbolTransaction, getDayProfitLoss());
+    }
+
+    /**
      * Returns the formatted profit or loss as a currency string.
      *
      * @return Formatted profit or loss.

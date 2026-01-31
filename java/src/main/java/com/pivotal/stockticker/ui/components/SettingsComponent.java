@@ -244,6 +244,16 @@ public class SettingsComponent<T extends JComponent> {
     }
 
     /**
+     * Sets the position of the component to align with the bottom-left corner of another component.
+     *
+     * @param alignmentComp The component to align with.
+     * @return The component itself for method chaining.
+     */
+    public T below(JComponent alignmentComp) {
+        return below(alignmentComp, 0);
+    }
+
+    /**
      * Sets the position of the component to align with the bottom-left corner of another component, with an offset.
      *
      * @param alignmentComp The component to align with.
@@ -255,6 +265,16 @@ public class SettingsComponent<T extends JComponent> {
         atBottom(alignmentComp, offset);
         withDimensions(alignmentComp);
         return component;
+    }
+
+    /**
+     * Sets the position of the component to align with the top-right corner of another component.
+     *
+     * @param alignmentComp The component to align with.
+     * @return The component itself for method chaining.
+     */
+    public T tail(JComponent alignmentComp) {
+        return tail(alignmentComp, 0);
     }
 
     /**
@@ -337,6 +357,20 @@ public class SettingsComponent<T extends JComponent> {
      */
     public T withDimensions(JComponent alignmentComp) {
         component.setBounds(component.getX(), component.getY(), alignmentComp.getWidth(), alignmentComp.getHeight());
+        return component;
+    }
+
+    /**
+     * Sets the characteristics of the component to same as another component.
+     *
+     * @param hostComponent The component to match with.
+     * @return The component itself for method chaining.
+     */
+    public T sameAs(JComponent hostComponent) {
+        withDimensions(hostComponent);
+        at(hostComponent.getX(), hostComponent.getY());
+        setBackColor(hostComponent.getBackground());
+        setForeColor(hostComponent.getForeground());
         return component;
     }
 

@@ -25,16 +25,16 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 /**
- * Form showing the portfolio summary
+ * Form showing the portfolio day summary
  */
 @Slf4j
-public class SummaryPanel extends JDialog implements CallbackInterface {
+public class DaySummaryPanel extends JDialog implements CallbackInterface {
 
     private static final int LEFT_MARGIN = 10;
     private static final int VALUE_SEP = 2;
 
     private ColouredTextPanel pnlSummary, pnlTotals;
-    private SettingsLabel lblStock, lblPaid, lblPrice, lblShares, lblCost, lblValue, lblPercent, lblGainLoss, lblSource, lblHeader, lblDivider;
+    private SettingsLabel lblStock, lblPrice, lblValue, lblGainLoss, lblSource, lblHeader, lblDivider;
     private final TickerBar tickerBar;
     private SettingsLabel lblSort = null;
     private boolean sortAsc = true;
@@ -44,7 +44,7 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
      *
      * @param tickerBar Parent callback interface
      */
-    public SummaryPanel(TickerBar tickerBar) {
+    public DaySummaryPanel(TickerBar tickerBar) {
         this.tickerBar = tickerBar;
         initComponents();
         initListeners();
@@ -65,8 +65,8 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
             Point screenLocation = getLocationOnScreen();
             Rectangle windowBounds = new Rectangle(screenLocation.x, screenLocation.y, getWidth(), getHeight());
 
-            screenLocation = tickerBar.pnlSummary.getLocationOnScreen();
-            Rectangle summaryBounds = new Rectangle(screenLocation.x, screenLocation.y, tickerBar.pnlSummary.getWidth(), tickerBar.pnlSummary.getHeight());
+            screenLocation = tickerBar.pnlDaySummary.getLocationOnScreen();
+            Rectangle summaryBounds = new Rectangle(screenLocation.x, screenLocation.y, tickerBar.pnlDaySummary.getWidth(), tickerBar.pnlSummary.getHeight());
 
             if (!summaryBounds.contains(mousePos) && !windowBounds.contains(mousePos)) {
                 setVisible(false);
@@ -79,15 +79,10 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
      * Sets up component listeners
      */
     private void initListeners() {
-
-        ColumnHeaderMouseAdapter mouseAdapter = new ColumnHeaderMouseAdapter();
+        MouseAdapter mouseAdapter = new ColumnHeaderMouseAdapter();
         lblStock.addMouseListener(mouseAdapter);
-        lblPaid.addMouseListener(mouseAdapter);
         lblPrice.addMouseListener(mouseAdapter);
-        lblShares.addMouseListener(mouseAdapter);
-        lblCost.addMouseListener(mouseAdapter);
         lblValue.addMouseListener(mouseAdapter);
-        lblPercent.addMouseListener(mouseAdapter);
         lblGainLoss.addMouseListener(mouseAdapter);
         lblSource.addMouseListener(mouseAdapter);
     }
@@ -164,11 +159,10 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
      * Draws the totals data panel
      */
     private void drawTotalsData(SymbolsManager symbols, PricesManager prices, ExchangeRatesManager rates, SettingsManager settings) {
+        // Create a summary stats object to calculate the summary data
         SummaryStats summaryStats = new SummaryStats(symbols, prices, rates);
+        double totalCostAtPreviousClose = summaryStats.calculateTotalValueAtPreviousClose();
         double totalValue = summaryStats.calculateTotalValue();
-        double totalCost = summaryStats.calculateTotalCost();
-        double cashCost = settings.getTotalInvestment() + settings.getMargin();
-        double adjustedTotalValue = totalValue - cashCost;
 
         // Now draw the totals panel
         pnlTotals.cls();
@@ -181,34 +175,14 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
         pnlTotals.cls();
         pnlTotals.setCurrentX(LEFT_MARGIN);
 
-        pnlTotals.setFontColor(settings.getLabelColor());
-        pnlTotals.print("Investment: ");
-        pnlTotals.setFontColor(settings.getNormalTextColor());
-        pnlTotals.print(Utils.formatCurrencyValue(cashCost, settings.getCurrencySymbol()));
+        // Draw the summary data
+        pnlTotals.print("Today: ");
+        pnlTotals.setFontColor(totalValue < totalCostAtPreviousClose ? settings.getDownColor() : totalValue > totalCostAtPreviousClose ? settings.getUpColor() : settings.getNormalTextColor());
+        pnlTotals.print(String.format("%s", Utils.formatCurrencyValue(totalCostAtPreviousClose == 0.0 ? 0 : (totalValue - totalCostAtPreviousClose), settings.getCurrencySymbol())));
+        pnlTotals.setCurrentX(pnlTotals.getCurrentX());
 
-        pnlTotals.setFontColor(settings.getLabelColor());
-        pnlTotals.print("  Cost: ");
-        pnlTotals.setFontColor(settings.getNormalTextColor());
-        pnlTotals.print(Utils.formatCurrencyValue(totalCost, settings.getCurrencySymbol()));
-
-        pnlTotals.setFontColor(settings.getLabelColor());
-        pnlTotals.print("  Value: ");
-        pnlTotals.setFontColor(settings.getNormalTextColor());
-        pnlTotals.print(Utils.formatCurrencyValue(totalValue, settings.getCurrencySymbol()));
-
-        pnlTotals.setCurrentY(pnlTotals.getCurrentY() + pnlTotals.getFontMetrics(pnlTotals.getFont()).getHeight() + VALUE_SEP);
-
-        pnlTotals.setCurrentX(LEFT_MARGIN);
-        pnlTotals.setFontColor(settings.getLabelColor());
-        pnlTotals.print("Summary: ");
-        pnlTotals.setFontColor(totalValue < totalCost ? settings.getDownColor() : totalValue > totalCost ? settings.getUpColor() : settings.getNormalTextColor());
-        pnlTotals.print(Utils.formatCurrencyValue(totalValue - totalCost, settings.getCurrencySymbol()));
-
-        pnlTotals.setFontColor(totalValue < 0 ? settings.getDownColor() : totalValue > 0 ? settings.getUpColor() : settings.getNormalTextColor());
-        pnlTotals.print(String.format("  (%s)", Utils.formatCurrencyValue(adjustedTotalValue, settings.getCurrencySymbol())));
-        pnlTotals.setFontColor(totalValue < totalCost ? settings.getDownColor() : totalValue > totalCost ? settings.getUpColor() : settings.getNormalTextColor());
-
-        pnlTotals.print(String.format("  %.2f%%", totalValue == 0.0 ? 0 : (totalValue - totalCost) / totalCost * 100));
+        // Percentage change
+        pnlTotals.print(String.format("  (%.2f%%)", totalCostAtPreviousClose == 0.0 ? 0 : (totalValue - totalCostAtPreviousClose) / totalCostAtPreviousClose * 100));
     }
 
     /**
@@ -234,30 +208,18 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
             pnlSummary.setCurrentX(lblStock.getX());
             pnlSummary.print(livePrice.getSymbol());
 
-            pnlSummary.setFontColor(settings.getNormalTextColor());
-            pnlSummary.setCurrentX(lblPaid.getX());
-            pnlSummary.print(livePrice.getFormattedPricePaid());
-
-            pnlSummary.setFontColor(livePrice.isUp() ? settings.getUpColor() : (livePrice.isDown() ? settings.getDownColor() : settings.getNormalTextColor()));
+            pnlSummary.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : (livePrice.isDownToday() ? settings.getDownColor() : settings.getNormalTextColor()));
             pnlSummary.setCurrentX(lblPrice.getX());
             pnlSummary.print(livePrice.getFormattedPrice());
 
-            pnlSummary.setFontColor(settings.getNormalTextColor());
-            pnlSummary.setCurrentX(lblShares.getX());
-            pnlSummary.print(livePrice.getFormattedSharesBought());
-
-            pnlSummary.setCurrentX(lblCost.getX());
-            pnlSummary.print(livePrice.getFormattedCostLocal());
-
-            pnlSummary.setFontColor(livePrice.isUp() ? settings.getUpColor() : (livePrice.isDown() ? settings.getDownColor() : settings.getNormalTextColor()));
+            pnlSummary.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : (livePrice.isDownToday() ? settings.getDownColor() : settings.getNormalTextColor()));
             pnlSummary.setCurrentX(lblValue.getX());
-            pnlSummary.print(livePrice.getFormattedValueLocal());
-
-            pnlSummary.setCurrentX(lblPercent.getX());
-            pnlSummary.print(livePrice.getFormattedPercentChange());
+            pnlSummary.print(livePrice.getFormattedDayProfitLossLocal());
 
             pnlSummary.setCurrentX(lblGainLoss.getX());
-            pnlSummary.print(livePrice.getFormattedProfitLossLocal());
+            pnlSummary.print(livePrice.getFormattedPercentDayChange());
+            pnlSummary.setCurrentX(lblGainLoss.getX() + lblGainLoss.getWidth() / 2);
+            pnlSummary.print("(" + livePrice.getFormattedDayChange() + ")");
 
             pnlSummary.setFontColor(settings.getLabelColor());
             pnlSummary.setCurrentX(lblSource.getX());
@@ -280,26 +242,14 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
             if (lblSort.equals(lblStock)) {
                 result = lp1.getSymbol().compareToIgnoreCase(lp2.getSymbol());
             }
-            else if (lblSort.equals(lblPaid)) {
-                result = Double.compare(lp1.getSymbolTransaction().getPricePaid(), lp2.getSymbolTransaction().getPricePaid());
-            }
             else if (lblSort.equals(lblPrice)) {
                 result = Double.compare(prices.getPrice(lp1.getSymbol()).getCurrentPrice(), prices.getPrice(lp2.getSymbol()).getCurrentPrice());
             }
-            else if (lblSort.equals(lblShares)) {
-                result = Integer.compare(lp1.getSharesBought(), lp2.getSharesBought());
-            }
-            else if (lblSort.equals(lblCost)) {
-                result = Double.compare(lp1.getCostLocal(), lp2.getCostLocal());
-            }
             else if (lblSort.equals(lblValue)) {
-                result = Double.compare(lp1.getValueLocal(), lp2.getValueLocal());
-            }
-            else if (lblSort.equals(lblPercent)) {
-                result = Double.compare(lp1.getPercentChange(), lp2.getPercentChange());
+                result = Double.compare(lp1.getDayProfitLossLocal(), lp2.getDayProfitLossLocal());
             }
             else if (lblSort.equals(lblGainLoss)) {
-                result = Double.compare(lp1.getProfitLoss(), lp2.getProfitLoss());
+                result = Double.compare(lp1.getPercentDayChange(), lp2.getPercentDayChange());
             }
             else if (lblSort.equals(lblSource)) {
                 result = lp1.getSource().compareToIgnoreCase(lp2.getSource());
@@ -340,14 +290,10 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
 
         // Create all the column headers
         lblStock = SettingsLabel.create("Stock", "Sort by stock name").withDimensions(100, 25).atLeft(LEFT_MARGIN).atTop(LEFT_MARGIN / 2).setAlignment(SwingConstants.LEFT).setForeColor(settings.getLabelColor()).setBackColor(settings.getBackgroundColor()).to(getContentPane());
-        lblPaid = SettingsLabel.create("Paid", "Sort by the cost base price of the stock").sameAs(lblStock).withWidth(65).tail(lblStock).to(getContentPane());
-        lblPrice = SettingsLabel.create("Price", "Sort by the current price").sameAs(lblPaid).tail(lblPaid).to(getContentPane());
-        lblShares = SettingsLabel.create("Shares", "Sort by the number of shares").sameAs(lblPaid).tail(lblPrice).to(getContentPane());
-        lblCost = SettingsLabel.create("Cost", "Sort by the total cost in local currency").sameAs(lblStock).withWidth(80).tail(lblShares).to(getContentPane());
-        lblValue = SettingsLabel.create("Value", "Sort by the total current value").sameAs(lblCost).tail(lblCost).to(getContentPane());
-        lblPercent = SettingsLabel.create("Percent", "Sort by the percentage difference between value and cost").sameAs(lblPaid).tail(lblValue).to(getContentPane());
-        lblGainLoss = SettingsLabel.create("Gain/Loss", "Sort by the difference between current total value and original cost").sameAs(lblCost).tail(lblPercent, 0).to(getContentPane());
-        lblSource = SettingsLabel.create("Source", "Sort by the source of the data").sameAs(lblCost).tail(lblGainLoss).to(getContentPane());
+        lblPrice = SettingsLabel.create("Price", "Sort by the current price").sameAs(lblStock).tail(lblStock).withWidth(65).to(getContentPane());
+        lblValue = SettingsLabel.create("Value", "Sort by the value of the gain/loss today").sameAs(lblStock).withWidth(80).tail(lblPrice).to(getContentPane());
+        lblGainLoss = SettingsLabel.create("Change", "Sort by the percentage change between the start of day and current price").sameAs(lblStock).withWidth(110).tail(lblValue).to(getContentPane());
+        lblSource = SettingsLabel.create("Source", "Sort by the source of the data").sameAs(lblPrice).tail(lblGainLoss).to(getContentPane());
         lblHeader = SettingsLabel.create().below(lblStock, 0).withDimensions(lblSource.getRight() - lblStock.getX(), 1).setForeColor(settings.getLabelColor()).setBackColor(settings.getLabelColor()).to(getContentPane());
 
         // Now position the summary panel
@@ -359,26 +305,22 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
         lblDivider = SettingsLabel.create().sameAs(lblHeader).below(pnlSummary).to(getContentPane());
 
         // Now position the totals panel
-        pnlTotals = ColouredTextPanel.create().withDimensions(pnlSummary).below(lblDivider, 0).to(getContentPane());
+        pnlTotals = ColouredTextPanel.create().withDimensions(pnlSummary).below(lblDivider).to(getContentPane());
         pnlTotals.setBackground(settings.getBackgroundColor());
         pnlTotals.setDisplayStyle(ColouredTextPanel.DISPLAY_STYLE.FIT);
 
         // Set the current sort column and order
-        if (settings.getSummarySortColumn() != null && !settings.getSummarySortColumn().isEmpty()) {
-            lblSort = switch (settings.getSummarySortColumn().toLowerCase()) {
+        if (settings.getDaySortColumn() != null && !settings.getDaySortColumn().isEmpty()) {
+            lblSort = switch (settings.getDaySortColumn().toLowerCase()) {
                 case "stock" -> lblStock;
-                case "paid" -> lblPaid;
                 case "price" -> lblPrice;
-                case "shares" -> lblShares;
-                case "cost" -> lblCost;
                 case "value" -> lblValue;
-                case "percent" -> lblPercent;
                 case "gain/loss" -> lblGainLoss;
                 case "source" -> lblSource;
                 default -> lblStock;
             };
         }
-        sortAsc = settings.getSummarySortOrder().equalsIgnoreCase("ASC");
+        sortAsc = settings.getDaySortOrder().equalsIgnoreCase("ASC");
         lblSort.setText(lblSort.getText() + (sortAsc ? " ▲" : " ▼"));
 
         // Set the size of the dialog
@@ -414,12 +356,12 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
             }
 
             // Save the settings
-            settings.setSummarySortColumn(lblSort.getText());
-            settings.setSummarySortOrder(sortAsc ? "ASC" : "DESC");
+            settings.setDaySortColumn(lblSort.getText());
+            settings.setDaySortOrder(sortAsc ? "ASC" : "DESC");
 
             // Re-display the summary
             column.setText(lblSort.getText() + (sortAsc ? " ▲" : " ▼"));
-            SwingUtilities.invokeLater(SummaryPanel.this::displaySummary);
+            SwingUtilities.invokeLater(DaySummaryPanel.this::displaySummary);
         }
     }
 

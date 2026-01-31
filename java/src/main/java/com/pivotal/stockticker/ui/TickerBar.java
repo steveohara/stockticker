@@ -47,6 +47,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
     private final StockPanel stockPanel = new StockPanel(this);
     private final SummaryPanel summaryPanel = new SummaryPanel(this);
+    private final DaySummaryPanel daySummaryPanel = new DaySummaryPanel(this);
 
     private JPanel pnlLeftDrag;
     private JPanel pnlRightDrag;
@@ -360,6 +361,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         // Notify any preview windows about the change
         stockPanel.changed(source);
         summaryPanel.changed(source);
+        daySummaryPanel.changed(source);
 
         // We need to make sure that all UI changes are done on the Swing thread
         SwingUtilities.invokeLater(() -> {
@@ -532,6 +534,13 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlSummary.getWidth(), pnlSummary.getHeight());
                 if (bounds.contains(mousePos)) {
                     summaryPanel.showSummary(mousePos);
+                }
+                else {
+                    screenLocation = pnlDaySummary.getLocationOnScreen();
+                    bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlDaySummary.getWidth(), pnlDaySummary.getHeight());
+                    if (bounds.contains(mousePos)) {
+                        daySummaryPanel.showSummary(mousePos);
+                    }
                 }
             }
         });

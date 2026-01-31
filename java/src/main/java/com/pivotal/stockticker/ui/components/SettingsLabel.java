@@ -76,4 +76,16 @@ public class SettingsLabel extends JLabel {
         super.setHorizontalAlignment(alignment);
         return this;
     }
+
+    /**
+     * Sets the characteristics of the SettingsLabel to same as another component.
+     *
+     * @param hostComponent The SettingsLabel to match with.
+     * @return The component itself for method chaining.
+     */
+    public SettingsLabel sameAs(SettingsLabel hostComponent) {
+        helper.sameAs(hostComponent);
+        setAlignment(hostComponent.getHorizontalAlignment());
+        return this;
+    }
 }
