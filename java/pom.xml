@@ -330,6 +330,8 @@
                                         <argument>${project.organization.name}</argument>
                                         <argument>--about-url</argument>
                                         <argument>${project.organization.url}</argument>
+                                        <argument>--resource-dir</argument>
+                                        <argument>src/main/package/macos</argument>
 
                                         <argument>--icon</argument>
                                         <argument>${project.basedir}/src/main/resources/favicon.icns</argument>
