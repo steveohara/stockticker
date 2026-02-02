@@ -12,6 +12,7 @@ import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.model.SummaryStats;
 import com.pivotal.stockticker.model.SymbolTransaction;
 import com.pivotal.stockticker.service.ExchangeRatesManager;
+import com.pivotal.stockticker.service.ExportData;
 import com.pivotal.stockticker.service.PricesManager;
 import com.pivotal.stockticker.service.SymbolsManager;
 import com.pivotal.stockticker.ui.components.ColouredTextPanel;
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -767,10 +769,15 @@ public class TickerBar extends JFrame implements CallbackInterface {
         JMenuItem export = new JMenu("Export");
         contextMenu.add(export);
         JMenuItem exportCsvAll = new JMenuItem("Export to CSV (All)");
+        exportCsvAll.addActionListener(this::exportToCSV);
         export.add(exportCsvAll);
-        JMenuItem exportCsvLive = new JMenuItem("Export to CSV (live)");
+
+        JMenuItem exportCsvLive = new JMenuItem("Export to CSV (Live)");
+        exportCsvLive.addActionListener(this::exportToCSV);
         export.add(exportCsvLive);
+
         JMenuItem exportCsvSummarised = new JMenuItem("Export to CSV (Summarised)");
+        exportCsvSummarised.addActionListener(this::exportToCSV);
         export.add(exportCsvSummarised);
         contextMenu.addSeparator();
 
@@ -781,6 +788,22 @@ public class TickerBar extends JFrame implements CallbackInterface {
         pnlTicker.setComponentPopupMenu(contextMenu);
         pnlLeftDrag.setComponentPopupMenu(contextMenu);
         pnlRightDrag.setComponentPopupMenu(contextMenu);
+    }
+
+    private void exportToCSV(ActionEvent e) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                if (e.getActionCommand().contains("All"))
+                    ExportData.exportSymbolsToCSV(this, true, false);
+                else if (e.getActionCommand().contains("Live"))
+                    ExportData.exportSymbolsToCSV(this, false, false);
+                else if (e.getActionCommand().contains("Summarised"))
+                    ExportData.exportSymbolsToCSV(this, false, true);
+            }
+            catch (Exception ex) {
+                Utils.showTopmostMessage("Failed to open Symbols Form\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
 
     /**

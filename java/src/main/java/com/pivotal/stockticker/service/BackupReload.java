@@ -516,7 +516,7 @@ public class BackupReload {
      */
     @Getter
     @Setter
-    private static class OverwritePromptChooser extends JFileChooser {
+    public static class OverwritePromptChooser extends JFileChooser {
         public enum CHOOSER_TYPE {
             OPEN,
             SAVE
