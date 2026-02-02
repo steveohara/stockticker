@@ -281,10 +281,10 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
                 result = lp1.getSymbol().compareToIgnoreCase(lp2.getSymbol());
             }
             else if (lblSort.equals(lblPaid)) {
-                result = Double.compare(lp1.getSymbolTransaction().getPricePaid(), lp2.getSymbolTransaction().getPricePaid());
+                result = Double.compare(lp1.getPricePaidLocal(), lp2.getPricePaidLocal());
             }
             else if (lblSort.equals(lblPrice)) {
-                result = Double.compare(prices.getPrice(lp1.getSymbol()).getCurrentPrice(), prices.getPrice(lp2.getSymbol()).getCurrentPrice());
+                result = Double.compare(lp1.getPriceLocal(), lp2.getPriceLocal());
             }
             else if (lblSort.equals(lblShares)) {
                 result = Integer.compare(lp1.getSharesBought(), lp2.getSharesBought());
@@ -299,7 +299,7 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
                 result = Double.compare(lp1.getPercentChange(), lp2.getPercentChange());
             }
             else if (lblSort.equals(lblGainLoss)) {
-                result = Double.compare(lp1.getProfitLoss(), lp2.getProfitLoss());
+                result = Double.compare(lp1.getProfitLossLocal(), lp2.getProfitLossLocal());
             }
             else if (lblSort.equals(lblSource)) {
                 result = lp1.getSource().compareToIgnoreCase(lp2.getSource());

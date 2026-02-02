@@ -243,7 +243,7 @@ public class DaySummaryPanel extends JDialog implements CallbackInterface {
                 result = lp1.getSymbol().compareToIgnoreCase(lp2.getSymbol());
             }
             else if (lblSort.equals(lblPrice)) {
-                result = Double.compare(prices.getPrice(lp1.getSymbol()).getCurrentPrice(), prices.getPrice(lp2.getSymbol()).getCurrentPrice());
+                result = Double.compare(lp1.getPriceLocal(), lp2.getPriceLocal());
             }
             else if (lblSort.equals(lblValue)) {
                 result = Double.compare(lp1.getDayProfitLossLocal(), lp2.getDayProfitLossLocal());

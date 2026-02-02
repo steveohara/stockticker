@@ -99,7 +99,7 @@ public class LivePrice {
      * @return Formatted aggregated price paid
      */
     public String getFormattedPricePaid() {
-        return Utils.formatCurrencyValue(aggregated ? getAggregatedPricePaid() : symbolTransaction.getPricePaid(), symbolTransaction.getCurrencySymbol());
+        return Utils.formatCurrencyValue(getPricePaid(), symbolTransaction.getCurrencySymbol());
     }
 
     /**
@@ -108,7 +108,7 @@ public class LivePrice {
      * @return Formatted aggregated shares bought
      */
     public String getFormattedSharesBought() {
-        return Utils.formatValue(aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought());
+        return Utils.formatValue(getSharesBought());
     }
 
     /**
@@ -292,6 +292,15 @@ public class LivePrice {
         double currentPrice = prices.getPrice(symbol).getCurrentPrice();
         double sharesBought = aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought();
         return (currentPrice - pricePaid) * sharesBought;
+    }
+
+    /**
+     * Calculates the profit or loss based on current price and original price in local currency.
+     *
+     * @return Profit or loss amount.
+     */
+    public double getProfitLossLocal() {
+        return exchangeRates.convertAmount(symbolTransaction, getProfitLoss());
     }
 
     /**
@@ -495,4 +504,41 @@ public class LivePrice {
     public int getSharesBought() {
         return (int)(aggregated ? getAggregatedSharesBought() : symbolTransaction.getSharesBought());
     }
+
+    /**
+     * Gets the price paid (cost base).
+     *
+     * @return Price paid.
+     */
+    public double getPricePaid() {
+        return aggregated ? getAggregatedPricePaid() : symbolTransaction.getPricePaid();
+    }
+
+    /**
+     * Gets the price paid (cost base) in local currency.
+     *
+     * @return Price paid.
+     */
+    public double getPricePaidLocal() {
+        return exchangeRates.convertAmount(symbolTransaction, getPricePaid());
+    }
+
+    /**
+     * Returns the current price
+     *
+     * @return Current price.
+     */
+    public double getPrice() {
+        return prices.getPrice(symbol).getCurrentPrice();
+    }
+
+    /**
+     * Returns the current price in local currency
+     *
+     * @return Current price.
+     */
+    public double getPriceLocal() {
+        return exchangeRates.convertAmount(symbolTransaction, getPrice());
+    }
+
 }

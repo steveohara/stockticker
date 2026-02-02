@@ -178,23 +178,29 @@ public class ExchangeRatesManager {
      * @return The equivalent amount in the base currency
      */
     public double convertAmount(String fromCode, String fromCurrencySymbol, double amount) {
+        SettingsManager settings = SettingsManager.getInstance();
+
+        log.info("");
+        log.info("Converting {} from {} to {}", amount, fromCode, settings.getCurrencyCode());
         ExchangeRate fromRate = getRate(fromCode);
         if (fromRate == null) {
             log.warn("Cannot convert amount - missing exchange rate for {}", fromCode);
             return 0.0;
         }
         double total = amount / (fromRate.getExchangeRate() == 0.0 ? 1.0 : fromRate.getExchangeRate());
+        log.info("Converted amount before symbol adjustment: {}", total);
 
         // We need to take the currency symbol into account if it indicates a different denomination
         if (fromCurrencySymbol != null && fromCurrencySymbol.matches("[a-zA-Z¢]+")) {
             total = total / 100.0;
+            log.info("Converted amount after symbol adjustment: {}", total);
         }
 
         // Now we need to do a similar adjustment for the base currency symbol
-        SettingsManager settings = SettingsManager.getInstance();
         String baseCurrencySymbol = settings.getCurrencySymbol();
         if (baseCurrencySymbol != null && baseCurrencySymbol.matches("[a-zA-Z¢]+")) {
             total = total * 100.0;
+            log.info("Converted amount after base symbol adjustment: {}", total);
         }
         return total;
     }
