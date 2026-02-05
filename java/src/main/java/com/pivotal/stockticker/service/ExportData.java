@@ -88,6 +88,19 @@ public class ExportData {
             // Select the symbols to export
             List<SymbolTransaction> symbols = symbolsManager.getSymbolTransactions(includeDisabled, uniqueOnly, null);
             PricesManager prices = new PricesManager(null);
+            SettingsManager settings = SettingsManager.getInstance();
+            ExchangeRatesManager rates = new ExchangeRatesManager(null);
+
+            // If we are getting ALL symbols, we will need to get all exchange rates and all prices.
+            if (includeDisabled) {
+                log.info("Getting all exchange rates");
+                rates.replaceExchangeRates(symbolsManager.getAllCurrencyCodes(true));
+                rates.refreshExchangeRates();
+                log.info("Getting all prices");
+                prices.replacePrices(symbolsManager.getAllSymbolCodes(true));
+                prices.refreshPrices();
+                log.info("Data update complete");
+            }
 
             // Map live prices by symbol code for easy lookup
             try (FileWriter writer = new FileWriter(file);
@@ -95,12 +108,13 @@ public class ExportData {
 
                 // Write header
                 csvPrinter.printRecord("Date:", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                csvPrinter.printRecord("Code", "Display Name", "Trade Date", "Disabled", "Currency Name", "Currency Symbol", "Shares", "Cost", "Current Price");
+                csvPrinter.printRecord("Code", "Display Name", "Trade Date", "Disabled", "Currency Name", "Currency Symbol", "Shares", "Cost", "Current Price",
+                        String.format("Value (%s)", settings.getCurrencyCode()),
+                        String.format("Cost (%s)", settings.getCurrencyCode()),
+                        String.format("Profit (%s)", settings.getCurrencyCode()));
 
                 // If this is unique only, we need to filter the list to only one transaction per symbol
                 if (uniqueOnly) {
-                    SettingsManager settings = SettingsManager.getInstance();
-                    ExchangeRatesManager rates = new ExchangeRatesManager(null);
                     ArrayList<LivePrice> livePricesList = LivePrice.getLivePrices(symbolsManager, prices, rates, settings);
 
                     // Write data rows using live, aggregated prices
@@ -109,12 +123,15 @@ public class ExportData {
                                 symbol.getSymbol(),
                                 symbol.getSymbolTransaction().getDisplayName(),
                                 symbol.getDisplayTimestamp(),
-                                Boolean.toString(symbol.getSymbolTransaction().isDisabled()),
+                                symbol.getSymbolTransaction().isDisabled(),
                                 symbol.getSymbolTransaction().getCurrencyCode(),
                                 symbol.getSymbolTransaction().getCurrencySymbol(),
-                                Double.toString(symbol.getSharesBought()),
-                                Double.toString(symbol.getPricePaid()),
-                                Double.toString(symbol.getPrice())
+                                symbol.getSharesBought(),
+                                symbol.getPricePaid(),
+                                symbol.getPrice(),
+                                symbol.getValueLocal(),
+                                symbol.getCostLocal(),
+                                symbol.getValueLocal() - symbol.getCostLocal()
                         );
                     }
                 }
@@ -126,12 +143,15 @@ public class ExportData {
                                 symbol.getCode(),
                                 symbol.getDisplayName(),
                                 symbol.getDisplayTimestamp(),
-                                Boolean.toString(symbol.isDisabled()),
+                                symbol.isDisabled(),
                                 symbol.getCurrencyCode(),
                                 symbol.getCurrencySymbol(),
-                                Double.toString(symbol.getSharesBought()),
-                                Double.toString(symbol.getPricePaid()),
-                                Double.toString(price == null ? 0.0 : price.getCurrentPrice())
+                                symbol.getSharesBought(),
+                                symbol.getPricePaid(),
+                                price == null ? 0.0 : price.getCurrentPrice(),
+                                price == null ? 0.0 : rates.convertAmount(symbol, price.getCurrentPrice() * symbol.getSharesBought()),
+                                rates.convertAmount(symbol, symbol.getPricePaid() * symbol.getSharesBought()),
+                                price == null ? 0.0 : rates.convertAmount(symbol, (price.getCurrentPrice() - symbol.getPricePaid()) * symbol.getSharesBought())
                         );
                     }
                 }

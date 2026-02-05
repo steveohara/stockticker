@@ -794,20 +794,32 @@ public class TickerBar extends JFrame implements CallbackInterface {
         pnlRightDrag.setComponentPopupMenu(contextMenu);
     }
 
+    /**
+     * Exports the ticker data to a CSV file based on the selected export option.
+     *
+     * @param e The action event triggered by the export menu item.
+     */
     private void exportToCSV(ActionEvent e) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                if (e.getActionCommand().contains("All"))
-                    ExportData.exportSymbolsToCSV(this, true, false);
-                else if (e.getActionCommand().contains("Live"))
-                    ExportData.exportSymbolsToCSV(this, false, false);
-                else if (e.getActionCommand().contains("Summarised"))
-                    ExportData.exportSymbolsToCSV(this, false, true);
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    if (e.getActionCommand().contains("All")) {
+                        ExportData.exportSymbolsToCSV(null, true, false);
+                    }
+                    else if (e.getActionCommand().contains("Live")) {
+                        ExportData.exportSymbolsToCSV(null, false, false);
+                    }
+                    else if (e.getActionCommand().contains("Summarised")) {
+                        ExportData.exportSymbolsToCSV(null, false, true);
+                    }
+                }
+                catch (Exception ex) {
+                    Utils.showTopmostMessage("Failed to open Symbols Form\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                return null;
             }
-            catch (Exception ex) {
-                Utils.showTopmostMessage("Failed to open Symbols Form\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
+        }.execute();
     }
 
     /**
