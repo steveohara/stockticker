@@ -531,12 +531,16 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 }
 
                 // Check to see if it's over the summary panel
-                screenLocation = pnlSummary.getLocationOnScreen();
-                bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlSummary.getWidth(), pnlSummary.getHeight());
-                if (bounds.contains(mousePos)) {
-                    summaryPanel.showSummary(mousePos);
+                if (pnlSummary.isVisible()) {
+                    screenLocation = pnlSummary.getLocationOnScreen();
+                    bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlSummary.getWidth(), pnlSummary.getHeight());
+                    if (bounds.contains(mousePos)) {
+                        summaryPanel.showSummary(mousePos);
+                    }
                 }
-                else {
+
+                // Check if we are over the day summary panel
+                if (pnlDaySummary.isVisible()) {
                     screenLocation = pnlDaySummary.getLocationOnScreen();
                     bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlDaySummary.getWidth(), pnlDaySummary.getHeight());
                     if (bounds.contains(mousePos)) {
