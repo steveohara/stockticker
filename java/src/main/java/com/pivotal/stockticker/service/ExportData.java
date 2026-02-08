@@ -11,6 +11,7 @@ import com.pivotal.stockticker.model.LivePrice;
 import com.pivotal.stockticker.model.Price;
 import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.model.SymbolTransaction;
+import com.pivotal.stockticker.ui.MessageDialog;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -93,13 +94,17 @@ public class ExportData {
 
             // If we are getting ALL symbols, we will need to get all exchange rates and all prices.
             if (includeDisabled) {
+                MessageDialog messageDialog = MessageDialog.create(parent, "Exporting all symbols may take some time as we need to fetch all exchange rates and prices...", "Export All Symbols", JOptionPane.PLAIN_MESSAGE);
                 log.info("Getting all exchange rates");
                 rates.replaceExchangeRates(symbolsManager.getAllCurrencyCodes(true));
                 rates.refreshExchangeRates();
+                Utils.sleep(1000);
+                messageDialog.showMessage("Getting all prices may take some time as we need to fetch all prices for all symbols...");
                 log.info("Getting all prices");
                 prices.replacePrices(symbolsManager.getAllSymbolCodes(true));
                 prices.refreshPrices();
                 log.info("Data update complete");
+                messageDialog.close();
             }
 
             // Map live prices by symbol code for easy lookup
@@ -155,11 +160,11 @@ public class ExportData {
                         );
                     }
                 }
-                Utils.showTopmostMessage(parent, String.format("Successfully exported symbols to [%s]", file.getAbsolutePath()), "Export Successful", JOptionPane.INFORMATION_MESSAGE);
+                MessageDialog.create(parent, String.format("Successfully exported symbols to [%s]", file.getAbsolutePath()), "Export Successful", JOptionPane.INFORMATION_MESSAGE);
             }
             catch (IOException e) {
                 log.error("Error exporting symbols to [{}] - {}", file.getAbsolutePath(), e.getMessage());
-                Utils.showTopmostMessage(parent, String.format("Error exporting symbols to [%s]: %s", file.getAbsolutePath(), e.getMessage()), "Export Error", JOptionPane.ERROR_MESSAGE);
+                MessageDialog.create(parent, String.format("Error exporting symbols to [%s]: %s", file.getAbsolutePath(), e.getMessage()), "Export Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

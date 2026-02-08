@@ -30,33 +30,6 @@ public class Utils {
     private static JFileChooser fileChooser = null;
 
     /**
-     * Displays a message dialog that stays on top of all other windows.
-     *
-     * @param message     The message to display.
-     * @param title       The title of the dialog.
-     * @param messageType The type of message (e.g., JOptionPane.INFORMATION_MESSAGE).
-     */
-    public static void showTopmostMessage(String message, String title, int messageType) {
-        showTopmostMessage(null, message, title, messageType);
-    }
-
-    /**
-     * Displays a message dialog that stays on top of all other windows.
-     *
-     * @param parent      The parent component for the dialog.
-     * @param message     The message to display.
-     * @param title       The title of the dialog.
-     * @param messageType The type of message (e.g., JOptionPane.INFORMATION_MESSAGE).
-     */
-    public static void showTopmostMessage(Component parent, String message, String title, int messageType) {
-        JOptionPane pane = new JOptionPane(message, messageType);
-        JDialog dialog = pane.createDialog(parent, title);
-        dialog.setAlwaysOnTop(true);
-        dialog.setModal(true);
-        dialog.setVisible(true);
-    }
-
-    /**
      * Attaches change listeners to various Swing components within a container.
      *
      * @param container        The container holding the components.
@@ -347,4 +320,19 @@ public class Utils {
         int b = (int)(color.getBlue() + (255 - color.getBlue()) * amount);
         return new Color(r, g, b, color.getAlpha());
     }
+
+    /**
+     * Sleeps for the specified number of milliseconds, handling InterruptedException.
+     *
+     * @param millis The number of milliseconds to sleep.
+     */
+    public static void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
 }

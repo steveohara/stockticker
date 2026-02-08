@@ -766,7 +766,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         });
         contextMenu.add(help);
         JMenuItem about = new JMenuItem("About...");
-        about.addActionListener(e -> Utils.showTopmostMessage(VersionInfo.getVersionString(), "About", JOptionPane.INFORMATION_MESSAGE));
+        about.addActionListener(e -> MessageDialog.create(VersionInfo.getVersionString(), "About", JOptionPane.INFORMATION_MESSAGE));
         contextMenu.add(about);
         contextMenu.addSeparator();
 
@@ -795,6 +795,15 @@ public class TickerBar extends JFrame implements CallbackInterface {
     }
 
     /**
+     * Retrieves the context menu for the ticker panel.
+     *
+     * @return The JPopupMenu associated with the ticker panel.
+     */
+    public JPopupMenu getPopupMenu() {
+        return pnlTicker.getComponentPopupMenu();
+    }
+
+    /**
      * Exports the ticker data to a CSV file based on the selected export option.
      *
      * @param e The action event triggered by the export menu item.
@@ -815,7 +824,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                     }
                 }
                 catch (Exception ex) {
-                    Utils.showTopmostMessage("Failed to open Symbols Form\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    MessageDialog.create("Failed to open Symbols Form\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 return null;
             }
@@ -831,7 +840,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 new SymbolsForm(this);
             }
             catch (Exception ex) {
-                Utils.showTopmostMessage("Failed to open Symbols Form\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                MessageDialog.create("Failed to open Symbols Form\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
     }

@@ -79,6 +79,12 @@ public class StockPanel extends JDialog implements CallbackInterface {
                 return;
             }
 
+            // If the popup menu is open, do not hide the preview as the user is likely trying to click on it
+            if (tickerBar.getPopupMenu().isVisible()) {
+                setVisible(false);
+                return;
+            }
+
             // If the mouse is not over the dialog and not over the ticker bar at
             // the same symbol, hide the preview
             Point mousePos = MouseInfo.getPointerInfo().getLocation();
