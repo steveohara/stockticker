@@ -6,6 +6,7 @@
  */
 package com.pivotal.stockticker.service;
 
+import com.pivotal.stockticker.Utils;
 import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.model.SymbolTransaction;
 import com.pivotal.stockticker.ui.MessageDialog;
@@ -67,11 +68,11 @@ public class BackupReload {
             try (OutputStream os = Files.newOutputStream(selectedFile.toPath())) {
                 Preferences prefs = Preferences.userRoot().node(PersistanceManager.ROOT_NODE_NAME);
                 prefs.exportSubtree(os);
-                MessageDialog.create(dialog, "Settings backed up successfully!", "Backup Successful", JOptionPane.INFORMATION_MESSAGE);
+                MessageDialog.show(dialog, "Settings backed up successfully!", "Backup Successful", JOptionPane.INFORMATION_MESSAGE);
                 log.info("Preferences backed up to {}", selectedFile);
             }
             catch (IOException | BackingStoreException ex) {
-                MessageDialog.create(dialog, "Export failed: " + ex.getMessage(), "Backup Failed", JOptionPane.ERROR_MESSAGE);
+                MessageDialog.show(dialog, "Export failed: " + ex.getMessage(), "Backup Failed", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -103,20 +104,20 @@ public class BackupReload {
             // Get the file and make sure it has an extension
             File selectedFile = chooser.getSelectedFile();
             if (selectedFile == null || !selectedFile.exists()) {
-                MessageDialog.create(dialog, "Selected file does not exist.", "Restore Failed", JOptionPane.ERROR_MESSAGE);
+                MessageDialog.show(dialog, "Selected file does not exist.", "Restore Failed", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
 
             // Load the preferences from the file
             try {
                 loadPreferencesFromFile(selectedFile);
-                MessageDialog.create(dialog, "Settings restored successfully!", "Restore Successful", JOptionPane.INFORMATION_MESSAGE);
+                MessageDialog.show(dialog, "Settings restored successfully!", "Restore Successful", JOptionPane.INFORMATION_MESSAGE);
                 log.info("Preferences restored from {}", chooser.getSelectedFile());
                 return true;
             }
             catch (Exception ex) {
                 log.error("Restore from {} failed", selectedFile, ex);
-                MessageDialog.create(dialog, "Restore failed: " + ex.getMessage(), "Restore Failed", JOptionPane.ERROR_MESSAGE);
+                MessageDialog.show(dialog, "Restore failed: " + ex.getMessage(), "Restore Failed", JOptionPane.ERROR_MESSAGE);
             }
         }
         return false;
@@ -523,6 +524,16 @@ public class BackupReload {
         }
 
         private CHOOSER_TYPE chooserType = CHOOSER_TYPE.OPEN;
+        private JDialog dialog = null;
+        private int returnValue = ERROR_OPTION;
+
+        @Override
+        protected JDialog createDialog(Component parent) throws HeadlessException {
+            JDialog dialog = super.createDialog(parent);
+            dialog.setLocationRelativeTo(parent);
+            Utils.recenterDialog(dialog, parent);
+            return dialog;
+        }
 
         @Override
         public void approveSelection() {

@@ -766,7 +766,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         });
         contextMenu.add(help);
         JMenuItem about = new JMenuItem("About...");
-        about.addActionListener(e -> MessageDialog.create(VersionInfo.getVersionString(), "About", JOptionPane.INFORMATION_MESSAGE));
+        about.addActionListener(e -> MessageDialog.show(VersionInfo.getVersionString(), "About", JOptionPane.INFORMATION_MESSAGE));
         contextMenu.add(about);
         contextMenu.addSeparator();
 
@@ -809,22 +809,23 @@ public class TickerBar extends JFrame implements CallbackInterface {
      * @param e The action event triggered by the export menu item.
      */
     private void exportToCSV(ActionEvent e) {
+        Component tickerComponent = this;
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
                     if (e.getActionCommand().contains("All")) {
-                        ExportData.exportSymbolsToCSV(null, true, false);
+                        ExportData.exportSymbolsToCSV(tickerComponent, true, false);
                     }
                     else if (e.getActionCommand().contains("Live")) {
-                        ExportData.exportSymbolsToCSV(null, false, false);
+                        ExportData.exportSymbolsToCSV(tickerComponent, false, false);
                     }
                     else if (e.getActionCommand().contains("Summarised")) {
-                        ExportData.exportSymbolsToCSV(null, false, true);
+                        ExportData.exportSymbolsToCSV(tickerComponent, false, true);
                     }
                 }
                 catch (Exception ex) {
-                    MessageDialog.create("Failed to open Symbols Form\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    MessageDialog.show("Failed to open Symbols Form\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 return null;
             }
@@ -840,7 +841,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                 new SymbolsForm(this);
             }
             catch (Exception ex) {
-                MessageDialog.create("Failed to open Symbols Form\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                MessageDialog.show("Failed to open Symbols Form\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
     }

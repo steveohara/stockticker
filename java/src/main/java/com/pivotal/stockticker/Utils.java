@@ -6,6 +6,7 @@
  */
 package com.pivotal.stockticker;
 
+import com.pivotal.stockticker.ui.TickerBar;
 import com.pivotal.stockticker.utils.CallbackInterface;
 import lombok.extern.slf4j.Slf4j;
 
@@ -315,9 +316,9 @@ public class Utils {
      */
     public static Color lighten(Color color, float amount) {
         // amount: 0.0 = original color, 1.0 = white
-        int r = (int)(color.getRed() + (255 - color.getRed()) * amount);
-        int g = (int)(color.getGreen() + (255 - color.getGreen()) * amount);
-        int b = (int)(color.getBlue() + (255 - color.getBlue()) * amount);
+        int r = (int) (color.getRed() + (255 - color.getRed()) * amount);
+        int g = (int) (color.getGreen() + (255 - color.getGreen()) * amount);
+        int b = (int) (color.getBlue() + (255 - color.getBlue()) * amount);
         return new Color(r, g, b, color.getAlpha());
     }
 
@@ -332,6 +333,26 @@ public class Utils {
         }
         catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * Adjusts the position of the dialog to be centered on the screen.
+     * For the ticker bar, it centers relative to the ticker bar but
+     * aligns to the middle of the ticker bar.
+     *
+     * @param dialog The dialog to recenter.
+     * @param parent The parent component to center relative to.
+     */
+    public static void recenterDialog(JDialog dialog, Component parent) {
+        if (parent instanceof TickerBar) {
+            dialog.setLocationRelativeTo(parent);
+            Point locationRelativeToTicker = dialog.getLocation();
+            Rectangle screen = Utils.getAllScreensBounds();
+            dialog.setLocation((int) locationRelativeToTicker.getX(), (screen.height - dialog.getHeight()) / 2);
+        }
+        else {
+            dialog.setLocationRelativeTo(parent);
         }
     }
 

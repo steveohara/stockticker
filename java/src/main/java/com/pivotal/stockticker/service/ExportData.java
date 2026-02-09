@@ -12,6 +12,7 @@ import com.pivotal.stockticker.model.Price;
 import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.model.SymbolTransaction;
 import com.pivotal.stockticker.ui.MessageDialog;
+import com.pivotal.stockticker.ui.ProgressDialog;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -41,7 +42,7 @@ public class ExportData {
      *
      * @param dialog The parent dialog for the file chooser.
      */
-    private static File getCsvExportFile(Window dialog) {
+    private static File getCsvExportFile(Component dialog) {
 
         // Use JFileChooser to let user pick the file location
         if (chooser == null) {
@@ -77,7 +78,7 @@ public class ExportData {
      * @param includeDisabled Whether to include disabled symbols in the export
      * @param uniqueOnly      Whether to include only unique symbols in the export
      */
-    public static void exportSymbolsToCSV(Window parent, boolean includeDisabled, boolean uniqueOnly) {
+    public static void exportSymbolsToCSV(Component parent, boolean includeDisabled, boolean uniqueOnly) {
 
         // Get a file to use for export
         File file = getCsvExportFile(parent);
@@ -94,17 +95,17 @@ public class ExportData {
 
             // If we are getting ALL symbols, we will need to get all exchange rates and all prices.
             if (includeDisabled) {
-                MessageDialog messageDialog = MessageDialog.create(parent, "Exporting all symbols may take some time as we need to fetch all exchange rates and prices...", "Export All Symbols", JOptionPane.PLAIN_MESSAGE);
+                ProgressDialog progressDialog = ProgressDialog.create(parent, "Exporting all symbols may take some time as we need to fetch all exchange rates and prices...", "Export All Symbols");
                 log.info("Getting all exchange rates");
                 rates.replaceExchangeRates(symbolsManager.getAllCurrencyCodes(true));
                 rates.refreshExchangeRates();
                 Utils.sleep(1000);
-                messageDialog.showMessage("Getting all prices may take some time as we need to fetch all prices for all symbols...");
+                progressDialog.showMessage("Getting all prices may take some time as we need to fetch all prices for all symbols...");
                 log.info("Getting all prices");
                 prices.replacePrices(symbolsManager.getAllSymbolCodes(true));
                 prices.refreshPrices();
                 log.info("Data update complete");
-                messageDialog.close();
+                progressDialog.close();
             }
 
             // Map live prices by symbol code for easy lookup
@@ -160,11 +161,11 @@ public class ExportData {
                         );
                     }
                 }
-                MessageDialog.create(parent, String.format("Successfully exported symbols to [%s]", file.getAbsolutePath()), "Export Successful", JOptionPane.INFORMATION_MESSAGE);
+                MessageDialog.show(parent, String.format("Successfully exported symbols to [%s]", file.getAbsolutePath()), "Export Successful", JOptionPane.INFORMATION_MESSAGE);
             }
             catch (IOException e) {
                 log.error("Error exporting symbols to [{}] - {}", file.getAbsolutePath(), e.getMessage());
-                MessageDialog.create(parent, String.format("Error exporting symbols to [%s]: %s", file.getAbsolutePath(), e.getMessage()), "Export Error", JOptionPane.ERROR_MESSAGE);
+                MessageDialog.show(parent, String.format("Error exporting symbols to [%s]: %s", file.getAbsolutePath(), e.getMessage()), "Export Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
