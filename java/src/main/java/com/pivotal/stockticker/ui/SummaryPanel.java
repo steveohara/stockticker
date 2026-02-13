@@ -278,7 +278,7 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
      * Gets the live prices sorted based on the current sort column and order
      */
     private ArrayList<LivePrice> getLivePrices(SymbolsManager symbols, PricesManager prices, ExchangeRatesManager rates) {
-        ArrayList<LivePrice> livePricesList = LivePrice.getLivePrices(symbols, prices, rates, true);
+        ArrayList<LivePrice> livePricesList = LivePrice.getLivePrices(symbols, prices, rates, true, true);
 
         // Sort them based on the current sort column and order
         livePricesList.sort((lp1, lp2) -> {
