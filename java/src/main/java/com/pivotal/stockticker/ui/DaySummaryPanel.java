@@ -52,30 +52,35 @@ public class DaySummaryPanel extends JDialog implements CallbackInterface {
         // Set a timer to keep track of the mouse position for whether to close the
         // window automatically
         Timer timer = new Timer(750, e -> {
+            try {
 
-            // If we are not visible, do nothing
-            if (!isVisible()) {
-                return;
+                // If we are not visible, do nothing
+                if (!isVisible()) {
+                    return;
+                }
+
+                // If the popup menu is open, do not hide the preview as the user is likely trying to click on it
+                if (tickerBar.getPopupMenu().isVisible()) {
+                    setVisible(false);
+                    return;
+                }
+
+                // If the mouse is not over the dialog and not over the ticker bar at
+                // the summary, hide the panel
+                Point mousePos = MouseInfo.getPointerInfo().getLocation();
+
+                Point screenLocation = getLocationOnScreen();
+                Rectangle windowBounds = new Rectangle(screenLocation.x, screenLocation.y, getWidth(), getHeight());
+
+                screenLocation = tickerBar.pnlDaySummary.getLocationOnScreen();
+                Rectangle summaryBounds = new Rectangle(screenLocation.x, screenLocation.y, tickerBar.pnlDaySummary.getWidth(), tickerBar.pnlSummary.getHeight());
+
+                if (!summaryBounds.contains(mousePos) && !windowBounds.contains(mousePos)) {
+                    setVisible(false);
+                }
             }
-
-            // If the popup menu is open, do not hide the preview as the user is likely trying to click on it
-            if (tickerBar.getPopupMenu().isVisible()) {
-                setVisible(false);
-                return;
-            }
-
-            // If the mouse is not over the dialog and not over the ticker bar at
-            // the summary, hide the panel
-            Point mousePos = MouseInfo.getPointerInfo().getLocation();
-
-            Point screenLocation = getLocationOnScreen();
-            Rectangle windowBounds = new Rectangle(screenLocation.x, screenLocation.y, getWidth(), getHeight());
-
-            screenLocation = tickerBar.pnlDaySummary.getLocationOnScreen();
-            Rectangle summaryBounds = new Rectangle(screenLocation.x, screenLocation.y, tickerBar.pnlDaySummary.getWidth(), tickerBar.pnlSummary.getHeight());
-
-            if (!summaryBounds.contains(mousePos) && !windowBounds.contains(mousePos)) {
-                setVisible(false);
+            catch (Exception ex) {
+                log.error("Error in day summary timer: ", ex);
             }
         });
         timer.start();

@@ -121,11 +121,16 @@ public class ColouredTextPanel extends JPanel {
             log.debug("Creating scroll timer to scroll text");
             if (scrollTimer == null) {
                 scrollTimer = new Timer(SCROLL_DELAY, e -> {
-                    scrollPosition += scrollSpeed;
-                    if (scrollPosition >= totalTextWidth) {
-                        scrollPosition = 0;
+                    try {
+                        scrollPosition += scrollSpeed;
+                        if (scrollPosition >= totalTextWidth) {
+                            scrollPosition = 0;
+                        }
+                        repaint();
                     }
-                    repaint();
+                    catch (Exception ex) {
+                        log.error("Error occurred during scroll timer action", ex);
+                    }
                 });
                 scrollTimer.start();
             }

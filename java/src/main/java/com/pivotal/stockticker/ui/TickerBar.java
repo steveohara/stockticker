@@ -501,52 +501,57 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
         // Set a timer to keep track of the mouse position for hover panels
         Timer timer = new Timer(500, e -> {
+            try {
 
-            // Get the current mouse position and check if it's over a symbol
-            Point mousePos = MouseInfo.getPointerInfo().getLocation();
-            LivePrice price = getLivePriceAtPoint(mousePos);
+                // Get the current mouse position and check if it's over a symbol
+                Point mousePos = MouseInfo.getPointerInfo().getLocation();
+                LivePrice price = getLivePriceAtPoint(mousePos);
 
-            // If over a symbol, select it; otherwise, clear selection
-            if (price != null && price.getSymbolTransaction() != null && !price.getSymbolTransaction().isSelected()) {
+                // If over a symbol, select it; otherwise, clear selection
+                if (price != null && price.getSymbolTransaction() != null && !price.getSymbolTransaction().isSelected()) {
 
-                // Clear any previous selected symbols and select this one
-                symbols.clearSelected();
-                price.getSymbolTransaction().setSelected(true);
+                    // Clear any previous selected symbols and select this one
+                    symbols.clearSelected();
+                    price.getSymbolTransaction().setSelected(true);
 
-                // Draw the prices with the selection
-                drawLivePrices();
+                    // Draw the prices with the selection
+                    drawLivePrices();
 
-                // Show the stock preview
-                stockPanel.showSymbol(price, mousePos);
+                    // Show the stock preview
+                    stockPanel.showSymbol(price, mousePos);
+                }
+
+                // Not over a symbol or the panel, clear any selected symbols
+                else {
+                    Point screenLocation = pnlStocks.getLocationOnScreen();
+                    Rectangle bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlStocks.getWidth(), pnlStocks.getHeight());
+                    if (!bounds.contains(mousePos)) {
+                        if (symbols.clearSelected()) {
+                            drawLivePrices();
+                        }
+                    }
+
+                    // Check to see if it's over the summary panel
+                    if (pnlSummary.isVisible()) {
+                        screenLocation = pnlSummary.getLocationOnScreen();
+                        bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlSummary.getWidth(), pnlSummary.getHeight());
+                        if (bounds.contains(mousePos)) {
+                            summaryPanel.showSummary(mousePos);
+                        }
+                    }
+
+                    // Check if we are over the day summary panel
+                    if (pnlDaySummary.isVisible()) {
+                        screenLocation = pnlDaySummary.getLocationOnScreen();
+                        bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlDaySummary.getWidth(), pnlDaySummary.getHeight());
+                        if (bounds.contains(mousePos)) {
+                            daySummaryPanel.showSummary(mousePos);
+                        }
+                    }
+                }
             }
-
-            // Not over a symbol or the panel, clear any selected symbols
-            else {
-                Point screenLocation = pnlStocks.getLocationOnScreen();
-                Rectangle bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlStocks.getWidth(), pnlStocks.getHeight());
-                if (!bounds.contains(mousePos)) {
-                    if (symbols.clearSelected()) {
-                        drawLivePrices();
-                    }
-                }
-
-                // Check to see if it's over the summary panel
-                if (pnlSummary.isVisible()) {
-                    screenLocation = pnlSummary.getLocationOnScreen();
-                    bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlSummary.getWidth(), pnlSummary.getHeight());
-                    if (bounds.contains(mousePos)) {
-                        summaryPanel.showSummary(mousePos);
-                    }
-                }
-
-                // Check if we are over the day summary panel
-                if (pnlDaySummary.isVisible()) {
-                    screenLocation = pnlDaySummary.getLocationOnScreen();
-                    bounds = new Rectangle(screenLocation.x, screenLocation.y, pnlDaySummary.getWidth(), pnlDaySummary.getHeight());
-                    if (bounds.contains(mousePos)) {
-                        daySummaryPanel.showSummary(mousePos);
-                    }
-                }
+            catch (Exception ex) {
+                log.error("Error in hover timer", ex);
             }
         });
         timer.start();
