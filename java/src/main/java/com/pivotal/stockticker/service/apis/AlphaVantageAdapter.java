@@ -122,7 +122,7 @@ public class AlphaVantageAdapter implements PricesApiAdapter {
                     }
                 }
                 catch (Exception e) {
-                    log.error("Error fetching exchange rates from {} API: {}", e.getMessage(), getAdapterName());
+                    log.error("Error fetching exchange rates from ▲{} - {}", getAdapterName(), e.getMessage());
                 }
             }
             if (updatedSymbols.isEmpty()) {

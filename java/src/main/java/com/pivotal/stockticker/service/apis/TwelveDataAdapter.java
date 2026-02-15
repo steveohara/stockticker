@@ -122,7 +122,7 @@ public class TwelveDataAdapter implements PricesApiAdapter {
                     }
                 }
                 catch (Exception e) {
-                    log.error("Error fetching prices from {} API: {}", e.getMessage(), getAdapterName());
+                    log.error("Error fetching prices from ▲{} - {}", getAdapterName(), e.getMessage());
                 }
             }
             if (updatedSymbols.isEmpty()) {
