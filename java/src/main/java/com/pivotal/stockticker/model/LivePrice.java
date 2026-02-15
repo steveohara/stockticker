@@ -439,7 +439,7 @@ public class LivePrice {
      * @return List of LivePrice objects
      */
     public static ArrayList<LivePrice> getLivePrices(SymbolsManager symbols, PricesManager prices, ExchangeRatesManager exchangeRates, SettingsManager settings) {
-        return getLivePrices(symbols, prices, exchangeRates, settings.isShowUniqueSymbols());
+        return getLivePrices(symbols, prices, exchangeRates, settings.isShowUniqueSymbols(), false);
     }
 
     /**
@@ -449,12 +449,15 @@ public class LivePrice {
      * @param prices        Prices manager
      * @param exchangeRates Exchange rates manager
      * @param isAveraged    Whether to aggregate across all transactions for each symbol
+     * @param summaryOnly   Whether to include only summary rows (one per symbol) or all transactions
      * @return List of LivePrice objects
      */
-    public static ArrayList<LivePrice> getLivePrices(SymbolsManager symbols, PricesManager prices, ExchangeRatesManager exchangeRates, boolean isAveraged) {
+    public static ArrayList<LivePrice> getLivePrices(SymbolsManager symbols, PricesManager prices, ExchangeRatesManager exchangeRates, boolean isAveraged, boolean summaryOnly) {
         ArrayList<LivePrice> livePrices = new ArrayList<>();
         for (SymbolTransaction symbolTransaction : symbols.getSymbolTransactions(false, isAveraged, null)) {
-            livePrices.add(new LivePrice(symbols, prices, exchangeRates, symbolTransaction, isAveraged));
+            if (!summaryOnly || !symbolTransaction.isExcludeFromSummary()) {
+                livePrices.add(new LivePrice(symbols, prices, exchangeRates, symbolTransaction, isAveraged));
+            }
         }
         return livePrices;
     }
