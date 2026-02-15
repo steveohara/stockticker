@@ -90,7 +90,6 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
      * Sets up component listeners
      */
     private void initListeners() {
-
         ColumnHeaderMouseAdapter mouseAdapter = new ColumnHeaderMouseAdapter();
         lblStock.addMouseListener(mouseAdapter);
         lblPaid.addMouseListener(mouseAdapter);
@@ -227,6 +226,19 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
      */
     private void drawSummaryData(SettingsManager settings, ArrayList<LivePrice> livePricesList) {
 
+        // Update the label colours
+        lblStock.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblPaid.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblPrice.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblShares.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblCost.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblValue.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblPercent.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblGainLoss.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblSource.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblHeader.setForeColor(settings.getPreviewColor()).setBackColor(settings.getPreviewColor());
+        lblDivider.setForeColor(settings.getPreviewColor()).setBackColor(settings.getPreviewColor());
+
         // Clear the summary panel
         pnlSummary.cls();
         pnlSummary.setOpaque(true);
@@ -350,7 +362,7 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
         getContentPane().setLayout(null);
 
         // Create all the column headers
-        lblStock = SettingsLabel.create("Stock", "Sort by stock name").withDimensions(100, 25).atLeft(LEFT_MARGIN).atTop(LEFT_MARGIN / 2).setAlignment(SwingConstants.LEFT).setForeColor(settings.getLabelColor()).setBackColor(settings.getBackgroundColor()).to(getContentPane());
+        lblStock = SettingsLabel.create("Stock", "Sort by stock name").withDimensions(100, 25).atLeft(LEFT_MARGIN).atTop(LEFT_MARGIN / 2).setAlignment(SwingConstants.LEFT).setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor()).to(getContentPane());
         lblPaid = SettingsLabel.create("Paid", "Sort by the cost base price of the stock").sameAs(lblStock).withWidth(65).tail(lblStock).to(getContentPane());
         lblPrice = SettingsLabel.create("Price", "Sort by the current price").sameAs(lblPaid).tail(lblPaid).to(getContentPane());
         lblShares = SettingsLabel.create("Shares", "Sort by the number of shares").sameAs(lblPaid).tail(lblPrice).to(getContentPane());
@@ -359,7 +371,7 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
         lblPercent = SettingsLabel.create("Percent", "Sort by the percentage difference between value and cost").sameAs(lblPaid).tail(lblValue).to(getContentPane());
         lblGainLoss = SettingsLabel.create("Gain/Loss", "Sort by the difference between current total value and original cost").sameAs(lblCost).tail(lblPercent, 0).to(getContentPane());
         lblSource = SettingsLabel.create("Source", "Sort by the source of the data").sameAs(lblCost).tail(lblGainLoss).to(getContentPane());
-        lblHeader = SettingsLabel.create().below(lblStock, 0).withDimensions(lblSource.getRight() - lblStock.getX(), 1).setForeColor(settings.getLabelColor()).setBackColor(settings.getLabelColor()).to(getContentPane());
+        lblHeader = SettingsLabel.create().below(lblStock, 0).withDimensions(lblSource.getRight() - lblStock.getX(), 1).setForeColor(settings.getPreviewColor()).setBackColor(settings.getPreviewColor()).to(getContentPane());
 
         // Now position the summary panel
         pnlSummary = ColouredTextPanel.create().withDimensions(lblHeader.getWidth(), 10).at(0, lblHeader.getBottom() + VALUE_SEP).to(getContentPane());

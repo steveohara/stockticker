@@ -35,7 +35,7 @@ public class StockPanel extends JDialog implements CallbackInterface {
 
     private static final int LEFT_MARGIN = 10;
     private static final int VALUE_MARGIN = 95;
-    private static final int VALUE_SEP = 2;
+    private static final int VALUE_SEP = 1;
     private static final String AGENT_NAME = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
     private final HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).connectTimeout(Duration.ofSeconds(10)).build();
 
@@ -255,13 +255,13 @@ public class StockPanel extends JDialog implements CallbackInterface {
         pnlSummary.cls();
         pnlSummary.setOpaque(true);
         pnlSummary.setBackColor(settings.getBackgroundColor());
-        pnlSummary.setFontColor(settings.getLabelColor());
+        pnlSummary.setFontColor(settings.getPreviewColor());
         pnlSummary.setFont(settings.getFont());
 
         // Draw the overall position data
         pnlSummary.setCurrentX(LEFT_MARGIN);
         pnlSummary.setCurrentY(LEFT_MARGIN / 2);
-        pnlSummary.setFontSize(settings.getFontSize() * 1.2f);
+        pnlSummary.setFontSize(settings.getFontSize() * 1.1f);
         pnlSummary.setFontBold(true);
         pnlSummary.print("Overall Position");
 
@@ -299,7 +299,7 @@ public class StockPanel extends JDialog implements CallbackInterface {
         pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
         pnlSummary.print("Gain/Loss:");
         pnlSummary.setCurrentX(VALUE_MARGIN);
-        pnlSummary.setFontColor(livePrice.isUp() ? settings.getUpColor() : settings.getDownColor());
+        pnlSummary.setFontColor(livePrice.isUp() ? settings.getUpColor() : (livePrice.isDown() ? settings.getDownColor() : settings.getNormalTextColor()));
         pnlSummary.print(livePrice.getFormattedProfitLoss());
         pnlSummary.setCurrentX(VALUE_MARGIN);
         pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
@@ -307,8 +307,8 @@ public class StockPanel extends JDialog implements CallbackInterface {
 
         // Draw the day position data
         pnlSummary.setCurrentX(LEFT_MARGIN);
-        pnlSummary.setFontSize(settings.getFontSize() * 1.2f);
-        pnlSummary.setFontColor(settings.getLabelColor());
+        pnlSummary.setFontSize(settings.getFontSize() * 1.1f);
+        pnlSummary.setFontColor(settings.getPreviewColor());
         pnlSummary.setFontBold(true);
         pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP * 2);
         pnlSummary.print("Day Position");
@@ -338,15 +338,15 @@ public class StockPanel extends JDialog implements CallbackInterface {
         pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
         pnlSummary.print("Change:");
         pnlSummary.setCurrentX(VALUE_MARGIN);
-        pnlSummary.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : settings.getDownColor());
+        pnlSummary.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : (livePrice.isDownToday() ? settings.getDownColor() : settings.getNormalTextColor()));
         pnlSummary.print(livePrice.getFormattedDayChange() + " (" + livePrice.getFormattedPercentDayChange() + ")");
 
-        pnlSummary.setFontColor(settings.getLabelColor());
+        pnlSummary.setFontColor(settings.getPreviewColor());
         pnlSummary.setCurrentX(LEFT_MARGIN);
         pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
         pnlSummary.print("Gain/Loss:");
         pnlSummary.setCurrentX(VALUE_MARGIN);
-        pnlSummary.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : settings.getDownColor());
+        pnlSummary.setFontColor(livePrice.isUpToday() ? settings.getUpColor() : (livePrice.isDown() ? settings.getDownColor() : settings.getNormalTextColor()));
         pnlSummary.print(livePrice.getFormattedDayProfitLoss());
         pnlSummary.setCurrentX(VALUE_MARGIN);
         pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP);
@@ -355,8 +355,8 @@ public class StockPanel extends JDialog implements CallbackInterface {
         // Now the FX rate if it is appropriate
         if (!livePrice.getSymbolTransaction().getCurrencyCode().equalsIgnoreCase(settings.getCurrencyCode())) {
             pnlSummary.setCurrentX(LEFT_MARGIN);
-            pnlSummary.setFontSize(settings.getFontSize() * 1.2f);
-            pnlSummary.setFontColor(settings.getLabelColor());
+            pnlSummary.setFontSize(settings.getFontSize());
+            pnlSummary.setFontColor(settings.getPreviewColor());
             pnlSummary.setFontBold(true);
             pnlSummary.setCurrentY(pnlSummary.getCurrentY() + pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() + VALUE_SEP * 2);
             pnlSummary.print("FX Rate");
@@ -384,7 +384,7 @@ public class StockPanel extends JDialog implements CallbackInterface {
         }
 
         // Show the source of the data
-        pnlSummary.setFontColor(Color.GRAY);
+        pnlSummary.setFontColor(Color.LIGHT_GRAY);
         pnlSummary.setCurrentX(LEFT_MARGIN);
         pnlSummary.setCurrentY(pnlSummary.getHeight() - pnlSummary.getFontMetrics(pnlSummary.getFont()).getHeight() - LEFT_MARGIN / 2);
         pnlSummary.print("Updated: " + livePrice.getDisplayTimestamp());
@@ -417,7 +417,7 @@ public class StockPanel extends JDialog implements CallbackInterface {
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         ((JPanel)getContentPane()).setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
 
-        setSize(720, 360);
+        setSize(700, 360);
         setPreferredSize(getSize());
         setMaximumSize(getSize());
         setMinimumSize(getSize());
@@ -425,7 +425,7 @@ public class StockPanel extends JDialog implements CallbackInterface {
         setResizable(false);
         getContentPane().setLayout(null);
 
-        pnlSummary = ColouredTextPanel.create().withDimensions(220, getHeight()).atRight(getWidth()).to(getContentPane());
+        pnlSummary = ColouredTextPanel.create().withDimensions(200, getHeight()).atRight(getWidth()).to(getContentPane());
         lblGraph = SettingsLabel.create("").withDimensions(getWidth() - pnlSummary.getWidth(), getHeight()).atRight(pnlSummary.getX()).atTop(0).setAlignment(SwingConstants.CENTER).to(getContentPane());
         lblGraph.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
 

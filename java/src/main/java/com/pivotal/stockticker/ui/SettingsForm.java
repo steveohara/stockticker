@@ -29,7 +29,7 @@ import java.util.Set;
 public class SettingsForm extends JDialog implements CallbackInterface {
 
     private CapableTextField txtCurrencySymbol, txtMargin, txtTotalInvestment;
-    private SettingsButton btnBackground, btnBackup, btnCancel, btnDownArrowColour, btnDownColour, btnLabelColour, btnHoverColour, btnHighAlarm, btnLowAlarm, btnNormalText, btnOk, btnRestore, btnUpArrowColour, btnUpColour;
+    private SettingsButton btnBackground, btnBackup, btnCancel, btnDownArrowColour, btnDownColour, btnLabelColour, btnHoverColour, btnPreviewColour, btnHighAlarm, btnLowAlarm, btnNormalText, btnOk, btnRestore, btnUpArrowColour, btnUpColour;
     private SettingsCheckbox chkBold, chkItalic, chkShowDailyChange, chkShowTotalCost, chkShowTotalProfit, chkShowTotalProfitPercentage, chkShowTotalValue, chkShowUniqueSymbols;
     private SettingsComboBox<String> lstFont, lstCurrencyCode;
     private SettingsSpinner spnTickerUpdate;
@@ -104,6 +104,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         btnDownArrowColour.addActionListener(this::colourButtonClicked);
         btnLabelColour.addActionListener(this::colourButtonClicked);
         btnHoverColour.addActionListener(this::colourButtonClicked);
+        btnPreviewColour.addActionListener(this::colourButtonClicked);
 
         btnLowAlarm.addActionListener(this::selectAudioFile);
         btnHighAlarm.addActionListener(this::selectAudioFile);
@@ -137,6 +138,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         btnDownArrowColour.setBackground(settings.getDownArrowColor());
         btnLabelColour.setBackground(settings.getLabelColor());
         btnHoverColour.setBackground(settings.getHoverColor());
+        btnPreviewColour.setBackground(settings.getPreviewColor());
 
         // Fonts
         lstFont.setSelectedItem(settings.getFontName());
@@ -186,6 +188,7 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         settings.setDownArrowColor(btnDownArrowColour.getBackground());
         settings.setLabelColor(btnLabelColour.getBackground());
         settings.setHoverColor(btnHoverColour.getBackground());
+        settings.setPreviewColor(btnPreviewColour.getBackground());
 
         // Fonts
         settings.setFontName((String) lstFont.getSelectedItem());
@@ -326,6 +329,9 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
         SettingsLabel jLabel101 = SettingsLabel.create("Hover").below(jLabel8, vGap).withDimensions(jLabel5).to(getContentPane());
         btnHoverColour = SettingsButton.create("").tail(jLabel101, lblGap).withDimensions(btnBackground).setBackColor(new java.awt.Color(153, 153, 153)).to(getContentPane());
+
+        SettingsLabel jLabel102 = SettingsLabel.create("Preview Text").below(jLabel9, vGap).withDimensions(jLabel9).to(getContentPane());
+        btnPreviewColour = SettingsButton.create("").tail(jLabel102, lblGap).withDimensions(btnBackground).setBackColor(new java.awt.Color(255, 255, 255)).to(getContentPane());
 
         // Font settings
         SettingsLabel jLabel11 = SettingsLabel.create("Font").below(jLabel10, vGap).to(getContentPane());

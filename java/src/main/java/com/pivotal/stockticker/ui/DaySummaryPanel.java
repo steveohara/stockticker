@@ -201,6 +201,15 @@ public class DaySummaryPanel extends JDialog implements CallbackInterface {
      */
     private void drawSummaryData(SettingsManager settings, ArrayList<LivePrice> livePricesList) {
 
+        // Update the label colours
+        lblStock.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblPrice.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblValue.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblGainLoss.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblSource.setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor());
+        lblHeader.setForeColor(settings.getPreviewColor()).setBackColor(settings.getPreviewColor());
+        lblDivider.setForeColor(settings.getPreviewColor()).setBackColor(settings.getPreviewColor());
+
         // Clear the summary panel
         pnlSummary.cls();
         pnlSummary.setOpaque(true);
@@ -300,7 +309,7 @@ public class DaySummaryPanel extends JDialog implements CallbackInterface {
         getContentPane().setLayout(null);
 
         // Create all the column headers
-        lblStock = SettingsLabel.create("Stock", "Sort by stock name").withDimensions(100, 25).atLeft(LEFT_MARGIN).atTop(LEFT_MARGIN / 2).setAlignment(SwingConstants.LEFT).setForeColor(settings.getLabelColor()).setBackColor(settings.getBackgroundColor()).to(getContentPane());
+        lblStock = SettingsLabel.create("Stock", "Sort by stock name").withDimensions(100, 25).atLeft(LEFT_MARGIN).atTop(LEFT_MARGIN / 2).setAlignment(SwingConstants.LEFT).setForeColor(settings.getPreviewColor()).setBackColor(settings.getBackgroundColor()).to(getContentPane());
         lblPrice = SettingsLabel.create("Price", "Sort by the current price").sameAs(lblStock).tail(lblStock).withWidth(65).to(getContentPane());
         lblValue = SettingsLabel.create("Value", "Sort by the value of the gain/loss today").sameAs(lblStock).withWidth(80).tail(lblPrice).to(getContentPane());
         lblGainLoss = SettingsLabel.create("Change", "Sort by the percentage change between the start of day and current price").sameAs(lblStock).withWidth(110).tail(lblValue).to(getContentPane());

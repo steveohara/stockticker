@@ -447,8 +447,8 @@ public class TickerBar extends JFrame implements CallbackInterface {
         pnlStocks.setForeground(pnlTicker.getForeground());
 
         // Set the colors for the borders
-        pnlSummary.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, settings.getLabelColor()));
-        pnlDaySummary.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, settings.getLabelColor()));
+        pnlSummary.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.GRAY));
+        pnlDaySummary.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.GRAY));
 
         // Finalize and display the frame
         setVisible(true);

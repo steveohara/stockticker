@@ -50,6 +50,7 @@ public class SettingsManager extends PersistanceManager {
     private Color downArrowColor = new Color(255, 0, 0);
     private Color labelColor = Color.LIGHT_GRAY;
     private Color HoverColor = Color.LIGHT_GRAY;
+    private Color PreviewColor = Color.WHITE;
     private String fontName = "Tahoma";
     private boolean fontBold = false;
     private boolean fontItalic = false;
