@@ -221,13 +221,13 @@ public class StockPanel extends JDialog implements CallbackInterface {
         graphType = GRAPH_TYPE.DAY;
 
         // Position the form near the ticker bar and the selected live price
-        Rectangle screen = Utils.getAllScreensBounds();
+        Rectangle screen = Utils.getScreensBounds(location);
         int x = (int) location.getX();
         int y = tickerBar.getY() + tickerBar.getHeight();
 
         // Need to make sure the form is fully on screen
-        if (x + getWidth() > screen.getWidth()) {
-            x = (int) screen.getWidth() - getWidth();
+        if (x + getWidth() > (screen.getX() + screen.getWidth())) {
+            x = (int)screen.getX() + (int)screen.getWidth() - getWidth();
         }
         if (x < 0) {
             x = 0;

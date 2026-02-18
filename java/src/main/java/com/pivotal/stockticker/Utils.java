@@ -308,6 +308,27 @@ public class Utils {
     }
 
     /**
+     * Gets the bounds of the screen that contains the point.
+     *
+     * @param location The point to check which screen it is on.
+     * @return Rectangle representing the bounds of the screen that contains the point,
+     * or the bounds of all screens if the point is not on any screen.
+     */
+    public static Rectangle getScreensBounds(Point location) {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice[] screens = ge.getScreenDevices();
+
+        for (GraphicsDevice screen : screens) {
+            GraphicsConfiguration gc = screen.getDefaultConfiguration();
+            Rectangle screenBounds = gc.getBounds();
+            if (screenBounds.contains(location)) {
+                return screenBounds;
+            }
+        }
+        return getAllScreensBounds();
+    }
+
+    /**
      * Lightens a given color by a specified amount.
      *
      * @param color  The original color.
