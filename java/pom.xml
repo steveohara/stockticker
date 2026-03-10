@@ -338,6 +338,10 @@
                                         <argument>${project.organization.url}</argument>
                                         <argument>--java-options</argument>
                                         <argument>-Dapple.awt.UIElement=true</argument>
+                                        <argument>--java-options</argument>
+                                        <argument>-Djavax.net.ssl.trustStoreType=KeychainStore</argument>
+                                        <argument>--java-options</argument>
+                                        <argument>-Dorg.slf4j.simpleLogger.logFile=System.out</argument>
                                         <argument>--icon</argument>
                                         <argument>${project.basedir}/src/main/resources/favicon.icns</argument>
                                         <argument>--mac-dmg-content</argument>
