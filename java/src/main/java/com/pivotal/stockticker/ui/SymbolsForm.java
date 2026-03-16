@@ -49,14 +49,14 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
      *
      * @param caller The callback interface to notify of changes
      */
-    public SymbolsForm(CallbackInterface caller) {
+    public SymbolsForm(TickerBar caller) {
         settings = SettingsManager.getInstance();
         this.caller = caller;
         initComponents();
         setTitle("Symbols");
         setModal(true);
         setAlwaysOnTop(true);
-        setLocationRelativeTo(null);
+        Utils.recenterDialog(this, caller);
         setResizable(false);
 
         // Initialize listeners

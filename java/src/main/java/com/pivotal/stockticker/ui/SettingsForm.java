@@ -43,14 +43,14 @@ public class SettingsForm extends JDialog implements CallbackInterface {
      *
      * @param caller   Parent callback interface
      */
-    public SettingsForm(CallbackInterface caller) {
+    public SettingsForm(TickerBar caller) {
         this.caller = caller;
         this.settings = SettingsManager.getInstance();
         initComponents();
         setTitle("Settings");
         setModal(true);
         setAlwaysOnTop(true);
-        setLocationRelativeTo(null);
+        Utils.recenterDialog(this, caller);
         setResizable(false);
 
         // Init the settings from storage
