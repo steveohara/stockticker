@@ -317,7 +317,7 @@
                                     <executable>${java.home}/bin/jpackage</executable>
                                     <arguments>
                                         <argument>--type</argument>
-                                        <argument>dmg</argument>
+                                        <argument>pkg</argument>
                                         <argument>--name</argument>
                                         <argument>Pivotal Stock Ticker</argument>
                                         <argument>--app-version</argument>
@@ -341,13 +341,13 @@
                                         <argument>--java-options</argument>
                                         <argument>-Djavax.net.ssl.trustStoreType=KeychainStore</argument>
                                         <argument>--java-options</argument>
-                                        <argument>-Dorg.slf4j.simpleLogger.logFile=System.out</argument>
+                                        <argument>-Dorg.slf4j.simpleLogger.logFile=/Library/Logs/PivotalStockTicker/pivotalstockticker.log</argument>
                                         <argument>--icon</argument>
-                                        <argument>${project.basedir}/src/main/resources/favicon.icns</argument>
-                                        <argument>--mac-dmg-content</argument>
                                         <argument>${project.basedir}/src/main/resources/favicon.icns</argument>
                                         <argument>--mac-package-identifier</argument>
                                         <argument>com.pivotal.stockticker</argument>
+                                        <argument>--resource-dir</argument>
+                                        <argument>${project.basedir}/src/main/resources/package/macos</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

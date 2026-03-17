@@ -5,3 +5,5 @@ output/
 target/
 .idea/
 *.bck
+/node_modules/
+/java/dependency-reduced-pom.xml
