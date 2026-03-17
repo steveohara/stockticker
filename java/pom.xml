@@ -256,7 +256,7 @@
                                     <executable>${java.home}/bin/jpackage</executable>
                                     <arguments>
                                         <argument>--type</argument>
-                                        <argument>exe</argument>
+                                        <argument>msi</argument>
                                         <argument>--name</argument>
                                         <argument>pivotalstockticker</argument>
                                         <argument>--app-version</argument>
@@ -277,6 +277,10 @@
                                         <argument>${project.organization.url}</argument>
                                         <argument>--icon</argument>
                                         <argument>${project.basedir}/src/main/resources/favicon.ico</argument>
+                                        <argument>--java-options</argument>
+                                        <argument>-Dorg.slf4j.simpleLogger.logFile=C:\ProgramData\PivotalStockTicker\pivotalstockticker.log</argument>
+                                        <argument>--resource-dir</argument>
+                                        <argument>${project.basedir}/src/main/resources/package/windows</argument>
 
                                         <argument>--win-menu</argument>
                                         <argument>--win-shortcut</argument>
@@ -284,6 +288,8 @@
                                         <argument>--win-dir-chooser</argument>
                                         <argument>--win-help-url</argument>
                                         <argument>${project.organization.url}</argument>
+
+                                        <argument>--verbose</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
