@@ -62,6 +62,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private JCheckBoxMenuItem fontSizeItemMedium;
     private JCheckBoxMenuItem fontSizeItemLarge;
     private JCheckBoxMenuItem onTop;
+    private LogViewerDialog logViewerDialog;
     private JCheckBoxMenuItem scrollItemSlow;
     private JCheckBoxMenuItem scrollItemNormal;
     private JCheckBoxMenuItem scrollItemFast;
@@ -790,6 +791,11 @@ public class TickerBar extends JFrame implements CallbackInterface {
         export.add(exportCsvSummarised);
         contextMenu.addSeparator();
 
+        JMenuItem logsItem = new JMenuItem("Logs");
+        logsItem.addActionListener(e -> showLogsDialog());
+        contextMenu.add(logsItem);
+        contextMenu.addSeparator();
+
         JMenuItem exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(e -> exitApplication());
         contextMenu.add(exitItem);
@@ -856,6 +862,20 @@ public class TickerBar extends JFrame implements CallbackInterface {
      */
     private void showSettingsDialog() {
         SwingUtilities.invokeLater(() -> new SettingsForm(this));
+    }
+
+    /**
+     * Displays the log viewer dialog, bringing an existing instance to the front if already open.
+     */
+    private void showLogsDialog() {
+        SwingUtilities.invokeLater(() -> {
+            if (logViewerDialog != null && logViewerDialog.isVisible()) {
+                logViewerDialog.toFront();
+            }
+            else {
+                logViewerDialog = LogViewerDialog.show(this);
+            }
+        });
     }
 
     /**

@@ -8,6 +8,7 @@ package com.pivotal.stockticker;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.pivotal.stockticker.ui.TickerBar;
+import com.pivotal.stockticker.utils.LogCapture;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
@@ -24,6 +25,9 @@ public class App {
      * @param args Command-line arguments.
      */
     public static void main(String[] args) {
+        // Install the log capture tee as early as possible so nothing is missed
+        LogCapture.install();
+
         try {
             // Add the application icon to the taskbar - simply fail through if not found
             try (InputStream stream = App.class.getResourceAsStream("/icon.png")) {
