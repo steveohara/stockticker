@@ -396,7 +396,7 @@ public class SummaryPanel extends JDialog implements CallbackInterface {
                 case "cost" -> lblCost;
                 case "value" -> lblValue;
                 case "percent" -> lblPercent;
-                case "gain/loss" -> lblGainLoss;
+                case "gainloss" -> lblGainLoss;
                 case "source" -> lblSource;
                 default -> lblStock;
             };
