@@ -1,4 +1,4 @@
 #!/bin/zsh
 sudo mkdir -p /Library/Logs/PivotalStockTicker
-sudo chmod 755 /Library/Logs/PivotalStockTicker
+sudo chmod 777 /Library/Logs/PivotalStockTicker
 sudo chown root:wheel /Library/Logs/PivotalStockTicker
