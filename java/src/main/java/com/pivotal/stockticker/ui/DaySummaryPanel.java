@@ -73,7 +73,7 @@ public class DaySummaryPanel extends JDialog implements CallbackInterface {
                 Rectangle windowBounds = new Rectangle(screenLocation.x, screenLocation.y, getWidth(), getHeight());
 
                 screenLocation = tickerBar.pnlDaySummary.getLocationOnScreen();
-                Rectangle summaryBounds = new Rectangle(screenLocation.x, screenLocation.y, tickerBar.pnlDaySummary.getWidth(), tickerBar.pnlSummary.getHeight());
+                Rectangle summaryBounds = new Rectangle(screenLocation.x, screenLocation.y, tickerBar.pnlDaySummary.getWidth(), tickerBar.pnlDaySummary.getHeight());
 
                 if (!summaryBounds.contains(mousePos) && !windowBounds.contains(mousePos)) {
                     setVisible(false);
