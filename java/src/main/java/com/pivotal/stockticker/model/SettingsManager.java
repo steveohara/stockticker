@@ -33,6 +33,7 @@ public class SettingsManager extends PersistanceManager {
     public static final int SCROLL_SPEED_SLOW = 1;
     public static final int SCROLL_SPEED_MEDIUM = 2;
     public static final int SCROLL_SPEED_FAST = 4;
+    public static final int SCROLL_SPEED_OFF = 0;
 
     private String proxyServer = null;
     @Setter(AccessLevel.NONE)

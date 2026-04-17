@@ -66,6 +66,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private JCheckBoxMenuItem scrollItemSlow;
     private JCheckBoxMenuItem scrollItemNormal;
     private JCheckBoxMenuItem scrollItemFast;
+    private JCheckBoxMenuItem scrollItemOff;
 
     private Point dragStart = null;
     private Point leftDragStart = null;
@@ -439,7 +440,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
         pnlStocks.setFont(getFont());
         pnlSummary.setVisible(settings.isShowSummary());
         pnlDaySummary.setVisible(settings.isShowDailySummary());
-        pnlStocks.setScrollSpeed(settings.getTickerSpeed());
+        setTicketSpeed(settings.getTickerSpeed());
         pnlDaySummary.setBackground(pnlTicker.getBackground());
         pnlSummary.setBackground(pnlTicker.getBackground());
         pnlStocks.setBackground(pnlTicker.getBackground());
@@ -689,8 +690,18 @@ public class TickerBar extends JFrame implements CallbackInterface {
         // Adjust the mouse point to be relative to the stocks panel
         Point pointOverStocks = new Point(point.x - bounds.x, point.y - bounds.y);
 
+        // Check to make sure we're not over the pan buttons
+        if (pnlStocks.getDisplayStyle().equals(ColouredTextPanel.DISPLAY_STYLE.PAN)) {
+            if (pointOverStocks.x < ColouredTextPanel.PAN_BUTTON_WIDTH ||
+                pointOverStocks.x > (pnlStocks.getWidth() - ColouredTextPanel.PAN_BUTTON_WIDTH)) {
+                return null;
+            }
+        }
+
         // Adjust point for scrolling if necessary
-        int scrollPosition = pnlStocks.getScrollPosition();
+        int scrollPosition = pnlStocks.getDisplayStyle().equals(ColouredTextPanel.DISPLAY_STYLE.PAN)
+                ? pnlStocks.getPanPosition()
+                : pnlStocks.getScrollPosition();
         if (pointOverStocks.x + scrollPosition > pnlStocks.getTotalTextWidth() &&
                 pnlStocks.getTotalTextWidth() > pnlStocks.getWidth()) {
             scrollPosition -= pnlStocks.getTotalTextWidth();
@@ -744,6 +755,9 @@ public class TickerBar extends JFrame implements CallbackInterface {
         scrollItemFast = new JCheckBoxMenuItem("Fast", settings.getTickerSpeed() == SettingsManager.SCROLL_SPEED_FAST);
         scrollItemFast.addActionListener(e -> setTicketSpeed(SettingsManager.SCROLL_SPEED_FAST));
         scroll.add(scrollItemFast);
+        scrollItemOff = new JCheckBoxMenuItem("Off", settings.getTickerSpeed() == SettingsManager.SCROLL_SPEED_OFF);
+        scrollItemOff.addActionListener(e -> setTicketSpeed(SettingsManager.SCROLL_SPEED_OFF));
+        scroll.add(scrollItemOff);
         contextMenu.add(scroll);
         contextMenu.addSeparator();
 
@@ -945,10 +959,14 @@ public class TickerBar extends JFrame implements CallbackInterface {
      */
     private void setTicketSpeed(int speed) {
         settings.setTickerSpeed(speed);
+        pnlStocks.setDisplayStyle(speed == SettingsManager.SCROLL_SPEED_OFF
+                ? ColouredTextPanel.DISPLAY_STYLE.PAN
+                : ColouredTextPanel.DISPLAY_STYLE.SCROLL);
         pnlStocks.setScrollSpeed(speed);
         scrollItemSlow.setSelected(speed == SettingsManager.SCROLL_SPEED_SLOW);
         scrollItemNormal.setSelected(speed == SettingsManager.SCROLL_SPEED_MEDIUM);
         scrollItemFast.setSelected(speed == SettingsManager.SCROLL_SPEED_FAST);
+        scrollItemOff.setSelected(speed == SettingsManager.SCROLL_SPEED_OFF);
     }
 
     /**

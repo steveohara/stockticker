@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -32,6 +34,12 @@ public class ColouredTextPanel extends JPanel {
     private static final int SCROLL_SPEED = 2;
     private static final int SCROLL_DELAY = 30;
 
+    /** Width of each pan thumb button in pixels. */
+    public static final int PAN_BUTTON_WIDTH = 20;
+
+    /** Number of pixels to move per pan timer tick. */
+    private static final int PAN_SCROLL_SPEED = 5;
+
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private BufferedImage cachedContent;
@@ -45,8 +53,9 @@ public class ColouredTextPanel extends JPanel {
      */
     public enum DISPLAY_STYLE {
         CLIP,    // Overflow will be clipped and invisible
-        FIT,    // Panel will grow to fit all text
-        SCROLL   // Panel will rotate the text if text overflows
+        FIT,     // Panel will grow to fit all text
+        SCROLL,  // Panel will rotate the text if text overflows
+        PAN      // Clip but allow panning to view more using thumb buttons
     }
 
     private int currentX = 0;
@@ -59,11 +68,23 @@ public class ColouredTextPanel extends JPanel {
     private int totalTextWidth = 0;
     private int totalTextHeight = 0;
     private int scrollPosition = 0;
+
+    /**
+     * Current pan offset in pixels; preserved across {@link #cls()} calls so
+     * the view position survives content refreshes.
+     */
+    private int panPosition = 0;
+
     private boolean contiguousBackground = false;
 
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private Timer scrollTimer;
+
+    /** Timer that drives continuous panning while a thumb button is held. */
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private Timer panTimer;
 
     @Setter(AccessLevel.NONE)
     private DISPLAY_STYLE displayStyle = DISPLAY_STYLE.CLIP;
@@ -75,12 +96,132 @@ public class ColouredTextPanel extends JPanel {
     @Setter(AccessLevel.NONE)
     private final CopyOnWriteArrayList<TextItem> items = new CopyOnWriteArrayList<>();
 
+    /** Left (scroll-back) thumb button for PAN mode. */
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private final JButton panLeftButton;
+
+    /** Right (scroll-forward) thumb button for PAN mode. */
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private final JButton panRightButton;
+
     /**
      * Creates a new ColouredTextPanel with default settings.
      */
     public ColouredTextPanel() {
         setDoubleBuffered(true);
         setOpaque(true);
+        setLayout(null);
+
+        panLeftButton  = createPanButton("◀", -PAN_SCROLL_SPEED);
+        panRightButton = createPanButton("▶",  PAN_SCROLL_SPEED);
+
+        add(panLeftButton);
+        add(panRightButton);
+    }
+
+    /**
+     * Creates a pan thumb button that scrolls content by {@code delta} pixels per timer tick.
+     *
+     * @param label The button label (a Unicode arrow character).
+     * @param delta Positive moves right, negative moves left.
+     * @return The configured {@link JButton}.
+     */
+    private JButton createPanButton(String label, int delta) {
+        JButton btn = new JButton(label);
+        btn.setVisible(false);
+        btn.setFocusable(false);
+        btn.setMargin(new Insets(0, 0, 0, 0));
+        btn.setBorder(BorderFactory.createEmptyBorder());
+        btn.setBackground(getBackground());
+        btn.setFont(btn.getFont().deriveFont(8f));
+        btn.setBackground(Color.BLACK);
+        btn.setForeground(Color.LIGHT_GRAY);
+
+        MouseAdapter ma = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                startPanning(delta);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                stopPanning();
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                stopPanning();
+            }
+        };
+        btn.addMouseListener(ma);
+        return btn;
+    }
+
+    /**
+     * Starts the pan timer that shifts the content by {@code delta} pixels each tick.
+     *
+     * @param delta Pixels to move per tick; positive scrolls right, negative scrolls left.
+     */
+    private void startPanning(int delta) {
+        log.debug("Starting pan timer with delta {}", delta);
+        if (panTimer != null && panTimer.isRunning()) {
+            panTimer.stop();
+        }
+        panTimer = new Timer(SCROLL_DELAY, e -> {
+            try {
+                int maxPan = Math.max(0, totalTextWidth - contentWidth());
+                panPosition = Math.max(0, Math.min(panPosition + delta, maxPan));
+                updatePanButtons();
+                repaint();
+            }
+            catch (Exception ex) {
+                log.error("Error occurred during pan timer action", ex);
+            }
+        });
+        panTimer.start();
+    }
+
+    /**
+     * Stops the ongoing pan timer.
+     */
+    private void stopPanning() {
+        log.debug("Stopping pan timer");
+        if (panTimer != null) {
+            panTimer.stop();
+        }
+    }
+
+    /**
+     * Returns the usable content width inside any pan buttons.
+     *
+     * @return Available pixels for content display.
+     */
+    private int contentWidth() {
+        boolean panButtonsVisible = displayStyle == DISPLAY_STYLE.PAN && totalTextWidth > super.getWidth();
+        return panButtonsVisible ? super.getWidth() - PAN_BUTTON_WIDTH * 2 : super.getWidth();
+    }
+
+    /**
+     * Positions and shows or hides the pan thumb buttons depending on whether
+     * the display style is {@link DISPLAY_STYLE#PAN} and the content overflows.
+     * This must be called on the Swing thread.
+     */
+    private void updatePanButtons() {
+        boolean show = displayStyle == DISPLAY_STYLE.PAN && totalTextWidth > super.getWidth();
+        int h = super.getHeight();
+
+        if (show) {
+            int w = super.getWidth();
+            panLeftButton.setBounds(0, 0, PAN_BUTTON_WIDTH, h);
+            panRightButton.setBounds(w - PAN_BUTTON_WIDTH, 0, PAN_BUTTON_WIDTH, h);
+
+            // Enable/disable based on current pan position
+            int maxPan = Math.max(0, totalTextWidth - (w - PAN_BUTTON_WIDTH * 2));
+            panLeftButton.setVisible(panPosition > 0);
+            panRightButton.setVisible(panPosition < maxPan);
+        }
     }
 
     /**
@@ -113,6 +254,7 @@ public class ColouredTextPanel extends JPanel {
 
         // If no content to display, we're done (super.paintComponent already cleared it)
         if (cachedContent == null || items.isEmpty()) {
+            updatePanButtons();
             return;
         }
 
@@ -148,25 +290,41 @@ public class ColouredTextPanel extends JPanel {
             }
         }
 
-        // Create a Graphics2D context for better rendering control when
-        // we are scrolling
+        // Create a Graphics2D context for better rendering control
         Graphics2D g2 = (Graphics2D) g;
+
         if (displayStyle == DISPLAY_STYLE.SCROLL && totalTextWidth > getWidth()) {
 
             // Draw from cached image
             log.debug("Drawing the image from the cached version with scroll position {}", scrollPosition);
             g2.drawImage(cachedContent, -scrollPosition, 0, null);
 
-            // Draw second copy if needed
+            // Draw second copy if needed for seamless rotation
             if (scrollPosition > 0) {
                 log.debug("Drawing the image again to account for rotation");
                 g2.drawImage(cachedContent, totalTextWidth - scrollPosition, 0, null);
             }
         }
+        else if (displayStyle == DISPLAY_STYLE.PAN && totalTextWidth > super.getWidth()) {
+
+            // Clamp pan position to valid range
+            int maxPan = Math.max(0, totalTextWidth - contentWidth());
+            panPosition = Math.max(0, Math.min(panPosition, maxPan));
+
+            // Clip to the content area so drawing does not bleed under the buttons
+            Shape oldClip = g2.getClip();
+            g2.setClip(PAN_BUTTON_WIDTH, 0, contentWidth(), super.getHeight());
+            log.debug("Drawing panned image at offset {} (panPosition={})", PAN_BUTTON_WIDTH - panPosition, panPosition);
+            g2.drawImage(cachedContent, PAN_BUTTON_WIDTH - panPosition, 0, null);
+            g2.setClip(oldClip);
+
+            updatePanButtons();
+        }
         else {
-            // Normal rendering
+            // Normal rendering (CLIP, FIT, or PAN without overflow)
             log.debug("Drawing the cached image in normal mode");
             g2.drawImage(cachedContent, 0, 0, null);
+            updatePanButtons();
         }
     }
 
@@ -337,6 +495,8 @@ public class ColouredTextPanel extends JPanel {
 
     /**
      * Clears the panel and resets the cursor position.
+     * The pan position is intentionally preserved so that the view
+     * offset survives content refreshes in PAN mode.
      */
     public void cls() {
         log.debug("Clearing the panel");
@@ -358,7 +518,7 @@ public class ColouredTextPanel extends JPanel {
     }
 
     /**
-     * Sets the display style.
+     * Sets the display style and updates pan button visibility accordingly.
      *
      * @param displayStyle The display style to set.
      */
@@ -367,10 +527,17 @@ public class ColouredTextPanel extends JPanel {
         DISPLAY_STYLE oldStyle = this.displayStyle;
         this.displayStyle = displayStyle;
 
+        // If leaving PAN mode, stop any in-progress pan and hide buttons
+        if (oldStyle == DISPLAY_STYLE.PAN && displayStyle != DISPLAY_STYLE.PAN) {
+            stopPanning();
+            panPosition = 0;
+        }
+
         // If switching to/from GROW mode, revalidate
         if (oldStyle != displayStyle && (oldStyle == DISPLAY_STYLE.FIT || displayStyle == DISPLAY_STYLE.FIT)) {
             revalidate();
         }
+        updatePanButtons();
         repaint();
     }
 
