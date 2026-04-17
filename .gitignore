@@ -7,3 +7,5 @@ target/
 *.bck
 /node_modules/
 /java/dependency-reduced-pom.xml
+/__MACOSX/
+/pivotalstockticker-pom.iml

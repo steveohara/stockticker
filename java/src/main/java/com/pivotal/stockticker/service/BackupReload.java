@@ -154,7 +154,7 @@ public class BackupReload {
         }
 
         // Replace the positioning settings to maintain window position
-        settings = SettingsManager.getInstance();
+        settings = SettingsManager.getInstance(true);
         settings.setWindowX(left);
         settings.setWindowY(top);
         settings.setWindowWidth(width);
