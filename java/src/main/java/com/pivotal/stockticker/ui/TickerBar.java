@@ -943,13 +943,17 @@ public class TickerBar extends JFrame implements CallbackInterface {
 
     /**
      * Refreshes the ticker data and redraws the content.
-     * This is a synchronous call to the data sources so could take some time
+     * Network calls are performed on a background thread to avoid blocking the EDT.
      */
     private void refreshTicker() {
-        SwingUtilities.invokeLater(() -> {
-            rates.refreshExchangeRates();
-            prices.refreshPrices(true);
-        });
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() {
+                rates.refreshExchangeRates();
+                prices.refreshPrices(true);
+                return null;
+            }
+        }.execute();
     }
 
     /**

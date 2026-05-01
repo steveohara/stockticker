@@ -183,18 +183,20 @@ public class PricesManager {
      *
      * @param notifyCallback True to notify the callback after updating prices
      */
-    synchronized public void refreshPrices(boolean notifyCallback) {
+    public void refreshPrices(boolean notifyCallback) {
 
-        // Sort the symbols to update so that those without a value are first
-        Collection<String> symbols = new ArrayList<>(currentPrices.keySet());
-        List<String> symbolsList = new ArrayList<>(symbols);
-        symbolsList.sort(Comparator.comparingDouble(code -> {
-            Price price = currentPrices.get(code);
-            return price != null ? price.getCurrentPrice() : Double.MIN_VALUE;
-        }));
-        symbols = symbolsList;
+        // Take a snapshot of the symbols under the lock so we don't hold it during I/O
+        Collection<String> symbols;
+        synchronized (this) {
+            List<String> symbolsList = new ArrayList<>(currentPrices.keySet());
+            symbolsList.sort(Comparator.comparingDouble(code -> {
+                Price price = currentPrices.get(code);
+                return price != null ? price.getCurrentPrice() : Double.MIN_VALUE;
+            }));
+            symbols = symbolsList;
+        }
 
-        // Update prices for each symbol from each source
+        // Perform all HTTP calls outside the lock to avoid blocking other callers
         PricesApiAdapter adapter = new AlphaVantageAdapter(this);
         symbols = adapter.fetchAndUpdatePrices(symbols);
 

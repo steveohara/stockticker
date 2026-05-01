@@ -11,7 +11,7 @@
 
     <artifactId>pivotalstockticker-jar</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -220,6 +220,11 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
+            </plugin>
         </plugins>
     </build>
 
@@ -227,7 +232,7 @@
         <repository>
             <id>github</id>
             <name>steveohara</name>
-            <url>https://maven.pkg.github.com/steveohara/${project.artifactId}</url>
+            <url>https://maven.pkg.github.com/steveohara/stockticker</url>
         </repository>
     </distributionManagement>
 
@@ -294,6 +299,38 @@
                                     </arguments>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>create-github-release</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <!-- Create the release; tolerate failure if it already exists (e.g. built on another OS first) -->
+                                    <executable>cmd</executable>
+                                    <arguments>
+                                        <argument>/c</argument>
+                                        <argument>gh release create v${project.version} --title "v${project.version}" --generate-notes || exit 0</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>upload-windows-installer</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>gh</executable>
+                                    <arguments>
+                                        <argument>release</argument>
+                                        <argument>upload</argument>
+                                        <argument>v${project.version}</argument>
+                                        <argument>${project.build.directory}/jpackage/pivotalstockticker-${project.version}.msi</argument>
+                                        <argument>--clobber</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                 </plugins>
@@ -355,6 +392,38 @@
                                         <argument>com.pivotal.stockticker</argument>
                                         <argument>--resource-dir</argument>
                                         <argument>${project.basedir}/src/main/resources/package/macos</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>create-github-release</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <!-- Create the release; tolerate failure if it already exists (e.g. built on another OS first) -->
+                                    <executable>/bin/sh</executable>
+                                    <arguments>
+                                        <argument>-c</argument>
+                                        <argument>gh release create v${project.version} --title "v${project.version}" --generate-notes || true</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>upload-mac-installer</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>gh</executable>
+                                    <arguments>
+                                        <argument>release</argument>
+                                        <argument>upload</argument>
+                                        <argument>v${project.version}</argument>
+                                        <argument>${project.build.directory}/jpackage/Pivotal Stock Ticker-${project.version}.pkg</argument>
+                                        <argument>--clobber</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
