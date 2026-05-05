@@ -270,16 +270,27 @@ public class ExchangeRatesManager {
         }
 
         /**
-         * Return a true if the periodic task is currently running
+         * Return a true if the periodic task is currently running.
+         * A future that has completed due to an exception is considered not running,
+         * so the scheduler can be restarted automatically.
          */
         public boolean isRunning() {
-            return scheduledFuture != null && !scheduledFuture.isCancelled();
+            return scheduledFuture != null && !scheduledFuture.isCancelled() && !scheduledFuture.isDone();
         }
 
         /**
-         * The periodic task to update exchange rates
+         * The periodic task to update exchange rates.
+         * All exceptions are caught and logged so that an unexpected error does not
+         * silently terminate the recurring schedule.
          */
-        private final Runnable task = () -> exchangeRatesManager.refreshExchangeRates(true);
+        private final Runnable task = () -> {
+            try {
+                exchangeRatesManager.refreshExchangeRates(true);
+            }
+            catch (Exception e) {
+                log.error("Unexpected error during exchange rate refresh - scheduler will continue", e);
+            }
+        };
 
         /**
          * Start or restart the periodic task with a new frequency

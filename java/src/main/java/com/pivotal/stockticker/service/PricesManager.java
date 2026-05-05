@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.prefs.Preferences;
 
 /**
@@ -33,6 +34,9 @@ public class PricesManager {
     private Preferences prefs = Preferences.userRoot().node(PRICES_ROOT);
 
     private final Map<String, Price> currentPrices = new TreeMap<>(String::compareToIgnoreCase);
+
+    /** Guard to prevent concurrent price refresh calls from overlapping. */
+    private final AtomicBoolean refreshing = new AtomicBoolean(false);
 
     private final PriceCurrencyUpdateTask scheduler;
     private final CallbackInterface callback;
@@ -185,44 +189,54 @@ public class PricesManager {
      */
     public void refreshPrices(boolean notifyCallback) {
 
-        // Take a snapshot of the symbols under the lock so we don't hold it during I/O
-        Collection<String> symbols;
-        synchronized (this) {
-            List<String> symbolsList = new ArrayList<>(currentPrices.keySet());
-            symbolsList.sort(Comparator.comparingDouble(code -> {
-                Price price = currentPrices.get(code);
-                return price != null ? price.getCurrentPrice() : Double.MIN_VALUE;
-            }));
-            symbols = symbolsList;
+        // Prevent concurrent refresh calls (e.g. manual UI refresh overlapping the scheduler)
+        if (!refreshing.compareAndSet(false, true)) {
+            log.debug("Price refresh already in progress - skipping concurrent request");
+            return;
         }
+        try {
+            // Take a snapshot of the symbols under the lock so we don't hold it during I/O
+            Collection<String> symbols;
+            synchronized (this) {
+                List<String> symbolsList = new ArrayList<>(currentPrices.keySet());
+                symbolsList.sort(Comparator.comparingDouble(code -> {
+                    Price price = currentPrices.get(code);
+                    return price != null ? price.getCurrentPrice() : Double.MIN_VALUE;
+                }));
+                symbols = symbolsList;
+            }
 
-        // Perform all HTTP calls outside the lock to avoid blocking other callers
-        PricesApiAdapter adapter = new AlphaVantageAdapter(this);
-        symbols = adapter.fetchAndUpdatePrices(symbols);
+            // Perform all HTTP calls outside the lock to avoid blocking other callers
+            PricesApiAdapter adapter = new AlphaVantageAdapter(this);
+            symbols = adapter.fetchAndUpdatePrices(symbols);
 
-        adapter = new MarketStackAdapter(this);
-        symbols = adapter.fetchAndUpdatePrices(symbols);
+            adapter = new MarketStackAdapter(this);
+            symbols = adapter.fetchAndUpdatePrices(symbols);
 
-        adapter = new TwelveDataAdapter(this);
-        symbols = adapter.fetchAndUpdatePrices(symbols);
+            adapter = new TwelveDataAdapter(this);
+            symbols = adapter.fetchAndUpdatePrices(symbols);
 
-        adapter = new FinnHubAdapter(this);
-        symbols = adapter.fetchAndUpdatePrices(symbols);
+            adapter = new FinnHubAdapter(this);
+            symbols = adapter.fetchAndUpdatePrices(symbols);
 
-        adapter = new TiingoAdapter(this);
-        symbols = adapter.fetchAndUpdatePrices(symbols);
+            adapter = new TiingoAdapter(this);
+            symbols = adapter.fetchAndUpdatePrices(symbols);
 
-        adapter = new YahooAdapter(this);
-        symbols = adapter.fetchAndUpdatePrices(symbols);
+            adapter = new YahooAdapter(this);
+            symbols = adapter.fetchAndUpdatePrices(symbols);
 
-        // Log any symbols that were not updated
-        if (!symbols.isEmpty()) {
-            log.warn("Prices not updated for symbols: {}", String.join(", ", symbols));
+            // Log any symbols that were not updated
+            if (!symbols.isEmpty()) {
+                log.warn("Prices not updated for symbols: {}", String.join(", ", symbols));
+            }
+
+            // Notify the callback that prices have been updated
+            if (notifyCallback && callback != null) {
+                callback.changed(this);
+            }
         }
-
-        // Notify the callback that prices have been updated
-        if (notifyCallback && callback != null) {
-            callback.changed(this);
+        finally {
+            refreshing.set(false);
         }
     }
 
@@ -248,22 +262,30 @@ public class PricesManager {
         }
 
         /**
-         * Return a true if the periodic task is currently running
+         * Return a true if the periodic task is currently running.
+         * A future that has completed due to an exception is considered not running,
+         * so the scheduler can be restarted automatically.
          */
         public boolean isRunning() {
-            return scheduledFuture != null && !scheduledFuture.isCancelled();
+            return scheduledFuture != null && !scheduledFuture.isCancelled() && !scheduledFuture.isDone();
         }
 
         /**
-         * The periodic task to update prices
+         * The periodic task to update prices.
+         * All exceptions are caught and logged so that an unexpected error does not
+         * silently terminate the recurring schedule.
          */
         private final Runnable task = () -> {
+            try {
+                // Get the list of stock symbols to update prices for
+                log.debug("Updating prices for {} symbols", prices.currentPrices.size());
 
-            // Get the list of stock symbols to update prices for
-            log.debug("Updating prices for {} symbols", prices.currentPrices.size());
-
-            // Update prices for each symbol from each source
-            prices.refreshPrices(true);
+                // Update prices for each symbol from each source
+                prices.refreshPrices(true);
+            }
+            catch (Exception e) {
+                log.error("Unexpected error during price refresh - scheduler will continue", e);
+            }
         };
 
         /**
