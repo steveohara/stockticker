@@ -222,6 +222,10 @@ public class ColouredTextPanel extends JPanel {
             panLeftButton.setVisible(panPosition > 0);
             panRightButton.setVisible(panPosition < maxPan);
         }
+        else {
+            panLeftButton.setVisible(false);
+            panRightButton.setVisible(false);
+        }
     }
 
     /**
@@ -239,6 +243,19 @@ public class ColouredTextPanel extends JPanel {
         log.debug("Invalidating the layout and marking content dirty");
         contentDirty = true;
         super.invalidate();
+    }
+
+    /**
+     * Repositions and updates the visibility of the pan buttons whenever Swing
+     * runs a layout pass on this component (e.g. after a window resize). This
+     * ensures the buttons have correct bounds and visibility before they are
+     * painted, avoiding the one-frame lag that would occur if this were done
+     * only inside {@link #paintComponent}.
+     */
+    @Override
+    public void doLayout() {
+        super.doLayout();
+        updatePanButtons();
     }
 
     @Override

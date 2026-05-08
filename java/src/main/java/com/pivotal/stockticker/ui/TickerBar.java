@@ -604,6 +604,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                     setLocation(x, getY());
                     pnlTicker.setPreferredSize(new Dimension(width, pnlTicker.getHeight()));
                     setSize(new Dimension(width, pnlTicker.getHeight()));
+                    validate();
                 }
             }
         });
@@ -649,6 +650,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
                     width = Math.max(width, 150);
                     pnlTicker.setPreferredSize(new Dimension(width, pnlTicker.getHeight()));
                     setSize(new Dimension(width, pnlTicker.getHeight()));
+                    validate();
                 }
             }
         });
