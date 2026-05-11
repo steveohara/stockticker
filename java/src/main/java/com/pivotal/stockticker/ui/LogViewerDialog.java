@@ -7,6 +7,7 @@
 package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.utils.LogCapture;
+import com.pivotal.stockticker.utils.LogLevelManager;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -96,6 +97,14 @@ public class LogViewerDialog extends JDialog {
 
         // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 6));
+
+        // Log level control — changes take effect immediately via LogLevelManager
+        JLabel levelLabel = new JLabel("Level:");
+        JComboBox<String> levelCombo = new JComboBox<>(new String[]{"TRACE", "DEBUG", "INFO", "WARN", "ERROR"});
+        levelCombo.setSelectedItem(LogLevelManager.getAppLevel());
+        levelCombo.setToolTipText("Change the log level for " + LogLevelManager.APP_PACKAGE);
+        levelCombo.addActionListener(e -> LogLevelManager.setAppLevel((String) levelCombo.getSelectedItem()));
+
         autoScroll = new JCheckBox("Auto-scroll", true);
         autoScroll.setToolTipText("Automatically scroll to the latest log entries");
         JButton clearButton = new JButton("Clear");
@@ -103,6 +112,8 @@ public class LogViewerDialog extends JDialog {
         clearButton.addActionListener(e -> textArea.setText(""));
         JButton closeButton = new JButton("Close");
         closeButton.addActionListener(e -> dispose());
+        buttonPanel.add(levelLabel);
+        buttonPanel.add(levelCombo);
         buttonPanel.add(autoScroll);
         buttonPanel.add(clearButton);
         buttonPanel.add(closeButton);
