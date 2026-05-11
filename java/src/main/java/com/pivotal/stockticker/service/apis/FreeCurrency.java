@@ -27,6 +27,7 @@ import java.util.Map;
 public class FreeCurrency {
 
     private static final String BASE_URL = "https://api.freecurrencyapi.com/v1/latest";
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(30);
     private final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
     private final SettingsManager settingsManager;
@@ -68,6 +69,7 @@ public class FreeCurrency {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL + String.format("?apikey=%s&base_currency=%s&currencies=%s",
                             apiKey, settingsManager.getCurrencyCode(), String.join(",", currencyCodes))))
+                    .timeout(REQUEST_TIMEOUT)
                     .GET()
                     .header("Accept", "application/json")
                     .build();

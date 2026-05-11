@@ -1,11 +1,19 @@
 package com.pivotal.stockticker.service.apis;
 
+import java.time.Duration;
 import java.util.Collection;
 
 /**
  * Adapter interface for price APIs
  */
 public interface PricesApiAdapter {
+
+    /**
+     * Maximum time to wait for a response from any price API.
+     * This is a request-level timeout (distinct from the TCP connect timeout) and
+     * guards against servers that accept connections but never send a response.
+     */
+    Duration REQUEST_TIMEOUT = Duration.ofSeconds(30);
 
     /**
      * Fetch prices for the given symbols and update the PricesManager

@@ -69,6 +69,7 @@ public class TwelveDataAdapter implements PricesApiAdapter {
                 String adjustedSymbol = symbol.trim().replaceAll("(?i)[.]L", "");
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(String.format(BASE_URL, apiKey, adjustedSymbol)))
+                        .timeout(REQUEST_TIMEOUT)
                         .GET().header("Accept", "application/json").build();
                 try {
                     HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -106,6 +107,7 @@ public class TwelveDataAdapter implements PricesApiAdapter {
                             // Have to get the price separately
                             request = HttpRequest.newBuilder()
                                     .uri(URI.create(String.format(BASE_URL_PRICE, apiKey, adjustedSymbol)))
+                                    .timeout(REQUEST_TIMEOUT)
                                     .GET().header("Accept", "application/json").build();
                             response = client.send(request, HttpResponse.BodyHandlers.ofString());
                             if (response.statusCode() != 200) {

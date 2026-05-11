@@ -65,6 +65,7 @@ public class YahooAdapter implements PricesApiAdapter {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(String.format(BASE_URL, adjustedSymbol)))
                     .GET()
+                    .timeout(REQUEST_TIMEOUT)
                     .header("Accept", "application/json")
                     .header("User-Agent", AGENT_NAME)
                     .build();

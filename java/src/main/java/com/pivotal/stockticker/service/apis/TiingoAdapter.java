@@ -74,6 +74,7 @@ public class TiingoAdapter implements PricesApiAdapter {
                 String adjustedSymbol = symbol.trim().replace('^', '.');
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(String.format(BASE_URL, adjustedSymbol, apiKey)))
+                        .timeout(REQUEST_TIMEOUT)
                         .GET().header("Accept", "application/json").build();
                 try {
                     HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
