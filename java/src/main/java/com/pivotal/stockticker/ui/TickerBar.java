@@ -67,6 +67,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private JCheckBoxMenuItem scrollItemNormal;
     private JCheckBoxMenuItem scrollItemFast;
     private JCheckBoxMenuItem scrollItemOff;
+    private JPopupMenu contextMenu;
 
     private Point dragStart = null;
     private Point leftDragStart = null;
@@ -725,7 +726,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
      * Sets up the context menu for the ticker panel.
      */
     private void setupContextMenu() {
-        JPopupMenu contextMenu = new JPopupMenu();
+        contextMenu = new JPopupMenu();
         JMenuItem symbolsItem = new JMenuItem("Edit Symbols...");
         symbolsItem.addActionListener(e -> showSymbolsDialog());
         contextMenu.add(symbolsItem);
@@ -819,6 +820,58 @@ public class TickerBar extends JFrame implements CallbackInterface {
         pnlTicker.setComponentPopupMenu(contextMenu);
         pnlLeftDrag.setComponentPopupMenu(contextMenu);
         pnlRightDrag.setComponentPopupMenu(contextMenu);
+
+        // On macOS, this window runs as an accessory/utility window (apple.awt.UIElement,
+        // Window.Type.UTILITY) which is never made the "key" application window by Cocoa.
+        // Because of this, the automatic popup trigger handling installed by
+        // setComponentPopupMenu() above sometimes shows the popup behind other windows, or not
+        // at all, on a right-click/two-finger trackpad click. Since we can't guarantee our
+        // workaround runs before Swing's own internal trigger handling, we disable the automatic
+        // popup and show it manually after forcing this window to the front instead.
+        if (Utils.isMac()) {
+            setupPopupTriggerWorkaround(contextMenu, pnlTicker, pnlLeftDrag, pnlRightDrag);
+        }
+    }
+
+    /**
+     * Works around a macOS-specific issue where {@link JPopupMenu}s triggered by a right-click
+     * (or two-finger trackpad click) on an accessory/utility window (see {@link #setupContextMenu()})
+     * fail to show or appear hidden behind other windows. This happens because such windows are
+     * never given "key window" status by Cocoa, so the popup's own window is not raised either.
+     * <p>
+     * This removes the automatic popup handling for the given components and instead shows the
+     * popup manually, forcing this window to the front and requesting focus first so macOS
+     * activates the application before the popup is displayed.
+     *
+     * @param menu       The popup menu already attached via {@code setComponentPopupMenu}.
+     * @param components The components the popup menu is attached to.
+     */
+    private void setupPopupTriggerWorkaround(JPopupMenu menu, JComponent... components) {
+        MouseAdapter manualPopupTrigger = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                showPopup(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                showPopup(e);
+            }
+
+            private void showPopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    toFront();
+                    requestFocus();
+                    menu.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        };
+        for (JComponent component : components) {
+
+            // Remove the automatic popup handling so it doesn't fire (and race) alongside our manual trigger
+            component.setComponentPopupMenu(null);
+            component.addMouseListener(manualPopupTrigger);
+        }
     }
 
     /**
@@ -827,7 +880,7 @@ public class TickerBar extends JFrame implements CallbackInterface {
      * @return The JPopupMenu associated with the ticker panel.
      */
     public JPopupMenu getPopupMenu() {
-        return pnlTicker.getComponentPopupMenu();
+        return contextMenu;
     }
 
     /**

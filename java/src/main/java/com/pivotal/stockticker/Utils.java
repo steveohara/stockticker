@@ -358,6 +358,16 @@ public class Utils {
     }
 
     /**
+     * Determines if the application is currently running on macOS.
+     *
+     * @return true if the operating system is macOS, false otherwise.
+     */
+    public static boolean isMac() {
+        String osName = System.getProperty("os.name", "");
+        return osName.toLowerCase().contains("mac");
+    }
+
+    /**
      * Adjusts the position of the dialog to be centered on the screen.
      * For the ticker bar, it centers relative to the ticker bar but
      * aligns to the middle of the ticker bar.
