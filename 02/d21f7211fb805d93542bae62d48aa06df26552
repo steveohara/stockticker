@@ -1,0 +1,20 @@
+java/pom.xml
+  h_32373f709924d7 15
+java/src/main/java/com/pivotal/stockticker/Utils.java
+  h_32373f709924d7 360-369
+java/src/main/java/com/pivotal/stockticker/ui/TickerBar.java
+  h_32373f709924d7 70,729,823-874,883
+java/src/main/java/com/pivotal/stockticker/utils/StartupManager.java
+  h_32373f709924d7 14-16,24-28,78,82-88,91-93,95,106-110,112-114,116-122,134-139,151-162,166,171,174,181,183-184,187-192,204-213,215-224,227,232-242,244-245,247-266,268-272,274-283,286,289,291
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "02d21f7211fb805d93542bae62d48aa06df26552",
+  "prompts": {},
+  "humans": {
+    "h_32373f709924d7": {
+      "author": "Steve O'Hara <sohara@pivotal-solutions.co.uk>"
+    }
+  }
+}
