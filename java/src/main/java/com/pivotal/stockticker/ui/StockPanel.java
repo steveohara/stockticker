@@ -128,9 +128,16 @@ public class StockPanel extends JDialog implements CallbackInterface {
      */
     private void displayGraph() {
 
+        // Snapshot the symbol and graph type being requested. The user can hover to a
+        // different symbol while the background fetch below is in flight, which reassigns
+        // the instance fields - the worker must only ever act on the request it was
+        // created for, not whatever the fields happen to be when it completes.
+        LivePrice requestedLivePrice = livePrice;
+        GRAPH_TYPE requestedGraphType = graphType;
+
         // Check the cache first
         lblGraph.setIcon(null);
-        ImageIcon imageIcon = ImageCache.getImageFromCache(livePrice.getSymbol(), graphType);
+        ImageIcon imageIcon = ImageCache.getImageFromCache(requestedLivePrice.getSymbol(), requestedGraphType);
         if (imageIcon != null) {
             lblGraph.setIcon(imageIcon);
             return;
@@ -148,14 +155,14 @@ public class StockPanel extends JDialog implements CallbackInterface {
                 int loops = 1;
                 do {
                     // Build request to fetch graph image
-                    String symbol = livePrice.getSymbol();
+                    String symbol = requestedLivePrice.getSymbol();
                     if (loops == 2) {
                         symbol += ".OQ";
                     }
                     else if (loops == 3) {
                         symbol += ".N";
                     }
-                    url = String.format(CHART_URL, symbol, graphType.durationDays, lblGraph.getWidth(), lblGraph.getHeight());
+                    url = String.format(CHART_URL, symbol, requestedGraphType.durationDays, lblGraph.getWidth(), lblGraph.getHeight());
                     HttpRequest request = HttpRequest.newBuilder()
                             .uri(URI.create(url))
                             .GET()
@@ -168,7 +175,7 @@ public class StockPanel extends JDialog implements CallbackInterface {
                         // Get raw bytes of the image
                         response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
                         if (response.statusCode() != 200) {
-                            log.debug("Failed to fetch graph for {}: HTTP [{}]", livePrice.getSymbol(), response.statusCode());
+                            log.debug("Failed to fetch graph for {}: HTTP [{}]", requestedLivePrice.getSymbol(), response.statusCode());
                             Thread.sleep(500);
                         }
                         else {
@@ -180,18 +187,27 @@ public class StockPanel extends JDialog implements CallbackInterface {
                     }
                 } while (loops++ < 3 && response != null && response.statusCode() != 200);
                 log.error("Failed to get graph from {} - after {} attempts", url, loops - 1);
-                lblGraph.setText("Failed to load graph from external source for " + livePrice.getSymbol());
                 return null;
             }
 
             @Override
             protected void done() {
+
+                // If the panel has since moved on to a different symbol or graph type, this
+                // result is stale - discard it rather than painting it over the current display
+                if (requestedLivePrice != livePrice || requestedGraphType != graphType) {
+                    log.debug("Discarding stale graph result for {} as panel now shows {}", requestedLivePrice.getSymbol(), livePrice == null ? "none" : livePrice.getSymbol());
+                    return;
+                }
                 try {
                     ImageIcon icon = get();
                     if (icon != null) {
-                        ImageCache.add(livePrice.getSymbol(), graphType, icon);
+                        ImageCache.add(requestedLivePrice.getSymbol(), requestedGraphType, icon);
                         lblGraph.setIcon(icon);
                         lblGraph.setText("");
+                    }
+                    else {
+                        lblGraph.setText("Failed to load graph from external source for " + requestedLivePrice.getSymbol());
                     }
                 }
                 catch (Exception e) {
