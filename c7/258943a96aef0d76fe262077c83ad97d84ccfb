@@ -1,0 +1,16 @@
+java/pom.xml
+  h_32373f709924d7 15
+java/src/main/java/com/pivotal/stockticker/ui/StockPanel.java
+  h_32373f709924d7 131-137,140,158,165,178,195-201,205,209-211
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c7258943a96aef0d76fe262077c83ad97d84ccfb",
+  "prompts": {},
+  "humans": {
+    "h_32373f709924d7": {
+      "author": "Steve O'Hara <sohara@pivotal-solutions.co.uk>"
+    }
+  }
+}
