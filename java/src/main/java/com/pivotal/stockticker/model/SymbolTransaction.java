@@ -34,8 +34,8 @@ public class SymbolTransaction extends PersistanceManager {
     private String currencySymbol = "$";
     private double sharesBought;
     private boolean showPrice;
-    private boolean showChange = true;
-    private boolean showChangePercent;
+    private boolean showChange;
+    private boolean showChangePercent = true;
     private boolean showChangeUpDown;
     private boolean showProfitLoss;
     private boolean showDayChange;
