@@ -17,6 +17,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -64,7 +66,7 @@ public class AlarmPanelDialog extends JDialog {
             AlarmEvent alarm = alarms.get(rowIndex);
             SymbolTransaction symbol = alarm.getSymbolTransaction();
             return switch (columnIndex) {
-                case 0 -> alarm.isMuted() ? "🔇" : "🔔";
+                case 0 -> alarm.isMuted() ? "Muted" : "";
                 case 1 -> symbol.getDisplayName();
                 case 2 -> alarm.getType().toString();
                 case 3 -> alarm.isPercent()
@@ -112,6 +114,34 @@ public class AlarmPanelDialog extends JDialog {
     }
 
     /**
+     * A small filled circle used as the status indicator, drawn directly rather than relying on
+     * a Unicode emoji glyph that may not be present in every font.
+     */
+    private static Icon statusIcon(boolean muted) {
+        Color color = muted ? Color.GRAY : new Color(0, 160, 0);
+        return new Icon() {
+            @Override
+            public void paintIcon(Component c, Graphics g, int x, int y) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(color);
+                g2.fillOval(x + 1, y + 1, 10, 10);
+                g2.dispose();
+            }
+
+            @Override
+            public int getIconWidth() {
+                return 12;
+            }
+
+            @Override
+            public int getIconHeight() {
+                return 12;
+            }
+        };
+    }
+
+    /**
      * Custom cell renderer for alarm table.
      */
     private class AlarmCellRenderer extends DefaultTableCellRenderer {
@@ -122,31 +152,44 @@ public class AlarmPanelDialog extends JDialog {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
             List<AlarmEvent> alarms = alarmManager.getActiveAlarms();
-            if (!isSelected && row < alarms.size()) {
+            setIcon(null);
+            if (row < alarms.size()) {
                 AlarmEvent alarm = alarms.get(row);
-                if (alarm.isMuted()) {
-                    c.setForeground(Color.GRAY);
-                    c.setBackground(new Color(245, 245, 245));
+                if (column == 0) {
+                    setIcon(statusIcon(alarm.isMuted()));
                 }
-                else {
-                    Color bgColor = alarm.getType() == AlarmManager.AlarmType.HIGH
-                            ? new Color(255, 240, 240)
-                            : new Color(240, 255, 240);
-                    c.setBackground(bgColor);
-                    c.setForeground(Color.BLACK);
+                if (!isSelected) {
+                    if (alarm.isMuted()) {
+                        c.setForeground(Color.GRAY);
+                        c.setBackground(new Color(245, 245, 245));
+                    }
+                    else {
+                        Color bgColor = alarm.getType() == AlarmManager.AlarmType.HIGH
+                                ? new Color(255, 240, 240)
+                                : new Color(240, 255, 240);
+                        c.setBackground(bgColor);
+                        c.setForeground(Color.BLACK);
+                    }
                 }
             }
 
-            // Center align status and type columns
-            if (column == 0 || column == 2) {
-                setHorizontalAlignment(SwingConstants.CENTER);
-            }
-            else {
-                setHorizontalAlignment(SwingConstants.LEFT);
-            }
+            setHorizontalAlignment(columnAlignment(column));
 
             return c;
         }
+    }
+
+    /**
+     * Returns the horizontal alignment for a given column: status and type are centered, symbol
+     * is left aligned, and the value columns (current, threshold, time) are right aligned. Used
+     * for both the cell renderer and the column headers, so the two stay in sync.
+     */
+    private static int columnAlignment(int column) {
+        return switch (column) {
+            case 0, 2 -> SwingConstants.CENTER;
+            case 3, 4, 5 -> SwingConstants.RIGHT;
+            default -> SwingConstants.LEFT;
+        };
     }
 
     /**
@@ -170,14 +213,14 @@ public class AlarmPanelDialog extends JDialog {
     private void initializeUI() {
         setLayout(new BorderLayout(10, 10));
         setSize(700, 400);
-        setLocationRelativeTo(getParent());
+        Utils.recenterDialog(this, getOwner());
 
         // Header panel
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBorder(new EmptyBorder(10, 10, 5, 10));
         headerPanel.setBackground(new Color(240, 240, 240));
 
-        JLabel titleLabel = new JLabel("⚠ Active Alarms");
+        JLabel titleLabel = new JLabel("Active Alarms");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
         headerPanel.add(titleLabel, BorderLayout.WEST);
 
@@ -206,10 +249,20 @@ public class AlarmPanelDialog extends JDialog {
         alarmTable.getColumnModel().getColumn(4).setPreferredWidth(80);  // Threshold
         alarmTable.getColumnModel().getColumn(5).setPreferredWidth(60);  // Time
 
-        // Apply custom renderer
+        // Apply custom renderer, and align the headers to match their column's content alignment
         AlarmCellRenderer renderer = new AlarmCellRenderer();
+        TableCellRenderer defaultHeaderRenderer = alarmTable.getTableHeader().getDefaultRenderer();
         for (int i = 0; i < alarmTable.getColumnCount(); i++) {
-            alarmTable.getColumnModel().getColumn(i).setCellRenderer(renderer);
+            TableColumn column = alarmTable.getColumnModel().getColumn(i);
+            column.setCellRenderer(renderer);
+            int alignment = columnAlignment(i);
+            column.setHeaderRenderer((table, value, isSelected, hasFocus, row, col) -> {
+                Component c = defaultHeaderRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                if (c instanceof JLabel label) {
+                    label.setHorizontalAlignment(alignment);
+                }
+                return c;
+            });
         }
 
         JScrollPane scrollPane = new JScrollPane(alarmTable);

@@ -81,7 +81,8 @@ public class AlarmPreviewDialog extends JDialog {
 
         if (soundEnabled) {
             SettingsManager settings = SettingsManager.getInstance();
-            Utils.playAlarmSound(type == AlarmType.HIGH ? settings.getHighAlarmWaveFile() : settings.getLowAlarmWaveFile());
+            Utils.playAlarmSound(type == AlarmType.HIGH ? settings.getHighAlarmWaveFile() : settings.getLowAlarmWaveFile(),
+                    type == AlarmType.HIGH ? Utils.DEFAULT_HIGH_ALARM_SOUND : Utils.DEFAULT_LOW_ALARM_SOUND);
         }
 
         setVisible(true);

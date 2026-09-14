@@ -29,7 +29,32 @@ import java.util.Set;
 public class SettingsForm extends JDialog implements CallbackInterface {
 
     private CapableTextField txtCurrencySymbol, txtMargin, txtTotalInvestment;
-    private SettingsButton btnBackground, btnBackup, btnCancel, btnDownArrowColour, btnDownColour, btnLabelColour, btnHoverColour, btnPreviewColour, btnHighAlarm, btnLowAlarm, btnNormalText, btnOk, btnRestore, btnUpArrowColour, btnUpColour;
+    private SettingsButton btnBackground, btnBackup, btnCancel, btnDownArrowColour, btnDownColour, btnLabelColour, btnHoverColour, btnPreviewColour, btnHighAlarm, btnLowAlarm, btnTestHighAlarm, btnTestLowAlarm, btnNormalText, btnOk, btnRestore, btnUpArrowColour, btnUpColour;
+
+    /**
+     * A small triangular "play" icon, drawn directly rather than relying on a Unicode glyph
+     * that may not be present in every font.
+     */
+    private static final Icon PLAY_ICON = new Icon() {
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(c.isEnabled() ? Color.DARK_GRAY : Color.LIGHT_GRAY);
+            g2.fillPolygon(new int[]{x + 4, x + 4, x + 12}, new int[]{y + 3, y + 13, y + 8}, 3);
+            g2.dispose();
+        }
+
+        @Override
+        public int getIconWidth() {
+            return 16;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 16;
+        }
+    };
     private SettingsCheckbox chkBold, chkItalic, chkShowDailyChange, chkShowTotalCost, chkShowTotalProfit, chkShowTotalProfitPercentage, chkShowTotalValue, chkShowUniqueSymbols;
     private SettingsComboBox<String> lstFont, lstCurrencyCode;
     private SettingsSpinner spnTickerUpdate;
@@ -108,6 +133,8 @@ public class SettingsForm extends JDialog implements CallbackInterface {
 
         btnLowAlarm.addActionListener(this::selectAudioFile);
         btnHighAlarm.addActionListener(this::selectAudioFile);
+        btnTestLowAlarm.addActionListener(e -> Utils.playAlarmSound(txtLowAlarm.getText(), Utils.DEFAULT_LOW_ALARM_SOUND));
+        btnTestHighAlarm.addActionListener(e -> Utils.playAlarmSound(txtHighAlarm.getText(), Utils.DEFAULT_HIGH_ALARM_SOUND));
 
         btnBackup.addActionListener(e -> BackupReload.backupPreferences(this));
         btnRestore.addActionListener(e -> {
@@ -350,12 +377,16 @@ public class SettingsForm extends JDialog implements CallbackInterface {
         }
 
         SettingsLabel jLabel12 = SettingsLabel.create("High alarm").below(jLabel11, vGap).withDimensions(jLabel1).to(getContentPane());
-        txtHighAlarm = SettingsTextField.create().tail(jLabel12, lblGap).withWidth(getWidth() - (jLabel12.getRight() + lblGap + 70)).to(getContentPane());
-        btnHighAlarm = SettingsButton.create("...").tail(txtHighAlarm, lblGap).withWidth(25).withHeight(txtHighAlarm).setBackColor(new java.awt.Color(204, 204, 204)).to(getContentPane());
+        txtHighAlarm = SettingsTextField.create("", "Leave blank to use the built-in default sound").tail(jLabel12, lblGap).withWidth(getWidth() - (jLabel12.getRight() + lblGap + 110)).to(getContentPane());
+        btnHighAlarm = SettingsButton.create("...").setTooltip("Browse for a sound file").tail(txtHighAlarm, lblGap).withWidth(25).withHeight(txtHighAlarm).setBackColor(new java.awt.Color(204, 204, 204)).to(getContentPane());
+        btnTestHighAlarm = SettingsButton.create("").setTooltip("Play this alarm sound").tail(btnHighAlarm, lblGap).withDimensions(btnHighAlarm).setBackColor(new java.awt.Color(204, 204, 204)).to(getContentPane());
+        btnTestHighAlarm.setIcon(PLAY_ICON);
 
         SettingsLabel jLabel13 = SettingsLabel.create("Low alarm").below(jLabel12, vGap).withDimensions(jLabel1).to(getContentPane());
-        txtLowAlarm = SettingsTextField.create().tail(jLabel13, lblGap).withDimensions(txtHighAlarm).to(getContentPane());
-        btnLowAlarm = SettingsButton.create("...").tail(txtLowAlarm, lblGap).withDimensions(btnHighAlarm).setBackColor(new java.awt.Color(204, 204, 204)).to(getContentPane());
+        txtLowAlarm = SettingsTextField.create("", "Leave blank to use the built-in default sound").tail(jLabel13, lblGap).withDimensions(txtHighAlarm).to(getContentPane());
+        btnLowAlarm = SettingsButton.create("...").setTooltip("Browse for a sound file").tail(txtLowAlarm, lblGap).withDimensions(btnHighAlarm).setBackColor(new java.awt.Color(204, 204, 204)).to(getContentPane());
+        btnTestLowAlarm = SettingsButton.create("").setTooltip("Play this alarm sound").tail(btnLowAlarm, lblGap).withDimensions(btnHighAlarm).setBackColor(new java.awt.Color(204, 204, 204)).to(getContentPane());
+        btnTestLowAlarm.setIcon(PLAY_ICON);
 
         // Divider
         SettingsSeparator jSeparator2 = SettingsSeparator.create().below(jLabel13, vGap * 3).withDimensions(jSeparator1).to(getContentPane());

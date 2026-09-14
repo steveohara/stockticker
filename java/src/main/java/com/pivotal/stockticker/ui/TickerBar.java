@@ -127,8 +127,10 @@ public class TickerBar extends JFrame implements CallbackInterface {
     }
 
     /**
-     * Shows the alarm panel dialog if there are any active alarms, refreshing it if already
-     * visible, or hides it once all alarms have been dismissed.
+     * Called automatically whenever the set of active alarms changes: shows/refreshes the alarm
+     * panel while there is something to show, and hides it again once all alarms have been
+     * dismissed. Does not show the panel if the user hasn't asked to see it and there is nothing
+     * active yet.
      */
     private void showAlarmPanel() {
         if (alarmManager.getActiveAlarms().isEmpty()) {
@@ -137,11 +139,30 @@ public class TickerBar extends JFrame implements CallbackInterface {
             }
             return;
         }
+        showOrRefreshAlarmPanel();
+    }
+
+    /**
+     * Displays the Active Alarms dialog, e.g. from the context menu - shown regardless of
+     * whether there are currently any active alarms.
+     */
+    private void showAlarmsDialog() {
+        SwingUtilities.invokeLater(this::showOrRefreshAlarmPanel);
+    }
+
+    /**
+     * Creates the alarm panel dialog if it doesn't already exist, refreshes its content and
+     * brings it to the front.
+     */
+    private void showOrRefreshAlarmPanel() {
         if (alarmPanelDialog == null) {
             alarmPanelDialog = new AlarmPanelDialog(this, alarmManager, prices);
         }
         alarmPanelDialog.refresh();
         if (!alarmPanelDialog.isVisible()) {
+            // Re-centre each time it's (re)shown, in case the ticker has moved since the dialog
+            // (which is created once and reused) was last positioned
+            Utils.recenterDialog(alarmPanelDialog, this);
             alarmPanelDialog.setVisible(true);
         }
         alarmPanelDialog.toFront();
@@ -770,6 +791,9 @@ public class TickerBar extends JFrame implements CallbackInterface {
         JMenuItem settingsItem = new JMenuItem("Edit Settings...");
         settingsItem.addActionListener(e -> showSettingsDialog());
         contextMenu.add(settingsItem);
+        JMenuItem alarmsItem = new JMenuItem("Active Alarms...");
+        alarmsItem.addActionListener(e -> showAlarmsDialog());
+        contextMenu.add(alarmsItem);
         contextMenu.addSeparator();
 
         JMenuItem fontSize = new JMenu("Font Size");

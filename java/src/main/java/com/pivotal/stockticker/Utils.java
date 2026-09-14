@@ -10,10 +10,7 @@ import com.pivotal.stockticker.ui.TickerBar;
 import com.pivotal.stockticker.utils.CallbackInterface;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
+import javax.sound.sampled.*;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -21,7 +18,9 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -256,31 +255,85 @@ public class Utils {
         return null;
     }
 
+    /** Bundled default alarm sound played when the high alarm has no custom sound file configured. */
+    public static final String DEFAULT_HIGH_ALARM_SOUND = "/sounds/high_alarm_default.wav";
+
+    /** Bundled default alarm sound played when the low alarm has no custom sound file configured. */
+    public static final String DEFAULT_LOW_ALARM_SOUND = "/sounds/low_alarm_default.wav";
+
     /**
-     * Plays an alarm sound from the given audio file, falling back to the system beep if no
-     * file is configured or the file cannot be played.
+     * Plays an alarm sound. Tries the given audio file first (if any is configured), then falls
+     * back to the given bundled default resource, and finally to the system beep if neither can
+     * be played.
      *
-     * @param filePath Path to the audio file to play, or null/blank to just beep.
+     * @param filePath            Path to a user-supplied audio file, or null/blank to use the default.
+     * @param defaultResourcePath Classpath resource (e.g. {@link #DEFAULT_HIGH_ALARM_SOUND}) to fall back to.
      */
-    public static void playAlarmSound(String filePath) {
-        try {
-            if (filePath != null && !filePath.isBlank() && new File(filePath).isFile()) {
-                AudioInputStream audioStream = AudioSystem.getAudioInputStream(new File(filePath));
-                Clip clip = AudioSystem.getClip();
-                clip.open(audioStream);
-                clip.addLineListener(event -> {
-                    if (event.getType() == javax.sound.sampled.LineEvent.Type.STOP) {
-                        clip.close();
-                    }
-                });
-                clip.start();
-                return;
-            }
+    public static void playAlarmSound(String filePath, String defaultResourcePath) {
+        if (filePath != null && !filePath.isBlank() && playAudioFile(new File(filePath))) {
+            return;
         }
-        catch (Exception e) {
-            log.error("Failed to play alarm sound from {}: {}", filePath, e.getMessage());
+        if (defaultResourcePath != null && playAudioResource(defaultResourcePath)) {
+            return;
         }
         Toolkit.getDefaultToolkit().beep();
+    }
+
+    /**
+     * Plays an audio file from disk.
+     *
+     * @param file The audio file to play.
+     * @return True if playback was started successfully.
+     */
+    private static boolean playAudioFile(File file) {
+        try {
+            if (!file.isFile()) {
+                return false;
+            }
+            return playClip(AudioSystem.getAudioInputStream(file));
+        }
+        catch (Exception e) {
+            log.error("Failed to play alarm sound from {}: {}", file, e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Plays an audio file bundled as a classpath resource.
+     *
+     * @param resourcePath The classpath resource to play.
+     * @return True if playback was started successfully.
+     */
+    private static boolean playAudioResource(String resourcePath) {
+        try (InputStream raw = Utils.class.getResourceAsStream(resourcePath)) {
+            if (raw == null) {
+                log.error("Default alarm sound resource not found: {}", resourcePath);
+                return false;
+            }
+            return playClip(AudioSystem.getAudioInputStream(new BufferedInputStream(raw)));
+        }
+        catch (Exception e) {
+            log.error("Failed to play default alarm sound {}: {}", resourcePath, e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Opens and starts playing an audio clip, closing it automatically once playback finishes.
+     *
+     * @param audioStream The audio stream to play.
+     * @return True (playback started); exceptions are propagated to the caller to handle/log.
+     */
+    private static boolean playClip(AudioInputStream audioStream) throws Exception {
+        Clip clip = AudioSystem.getClip();
+        clip.open(audioStream);
+        clip.addLineListener(event -> {
+            if (event.getType() == LineEvent.Type.STOP) {
+                clip.close();
+            }
+        });
+        clip.start();
+        return true;
     }
 
     /**
