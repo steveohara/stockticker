@@ -7,8 +7,10 @@
 package com.pivotal.stockticker.ui;
 
 import com.pivotal.stockticker.Utils;
+import com.pivotal.stockticker.model.LivePrice;
 import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.model.SymbolTransaction;
+import com.pivotal.stockticker.service.AlarmManager.AlarmType;
 import com.pivotal.stockticker.service.SymbolsManager;
 import com.pivotal.stockticker.ui.components.*;
 import com.pivotal.stockticker.utils.CallbackInterface;
@@ -30,7 +32,7 @@ import java.util.Set;
 @Slf4j
 public class SymbolsForm extends JDialog implements CallbackInterface {
 
-    private SettingsButton btnAdd, btnCancel, btnDelete, btnOk;
+    private SettingsButton btnAdd, btnCancel, btnDelete, btnOk, btnTestAlarmLow, btnTestAlarmHigh;
     private SettingsCheckbox chkHideDisabled, chkAlarmHighPercent, chkAlarmHighPlaySound, chkAlarmLowPercent, chkAlarmLowPlaySound, chkDisabled, chkExcludeFromSummary, chkShowChange, chkShowChangePercent, chkShowDayChange, chkShowDayChangePercent, chkShowDayUpDown, chkShowPrice, chkShowProfitLoss, chlShowUpDown;
     private CheckBoxFrame pnlAlarmLow, pnlAlarmHigh;
     private SymbolsList lstSymbols;
@@ -42,6 +44,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
     private final SettingsManager settings;
     private final SymbolsManager symbolsManager = new SymbolsManager();
     private final CallbackInterface caller;
+    private final TickerBar tickerBar;
     private boolean ignoreChanges = false;
 
     /**
@@ -52,6 +55,7 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
     public SymbolsForm(TickerBar caller) {
         settings = SettingsManager.getInstance();
         this.caller = caller;
+        this.tickerBar = caller;
         initComponents();
         setTitle("Symbols");
         setModal(true);
@@ -125,6 +129,10 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
             lstSymbols.hideDisabled(chkHideDisabled.isSelected());
         });
         chkDisabled.addActionListener(e -> lstSymbols.hideDisabled(lstSymbols.isHideDisabled()));
+
+        // Preview an alarm - shows what it will look like and plays its configured sound
+        btnTestAlarmLow.addActionListener(e -> testAlarm(AlarmType.LOW));
+        btnTestAlarmHigh.addActionListener(e -> testAlarm(AlarmType.HIGH));
 
         // Listen for changes
         Utils.attachChangeListeners(getContentPane(), this, chkHideDisabled);
@@ -227,6 +235,33 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
         lblTransactionTimestamp.setText(String.format("<html><p style='color:#c0c0c0;font-size:0.9em'>%s</p></html>", symbol.getDisplayTimestamp()));
         lblTransactionTimestamp.setToolTipText(String.format("<html><b>Added: </b>%s</html>", symbol.getFullDisplayTimestamp()));
         ignoreChanges = false;
+    }
+
+    /**
+     * Shows a preview of the selected low/high alarm - what it will look like and sound like -
+     * using the currently entered (possibly unsaved) threshold, without saving or triggering
+     * anything for real.
+     *
+     * @param type Which alarm (low or high) to preview
+     */
+    private void testAlarm(AlarmType type) {
+        SymbolTransaction symbol = lstSymbols.getSelectedListItem();
+        if (symbol == null) {
+            return;
+        }
+        boolean percent = type == AlarmType.LOW ? chkAlarmLowPercent.isSelected() : chkAlarmHighPercent.isSelected();
+        boolean soundEnabled = type == AlarmType.LOW ? chkAlarmLowPlaySound.isSelected() : chkAlarmHighPlaySound.isSelected();
+        double threshold = type == AlarmType.LOW ? txtAlarmLow.getValue() : txtAlarmHigh.getValue();
+
+        Double currentPrice = null;
+        Double currentPercent = null;
+        LivePrice livePrice = tickerBar.getLivePrice(symbol);
+        if (livePrice.getPrice() != 0) {
+            currentPrice = livePrice.getPrice();
+            currentPercent = livePrice.getPercentChange();
+        }
+
+        new AlarmPreviewDialog(this, symbol, type, threshold, percent, soundEnabled, currentPrice, currentPercent);
     }
 
     /**
@@ -432,7 +467,9 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
                 .tail(jLabel7, lblGap).withWidth(70).to(pnlAlarmLow.getContentPanel());
         chkAlarmLowPercent = SettingsCheckbox.create("Percent").tail(txtAlarmLow, hGap).to(pnlAlarmLow.getContentPanel());
         chkAlarmLowPlaySound = SettingsCheckbox.create("Sound Alarm").below(chkAlarmLowPercent, vGap / 3).to(pnlAlarmLow.getContentPanel());
-        pnlAlarmLow.withHeight(chkAlarmLowPlaySound.getBottom() + vGap * 2);
+        btnTestAlarmLow = SettingsButton.create("Test Alarm").setTooltip("Preview this alarm - shows what it will look like and plays its sound")
+                .below(chkAlarmLowPlaySound, vGap).withWidth(100).withHeight(txtAlarmLow).to(pnlAlarmLow.getContentPanel());
+        pnlAlarmLow.withHeight(btnTestAlarmLow.getBottom() + vGap * 2);
 
         // High Alarm Panel
         pnlAlarmHigh = CheckBoxFrame.create("Enable High Alarm").withLayout(null).below(pnlAlarmLow, vGap).to(getContentPane());
@@ -441,7 +478,9 @@ public class SymbolsForm extends JDialog implements CallbackInterface {
                 .tail(jLabel8, lblGap).withWidth(70).to(pnlAlarmHigh.getContentPanel());
         chkAlarmHighPercent = SettingsCheckbox.create("Percent").tail(txtAlarmHigh, hGap).to(pnlAlarmHigh.getContentPanel());
         chkAlarmHighPlaySound = SettingsCheckbox.create("Sound Alarm").below(chkAlarmHighPercent, vGap / 3).to(pnlAlarmHigh.getContentPanel());
-        pnlAlarmHigh.withHeight(chkAlarmHighPlaySound.getBottom() + vGap * 2);
+        btnTestAlarmHigh = SettingsButton.create("Test Alarm").setTooltip("Preview this alarm - shows what it will look like and plays its sound")
+                .below(chkAlarmHighPlaySound, vGap).withWidth(100).withHeight(txtAlarmHigh).to(pnlAlarmHigh.getContentPanel());
+        pnlAlarmHigh.withHeight(btnTestAlarmHigh.getBottom() + vGap * 2);
 
         // Buttons
         jScrollPane1.withHeight(pnlAlarmHigh.getBottom() - jScrollPane1.getY());

@@ -340,7 +340,7 @@ public class BackupReload {
                     settings.setHighAlarmWaveFile(value);
                     break;
                 case "low alarm wave file":
-                    settings.setHighAlarmWaveFile(value);
+                    settings.setLowAlarmWaveFile(value);
                     break;
 
                 case "alphavantage key":

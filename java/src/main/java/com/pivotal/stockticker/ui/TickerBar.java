@@ -11,10 +11,7 @@ import com.pivotal.stockticker.model.LivePrice;
 import com.pivotal.stockticker.model.SettingsManager;
 import com.pivotal.stockticker.model.SummaryStats;
 import com.pivotal.stockticker.model.SymbolTransaction;
-import com.pivotal.stockticker.service.ExchangeRatesManager;
-import com.pivotal.stockticker.service.ExportData;
-import com.pivotal.stockticker.service.PricesManager;
-import com.pivotal.stockticker.service.SymbolsManager;
+import com.pivotal.stockticker.service.*;
 import com.pivotal.stockticker.ui.components.ColouredTextPanel;
 import com.pivotal.stockticker.utils.CallbackInterface;
 import com.pivotal.stockticker.utils.StartupManager;
@@ -45,11 +42,13 @@ public class TickerBar extends JFrame implements CallbackInterface {
     private final SymbolsManager symbols = new SymbolsManager();
     private final PricesManager prices = new PricesManager(this);
     private final ExchangeRatesManager rates = new ExchangeRatesManager(this);
+    private final AlarmManager alarmManager = new AlarmManager(symbols, prices, rates);
     private final CopyOnWriteArrayList<LivePrice> livePrices = new CopyOnWriteArrayList<>();
 
     private final StockPanel stockPanel = new StockPanel(this);
     private final SummaryPanel summaryPanel = new SummaryPanel(this);
     private final DaySummaryPanel daySummaryPanel = new DaySummaryPanel(this);
+    private AlarmPanelDialog alarmPanelDialog;
 
     private JPanel pnlLeftDrag;
     private JPanel pnlRightDrag;
@@ -85,6 +84,9 @@ public class TickerBar extends JFrame implements CallbackInterface {
         initializeUI();
         initListeners();
 
+        // Show/refresh the alarm panel whenever the set of active alarms changes
+        alarmManager.setListener(() -> SwingUtilities.invokeLater(this::showAlarmPanel));
+
         // Add all the symbols to the prices manager
         prices.replacePrices(symbols.getAllSymbolCodes(false));
 
@@ -107,7 +109,42 @@ public class TickerBar extends JFrame implements CallbackInterface {
         drawLivePrices();
         drawSummary();
         drawDaySummary();
+        alarmManager.checkAlarms();
+    }
 
+    /**
+     * Builds a live price for the given symbol transaction, e.g. so the Symbols dialog can
+     * preview an alarm against the current price. Ensures a price entry exists for the symbol's
+     * code even if it hasn't been added to the prices manager yet (e.g. a symbol still being
+     * edited that hasn't been saved).
+     *
+     * @param symbol Symbol transaction to build a live price for
+     * @return Live price for the symbol
+     */
+    public LivePrice getLivePrice(SymbolTransaction symbol) {
+        prices.addPrice(symbol.getCode());
+        return new LivePrice(symbols, prices, rates, symbol, false);
+    }
+
+    /**
+     * Shows the alarm panel dialog if there are any active alarms, refreshing it if already
+     * visible, or hides it once all alarms have been dismissed.
+     */
+    private void showAlarmPanel() {
+        if (alarmManager.getActiveAlarms().isEmpty()) {
+            if (alarmPanelDialog != null) {
+                alarmPanelDialog.setVisible(false);
+            }
+            return;
+        }
+        if (alarmPanelDialog == null) {
+            alarmPanelDialog = new AlarmPanelDialog(this, alarmManager, prices);
+        }
+        alarmPanelDialog.refresh();
+        if (!alarmPanelDialog.isVisible()) {
+            alarmPanelDialog.setVisible(true);
+        }
+        alarmPanelDialog.toFront();
     }
 
     /**

@@ -11,7 +11,9 @@ import com.pivotal.stockticker.utils.CallbackInterface;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -252,6 +254,33 @@ public class Utils {
             return fileChooser.getSelectedFile().getAbsolutePath();
         }
         return null;
+    }
+
+    /**
+     * Plays an alarm sound from the given audio file, falling back to the system beep if no
+     * file is configured or the file cannot be played.
+     *
+     * @param filePath Path to the audio file to play, or null/blank to just beep.
+     */
+    public static void playAlarmSound(String filePath) {
+        try {
+            if (filePath != null && !filePath.isBlank() && new File(filePath).isFile()) {
+                AudioInputStream audioStream = AudioSystem.getAudioInputStream(new File(filePath));
+                Clip clip = AudioSystem.getClip();
+                clip.open(audioStream);
+                clip.addLineListener(event -> {
+                    if (event.getType() == javax.sound.sampled.LineEvent.Type.STOP) {
+                        clip.close();
+                    }
+                });
+                clip.start();
+                return;
+            }
+        }
+        catch (Exception e) {
+            log.error("Failed to play alarm sound from {}: {}", filePath, e.getMessage());
+        }
+        Toolkit.getDefaultToolkit().beep();
     }
 
     /**

@@ -6,7 +6,11 @@
  */
 package com.pivotal.stockticker.ui;
 
+import com.pivotal.stockticker.Utils;
 import com.pivotal.stockticker.model.SymbolTransaction;
+import com.pivotal.stockticker.service.AlarmManager;
+import com.pivotal.stockticker.service.AlarmManager.AlarmEvent;
+import com.pivotal.stockticker.service.PricesManager;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -15,39 +19,20 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Compact alarm panel dialog for displaying and managing active stock alarms.
+ * Compact alarm panel dialog for displaying and managing active stock alarms raised by the
+ * {@link AlarmManager}.
  */
 @Slf4j
 public class AlarmPanelDialog extends JDialog {
-    private final List<AlarmEntry> activeAlarms;
+
+    private final AlarmManager alarmManager;
+    private final PricesManager prices;
     private final AlarmTableModel tableModel;
     private JTable alarmTable;
     private JLabel statusLabel;
-
-    /**
-     * Represents an active alarm entry.
-     */
-    private static class AlarmEntry {
-        SymbolTransaction symbol;
-        String type; // "HIGH" or "LOW"
-        double threshold;
-        double currentPrice;
-        LocalDateTime triggeredTime;
-        boolean isMuted;
-
-        AlarmEntry(SymbolTransaction symbol, String type, double threshold) {
-            this.symbol = symbol;
-            this.type = type;
-            this.threshold = threshold;
-//            this.currentPrice = symbol.getCurrentPrice();
-            this.triggeredTime = LocalDateTime.now();
-            this.isMuted = false;
-        }
-    }
 
     /**
      * Table model for displaying alarms.
@@ -57,7 +42,7 @@ public class AlarmPanelDialog extends JDialog {
 
         @Override
         public int getRowCount() {
-            return activeAlarms.size();
+            return alarmManager.getActiveAlarms().size();
         }
 
         @Override
@@ -72,16 +57,23 @@ public class AlarmPanelDialog extends JDialog {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            AlarmEntry alarm = activeAlarms.get(rowIndex);
+            List<AlarmEvent> alarms = alarmManager.getActiveAlarms();
+            if (rowIndex >= alarms.size()) {
+                return "";
+            }
+            AlarmEvent alarm = alarms.get(rowIndex);
+            SymbolTransaction symbol = alarm.getSymbolTransaction();
             return switch (columnIndex) {
-                case 0 -> alarm.isMuted ? "🔇" : "🔔";
-                case 1 -> alarm.symbol.getDisplayName();
-                case 2 -> alarm.type;
-                case 3 -> String.format("$%.2f", alarm.currentPrice);
-                case 4 -> alarm.symbol.isHighAlarmIsPercent() || alarm.symbol.isLowAlarmIsPercent()
-                        ? String.format("%.1f%%", alarm.threshold)
-                        : String.format("$%.2f", alarm.threshold);
-                case 5 -> formatTimeSince(alarm.triggeredTime);
+                case 0 -> alarm.isMuted() ? "🔇" : "🔔";
+                case 1 -> symbol.getDisplayName();
+                case 2 -> alarm.getType().toString();
+                case 3 -> alarm.isPercent()
+                        ? String.format("%.2f%%", currentPercentFor(alarm))
+                        : Utils.formatCurrencyValue(currentPriceFor(alarm), symbol.getCurrencySymbol());
+                case 4 -> alarm.isPercent()
+                        ? String.format("%.1f%%", alarm.getThreshold())
+                        : Utils.formatCurrencyValue(alarm.getThreshold(), symbol.getCurrencySymbol());
+                case 5 -> formatTimeSince(alarm.getTriggeredTime());
                 default -> "";
             };
         }
@@ -101,6 +93,25 @@ public class AlarmPanelDialog extends JDialog {
     }
 
     /**
+     * Returns the live current price for the symbol associated with the given alarm.
+     */
+    private double currentPriceFor(AlarmEvent alarm) {
+        var price = prices.getPrice(alarm.getSymbolTransaction().getCode());
+        return price == null ? alarm.getPriceAtTrigger() : price.getCurrentPrice();
+    }
+
+    /**
+     * Returns the live current percentage change for the symbol associated with the given alarm.
+     */
+    private double currentPercentFor(AlarmEvent alarm) {
+        double pricePaid = alarm.getSymbolTransaction().getPricePaid();
+        if (pricePaid == 0) {
+            return alarm.getPercentAtTrigger();
+        }
+        return ((currentPriceFor(alarm) - pricePaid) * 100) / pricePaid;
+    }
+
+    /**
      * Custom cell renderer for alarm table.
      */
     private class AlarmCellRenderer extends DefaultTableCellRenderer {
@@ -110,14 +121,15 @@ public class AlarmPanelDialog extends JDialog {
                                                        int row, int column) {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-            if (!isSelected) {
-                AlarmEntry alarm = activeAlarms.get(row);
-                if (alarm.isMuted) {
+            List<AlarmEvent> alarms = alarmManager.getActiveAlarms();
+            if (!isSelected && row < alarms.size()) {
+                AlarmEvent alarm = alarms.get(row);
+                if (alarm.isMuted()) {
                     c.setForeground(Color.GRAY);
                     c.setBackground(new Color(245, 245, 245));
                 }
                 else {
-                    Color bgColor = alarm.type.equals("HIGH")
+                    Color bgColor = alarm.getType() == AlarmManager.AlarmType.HIGH
                             ? new Color(255, 240, 240)
                             : new Color(240, 255, 240);
                     c.setBackground(bgColor);
@@ -140,46 +152,16 @@ public class AlarmPanelDialog extends JDialog {
     /**
      * Constructs the alarm panel dialog.
      *
-     * @param parent  Parent frame
-     * @param symbols List of symbols to check for active alarms
+     * @param parent       Parent frame
+     * @param alarmManager Alarm manager tracking the active alarms
+     * @param prices       Prices manager, used to show the live current price/percentage
      */
-    public AlarmPanelDialog(Frame parent, List<SymbolTransaction> symbols) {
+    public AlarmPanelDialog(Frame parent, AlarmManager alarmManager, PricesManager prices) {
         super(parent, "Active Alarms", false); // Non-modal
-        this.activeAlarms = new ArrayList<>();
-        loadActiveAlarms(symbols);
+        this.alarmManager = alarmManager;
+        this.prices = prices;
         this.tableModel = new AlarmTableModel();
         initializeUI();
-    }
-
-    /**
-     * Loads active alarms from symbols.
-     */
-    private void loadActiveAlarms(List<SymbolTransaction> symbols) {
-        for (SymbolTransaction symbol : symbols) {
-            if (symbol.isAlarmShowing()) {
-                // Check which alarm was triggered
-                if (symbol.isHighAlarmEnabled() && isHighAlarmTriggered(symbol)) {
-                    activeAlarms.add(new AlarmEntry(symbol, "HIGH", symbol.getHighAlarmValue()));
-                }
-                if (symbol.isLowAlarmEnabled() && isLowAlarmTriggered(symbol)) {
-                    activeAlarms.add(new AlarmEntry(symbol, "LOW", symbol.getLowAlarmValue()));
-                }
-            }
-        }
-    }
-
-    private boolean isHighAlarmTriggered(SymbolTransaction symbol) {
-//        double threshold = symbol.isHighAlarmIsPercent() ?
-//                symbol.getPrice() * (1 + symbol.getHighAlarmValue() / 100) : symbol.getHighAlarmValue();
-//        return symbol.getCurrentPrice() >= threshold;
-        return false;
-    }
-
-    private boolean isLowAlarmTriggered(SymbolTransaction symbol) {
-//        double threshold = symbol.isLowAlarmIsPercent() ?
-//                symbol.getPrice() * (1 - symbol.getLowAlarmValue() / 100) : symbol.getLowAlarmValue();
-//        return symbol.getCurrentPrice() <= threshold;
-        return false;
     }
 
     /**
@@ -199,7 +181,7 @@ public class AlarmPanelDialog extends JDialog {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
         headerPanel.add(titleLabel, BorderLayout.WEST);
 
-        statusLabel = new JLabel(activeAlarms.size() + " active alarm(s)");
+        statusLabel = new JLabel();
         statusLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         statusLabel.setForeground(Color.DARK_GRAY);
         headerPanel.add(statusLabel, BorderLayout.EAST);
@@ -218,7 +200,7 @@ public class AlarmPanelDialog extends JDialog {
 
         // Set column widths
         alarmTable.getColumnModel().getColumn(0).setPreferredWidth(50);  // Status
-        alarmTable.getColumnModel().getColumn(1).setPreferredWidth(120); // SymbolTransaction
+        alarmTable.getColumnModel().getColumn(1).setPreferredWidth(120); // Symbol
         alarmTable.getColumnModel().getColumn(2).setPreferredWidth(60);  // Type
         alarmTable.getColumnModel().getColumn(3).setPreferredWidth(80);  // Current
         alarmTable.getColumnModel().getColumn(4).setPreferredWidth(80);  // Threshold
@@ -239,137 +221,83 @@ public class AlarmPanelDialog extends JDialog {
 
         JButton muteButton = new JButton("Mute");
         muteButton.setToolTipText("Mute selected alarm");
-        muteButton.addActionListener(e -> muteSelectedAlarm());
+        muteButton.addActionListener(e -> withSelectedAlarm(alarm -> {
+            alarm.setMuted(true);
+            tableModel.fireTableDataChanged();
+        }));
         buttonPanel.add(muteButton);
 
         JButton unmuteButton = new JButton("Unmute");
         unmuteButton.setToolTipText("Unmute selected alarm");
-        unmuteButton.addActionListener(e -> unmuteSelectedAlarm());
+        unmuteButton.addActionListener(e -> withSelectedAlarm(alarm -> {
+            alarm.setMuted(false);
+            tableModel.fireTableDataChanged();
+        }));
         buttonPanel.add(unmuteButton);
 
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.setToolTipText("Cancel selected alarm");
-        cancelButton.addActionListener(e -> cancelSelectedAlarm());
-        buttonPanel.add(cancelButton);
+        JButton dismissButton = new JButton("Dismiss");
+        dismissButton.setToolTipText("Dismiss the selected alarm - it will fire again if the price crosses the threshold again");
+        dismissButton.addActionListener(e -> withSelectedAlarm(alarmManager::dismissAlarm));
+        buttonPanel.add(dismissButton);
+
+        JButton disableButton = new JButton("Disable");
+        disableButton.setToolTipText("Dismiss and disable the selected alarm");
+        disableButton.addActionListener(e -> withSelectedAlarm(alarm -> {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Disable the " + alarm.getType() + " alarm for " + alarm.getSymbolTransaction().getDisplayName() + "?\nYou can re-enable it from the Symbols dialog.",
+                    "Confirm Disable", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                alarmManager.disableAlarm(alarm);
+            }
+        }));
+        buttonPanel.add(disableButton);
 
         buttonPanel.add(new JSeparator(SwingConstants.VERTICAL));
 
-        JButton muteAllButton = new JButton("Mute All");
-        muteAllButton.addActionListener(e -> muteAllAlarms());
-        buttonPanel.add(muteAllButton);
-
-        JButton cancelAllButton = new JButton("Cancel All");
-        cancelAllButton.addActionListener(e -> cancelAllAlarms());
-        buttonPanel.add(cancelAllButton);
+        JButton dismissAllButton = new JButton("Dismiss All");
+        dismissAllButton.addActionListener(e -> {
+            if (!alarmManager.getActiveAlarms().isEmpty()
+                    && JOptionPane.showConfirmDialog(this, "Dismiss all " + alarmManager.getActiveAlarms().size() + " alarm(s)?",
+                    "Confirm Dismiss All", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                alarmManager.dismissAllAlarms();
+            }
+        });
+        buttonPanel.add(dismissAllButton);
 
         JButton closeButton = new JButton("Close");
-        closeButton.addActionListener(e -> dispose());
+        closeButton.addActionListener(e -> setVisible(false));
         buttonPanel.add(closeButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
 
-        // Show empty state if no alarms
-        if (activeAlarms.isEmpty()) {
-            showEmptyState();
-        }
+        refresh();
     }
 
-    private void showEmptyState() {
-        JPanel emptyPanel = new JPanel(new GridBagLayout());
-        emptyPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
-
-        JLabel emptyLabel = new JLabel("No active alarms");
-        emptyLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        emptyLabel.setForeground(Color.GRAY);
-
-        emptyPanel.add(emptyLabel);
-        add(emptyPanel, BorderLayout.CENTER);
-    }
-
-    private void muteSelectedAlarm() {
+    /**
+     * Runs the given action against the currently selected alarm, if any.
+     */
+    private void withSelectedAlarm(java.util.function.Consumer<AlarmEvent> action) {
         int selectedRow = alarmTable.getSelectedRow();
-        if (selectedRow >= 0) {
-            activeAlarms.get(selectedRow).isMuted = true;
-            tableModel.fireTableRowsUpdated(selectedRow, selectedRow);
+        List<AlarmEvent> alarms = alarmManager.getActiveAlarms();
+        if (selectedRow >= 0 && selectedRow < alarms.size()) {
+            action.accept(alarms.get(selectedRow));
         }
         else {
-            JOptionPane.showMessageDialog(this, "Please select an alarm to mute",
+            JOptionPane.showMessageDialog(this, "Please select an alarm first",
                     "No Selection", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
-    private void unmuteSelectedAlarm() {
-        int selectedRow = alarmTable.getSelectedRow();
-        if (selectedRow >= 0) {
-            activeAlarms.get(selectedRow).isMuted = false;
-            tableModel.fireTableRowsUpdated(selectedRow, selectedRow);
-        }
-        else {
-            JOptionPane.showMessageDialog(this, "Please select an alarm to unmute",
-                    "No Selection", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
-    private void cancelSelectedAlarm() {
-        int selectedRow = alarmTable.getSelectedRow();
-        if (selectedRow >= 0) {
-            AlarmEntry alarm = activeAlarms.get(selectedRow);
-            int confirm = JOptionPane.showConfirmDialog(this,
-                    "Cancel alarm for " + alarm.symbol.getDisplayName() + "?",
-                    "Confirm Cancel", JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                alarm.symbol.setAlarmShowing(false);
-                activeAlarms.remove(selectedRow);
-                tableModel.fireTableRowsDeleted(selectedRow, selectedRow);
-                updateStatusLabel();
-
-                if (activeAlarms.isEmpty()) {
-                    dispose();
-                }
-            }
-        }
-        else {
-            JOptionPane.showMessageDialog(this, "Please select an alarm to cancel",
-                    "No Selection", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
-    private void muteAllAlarms() {
-        for (AlarmEntry alarm : activeAlarms) {
-            alarm.isMuted = true;
-        }
-        tableModel.fireTableDataChanged();
-    }
-
-    private void cancelAllAlarms() {
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Cancel all " + activeAlarms.size() + " alarm(s)?",
-                "Confirm Cancel All", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            for (AlarmEntry alarm : activeAlarms) {
-                alarm.symbol.setAlarmShowing(false);
-            }
-            activeAlarms.clear();
-            tableModel.fireTableDataChanged();
-            dispose();
         }
     }
 
     private void updateStatusLabel() {
-        statusLabel.setText(activeAlarms.size() + " active alarm(s)");
+        int count = alarmManager.getActiveAlarms().size();
+        statusLabel.setText(count + " active alarm" + (count == 1 ? "" : "s"));
     }
 
     /**
-     * Updates the alarm list with new symbol data.
+     * Refreshes the table to reflect the current set of active alarms.
      */
-    public void refreshAlarms(List<SymbolTransaction> symbols) {
-        activeAlarms.clear();
-        loadActiveAlarms(symbols);
+    public void refresh() {
         tableModel.fireTableDataChanged();
         updateStatusLabel();
-
-        if (activeAlarms.isEmpty()) {
-            dispose();
-        }
     }
 }
